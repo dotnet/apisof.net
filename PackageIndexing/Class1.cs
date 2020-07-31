@@ -26,6 +26,9 @@ namespace PackageIndexing
 
         public static async Task Index(string id, string version, string connectionString)
         {
+            // TODO: Only write package when it doesn't exist.
+            // TODO: Only write assembly when it doesn't exist.
+            // TODO: Only write API when it doesn't exist.
             using (var connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
