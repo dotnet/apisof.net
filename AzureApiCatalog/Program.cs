@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -137,6 +138,7 @@ namespace AzureApiCatalog
             {
                 var queueClient = new QueueClient(userSecret.QueueConnectionString, "package-queue");
                 await queueClient.CreateIfNotExistsAsync();
+
                 while (filteredLeafItems.TryTake(out var leaf))
                 {
                     var message = new PackageQueueMessage
@@ -146,7 +148,11 @@ namespace AzureApiCatalog
                     };
 
                     var json = JsonConvert.SerializeObject(message);
-                    await queueClient.SendMessageAsync(json);
+                    // See https://github.com/Azure/azure-sdk-for-net/issues/10242
+                    // Why we're doing base 64 here.
+                    var jsonBytes = Encoding.UTF8.GetBytes(json);
+                    var jsonBase64 = Convert.ToBase64String(jsonBytes);
+                    await queueClient.SendMessageAsync(jsonBase64);
                 }
             });
 
