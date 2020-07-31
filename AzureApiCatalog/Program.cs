@@ -6,12 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Azure.Storage.Queues;
 
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration.UserSecrets;
 
 using Newtonsoft.Json;
@@ -28,6 +28,13 @@ namespace AzureApiCatalog
     {
         private const int MaxDegreeOfParallelism = 64;
         private static readonly string v3_flatContainer_nupkg_template = "https://api.nuget.org/v3-flatcontainer/{0}/{1}/{0}.{1}.nupkg";
+
+        private static readonly string[] _dotnetPlatformOwners = new[] {
+            "aspnet",
+            "dotnetframework",
+            "EntityFramework",
+            "RoslynTeam"
+        };
 
         private static async Task Main(string[] args)
         {
@@ -47,7 +54,6 @@ namespace AzureApiCatalog
 
             var sourceUrl = args[0];
             var createdAfter = (args.Length == 2) ? (DateTime?)DateTime.Parse(args[1]) : null;
-            var owners = new HashSet<string>() { "dotnetframework" };
 
             var timingResults = new List<(string, TimeSpan)>();
             var stopwatch = Stopwatch.StartNew();
@@ -60,6 +66,10 @@ namespace AzureApiCatalog
             var handler = new HttpClientHandler();
             handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
             var httpClient = new HttpClient(handler);
+
+            Console.Error.WriteLine($"Fetching owner information...");
+            var ownerInformation = await GetOwnerInformation(httpClient);
+            timingResults.Add(("Fetching owners", stopwatch.Elapsed));
 
             // Discover the catalog index URL from the service index.
             Console.Error.WriteLine($"Discovering index URL...");
@@ -82,6 +92,9 @@ namespace AzureApiCatalog
             {
                 while (pageItems.TryTake(out var pageItem))
                 {
+                    if (createdAfter != null && pageItem.CommitTimeStamp < createdAfter.Value)
+                        continue;
+
                     // Download the catalog page and deserialize it.
                     var pageString = await httpClient.GetStringAsync(pageItem.Url);
                     var page = JsonConvert.DeserializeObject<CatalogPage>(pageString);
@@ -90,7 +103,7 @@ namespace AzureApiCatalog
 
                     foreach (var pageLeafItem in page.Items)
                     {
-                        if (createdAfter == null || pageLeafItem.CommitTimeStamp >= createdAfter)
+                        if (pageLeafItem.Type == "nuget:PackageDetails")
                             allLeafItemsBag.Add(pageLeafItem);
                     }
                 }
@@ -100,38 +113,44 @@ namespace AzureApiCatalog
             Console.Error.WriteLine($"Fetched {index.Items.Count:N0} catalog pages, finding catalog leaves...");
             timingResults.Add(("Fetching pages", stopwatch.Elapsed));
 
-            var filteredLeafItemsGroup = allLeafItemsBag
-                .GroupBy(l => new PackageIdentity(l.Id, NuGetVersion.Parse(l.Version)));
+            var filteredLeaves = allLeafItemsBag.AsEnumerable();
 
-            var filteredLeafItemsList = filteredLeafItemsGroup
+            if (createdAfter != null)
+                filteredLeaves = filteredLeaves.Where(l => l.CommitTimeStamp >= createdAfter.Value)
+                                               .Where(l => IsOwnedByDotNet(ownerInformation, l.Id));
+
+            var filteredLeafGroups = filteredLeaves
+                .GroupBy(l => new PackageIdentity(l.Id, NuGetVersion.Parse(l.Version)))
                 .Select(g => g.OrderByDescending(l => l.CommitTimeStamp).First())
-                .Where(l => l.Type == "nuget:PackageDetails");
+                .ToArray();
 
-            var filteredLeafItems = new ConcurrentBag<CatalogLeaf>(filteredLeafItemsList);
+            var filteredLeafItems = new ConcurrentBag<CatalogLeaf>(filteredLeafGroups);
             timingResults.Add(("Filtering leaves", stopwatch.Elapsed));
 
             // Process all of the catalog leaf items.
             Console.Error.WriteLine($"Processing {filteredLeafItems.Count:N0} catalog leaves...");
 
             // Instantiate a QueueClient which will be used to create and manipulate the queue
-            //var userSecret = UserSecrets.Load();
-            //var queueClient = new QueueClient(userSecret.QueueConnectionString, "package-queue");
-            //await queueClient.CreateIfNotExistsAsync();
+            var userSecret = UserSecrets.Load();
 
-            //var processTasks = RunInParallel(async () =>
-            //{
-            //    while (filteredLeafItems.TryTake(out var leaf))
-            //    {
-            //        var message = new PackageQueueMessage
-            //        {
-            //            PackageId = leaf.Id,
-            //            PackageVersion = leaf.Version
-            //        };
+            var processTasks = RunInParallel(async () =>
+            {
+                var queueClient = new QueueClient(userSecret.QueueConnectionString, "package-queue");
+                await queueClient.CreateIfNotExistsAsync();
+                while (filteredLeafItems.TryTake(out var leaf))
+                {
+                    var message = new PackageQueueMessage
+                    {
+                        PackageId = leaf.Id,
+                        PackageVersion = leaf.Version
+                    };
 
-            //        var json = JsonConvert.SerializeObject(message);
-            //        await queueClient.SendMessageAsync(json);
-            //    }
-            //});
+                    var json = JsonConvert.SerializeObject(message);
+                    await queueClient.SendMessageAsync(json);
+                }
+            });
+
+            await Task.WhenAll(processTasks);
 
             timingResults.Add(("Queuing work", stopwatch.Elapsed));
 
@@ -146,6 +165,29 @@ namespace AzureApiCatalog
             }
 
             Console.WriteLine($"{"Total",-20}: {rolling}");
+        }
+
+        private static bool IsOwnedByDotNet(Dictionary<string, string[]> ownerInformation, string id)
+        {
+            if (ownerInformation.TryGetValue(id, out var owners))
+            {
+                foreach (var owner in owners)
+                {
+                    foreach (var platformOwner in _dotnetPlatformOwners)
+                    {
+                        if (string.Equals(owner, platformOwner, StringComparison.OrdinalIgnoreCase))
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static Task<Dictionary<string, string[]>> GetOwnerInformation(HttpClient httpClient)
+        {
+            var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-014/owners/owners.v2.json";
+            return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
         }
 
         private static async Task<Uri> GetCatalogIndexUrlAsync(string sourceUrl)
