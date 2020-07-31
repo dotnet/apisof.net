@@ -64,10 +64,11 @@
     <Build Include="PackageVersions.sql" />
     <Build Include="Assemblies.sql" />
     <Build Include="Declarations.sql" />
-    <Build Include="PlatformDeclarations.sql" />
+    <Build Include="PlatformAssemblies.sql" />
     <Build Include="PackageAssemblies.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Frameworks_Data.sql" />
+    <None Include="Reset.sql" />
   </ItemGroup>
 </Project>
