@@ -114,11 +114,11 @@ namespace AzureApiCatalog
             Console.Error.WriteLine($"Fetched {index.Items.Count:N0} catalog pages, finding catalog leaves...");
             timingResults.Add(("Fetching pages", stopwatch.Elapsed));
 
-            var filteredLeaves = allLeafItemsBag.AsEnumerable();
+            var filteredLeaves = allLeafItemsBag.AsEnumerable()
+                                                .Where(l => IsOwnedByDotNet(ownerInformation, l.Id));
 
             if (createdAfter != null)
-                filteredLeaves = filteredLeaves.Where(l => l.CommitTimeStamp >= createdAfter.Value)
-                                               .Where(l => IsOwnedByDotNet(ownerInformation, l.Id));
+                filteredLeaves = filteredLeaves.Where(l => l.CommitTimeStamp >= createdAfter.Value);
 
             var filteredLeafGroups = filteredLeaves
                 .GroupBy(l => new PackageIdentity(l.Id, NuGetVersion.Parse(l.Version)))
