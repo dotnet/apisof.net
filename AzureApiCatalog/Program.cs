@@ -34,7 +34,8 @@ namespace AzureApiCatalog
             "aspnet",
             "dotnetframework",
             "EntityFramework",
-            "RoslynTeam"
+            "RoslynTeam",
+            "dotnetfoundation"
         };
 
         private static async Task Main(string[] args)
