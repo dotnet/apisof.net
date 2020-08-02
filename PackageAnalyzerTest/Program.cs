@@ -15,13 +15,20 @@ namespace PackageAnalyzerTest
     {
         static async Task Main(string[] args)
         {
-            //var id = "System.Collections.Immutable";
-            //var version = "5.0.0-preview.7.20364.11";
             var secrets = UserSecrets.Load();
-            var id = "System.Memory";
-            var version = "4.5.4";
+            var packages = new[]
+            {
+                //("System.Memory", "4.5.4"),
+                //("System.Collections.Immutable", "5.0.0-preview.7.20364.11"),
+                ("System.Collections.Immutable", "1.3.1"),
+                //("System.Collections.Immutable", "1.7.1"),
+            };
+
             var stopwatch = Stopwatch.StartNew();
-            await Indexer.Index(id, version, secrets.SqlConnectionString);
+
+            foreach (var (id, version) in packages)
+                await Indexer.Index(id, version, secrets.SqlConnectionString);
+
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
         }
     }

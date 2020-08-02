@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Name>ApiCatalog</Name>
+    <Name>ApiCatalogDatabase</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{2527e20d-fe7a-4309-ab31-2c22cb533e9d}</ProjectGuid>
@@ -22,6 +22,7 @@
     <SqlServerVerification>False</SqlServerVerification>
     <IncludeCompositeObjects>True</IncludeCompositeObjects>
     <TargetDatabaseSet>True</TargetDatabaseSet>
+    <TargetDatabase>ApiCatalog</TargetDatabase>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -60,19 +61,21 @@
     <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Apis.sql" />
-    <Build Include="Frameworks.sql" />
-    <Build Include="Packages.sql" />
-    <Build Include="PackageVersions.sql" />
-    <Build Include="Assemblies.sql" />
-    <Build Include="Declarations.sql" />
-    <Build Include="PlatformAssemblies.sql" />
-    <Build Include="PackageAssemblies.sql" />
     <None Include="Scripts\Frameworks_Data.sql" />
     <None Include="Scripts\Reset.sql" />
+    <Build Include="Tables\Apis.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Stats.sql" />
     <None Include="Scripts\SelectPackages.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Tables\Assemblies.sql" />
+    <Build Include="Tables\Declarations.sql" />
+    <Build Include="Tables\Frameworks.sql" />
+    <Build Include="Tables\PackageAssemblies.sql" />
+    <Build Include="Tables\Packages.sql" />
+    <Build Include="Tables\PackageVersions.sql" />
+    <Build Include="Tables\PlatformAssemblies.sql" />
   </ItemGroup>
 </Project>

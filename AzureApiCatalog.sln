@@ -9,9 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IndexPackageFunction", "Ind
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageAnalyzerTest", "PackageAnalyzerTest\PackageAnalyzerTest.csproj", "{67B98544-7BD4-42B0-B89F-DDD529785A0F}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ApiCatalog", "ApiCatalog\ApiCatalog.sqlproj", "{2527E20D-FE7A-4309-AB31-2C22CB533E9D}"
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ApiCatalogDatabase", "ApiCatalogDatabase\ApiCatalogDatabase.sqlproj", "{2527E20D-FE7A-4309-AB31-2C22CB533E9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageIndexing", "PackageIndexing\PackageIndexing.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageIndexing", "PackageIndexing\PackageIndexing.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

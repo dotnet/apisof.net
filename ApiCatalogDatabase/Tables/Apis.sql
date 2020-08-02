@@ -5,3 +5,11 @@
 	[ParentApiId] INT,
 	[Name] NVARCHAR(255) NOT NULL
 )
+
+GO
+
+CREATE UNIQUE INDEX [IX_Apis_ApiGuid] ON [dbo].[Apis] ([ApiGuid])
+
+GO
+
+CREATE INDEX [IX_Apis_ParentApiId] ON [dbo].[Apis] ([ParentApiId])

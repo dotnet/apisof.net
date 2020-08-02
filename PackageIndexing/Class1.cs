@@ -26,19 +26,13 @@ namespace PackageIndexing
 
         public static async Task Index(string id, string version, string connectionString)
         {
-            // TODO: Only write package when it doesn't exist and we have at least one API
-            // TODO: Only write assembly when it doesn't exist.
-            // TODO: Only write API when it doesn't exist.
-            using (var connection = new SqlConnection(connectionString))
-            {
-                await connection.OpenAsync();
-                await IndexPackage(id, version, connection);
-            }
+            using var database = await CatalogDatabase.OpenAsync(connectionString);
+            await IndexPackage(id, version, database);
         }
 
-        private static async Task IndexPackage(string id, string version, SqlConnection connection)
+        private static async Task IndexPackage(string id, string version, CatalogDatabase database)
         {
-            var frameworkRows = (await connection.QueryAsync<FrameworkRow>("SELECT FrameworkId, FriendlyName FROM Frameworks")).ToList();
+            var frameworkRows = await database.GetFrameworksAsync();
             var frameworkIdByName = frameworkRows.ToDictionary(r => r.FriendlyName, r => r.FrameworkId);
 
             var frameworks = frameworkRows.Select(r => NuGetFramework.Parse(r.FriendlyName));
@@ -70,18 +64,27 @@ namespace PackageIndexing
                     if (!targets.Any())
                         return;
 
-                    var packageId = await connection.ExecuteScalarAsync<int>("INSERT INTO Packages (Name) VALUES (@Name); SELECT CAST(SCOPE_IDENTITY() AS INT)",
-                                                                             new { Name = id });
-
-                    var packageVersionId = await connection.ExecuteScalarAsync<int>("INSERT INTO PackageVersions (PackageId, Version) VALUES (@PackageId, @Version); SELECT CAST(SCOPE_IDENTITY() AS INT)",
-                                                                                    new { PackageId = packageId, Version = version });
+                    var packageId = 0;
+                    var packageVersionId = 0;
 
                     foreach (var target in targets)
                     {
                         Console.WriteLine(target);
 
                         var referenceGroup = GetReferenceItems(root, target);
+
+                        // Let's not index TFMs we don't care about.
+                        if (!frameworkIdByName.ContainsKey(referenceGroup.TargetFramework.GetShortFolderName()))
+                            continue;
+
                         Debug.Assert(referenceGroup != null);
+
+                        if (packageId == 0 && referenceGroup.Items.Any())
+                        {
+                            packageId = await database.InsertPackageAsync(id);
+                            packageVersionId = await database.InsertPackageVersionAsync(packageId, version);
+                        }
+
                         await FetchDependenciesAsync(dependencies, root, target);
 
                         Console.WriteLine("Index:");
@@ -108,7 +111,7 @@ namespace PackageIndexing
 
                         foreach (var path in referenceGroup.Items)
                         {
-                            var metadata = CreateReference(root.GetStream(path), filePath: path);
+                            var metadata = await AssemblyStream.CreateAsync(root.GetStream(path), path);
                             toBeIndexed.Add(metadata);
                             compilation = compilation.AddReferences(metadata);
                         }
@@ -122,7 +125,7 @@ namespace PackageIndexing
                             {
                                 foreach (var path in dependencyReferences.Items)
                                 {
-                                    var metadata = CreateReference(dependency.GetStream(path), filePath: path);
+                                    var metadata = await AssemblyStream.CreateAsync(dependency.GetStream(path), path);
                                     compilation = compilation.AddReferences(metadata);
                                 }
                             }
@@ -133,7 +136,7 @@ namespace PackageIndexing
                         var plaformSet = await GetPlatformSet(target);
                         foreach (var (path, stream) in plaformSet.GetFiles())
                         {
-                            var metadata = CreateReference(stream, filePath: path);
+                            var metadata = await AssemblyStream.CreateAsync(stream, path);
                             compilation = compilation.AddReferences(metadata);
                         }
 
@@ -143,7 +146,7 @@ namespace PackageIndexing
                             if (assemblyOrModule is IAssemblySymbol a)
                             {
                                 var frameworkId = frameworkIdByName[target.GetShortFolderName()];
-                                await IndexAssemblyAsync(a, connection, frameworkId, packageVersionId);
+                                await IndexAssemblyAsync(a, database, frameworkId, packageVersionId);
                             }
                         }
                     }
@@ -171,6 +174,7 @@ namespace PackageIndexing
             {
                 foreach (var d in dependencyGroup.Packages)
                 {
+                    Console.WriteLine($"Discovered dependency {d}");
                     var dependency = await FetchPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
                     packages.Add(dependency);
                     await FetchDependenciesAsync(packages, dependency, target);
@@ -251,7 +255,7 @@ namespace PackageIndexing
         }
 
         private static async Task IndexAssemblyAsync(IAssemblySymbol a,
-                                                     SqlConnection connection,
+                                                     CatalogDatabase database,
                                                      int frameworkId,
                                                      int packageVersionId)
         {
@@ -261,28 +265,26 @@ namespace PackageIndexing
             var assemblyVersion = a.Identity.Version.ToString();
             var assemblyPublicKeyToken = a.Identity.GetPublicKeyTokenString();
 
-            var assemblyId = await connection.ExecuteScalarAsync<int>("INSERT INTO Assemblies (AssemblyGuid, Name, Version, PublicKeyToken) VALUES (@AssemblyGuid, @Name, @Version, @PublicKeyToken); SELECT CAST(SCOPE_IDENTITY() AS INT)",
-                                                                      new { AssemblyGuid = assemblyGuid, Name = assemblyName, Version = assemblyVersion, PublicKeyToken = assemblyPublicKeyToken });
+            var (assemblyId, assemblyInserted) = await database.InsertAssemblyAsync(assemblyGuid, assemblyName, assemblyVersion, assemblyPublicKeyToken);
+            await database.InsertPackageAssemblyAsync(packageVersionId, frameworkId, assemblyId);
 
-            await connection.ExecuteScalarAsync("INSERT INTO PackageAssemblies (PackageVersionId, FrameworkId, AssemblyId) VALUES (@PackageVersionId, @FrameworkId, @AssemblyId)",
-                                                new { PackageVersionId = packageVersionId, FrameworkId = frameworkId, AssemblyId = assemblyId });
-
-            var apiIdByEntry = new Dictionary<ApiEntry, int>();
-
-            foreach (var api in apis)
+            if (assemblyInserted)
             {
-                var parentApiId = api.Parent == null
-                                    ? (int?)null
-                                    : apiIdByEntry[api.Parent];
-                var apiGuid = api.Symbol.GetCatalogGuid();
-                var name = api.Symbol.GetCatalogName();
-                var apiId = await connection.ExecuteScalarAsync<int>("INSERT INTO Apis (ApiGuid, ParentApiId, Name) VALUES (@Guid, @ParentApiId, @Name); SELECT CAST(SCOPE_IDENTITY() AS INT)",
-                                                                     new { Guid = apiGuid, ParentApiId = parentApiId, Name = name });
-                apiIdByEntry.Add(api, apiId);
+                var apiIdByEntry = new Dictionary<ApiEntry, int>();
 
-                var syntax = api.Symbol.ToString();
-                var declarationId = await connection.ExecuteScalarAsync<int>("INSERT INTO Declarations (ApiId, AssemblyId, Syntax) VALUES (@ApiId, @AssemblyId, @Syntax); SELECT CAST(SCOPE_IDENTITY() AS INT)",
-                                                                             new { ApiId = apiId, AssemblyId = assemblyId, Syntax = syntax });
+                foreach (var api in apis)
+                {
+                    var parentApiId = api.Parent == null
+                                        ? (int?)null
+                                        : apiIdByEntry[api.Parent];
+                    var apiGuid = api.Symbol.GetCatalogGuid();
+                    var name = api.Symbol.GetCatalogName();
+                    var apiId = await database.InsertApi(apiGuid, parentApiId, name);
+                    apiIdByEntry.Add(api, apiId);
+
+                    var syntax = api.Symbol.ToString();
+                    await database.InsertDeclaration(apiId, assemblyId, syntax);
+                }
             }
         }
 
@@ -385,14 +387,6 @@ namespace PackageIndexing
             var entry = new ApiEntry(symbol, parent);
             parent.Children.Add(entry);
         }
-
-        private static MetadataReference CreateReference(Stream stream, string filePath)
-        {
-            var memoryStream = new MemoryStream();
-            stream.CopyTo(memoryStream);
-            memoryStream.Position = 0;
-            return MetadataReference.CreateFromStream(memoryStream, filePath: filePath);
-        }
     }
 
     class FrameworkRow
@@ -409,6 +403,180 @@ namespace PackageIndexing
         public IEnumerable<(string Path, Stream data)> GetFiles()
         {
             return Packages.Select(Selector).SelectMany(s => s);
+        }
+    }
+
+    class CatalogDatabase : IDisposable
+    {
+        private readonly SqlConnection _connection;
+
+        private CatalogDatabase(SqlConnection connection)
+        {
+            _connection = connection;
+        }
+
+        public void Dispose()
+        {
+            _connection.Dispose();
+        }
+
+        public static async Task<CatalogDatabase> OpenAsync(string connectionString)
+        {
+            var connection = new SqlConnection(connectionString);
+            await connection.OpenAsync();
+            return new CatalogDatabase(connection);
+        }
+
+        public async Task<IReadOnlyList<FrameworkRow>> GetFrameworksAsync()
+        {
+            var rows = await _connection.QueryAsync<FrameworkRow>(@"
+                SELECT FrameworkId,
+                       FriendlyName
+                FROM Frameworks
+            ");
+            return rows.ToList();
+        }
+
+        public async Task<int> InsertPackageAsync(string name)
+        {
+            var packageId = await _connection.ExecuteScalarAsync<int>(@"
+                MERGE Packages AS target
+                USING (SELECT @Name) AS source (Name)
+                ON    (target.Name = source.Name)
+                WHEN NOT MATCHED THEN
+                    INSERT (Name)
+                    VALUES (@Name);
+                SELECT  PackageId
+                FROM    Packages
+                WHERE   Name = @Name;
+            ", new
+            {
+                Name = name
+            });
+
+            return packageId;
+        }
+
+        public async Task<int> InsertPackageVersionAsync(int packageId, string version)
+        {
+            var packageVersionId = await _connection.ExecuteScalarAsync<int>(@"
+                INSERT INTO PackageVersions
+                    (PackageId, Version)
+                VALUES
+                    (@PackageId, @Version);
+                SELECT CAST(SCOPE_IDENTITY() AS INT)
+            ", new
+            {
+                PackageId = packageId,
+                Version = version
+            });
+
+            return packageVersionId;
+        }
+
+        public async Task<(int Id, bool Inserted)> InsertAssemblyAsync(Guid assemblyGuid,
+                                                                       string assemblyName,
+                                                                       string assemblyVersion,
+                                                                       string assemblyPublicKeyToken)
+        {
+            using var reader = await _connection.ExecuteReaderAsync(@"
+                MERGE Assemblies AS target
+                USING (SELECT @AssemblyGuid) AS source (AssemblyGuid)
+                ON    (target.AssemblyGuid = source.AssemblyGuid)
+                WHEN NOT MATCHED THEN
+                    INSERT  (AssemblyGuid, Name, Version, PublicKeyToken)
+                    VALUES  (@AssemblyGuid, @Name, @Version, @PublicKeyToken)
+                OUTPUT
+                    inserted.AssemblyId;
+                SELECT  AssemblyId
+                FROM    Assemblies
+                WHERE   AssemblyGuid = @AssemblyGuid;
+            ", new
+            {
+                AssemblyGuid = assemblyGuid,
+                Name = assemblyName,
+                Version = assemblyVersion,
+                PublicKeyToken = assemblyPublicKeyToken
+            });
+
+            var isInserted = await reader.ReadAsync();
+            await reader.NextResultAsync();
+            await reader.ReadAsync();
+
+            var id = Convert.ToInt32(reader[0]);
+            return (id, isInserted);
+        }
+
+        public async Task InsertPackageAssemblyAsync(int packageVersionId, int frameworkId, int assemblyId)
+        {
+            await _connection.ExecuteScalarAsync(@"
+                INSERT INTO PackageAssemblies
+                    (PackageVersionId, FrameworkId, AssemblyId)
+                VALUES
+                    (@PackageVersionId, @FrameworkId, @AssemblyId)
+            ", new
+            {
+                PackageVersionId = packageVersionId,
+                FrameworkId = frameworkId,
+                AssemblyId = assemblyId
+            });
+        }
+
+        public async Task<int> InsertApi(Guid apiGuid, int? parentApiId, string name)
+        {
+            var apiId = await _connection.ExecuteScalarAsync<int>(@"
+                MERGE Apis AS target
+                USING (SELECT @ApiGuid) AS source (ApiGuid)
+                ON    (target.ApiGuid = source.ApiGuid)
+                WHEN NOT MATCHED THEN
+                    INSERT  (ApiGuid, ParentApiId, Name)
+                    VALUES  (@ApiGuid, @ParentApiId, @Name);
+                SELECT  ApiId
+                FROM    Apis
+                WHERE   ApiGuid = @ApiGuid;
+            ", new
+            {
+                ApiGuid = apiGuid,
+                ParentApiId = parentApiId,
+                Name = name
+            });
+
+            return apiId;
+        }
+
+        public async Task<int> InsertDeclaration(int apiId, int assemblyId, string syntax)
+        {
+            var declartionId = await _connection.ExecuteScalarAsync<int>(@"
+                INSERT INTO Declarations
+                    (ApiId, AssemblyId, Syntax)
+                VALUES
+                    (@ApiId, @AssemblyId, @Syntax);
+                SELECT CAST(SCOPE_IDENTITY() AS INT)
+            ", new
+            {
+                ApiId = apiId,
+                AssemblyId = assemblyId,
+                Syntax = syntax
+            });
+
+            return declartionId;
+        }
+    }
+
+    static class AssemblyStream
+    {
+        public static async Task<MetadataReference> CreateAsync(Stream stream, string path)
+        {
+            if (!stream.CanSeek)
+            {
+                var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+                stream.Dispose();
+                stream = memoryStream;
+            }
+
+            return MetadataReference.CreateFromStream(stream, filePath: path);
         }
     }
 

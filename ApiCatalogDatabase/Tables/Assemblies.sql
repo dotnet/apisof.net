@@ -6,3 +6,7 @@
 	[Version] NVARCHAR(15) NOT NULL,
 	[PublicKeyToken] NVARCHAR(16) NOT NULL,
 )
+
+GO
+
+CREATE UNIQUE INDEX [IX_Assemblies_AssemblyGuid] ON [dbo].[Assemblies] ([AssemblyGuid])
