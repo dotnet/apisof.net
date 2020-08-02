@@ -397,6 +397,9 @@ namespace PackageIndexing
                 symbol.DeclaredAccessibility != Accessibility.Protected)
                 return;
 
+            if (symbol.IsAccessor())
+                return;
+
             var entry = new ApiEntry(symbol, parent);
             parent.Children.Add(entry);
         }
@@ -610,7 +613,8 @@ namespace PackageIndexing
     {
         private static SymbolDisplayFormat _nameFormat = new SymbolDisplayFormat(
             memberOptions: SymbolDisplayMemberOptions.IncludeParameters,
-            parameterOptions: SymbolDisplayParameterOptions.IncludeType
+            parameterOptions: SymbolDisplayParameterOptions.IncludeType,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
         );
 
 
@@ -629,6 +633,27 @@ namespace PackageIndexing
                 return symbol.ToString();
 
             return symbol.ToDisplayString(_nameFormat);
+        }
+
+        public static bool IsAccessor(this ISymbol symbol)
+        {
+            if (symbol is IMethodSymbol method)
+            {
+                if (method.AssociatedSymbol is IPropertySymbol p)
+                {
+                    return SymbolEqualityComparer.Default.Equals(p.GetMethod, method) ||
+                           SymbolEqualityComparer.Default.Equals(p.SetMethod, method);
+                }
+
+                if (method.AssociatedSymbol is IEventSymbol e)
+                {
+                    return SymbolEqualityComparer.Default.Equals(e.AddMethod, method) ||
+                           SymbolEqualityComparer.Default.Equals(e.RemoveMethod, method) ||
+                           SymbolEqualityComparer.Default.Equals(e.RaiseMethod, method);
+                }
+            }
+
+            return false;
         }
 
         public static Guid GetCatalogGuid(List<ApiEntry> allApis)
