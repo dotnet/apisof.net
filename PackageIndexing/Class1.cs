@@ -291,8 +291,9 @@ namespace PackageIndexing
                                         ? (int?)null
                                         : apiIdByEntry[api.Parent];
                     var apiGuid = api.Symbol.GetCatalogGuid();
+                    var kind = api.Symbol.GetApiKind();
                     var name = api.Symbol.GetCatalogName();
-                    var apiId = await database.InsertApi(apiGuid, parentApiId, name);
+                    var apiId = await database.InsertApi(apiGuid, kind, parentApiId, name);
                     apiIdByEntry.Add(api, apiId);
 
                     var syntax = api.Symbol.ToString();
@@ -538,21 +539,22 @@ namespace PackageIndexing
             });
         }
 
-        public async Task<int> InsertApi(Guid apiGuid, int? parentApiId, string name)
+        public async Task<int> InsertApi(Guid apiGuid, ApiKind kind, int? parentApiId, string name)
         {
             var apiId = await _connection.ExecuteScalarAsync<int>(@"
                 MERGE Apis AS target
                 USING (SELECT @ApiGuid) AS source (ApiGuid)
                 ON    (target.ApiGuid = source.ApiGuid)
                 WHEN NOT MATCHED THEN
-                    INSERT  (ApiGuid, ParentApiId, Name)
-                    VALUES  (@ApiGuid, @ParentApiId, @Name);
+                    INSERT  (ApiGuid, Kind, ParentApiId, Name)
+                    VALUES  (@ApiGuid, @Kind, @ParentApiId, @Name);
                 SELECT  ApiId
                 FROM    Apis
                 WHERE   ApiGuid = @ApiGuid;
             ", new
             {
                 ApiGuid = apiGuid,
+                Kind = kind,
                 ParentApiId = parentApiId,
                 Name = name
             });
@@ -594,6 +596,21 @@ namespace PackageIndexing
 
             return MetadataReference.CreateFromStream(stream, filePath: path);
         }
+    }
+
+    enum ApiKind
+    {
+        Namespace,
+        Interface,
+        Delegate,
+        Enum,
+        Struct,
+        Class,
+        Field,
+        Constructor,
+        Property,
+        Method,
+        Event
     }
 
     class ApiEntry
@@ -655,6 +672,46 @@ namespace PackageIndexing
 
             return false;
         }
+
+        public static ApiKind GetApiKind(this ISymbol symbol)
+        {
+            if (symbol is INamespaceSymbol)
+                return ApiKind.Namespace;
+
+            if (symbol is INamedTypeSymbol type)
+            {
+                if (type.TypeKind == TypeKind.Interface)
+                    return ApiKind.Interface;
+                else if (type.TypeKind == TypeKind.Delegate)
+                    return ApiKind.Delegate;
+                else if (type.TypeKind == TypeKind.Enum)
+                    return ApiKind.Enum;
+                else if (type.TypeKind == TypeKind.Struct)
+                    return ApiKind.Struct;
+                else
+                    return ApiKind.Class;
+            }
+
+            if (symbol is IMethodSymbol method)
+            {
+                if (method.MethodKind == MethodKind.Constructor)
+                    return ApiKind.Constructor;
+
+                return ApiKind.Method;
+            }
+
+            if (symbol is IFieldSymbol)
+                return ApiKind.Field;
+
+            if (symbol is IPropertySymbol)
+                return ApiKind.Property;
+
+            if (symbol is IEventSymbol)
+                return ApiKind.Event;
+
+            throw new Exception($"Unpexected symbol kind {symbol.Kind}");
+        }
+
 
         public static Guid GetCatalogGuid(List<ApiEntry> allApis)
         {
