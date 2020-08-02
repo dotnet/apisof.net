@@ -48,7 +48,7 @@ namespace PackageIndexing
                                             .ToArray();
 
             var dependencies = new Dictionary<string, PackageArchiveReader>();
-            var apiIdByGuid = await database.GetKnownApisAsync(id);
+            var apiIdByGuid = new Dictionary<Guid, int>();
             try
             {
                 using (var root = await FetchPackageAsync(id, version))
@@ -469,31 +469,6 @@ namespace PackageIndexing
                 FROM Frameworks
             ");
             return rows.ToList();
-        }
-
-        public async Task<Dictionary<Guid, int>> GetKnownApisAsync(string packageName)
-        {
-            var rows = await _connection.QueryAsync<(int ApiId, Guid ApiGuid)>(@"
-                SELECT	a.ApiId,
-		                a.ApiGuid
-                FROM	Apis a
-                WHERE	EXISTS
-                (
-	                SELECT	*
-	                FROM	Declarations d
-				                JOIN Assemblies assm ON assm.AssemblyId = d.AssemblyId
-				                JOIN PackageAssemblies pa ON pa.AssemblyId = assm.AssemblyId
-				                JOIN PackageVersions pv ON pv.PackageVersionId = pa.PackageVersionId
-				                JOIN Packages p ON p.PackageId = pv.PackageId
-	                WHERE	d.ApiId = a.ApiId
-	                AND		p.Name = @PackageName
-                )
-            ", new
-            {
-                PackageName = packageName
-            });
-
-            return rows.ToDictionary(r => r.ApiGuid, r => r.ApiId);
         }
 
         public async Task<int> InsertPackageAsync(string name)
