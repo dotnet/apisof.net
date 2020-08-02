@@ -88,7 +88,10 @@ namespace PackageIndexing
                         if (packageId == 0 && referenceGroup.Items.Any())
                         {
                             packageId = await database.InsertPackageAsync(id);
-                            packageVersionId = await database.InsertPackageVersionAsync(packageId, version);
+                            var t = await database.InsertPackageVersionAsync(packageId, version);
+                            if (!t.Inserted)
+                                return;
+                            packageVersionId = t.Id;
                         }
 
                         await FetchDependenciesAsync(dependencies, root, target);
@@ -480,21 +483,34 @@ namespace PackageIndexing
             return packageId;
         }
 
-        public async Task<int> InsertPackageVersionAsync(int packageId, string version)
+        public async Task<(int Id, bool Inserted)> InsertPackageVersionAsync(int packageId, string version)
         {
-            var packageVersionId = await _connection.ExecuteScalarAsync<int>(@"
-                INSERT INTO PackageVersions
-                    (PackageId, Version)
-                VALUES
-                    (@PackageId, @Version);
-                SELECT CAST(SCOPE_IDENTITY() AS INT)
+            using var reader = await _connection.ExecuteReaderAsync(@"
+                MERGE PackageVersions AS target
+                USING (SELECT @PackageId, @Version) AS source (PackageId, Version)
+                ON    (target.PackageId = source.PackageId AND
+                       target.Version = source.Version)
+                WHEN NOT MATCHED THEN
+                    INSERT (PackageId, Version)
+                    VALUES (@PackageId, @Version)
+                OUTPUT
+                    inserted.PackageVersionId;
+                SELECT  PackageVersionId
+                FROM    PackageVersions
+                WHERE   PackageId = @PackageId
+                AND     Version = @Version
             ", new
             {
                 PackageId = packageId,
                 Version = version
             });
 
-            return packageVersionId;
+            var isInserted = await reader.ReadAsync();
+            await reader.NextResultAsync();
+            await reader.ReadAsync();
+
+            var id = Convert.ToInt32(reader[0]);
+            return (id, isInserted);
         }
 
         public async Task<(int Id, bool Inserted)> InsertAssemblyAsync(Guid assemblyGuid,
