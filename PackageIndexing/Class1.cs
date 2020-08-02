@@ -62,7 +62,7 @@ namespace PackageIndexing
                             var versionReferenceGroup = GetReferenceItems(root, frameworkVersion);
                             if (versionReferenceGroup != null)
                             {
-                                targets.Add(versionReferenceGroup.TargetFramework);
+                                targets.Add(frameworkVersion);
                                 break;
                             }
                         }
