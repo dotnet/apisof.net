@@ -32,6 +32,12 @@ namespace PackageIndexing
 
         private static async Task IndexPackage(string id, string version, CatalogDatabase database)
         {
+            var packageDisplayName = $"{id} {version}";
+            Console.WriteLine();
+            Console.WriteLine(packageDisplayName);
+            Console.WriteLine(new string('-', packageDisplayName.Length));
+            Console.WriteLine();
+
             var frameworkRows = await database.GetFrameworksAsync();
             var frameworkIdByName = frameworkRows.ToDictionary(r => r.FriendlyName, r => r.FrameworkId);
 
