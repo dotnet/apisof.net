@@ -64,6 +64,7 @@
     <None Include="Scripts\Frameworks_Data.sql" />
     <None Include="Scripts\Reset.sql" />
     <Build Include="Tables\Apis.sql" />
+    <None Include="Compare.scmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Stats.sql" />
