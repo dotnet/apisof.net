@@ -41,7 +41,7 @@ namespace PackageIndexing
                                             .Select(g => (Framework: g.Key, Versions: g.OrderByDescending(fx => fx.Version)))
                                             .ToArray();
 
-            var dependencies = new List<PackageArchiveReader>();
+            var dependencies = new Dictionary<string, PackageArchiveReader>();
             try
             {
                 using (var root = await FetchPackageAsync(id, version))
@@ -94,7 +94,7 @@ namespace PackageIndexing
 
                         Console.WriteLine("Dependencies:");
 
-                        foreach (var dependency in dependencies)
+                        foreach (var dependency in dependencies.Values)
                         {
                             var dependencyReferences = GetReferenceItems(dependency, target);
                             if (dependencyReferences != null)
@@ -118,7 +118,7 @@ namespace PackageIndexing
 
                         // Add dependencies to index
 
-                        foreach (var dependency in dependencies)
+                        foreach (var dependency in dependencies.Values)
                         {
                             var dependencyReferences = GetReferenceItems(dependency, target);
                             if (dependencyReferences != null)
@@ -154,7 +154,7 @@ namespace PackageIndexing
             }
             finally
             {
-                foreach (var package in dependencies)
+                foreach (var package in dependencies.Values)
                     package.Dispose();
             }
         }
@@ -166,7 +166,7 @@ namespace PackageIndexing
             return referenceGroup;
         }
 
-        private static async Task FetchDependenciesAsync(List<PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target)
+        private static async Task FetchDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target)
         {
             var dependencies = root.GetPackageDependencies();
             var dependencyGroup = NuGetFrameworkUtility.GetNearest(dependencies, target);
@@ -174,9 +174,22 @@ namespace PackageIndexing
             {
                 foreach (var d in dependencyGroup.Packages)
                 {
+                    if (packages.TryGetValue(d.Id, out var existingPackage))
+                    {
+                        if (d.VersionRange.MinVersion > existingPackage.NuspecReader.GetVersion())
+                        {
+                            existingPackage.Dispose();
+                            packages.Remove(d.Id);
+                            existingPackage = null;
+                        }
+                    }
+
+                    if (existingPackage != null)
+                        continue;
+
                     Console.WriteLine($"Discovered dependency {d}");
                     var dependency = await FetchPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
-                    packages.Add(dependency);
+                    packages.Add(d.Id, dependency);
                     await FetchDependenciesAsync(packages, dependency, target);
                 }
             }
