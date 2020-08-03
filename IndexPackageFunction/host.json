@@ -2,7 +2,9 @@
     "version": "2.0",
     "extensions": {
         "queues": {
-          "maxDequeueCount": 10
+          "maxDequeueCount": 10,
+          "batchSize": 8,
+          "newBatchThreshold": 4
         }
     },
     "logging": {
