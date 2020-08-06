@@ -51,7 +51,7 @@ namespace PackageIndexing
                         DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
                         DefinePackageAssembly(packageFingerprint, framework, assemblyFingerprint);
 
-                        foreach (var syntaxElement in doc.Root.Elements("syntax"))
+                        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                         {
                             var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
                             var syntax = syntaxElement.Value;
@@ -75,7 +75,7 @@ namespace PackageIndexing
                         DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
                         DefineFrameworkAssembly(framework, assemblyFingerprint);
 
-                        foreach (var syntaxElement in doc.Root.Elements("syntax"))
+                        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                         {
                             var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
                             var syntax = syntaxElement.Value;
