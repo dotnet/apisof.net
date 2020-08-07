@@ -143,7 +143,7 @@ namespace PackageIndexing
 
                 if (implementsInterfaces)
                 {
-                    var isFirst = true;
+                    var isFirst = !hasBaseType;
 
                     foreach (var @interface in type.Interfaces)
                     {
@@ -249,6 +249,7 @@ namespace PackageIndexing
                                                    .First();
 
             WriteTypeReference(invokeMethod.ReturnType, writer);
+            writer.WriteSpace();
             writer.WriteReference(type, type.Name);
             WriteParameterList(invokeMethod.Parameters, writer);
 
@@ -306,6 +307,7 @@ namespace PackageIndexing
             }
 
             WriteTypeReference(field.Type, writer);
+            writer.WriteSpace();
             writer.WriteReference(field, field.Name);
 
             if (field.HasConstantValue)
@@ -573,7 +575,10 @@ namespace PackageIndexing
         {
             if (constant.IsNull)
             {
-                writer.WriteKeyword("null");
+                if (constant.Type.IsValueType)
+                    writer.WriteKeyword("default");
+                else
+                    writer.WriteKeyword("null");
             }
             else
             {
@@ -606,7 +611,10 @@ namespace PackageIndexing
         {
             if (value == null)
             {
-                writer.WriteKeyword("null");
+                if (type.IsValueType)
+                    writer.WriteKeyword("default");
+                else
+                    writer.WriteKeyword("null");
             }
             else if (type.TypeKind == TypeKind.Enum)
             {

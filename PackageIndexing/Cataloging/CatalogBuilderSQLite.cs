@@ -7,6 +7,8 @@ using Dapper;
 
 using Microsoft.Data.Sqlite;
 
+using NuGet.Frameworks;
+
 namespace PackageIndexing
 {
     public sealed class CatalogBuilderSQLite : CatalogBuilder, IDisposable
@@ -173,7 +175,7 @@ namespace PackageIndexing
             {
                 ApiId = apiId,
                 Kind = kind,
-                ApiGuid = fingerprint,
+                ApiGuid = fingerprint.ToString("N"),
                 ParentApiId = parentApiId,
                 Name = name
             });
@@ -181,10 +183,10 @@ namespace PackageIndexing
             _apiIdByFingerprint.Add(fingerprint, apiId);
         }
 
-        protected override void DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken)
+        protected override bool DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken)
         {
             if (_assemblydIdByFingerprint.ContainsKey(fingerprint))
-                return;
+                return false;
 
             var assemblyId = _assemblydIdByFingerprint.Count + 1;
 
@@ -196,13 +198,14 @@ namespace PackageIndexing
             ", new
             {
                 AssemblyId = assemblyId,
-                AssemblyGuid = fingerprint,
+                AssemblyGuid = fingerprint.ToString("N"),
                 Name = name,
                 Version = version,
                 PublicKeyToken = publicKeyToken,
             });
 
             _assemblydIdByFingerprint.Add(fingerprint, assemblyId);
+            return true;
         }
 
         protected override void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax)

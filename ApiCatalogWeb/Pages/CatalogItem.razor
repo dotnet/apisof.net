@@ -1,0 +1,128 @@
+﻿@page "/catalog/{Guid}"
+@using ApiCatalogWeb.Services;
+ 
+@if (Spine == null)
+{
+    <div class="container-fluid">
+        <p>Loading...</p>
+    </div>
+}
+else
+{
+    <div class="container-fluid px-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><img height="16" width="16" src="/img/Database.svg" /> <a href="/catalog">Catalog</a></li>
+
+                @foreach (var p in Spine.Parents.AsEnumerable().Reverse())
+                {
+                    if (p.ApiId == Spine.Current.ApiId)
+                    {
+                        <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@p.Kind" /> @p.Name</li>
+                    }
+                    else
+                    {
+                        <li class="breadcrumb-item"><ApiIcon Kind="@p.Kind" /> <a href="/catalog/@p.ApiGuid">@p.Name</a></li>
+                    }
+                }
+
+                @if (!Spine.Parents.Any(p => p.ApiId == Spine.Current.ApiId))
+                {
+                    <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@Spine.Current.Kind" />@Spine.Current.Name</li>
+                }
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right">
+                <li>
+                    @{
+                        var root = Spine.Parents.First();
+                    }
+
+                    @if (root.ApiId == Spine.Current.ApiId)
+                    {
+                        <ApiIcon Kind="@root.Kind" /> <span class="font-weight-bold">@root.Name</span>
+                    }
+                    else
+                    {
+                        <ApiIcon Kind="@root.Kind" /> <a href="/catalog/@root.ApiGuid">@root.Name</a>
+                    }
+
+                    <ul class="list-unstyled pl-4">
+                        @foreach (var child in Spine.Children)
+                        {
+                            <li>
+                                @if (child.ApiId == Spine.Current.ApiId)
+                                {
+                                    <ApiIcon Kind="@child.Kind" /> <span class="font-weight-bold">@child.Name</span>
+                                }
+                                else
+                                {
+                                    <ApiIcon Kind="@child.Kind" /> <a href="/catalog/@child.ApiGuid">@child.Name</a>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="col-md-9">
+
+                @if (SelectedSyntax != null)
+                {
+                    <SyntaxView Syntax="@SelectedSyntax" CurrentId="@Spine.Current.ApiGuid" />
+                }
+
+            <dl class="my-3 small row">
+
+                @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.framework.GetFrameworkDisplayString())
+                                                                       .OrderBy(g => g.Key))
+                {
+                    <dt class="col-2">
+                        @frameworkGroup.Key
+                    </dt>
+                    <dd class="col-10">
+                        @{
+                            var isFirst = true;
+                        }
+                        @foreach (var version in frameworkGroup.OrderBy(fx => fx.framework.Version)
+                                                             .ThenBy(fx => fx.framework.Profile))
+                        {
+                            var versionFrameork = version.framework.GetShortFolderName();
+                            var activeClass = versionFrameork == SelectedFramework
+                                                    ? "font-weight-bold" : "";
+                            if (isFirst)
+                            {
+                                isFirst = false;
+                            }
+                            else
+                            {
+                                <span class="text-muted mx-3">&bull;</span>
+                            }
+                            <span class="@activeClass">
+                                <SetQueryParameter Key="fx" Value="@versionFrameork">@version.framework.GetVersionDisplayString()</SetQueryParameter>
+                            </span>
+                        }
+                    </dd>
+                }
+
+                @if (Availability.Current != null)
+                {
+                    <dt class="col-2">Assembly</dt>
+                    <dd class="col-10">@($"{Availability.Current.AssemblyName}, Version={Availability.Current.AssemblyVersion}, PublicKeyToken={Availability.Current.AssemblyPublicKeyToken}")</dd>
+
+                    @if (Availability.Current is ApiCatalogWeb.Services.CatalogPackageAvailability p)
+                    {
+                        <dt class="col-2">Package</dt>
+                        <dd class="col-10">@($"{p.PackageName}, Version={p.PackageVersion} via {p.FrameworkName}")</dd>
+                    }
+                }
+
+            </dl>
+            </div>
+        </div>
+    </div>
+}

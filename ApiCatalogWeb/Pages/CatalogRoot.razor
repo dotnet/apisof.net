@@ -1,0 +1,37 @@
+﻿@page "/catalog"
+
+@if (Namespaces == null)
+{
+    <div class="container-fluid">
+        <p>Loading...</p>
+    </div>
+}
+else
+{
+    <div class="container-fluid px-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><img height="16" width="16" src="/img/Database.svg" /> <a href="/catalog">Catalog</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="container-fluid">
+
+        <ul class="list-unstyled">
+            <li>
+                <img height="16" width="16" src="/img/Database.svg" /> <span class="font-weight-bold">Catalog</span>
+
+                <ul>
+                    @foreach (var child in Namespaces)
+                    {
+                        <li>
+                            <a href="/catalog/@child.ApiGuid">@child.Name</a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        </ul>
+        }
+    </div>
+}

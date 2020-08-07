@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X6 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="0.22222in" height="0.22222in" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 222 222"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil2 {fill:#C17C1A;fill-rule:nonzero}
+    .fil1 {fill:#F6F6F6;fill-rule:nonzero}
+    .fil0 {fill:#F6F6F6;fill-rule:nonzero;fill-opacity:0.000000}
+   ]]>
+  </style>
+ </defs>
+ <g id="canvas">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <polygon class="fil0" points="222,222 0,222 0,0 222,0 "/>
+ </g>
+ <g id="outline">
+  <metadata id="CorelCorpID_1Corel-Layer"/>
+  <polygon class="fil1" points="222,91 181,50 161,69 131,69 145,56 89,0 78,0 0,78 0,89 56,145 89,111 97,111 97,181 119,181 161,222 172,222 222,172 222,161 193,132 222,103 "/>
+ </g>
+ <g id="iconBg">
+  <metadata id="CorelCorpID_2Corel-Layer"/>
+  <polygon class="fil2" points="181,139 208,167 167,208 139,181 153,167 111,167 111,97 83,97 56,125 14,83 83,14 125,56 97,83 167,83 181,69 208,97 167,139 139,111 153,97 125,97 125,153 167,153 "/>
+ </g>
+</svg>

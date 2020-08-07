@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.IO;
+using System.Xml.Linq;
 
 using Microsoft.CodeAnalysis;
 
@@ -23,31 +24,36 @@ namespace PackageIndexing
             set => _writer.Indent = value;
         }
 
+        private void Write(string text)
+        {
+            _writer.Write(new XText(text).ToString());
+        }
+
         public override void WriteKeyword(string text)
         {
             _writer.Write("<k>");
-            _writer.Write(text);
+            Write(text);
             _writer.Write("</k>");
         }
 
         public override void WriteLiteralNumber(string text)
         {
             _writer.Write("<n>");
-            _writer.Write(text);
+            Write(text);
             _writer.Write("</n>");
         }
 
         public override void WriteLiteralString(string text)
         {
             _writer.Write("<s>");
-            _writer.Write(text);
+            Write(text);
             _writer.Write("</s>");
         }
 
         public override void WritePunctuation(string text)
         {
             _writer.Write("<p>");
-            _writer.Write(text);
+            Write(text);
             _writer.Write("</p>");
         }
 
@@ -56,14 +62,14 @@ namespace PackageIndexing
             var guid = symbol?.GetCatalogGuid() ?? Guid.Empty;
             if (guid == Guid.Empty)
             {
-                _writer.Write(text);
+                Write(text);
             }
             else
             {
                 _writer.Write("<r i=\"");
                 _writer.Write(guid.ToString("N"));
                 _writer.Write("\">");
-                _writer.Write(text);
+                Write(text);
                 _writer.Write("</r>");
             }
         }

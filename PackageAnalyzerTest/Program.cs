@@ -16,8 +16,8 @@ namespace PackageAnalyzerTest
 
             var stopwatch = Stopwatch.StartNew();
 
-            //await GenerateIndex(indexPath);
-            await ProduceCatalogBinary(indexPath, Path.Combine(indexPath, "apicatalog.dat"));
+            await GenerateIndex(indexPath);
+            //await ProduceCatalogBinary(indexPath, Path.Combine(indexPath, "apicatalog.dat"));
             await ProduceCatalogSQLite(indexPath, Path.Combine(indexPath, "apicatalog.db"));
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
@@ -38,6 +38,7 @@ namespace PackageAnalyzerTest
             {
                 ("System.Memory", "4.5.4"),
                 ("System.Collections.Immutable", "1.7.1"),
+                ("System.ValueTuple", "4.5.0"),
             };
 
             Directory.CreateDirectory(indexPath);

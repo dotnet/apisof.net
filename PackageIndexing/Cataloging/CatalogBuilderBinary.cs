@@ -76,10 +76,10 @@ namespace PackageIndexing
             _apiTable.WriteInt32(nameRowIndex);
         }
 
-        protected override void DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken)
+        protected override bool DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken)
         {
             if (_assemblyTable.Contains(fingerprint))
-                return;
+                return false;
 
             var nameRowIndex = DefineString(name);
             var versionRowIndex = DefineString(version);
@@ -89,6 +89,7 @@ namespace PackageIndexing
             _assemblyTable.WriteInt32(nameRowIndex);
             _assemblyTable.WriteInt32(versionRowIndex);
             _assemblyTable.WriteInt32(publicKeyTokenRowIndex);
+            return true;
         }
 
         protected override void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax)

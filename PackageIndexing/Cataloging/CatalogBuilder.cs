@@ -37,7 +37,6 @@ namespace PackageIndexing
                     var packageId = doc.Root.Attribute("id").Value;
                     var packageName = doc.Root.Attribute("name").Value;
                     DefinePackage(packageFingerprint, packageId, packageName);
-
                     DefineApis(this, doc.Root.Elements("api"));
 
                     foreach (var assemblyElement in doc.Root.Elements("assembly"))
@@ -48,14 +47,17 @@ namespace PackageIndexing
                         var version = assemblyElement.Attribute("version").Value;
                         var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
                         DefineFramework(framework);
-                        DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
+                        var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
                         DefinePackageAssembly(packageFingerprint, framework, assemblyFingerprint);
 
-                        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+                        if (assemblyCreated)
                         {
-                            var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
-                            var syntax = syntaxElement.Value;
-                            DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+                            foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+                            {
+                                var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
+                                var syntax = syntaxElement.Value;
+                                DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+                            }
                         }
                     }
                 }
@@ -63,8 +65,7 @@ namespace PackageIndexing
                 {
                     var framework = doc.Root.Attribute("name").Value;
                     DefineFramework(framework);
-
-                    DefineApis((CatalogBuilder)this, doc.Root.Elements("api"));
+                    DefineApis(this, doc.Root.Elements("api"));
 
                     foreach (var assemblyElement in doc.Root.Elements("assembly"))
                     {
@@ -72,14 +73,17 @@ namespace PackageIndexing
                         var name = assemblyElement.Attribute("name").Value;
                         var version = assemblyElement.Attribute("version").Value;
                         var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
-                        DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
+                        var assemblyExists = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
                         DefineFrameworkAssembly(framework, assemblyFingerprint);
 
-                        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+                        if (assemblyExists)
                         {
-                            var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
-                            var syntax = syntaxElement.Value;
-                            DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+                            foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+                            {
+                                var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
+                                var syntax = syntaxElement.Value;
+                                DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+                            }
                         }
                     }
                 }
@@ -87,7 +91,7 @@ namespace PackageIndexing
         }
 
         protected abstract void DefineApi(Guid fingerprint, ApiKind kind, Guid parentFingerprint, string name);
-        protected abstract void DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken);
+        protected abstract bool DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken);
         protected abstract void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax);
         protected abstract void DefineFramework(string frameworkName);
         protected abstract void DefineFrameworkAssembly(string framework, Guid assemblyFingerprint);

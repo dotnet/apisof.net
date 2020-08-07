@@ -13,6 +13,13 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ApiCatalogDatabase", "ApiCa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageIndexing", "PackageIndexing\PackageIndexing.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiCatalogWeb", "ApiCatalogWeb\ApiCatalogWeb.csproj", "{68575F1D-8460-4B96-8AF7-AB7D14E53F37}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{38C2089B-4BBE-4D1E-B307-A8908624F896}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +48,10 @@ Global
 		{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68575F1D-8460-4B96-8AF7-AB7D14E53F37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68575F1D-8460-4B96-8AF7-AB7D14E53F37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68575F1D-8460-4B96-8AF7-AB7D14E53F37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68575F1D-8460-4B96-8AF7-AB7D14E53F37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

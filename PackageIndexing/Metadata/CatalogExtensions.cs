@@ -22,7 +22,7 @@ namespace PackageIndexing
             if (symbol is ITypeParameterSymbol)
                 return Guid.Empty;
 
-            var id = symbol.GetDocumentationCommentId();
+            var id = symbol.OriginalDefinition.GetDocumentationCommentId();
             if (id == null)
                 return Guid.Empty;
 
