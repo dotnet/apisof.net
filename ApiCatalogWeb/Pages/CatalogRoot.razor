@@ -22,11 +22,11 @@ else
             <li>
                 <img height="16" width="16" src="/img/Database.svg" /> <span class="font-weight-bold">Catalog</span>
 
-                <ul>
+                <ul class="list-unstyled pl-4">
                     @foreach (var child in Namespaces)
                     {
                         <li>
-                            <a href="/catalog/@child.ApiGuid">@child.Name</a>
+                            <ApiIcon Kind="@child.Kind" /> <a href="/catalog/@child.ApiGuid">@child.Name</a>
                         </li>
                     }
                 </ul>

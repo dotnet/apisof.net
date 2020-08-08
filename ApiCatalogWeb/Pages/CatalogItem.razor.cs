@@ -45,6 +45,8 @@ namespace ApiCatalogWeb.Pages
         {
             SelectedFramework = NavigationManager.GetQueryParameter("fx");
             Availability = await CatalogService.GetAvailabilityAsync(Guid, SelectedFramework);
+            if (SelectedFramework == null)
+                SelectedFramework = Availability.Current?.FrameworkName;
 
             SelectedSyntax = Availability.Current == null
                 ? ""

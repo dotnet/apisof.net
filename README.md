@@ -2,14 +2,18 @@
 
 ## UI
 
-* The table still looks a bit ugly
 * Grey out APIs that aren't available for the selected framework
-* Add syntax highlighting for numbers and strings
 * We need to handle multiple package versions
+* We should change the order of namespaces: System, Microsoft, Windows, the rest
+* Add symbol-specific colorization
+* Add tooltips for symbols
 
 ## Indexing
 
 * Handle display of constant enum and enum flags correctly
+* Handle operator methods
+* Handle arrays in attributes (see: /catalog/0d9154acade21b26d7bd5d06341ecdb7)
+* Attributes in parameter lists cause issues
 * Split parameters on separate lines
 * Split base types on separate lines
 * `typeof()` should use open generic syntax
@@ -22,6 +26,7 @@
 	- TargedPatchingOptOut
 	- Nullable
 	- NullableContext
+* It seems symbols with empty namespace don't end up in the root namespace
 
 ## DB
 

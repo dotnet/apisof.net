@@ -27,6 +27,7 @@
 
 .syntax-view {
     display: block;
+    font-size: larger;
     background-color: #e9ecef;
     border-color: gray;
     border-radius: 0.25rem;
@@ -38,11 +39,19 @@
 }
 
 .syntax-view .keyword {
-    color: blue
+    color: blue;
 }
 
 .syntax-view .punctuation {
-    color: black
+    color: black;
+}
+
+.syntax-view .string {
+    color: #a31515;
+}
+
+.syntax-view .number {
+    color: #3876c2;
 }
 
 .syntax-view .reference a:link {

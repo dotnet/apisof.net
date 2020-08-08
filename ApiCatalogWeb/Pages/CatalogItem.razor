@@ -28,7 +28,7 @@ else
 
                 @if (!Spine.Parents.Any(p => p.ApiId == Spine.Current.ApiId))
                 {
-                    <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@Spine.Current.Kind" />@Spine.Current.Name</li>
+                    <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@Spine.Current.Kind" /> @Spine.Current.Name</li>
                 }
             </ol>
         </nav>
