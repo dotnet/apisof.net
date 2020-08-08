@@ -7,11 +7,9 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Azure.Storage.Queues;
+using System.Xml.Linq;
 
 using Microsoft.Extensions.Configuration.UserSecrets;
 
@@ -35,7 +33,7 @@ namespace AzureApiCatalog
             "dotnetframework",
             "EntityFramework",
             "RoslynTeam",
-            "dotnetfoundation"
+            //"dotnetfoundation"
         };
 
         private static async Task Main(string[] args)
@@ -133,31 +131,47 @@ namespace AzureApiCatalog
             Console.Error.WriteLine($"Processing {filteredLeafItems.Count:N0} catalog leaves...");
 
             // Instantiate a QueueClient which will be used to create and manipulate the queue
-            var userSecret = UserSecrets.Load();
+            //var userSecret = UserSecrets.Load();
+            //
+            //var processTasks = RunInParallel(async () =>
+            //{
+            //    var queueClient = new QueueClient(userSecret.QueueConnectionString, "package-queue");
+            //    await queueClient.CreateIfNotExistsAsync();
+            //
+            //    while (filteredLeafItems.TryTake(out var leaf))
+            //    {
+            //        var message = new PackageQueueMessage
+            //        {
+            //            PackageId = leaf.Id,
+            //            PackageVersion = leaf.Version
+            //        };
+            //
+            //        var json = JsonConvert.SerializeObject(message);
+            //        // See https://github.com/Azure/azure-sdk-for-net/issues/10242
+            //        // Why we're doing base 64 here.
+            //        var jsonBytes = Encoding.UTF8.GetBytes(json);
+            //        var jsonBase64 = Convert.ToBase64String(jsonBytes);
+            //        await queueClient.SendMessageAsync(jsonBase64);
+            //    }
+            //});
+            //
+            //await Task.WhenAll(processTasks);
 
-            var processTasks = RunInParallel(async () =>
+            var packageDocument = new XDocument();
+            var root = new XElement("packages");
+            packageDocument.Add(root);
+
+            foreach (var item in filteredLeafItems)
             {
-                var queueClient = new QueueClient(userSecret.QueueConnectionString, "package-queue");
-                await queueClient.CreateIfNotExistsAsync();
+                var e = new XElement("package",
+                    new XAttribute("id", item.Id),
+                    new XAttribute("version", item.Version)
+                );
 
-                while (filteredLeafItems.TryTake(out var leaf))
-                {
-                    var message = new PackageQueueMessage
-                    {
-                        PackageId = leaf.Id,
-                        PackageVersion = leaf.Version
-                    };
+                root.Add(e);
+            }
 
-                    var json = JsonConvert.SerializeObject(message);
-                    // See https://github.com/Azure/azure-sdk-for-net/issues/10242
-                    // Why we're doing base 64 here.
-                    var jsonBytes = Encoding.UTF8.GetBytes(json);
-                    var jsonBase64 = Convert.ToBase64String(jsonBytes);
-                    await queueClient.SendMessageAsync(jsonBase64);
-                }
-            });
-
-            await Task.WhenAll(processTasks);
+            packageDocument.Save(@"C:\Users\immo\Downloads\Indexing\packages.xml");
 
             timingResults.Add(("Queuing work", stopwatch.Elapsed));
 
