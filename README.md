@@ -19,7 +19,6 @@
 * `typeof()` should use open generic syntax
 * Hide internal attributes
 * Hide attributes which reference internal types in `typeof()` expressions
-* Sort namespaces, types, and members
 * Index extension methods
 * Exclude boilerplate attributes
 	- CompilerGenerated
@@ -30,6 +29,4 @@
 
 ## DB
 
-* Externalize syntax strings
-* Consider externalizing API strings
 * Figure out how we an efficiently lookup qualified URLs

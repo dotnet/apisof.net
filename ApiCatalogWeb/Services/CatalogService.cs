@@ -246,10 +246,11 @@ namespace ApiCatalogWeb.Services
 	                FROM    Apis a
 				                JOIN ApiParents p ON p.ParentApiId = a.ApiId
                 )
-                SELECT   d.Syntax
+                SELECT   s.Syntax
                 FROM     ApiParents api
-                            JOIN Declarations d ON d.ApiId = api.ApiId
+                            JOIN Declarations d INDEXED BY IX_Declarations_ApiId ON d.ApiId = api.ApiId
 			                JOIN Assemblies a on a.AssemblyId = d.AssemblyId
+                            JOIN Syntaxes s ON s.SyntaxId = d.SyntaxId
                 WHERE    a.AssemblyGuid = @AassemblyGuid
                 ORDER BY api.[Order] DESC
             ", new

@@ -7,8 +7,6 @@ using Dapper;
 
 using Microsoft.Data.Sqlite;
 
-using NuGet.Frameworks;
-
 namespace PackageIndexing
 {
     public sealed class CatalogBuilderSQLite : CatalogBuilder, IDisposable
@@ -56,6 +54,13 @@ namespace PackageIndexing
             var commands = new[]
             {
                 @"
+                    CREATE TABLE [Syntaxes]
+                    (
+                        [SyntaxId] INTEGER PRIMARY KEY,
+                        [Syntax] TEXT NOT NULL
+                    )
+                ",
+                @"
                     CREATE TABLE [Apis]
                     (
                         [ApiId] INTEGER PRIMARY KEY,
@@ -89,7 +94,7 @@ namespace PackageIndexing
                     (
                         [ApiId] INTEGER NOT NULL,
                         [AssemblyId] INTEGER NOT NULL,
-                        [Syntax] TEXT
+                        [SyntaxId] INTEGER NOT NULL
                     )
                 ",
                 @"
@@ -150,11 +155,35 @@ namespace PackageIndexing
             }
         }
 
+        private readonly Dictionary<string, int> _syntaxIdBySyntax = new Dictionary<string, int>();
         private readonly Dictionary<Guid, int> _apiIdByFingerprint = new Dictionary<Guid, int>();
         private readonly Dictionary<Guid, int> _assemblydIdByFingerprint = new Dictionary<Guid, int>();
         private readonly Dictionary<string, int> _packageIdByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<Guid, int> _packageVersionIdByFingerprint = new Dictionary<Guid, int>();
         private readonly Dictionary<string, int> _frameworkIdByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        private int DefineSyntax(string syntax)
+        {
+            if (_syntaxIdBySyntax.TryGetValue(syntax, out var syntaxId))
+                return syntaxId;
+
+            syntaxId = _syntaxIdBySyntax.Count + 1;
+
+            _connection.Execute(@"
+                    INSERT INTO [Syntaxes]
+                        (SyntaxId, Syntax)
+                    VALUES
+                        (@SyntaxId, @Syntax)
+                ", new
+            {
+                SyntaxId = syntaxId,
+                Syntax = syntax
+            });
+
+            _syntaxIdBySyntax.Add(syntax, syntaxId);
+
+            return syntaxId;
+        }
 
         protected override void DefineApi(Guid fingerprint, ApiKind kind, Guid parentFingerprint, string name)
         {
@@ -212,17 +241,18 @@ namespace PackageIndexing
         {
             var assemblyId = _assemblydIdByFingerprint[assemblyFingerprint];
             var apiId = _apiIdByFingerprint[apiFingerprint];
+            var syntaxId = DefineSyntax(syntax);
 
             _connection.Execute(@"
                 INSERT INTO [Declarations]
-                    (AssemblyId, ApiId, Syntax)
+                    (AssemblyId, ApiId, SyntaxId)
                 VALUES
-                    (@AssemblyId, @ApiId, @Syntax)
+                    (@AssemblyId, @ApiId, @SyntaxId)
             ", new
             {
                 AssemblyId = assemblyId,
                 ApiId = apiId,
-                Syntax = syntax
+                SyntaxId = syntaxId
             });
         }
 
