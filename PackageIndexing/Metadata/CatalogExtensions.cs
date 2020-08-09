@@ -22,6 +22,9 @@ namespace PackageIndexing
             if (symbol is ITypeParameterSymbol)
                 return Guid.Empty;
 
+            if (symbol is INamespaceSymbol ns && ns.IsGlobalNamespace)
+                return GetCatalogGuid("N:<global>");
+
             var id = symbol.OriginalDefinition.GetDocumentationCommentId();
             if (id == null)
                 return Guid.Empty;

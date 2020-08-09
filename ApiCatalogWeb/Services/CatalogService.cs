@@ -421,7 +421,9 @@ namespace ApiCatalogWeb.Services
                 (
                     SELECT  0 AS [Order],
                             a.ApiId,
-                            a.ParentApiId
+                            a.ParentApiId,
+                            a.Kind,
+                            a.Name
                     FROM    Apis a
                     WHERE   a.ApiGuid = @ApiGuid
 
@@ -429,7 +431,9 @@ namespace ApiCatalogWeb.Services
 
 	                SELECT  p.[Order] + 1,
                             a.ApiId,
-                            a.ParentApiId
+                            a.ParentApiId,
+                            a.Kind,
+                            a.Name
 	                FROM    Apis a
 				                JOIN ApiParents p ON p.ParentApiId = a.ApiId
                 )
@@ -439,6 +443,7 @@ namespace ApiCatalogWeb.Services
 			                JOIN Assemblies a on a.AssemblyId = d.AssemblyId
                             JOIN Syntaxes s ON s.SyntaxId = d.SyntaxId
                 WHERE    a.AssemblyGuid = @AassemblyGuid
+                AND      api.Name != '<global namespace>'
                 ORDER BY api.[Order] DESC
             ", new
             {

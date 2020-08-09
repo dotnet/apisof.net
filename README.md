@@ -24,7 +24,6 @@
 	- TargedPatchingOptOut
 	- Nullable
 	- NullableContext
-* It seems symbols with empty namespace don't end up in the root namespace
 * Sort interfaces and attributes
 * Don't index delegate members
 
