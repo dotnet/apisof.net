@@ -16,7 +16,7 @@ else
 
                 @foreach (var p in Spine.Parents.AsEnumerable().Reverse())
                 {
-                    if (p.ApiId == Spine.Current.ApiId)
+                    if (p == Spine.Selected)
                     {
                         <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@p.Kind" /> @p.Name</li>
                     }
@@ -26,9 +26,9 @@ else
                     }
                 }
 
-                @if (!Spine.Parents.Any(p => p.ApiId == Spine.Current.ApiId))
+                @if (!Spine.Parents.Any(p => p == Spine.Selected))
                 {
-                    <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@Spine.Current.Kind" /> @Spine.Current.Name</li>
+                    <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@Spine.Selected.Kind" /> @Spine.Selected.Name</li>
                 }
             </ol>
         </nav>
@@ -42,7 +42,7 @@ else
                         var root = Spine.Parents.First();
                     }
 
-                    @if (root.ApiId == Spine.Current.ApiId)
+                    @if (root == Spine.Selected)
                     {
                         <ApiIcon Kind="@root.Kind" /> <span class="font-weight-bold">@root.Name</span>
                     }
@@ -55,7 +55,7 @@ else
                         @foreach (var child in Spine.Children)
                         {
                             <li>
-                                @if (child.ApiId == Spine.Current.ApiId)
+                                @if (child.ApiId == Spine.Selected.ApiId)
                                 {
                                     <ApiIcon Kind="@child.Kind" /> <span class="font-weight-bold">@child.Name</span>
                                 }
@@ -73,7 +73,7 @@ else
 
                 @if (SelectedSyntax != null)
                 {
-                    <SyntaxView Syntax="@SelectedSyntax" CurrentId="@Spine.Current.ApiGuid" />
+                    <SyntaxView Syntax="@SelectedSyntax" CurrentId="@Spine.Selected.ApiGuid" />
                 }
 
             <dl class="my-3">

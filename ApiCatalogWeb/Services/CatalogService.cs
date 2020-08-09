@@ -26,7 +26,7 @@ namespace ApiCatalogWeb.Services
 
     public class CatalogApiSpine
     {
-        public CatalogApi Current { get; set; }
+        public CatalogApi Selected { get; set; }
         public List<CatalogApi> Parents { get; } = new List<CatalogApi>();
         public List<CatalogApi> Children { get; } = new List<CatalogApi>();
     }
@@ -155,25 +155,28 @@ namespace ApiCatalogWeb.Services
         public async Task<CatalogApiSpine> GetSpineAsync(string apiFingerprint)
         {
             var ancestorsAndSelf = await GetAncestorsAndSelf(apiFingerprint);
-            var current = ancestorsAndSelf.FirstOrDefault();
-            if (current == null)
+            var selected = ancestorsAndSelf.FirstOrDefault();
+            if (selected == null)
                 return null;
 
             var result = new CatalogApiSpine();
-            result.Current = current;
+            result.Selected = selected;
 
-            var canHaveChildren = !current.Kind.IsMember();
+            var canHaveChildren = !selected.Kind.IsMember();
 
             if (canHaveChildren)
             {
                 result.Parents.AddRange(ancestorsAndSelf);
-                result.Children.AddRange(await GetChildrenAsync(current.ApiId));
+                result.Children.AddRange(await GetChildrenAsync(selected.ApiId));
             }
             else
             {
-                var siblingsAndSelf = await GetChildrenAsync(current.ParentApiId);
+                var siblingsAndSelf = await GetChildrenAsync(selected.ParentApiId);
                 result.Parents.AddRange(ancestorsAndSelf.Skip(1));
                 result.Children.AddRange(siblingsAndSelf);
+
+                var indexOfCurrent = result.Children.IndexOf(result.Children.Single(c => c.ApiId == selected.ApiId));
+                result.Children[indexOfCurrent] = selected;
             }
 
             return result;

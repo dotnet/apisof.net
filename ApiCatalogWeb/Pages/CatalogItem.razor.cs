@@ -50,7 +50,7 @@ namespace ApiCatalogWeb.Pages
 
             SelectedSyntax = Availability.Current == null
                 ? ""
-                : await CatalogService.GetSyntaxAsync(Spine.Current.ApiGuid, Availability.Current.AssemblyFingerprint);
+                : await CatalogService.GetSyntaxAsync(Spine.Selected.ApiGuid, Availability.Current.AssemblyFingerprint);
         }
 
         private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
