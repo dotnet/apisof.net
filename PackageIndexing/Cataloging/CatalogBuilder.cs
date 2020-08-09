@@ -31,6 +31,9 @@ namespace PackageIndexing
             {
                 Console.WriteLine($"Processing {path}...");
                 var doc = XDocument.Load(data);
+                if (doc.Root.IsEmpty)
+                    continue;
+
                 if (doc.Root.Name == "package")
                 {
                     var packageFingerprint = Guid.Parse(doc.Root.Attribute("fingerprint").Value);

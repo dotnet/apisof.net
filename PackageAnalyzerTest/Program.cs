@@ -3,6 +3,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+
+using NuGet.Versioning;
 
 using PackageIndexing;
 
@@ -13,17 +16,21 @@ namespace PackageAnalyzerTest
         static async Task Main(string[] args)
         {
             var indexPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Indexing");
+            var platformsPath = Path.Combine(indexPath, "platforms");
+            var packageListPath = Path.Combine(indexPath, "packages.xml");
+            var packagesPath = Path.Combine(indexPath, "packages");
 
             var stopwatch = Stopwatch.StartNew();
 
-            await GenerateIndex(indexPath);
-            //await ProduceCatalogBinary(indexPath, Path.Combine(indexPath, "apicatalog.dat"));
-            await ProduceCatalogSQLite(indexPath, Path.Combine(indexPath, "apicatalog.db"));
+            //await GeneratePlatformIndex(platformsPath);
+            //await GeneratePackageIndex(packageListPath, packagesPath);
+            await ProduceCatalogBinary(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.dat"));
+            await ProduceCatalogSQLite(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.db"));
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
         }
 
-        private static async Task GenerateIndex(string indexPath)
+        private static async Task GeneratePlatformIndex(string platformsPath)
         {
             var frameworkResolvers = new FrameworkResolver[]
             {
@@ -34,49 +41,91 @@ namespace PackageAnalyzerTest
 
             var frameworks = frameworkResolvers.SelectMany(r => r.Resolve());
 
-            var packages = new[]
-            {
-                ("System.Memory", "4.5.4"),
-                ("System.Collections.Immutable", "1.7.1"),
-                ("System.ValueTuple", "4.5.0"),
-            };
-
-            Directory.CreateDirectory(indexPath);
+            Directory.CreateDirectory(platformsPath);
 
             foreach (var framework in frameworks)
             {
-                var path = Path.Join(indexPath, $"{framework.FrameworkName}.xml");
+                var path = Path.Join(platformsPath, $"{framework.FrameworkName}.xml");
                 Console.WriteLine($"Indexing {framework.FrameworkName}...");
                 var frameworkEntry = await FrameworkIndexer.Index(framework.FrameworkName, framework.FileSet);
                 using (var stream = File.Create(path))
                     frameworkEntry.Write(stream);
             }
+        }
 
-            foreach (var (id, version) in packages)
+        private static async Task GeneratePackageIndex(string packageListPath, string packagesPath)
+        {
+            var document = XDocument.Load(packageListPath);
+           
+            var packages = document.Root.Elements("package")
+                                        .Select(e => (Id: e.Attribute("id").Value, Version: NuGetVersion.Parse(e.Attribute("version").Value)))
+                                        .GroupBy(t => t.Id)
+                                        .Select(g => (Id: g.Key, Version: g.OrderBy(t => t.Version).Select(t => t.Version).Last().ToString()))
+                                        .ToArray();
+
+            Directory.CreateDirectory(packagesPath);
+
+            foreach (var (id, version) in packages.OrderBy(t => t.Id))
             {
-                var path = Path.Join(indexPath, $"{id}-{version}.xml");
-                Console.WriteLine($"Indexing {id} {version}...");
-                var packageEntry = await PackageIndexer.Index(id, version);
-                using (var stream = File.Create(path))
-                    packageEntry.Write(stream);
+                var path = Path.Join(packagesPath, $"{id}-{version}.xml");
+                var disabledPath = Path.Join(packagesPath, $"{id}-all.disabled");
+                var disabledVersionPath = Path.Join(packagesPath, $"{id}-{version}.disabled");
+                var failedVersionPath = Path.Join(packagesPath, $"{id}-{version}.failed");
+
+                var alreadyIndexed = File.Exists(path) ||
+                                     File.Exists(disabledPath) ||
+                                     File.Exists(disabledVersionPath) ||
+                                     File.Exists(failedVersionPath);
+
+                File.Delete(disabledVersionPath);
+
+                if (alreadyIndexed)
+                {
+                    Console.WriteLine($"Package {id} {version} already indexed.");
+                }
+                else
+                {
+                    Console.WriteLine($"Indexing {id} {version}...");
+                    try
+                    {
+                        var packageEntry = await PackageIndexer.Index(id, version);
+                        if (packageEntry == null)
+                        {
+                            Console.WriteLine($"Not a library package.");
+                            File.WriteAllText(disabledPath, string.Empty);
+                        }
+                        else
+                        {
+                            using (var stream = File.Create(path))
+                                packageEntry.Write(stream);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed: " + ex.Message);
+                        File.WriteAllText(failedVersionPath, ex.ToString());
+                    }
+                }
             }
         }
 
-        private static async Task ProduceCatalogBinary(string indexPath, string outputPath)
+        private static async Task ProduceCatalogBinary(string platformsPath, string packagesPath, string outputPath)
         {
             var builder = new CatalogBuilderBinary();
-            builder.Index(indexPath);
+            builder.Index(platformsPath);
+            builder.Index(packagesPath);
 
             using (var stream = File.Create(outputPath))
                 builder.WriteTo(stream);
         }
 
-        private static async Task ProduceCatalogSQLite(string indexPath, string outputPath)
+        private static async Task ProduceCatalogSQLite(string platformsPath, string packagesPath, string outputPath)
         {
             File.Delete(outputPath);
 
             var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
-            builder.Index(indexPath);
+            builder.Index(platformsPath);
+            builder.Index(packagesPath);
         }
     }
 }
