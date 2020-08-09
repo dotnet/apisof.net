@@ -65,3 +65,37 @@
 .syntax-view .reference-current {
     font-weight: 800
 }
+
+.fx-version {
+    border-radius: .5rem;
+    padding-left: .5rem;
+    padding-right: .5rem;
+    padding-top: .10rem;
+    padding-bottom: .10rem;
+    font-size: smaller;
+    text-wrap: none;
+}
+
+.fx-version.active {
+    background-color: #007bff !important;
+}
+
+    .fx-version.active a:link, .fx-version.active a:visited {
+        color: white !important;
+    }
+
+.fx-version.fx-version-inbox {
+    background-color: #28a745;
+}
+
+    .fx-version.fx-version-inbox a:link, .fx-version.fx-version-inbox a:visited {
+        color: white;
+    }
+
+.fx-version.fx-version-package {
+    background-color: #ffc107;
+}
+
+    .fx-version.fx-version-package a:link, .fx-version.fx-version-package a:visited {
+        color: black;
+    }
