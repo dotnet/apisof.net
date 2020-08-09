@@ -136,8 +136,16 @@ namespace PackageIndexing
                 return ApiKind.Method;
             }
 
-            if (symbol is IFieldSymbol)
+            if (symbol is IFieldSymbol f)
+            {
+                if (f.ContainingType.TypeKind == TypeKind.Enum)
+                    return ApiKind.EnumItem;
+
+                if (f.IsConst)
+                    return ApiKind.Constant;
+
                 return ApiKind.Field;
+            }
 
             if (symbol is IPropertySymbol)
                 return ApiKind.Property;

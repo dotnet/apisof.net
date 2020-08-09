@@ -22,6 +22,8 @@
             switch (kind)
             {
                 case ApiKind.Field:
+                case ApiKind.EnumItem:
+                case ApiKind.Constant:
                 case ApiKind.Constructor:
                 case ApiKind.Destructor:
                 case ApiKind.Operator:

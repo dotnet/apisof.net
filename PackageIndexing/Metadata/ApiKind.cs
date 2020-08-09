@@ -8,6 +8,8 @@
         Enum,
         Struct,
         Class,
+        Constant,
+        EnumItem,
         Field,
         Constructor,
         Destructor,
