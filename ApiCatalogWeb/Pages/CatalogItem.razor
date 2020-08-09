@@ -39,29 +39,31 @@ else
             <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right">
                 <li>
                     @{
-                        var root = Spine.Parents.First();
+                        var rootUnsupportedClass = Spine.Root.IsUnsupported ? "text-muted" : "";
                     }
 
-                    @if (root == Spine.Selected)
+                    @if (Spine.Root == Spine.Selected)
                     {
-                        <ApiIcon Kind="@root.Kind" /> <span class="font-weight-bold">@root.Name</span>
+                        <ApiIcon Kind="@Spine.Root.Kind" /> <span class="font-weight-bold @rootUnsupportedClass">@Spine.Root.Name</span>
                     }
                     else
                     {
-                        <ApiIcon Kind="@root.Kind" /> <a href="/catalog/@root.ApiGuid">@root.Name</a>
+                        <ApiIcon Kind="@Spine.Root.Kind" /> <a class="@rootUnsupportedClass" href="/catalog/@Spine.Root.ApiGuid">@Spine.Root.Name</a>
                     }
 
                     <ul class="list-unstyled pl-4">
                         @foreach (var child in Spine.Children)
                         {
+                            var childUnsupportedClass = child.IsUnsupported ? "text-muted" : "";
+
                             <li>
                                 @if (child.ApiId == Spine.Selected.ApiId)
                                 {
-                                    <ApiIcon Kind="@child.Kind" /> <span class="font-weight-bold">@child.Name</span>
+                                    <ApiIcon Kind="@child.Kind" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
                                 }
                                 else
                                 {
-                                    <ApiIcon Kind="@child.Kind" /> <a href="/catalog/@child.ApiGuid">@child.Name</a>
+                                    <ApiIcon Kind="@child.Kind" /> <a class="@childUnsupportedClass" href="/catalog/@child.ApiGuid">@child.Name</a>
                                 }
                             </li>
                         }
@@ -97,9 +99,6 @@ else
                         @frameworkGroup.Key
                     </dt>
                     <dd class="col-10">
-                        @{
-                            var isFirst = true;
-                        }
                         @foreach (var (fx, availability) in frameworkGroup.OrderBy(fx => fx.framework.Version)
                                                                     .ThenBy(fx => fx.framework.Profile))
                         {

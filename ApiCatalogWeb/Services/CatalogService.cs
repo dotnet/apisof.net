@@ -22,11 +22,13 @@ namespace ApiCatalogWeb.Services
         public int ParentApiId { get; set; }
         public ApiKind Kind { get; set; }
         public string Name { get; set; }
+        public bool IsUnsupported { get; set; }
     }
 
     public class CatalogApiSpine
     {
         public CatalogApi Selected { get; set; }
+        public CatalogApi Root => Parents.First();
         public List<CatalogApi> Parents { get; } = new List<CatalogApi>();
         public List<CatalogApi> Children { get; } = new List<CatalogApi>();
     }
@@ -113,7 +115,7 @@ namespace ApiCatalogWeb.Services
             return result.ToArray();
         }
 
-        public async Task<IReadOnlyList<CatalogApi>> GetAncestorsAndSelf(string apiFingerprint)
+        private async Task<IReadOnlyList<CatalogApi>> GetAncestorsAndSelf(string apiFingerprint)
         {
             var result = await _sqliteConnection.QueryAsync<CatalogApi>(@"
                 WITH Parents AS
@@ -138,7 +140,7 @@ namespace ApiCatalogWeb.Services
             return result.ToArray();
         }
 
-        public async Task<IReadOnlyList<CatalogApi>> GetChildrenAsync(int apiId)
+        private async Task<IReadOnlyList<CatalogApi>> GetChildrenAsync(int apiId)
         {
             var result = await _sqliteConnection.QueryAsync<CatalogApi>(@"
                 SELECT  *
@@ -152,7 +154,55 @@ namespace ApiCatalogWeb.Services
             return result.ToArray();
         }
 
-        public async Task<CatalogApiSpine> GetSpineAsync(string apiFingerprint)
+        private async Task<Dictionary<int, bool>> GetApiSupportAsync(int apiId, string frameworkName)
+        {
+            var rows = await _sqliteConnection.QueryAsync<(int ApiId, string PlatformFrameworks, string PackageFrameworks)>(@"
+                SELECT	a.ApiId,
+		                (
+			                SELECT	GROUP_CONCAT(f.FriendlyName)
+			                FROM	Declarations d
+						                JOIN Assemblies asm ON asm.AssemblyId = d.AssemblyId
+						                JOIN FrameworkAssemblies fa ON fa.AssemblyId = asm.AssemblyId
+						                JOIN Frameworks f ON f.FrameworkId = fa.FrameworkId
+			                WHERE	d.ApiId = a.ApiId
+		                ) AS PlatformFrameworks,
+		                (
+			                SELECT	GROUP_CONCAT(f.FriendlyName)
+			                FROM	Declarations d
+						                JOIN Assemblies asm ON asm.AssemblyId = d.AssemblyId
+						                JOIN PackageAssemblies pa ON pa.AssemblyId = asm.AssemblyId
+						                JOIN Frameworks f ON f.FrameworkId = pa.FrameworkId
+			                WHERE	d.ApiId = a.ApiId
+		                ) AS PackageFrameworks
+                FROM	Apis a
+                WHERE	a.ApiId = @ApiId
+                OR		a.ParentApiId = @ApiId
+            ", new
+            {
+                ApiId = apiId
+            });
+
+            var framework = NuGetFramework.ParseFolder(frameworkName);
+            var reducer = new FrameworkReducer();
+            var result = new Dictionary<int, bool>();
+
+            foreach (var entry in rows)
+            {
+                var platformFrameworks = (entry.PlatformFrameworks ?? string.Empty).Split(',').Select(NuGetFramework.ParseFolder);
+                var reduced = reducer.GetNearest(framework, platformFrameworks);
+                if (reduced == null)
+                {
+                    var packageFrameworks = (entry.PackageFrameworks ?? string.Empty).Split(',').Select(NuGetFramework.ParseFolder);
+                    reduced = reducer.GetNearest(framework, packageFrameworks);
+                }
+
+                result.Add(entry.ApiId, reduced != null);
+            }
+
+            return result;
+        }
+
+        public async Task<CatalogApiSpine> GetSpineAsync(string apiFingerprint, string frameworkName)
         {
             var ancestorsAndSelf = await GetAncestorsAndSelf(apiFingerprint);
             var selected = ancestorsAndSelf.FirstOrDefault();
@@ -179,10 +229,18 @@ namespace ApiCatalogWeb.Services
                 result.Children[indexOfCurrent] = selected;
             }
 
+            if (!string.IsNullOrEmpty(frameworkName))
+            {
+                var support = await GetApiSupportAsync(result.Root.ApiId, frameworkName);
+                result.Root.IsUnsupported = !support[result.Root.ApiId];
+                foreach (var child in result.Children)
+                    child.IsUnsupported = !support[child.ApiId];
+            }
+
             return result;
         }
 
-        public async Task<IReadOnlyList<CatalogFrameworkAvailability>> GetFrameworkAvailabilityAsync(string apiFingerprint)
+        private async Task<IReadOnlyList<CatalogFrameworkAvailability>> GetFrameworkAvailabilityAsync(string apiFingerprint)
         {
             var result = await _sqliteConnection.QueryAsync<CatalogFrameworkAvailability>(@"
                 SELECT	f.FriendlyName AS FrameworkName,
@@ -204,7 +262,7 @@ namespace ApiCatalogWeb.Services
             return result.ToArray();
         }
 
-        public async Task<IReadOnlyList<CatalogPackageAvailability>> GetPackageAvailabilityAsync(string apiFingerprint)
+        private async Task<IReadOnlyList<CatalogPackageAvailability>> GetPackageAvailabilityAsync(string apiFingerprint)
         {
             var result = await _sqliteConnection.QueryAsync<CatalogPackageAvailability>(@"
                 SELECT	p.Name AS PackageName,
@@ -228,6 +286,15 @@ namespace ApiCatalogWeb.Services
             });
 
             return result.ToArray();
+        }
+
+        public async Task<CatalogAvailability> GetAvailabilityAsync(string apiFingerprint, string framework)
+        {
+            var frameworks = await GetFrameworksAsync();
+            var frameworkAvailabilities = await GetFrameworkAvailabilityAsync(apiFingerprint);
+            var packageAvailabilities = await GetPackageAvailabilityAsync(apiFingerprint);
+            var availability = new CatalogAvailability(frameworks, framework, frameworkAvailabilities, packageAvailabilities);
+            return availability;
         }
 
         public async Task<string> GetSyntaxAsync(string apiFingerprint, string assemblyFingerprint)
@@ -292,15 +359,6 @@ namespace ApiCatalogWeb.Services
             writer.Flush();
 
             return stringWriter.ToString();
-        }
-
-        public async Task<CatalogAvailability> GetAvailabilityAsync(string apiFingerprint, string framework)
-        {
-            var frameworks = await GetFrameworksAsync();
-            var frameworkAvailabilities = await GetFrameworkAvailabilityAsync(apiFingerprint);
-            var packageAvailabilities = await GetPackageAvailabilityAsync(apiFingerprint);
-            var availability = new CatalogAvailability(frameworks, framework, frameworkAvailabilities, packageAvailabilities);
-            return availability;
         }
 
         public void Dispose()

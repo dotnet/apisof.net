@@ -2,7 +2,7 @@
 
 ## UI
 
-* Grey out APIs that aren't available for the selected framework
+* Maintain selected framework when navigating to other APIs
 * We need to handle multiple package versions
 * We should change the order of namespaces: System, Microsoft, Windows, the rest
 * Add symbol-specific colorization

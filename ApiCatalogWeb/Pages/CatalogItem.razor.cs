@@ -36,14 +36,13 @@ namespace ApiCatalogWeb.Pages
 
         protected override async Task OnParametersSetAsync()
         {
-            Spine = await CatalogService.GetSpineAsync(Guid);
-            Availability = await CatalogService.GetAvailabilityAsync(Guid, null);
             await UpdateSyntaxAsync();
         }
 
         private async Task UpdateSyntaxAsync()
         {
             SelectedFramework = NavigationManager.GetQueryParameter("fx");
+            Spine = await CatalogService.GetSpineAsync(Guid, SelectedFramework);
             Availability = await CatalogService.GetAvailabilityAsync(Guid, SelectedFramework);
             if (SelectedFramework == null)
                 SelectedFramework = Availability.Current?.FrameworkName;
