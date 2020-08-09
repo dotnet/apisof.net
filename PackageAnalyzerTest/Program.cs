@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -55,15 +56,36 @@ namespace PackageAnalyzerTest
 
         private static async Task GeneratePackageIndex(string packageListPath, string packagesPath)
         {
+            var existingPackagesOnly = false;
+
+            static (string Id, string Version) ParsePackage(string path)
+            {
+                var name = Path.GetFileNameWithoutExtension(path);
+                var dashIndex = name.IndexOf('-');
+                var id = name.Substring(0, dashIndex);
+                var version = name.Substring(dashIndex + 1);
+                return (id, version);
+            }
+
             var document = XDocument.Load(packageListPath);
-           
-            var packages = document.Root.Elements("package")
+            Directory.CreateDirectory(packagesPath);
+
+            (string Id, string Version)[] packages;
+
+            if (existingPackagesOnly)
+            {
+                packages = Directory.GetFiles(packagesPath, "*.xml")
+                                    .Select(ParsePackage)
+                                    .ToArray();
+            }
+            else
+            {
+                packages = document.Root.Elements("package")
                                         .Select(e => (Id: e.Attribute("id").Value, Version: NuGetVersion.Parse(e.Attribute("version").Value)))
                                         .GroupBy(t => t.Id)
                                         .Select(g => (Id: g.Key, Version: g.OrderBy(t => t.Version).Select(t => t.Version).Last().ToString()))
                                         .ToArray();
-
-            Directory.CreateDirectory(packagesPath);
+            }
 
             foreach (var (id, version) in packages.OrderBy(t => t.Id))
             {
@@ -72,10 +94,13 @@ namespace PackageAnalyzerTest
                 var disabledVersionPath = Path.Join(packagesPath, $"{id}-{version}.disabled");
                 var failedVersionPath = Path.Join(packagesPath, $"{id}-{version}.failed");
 
-                var alreadyIndexed = File.Exists(path) ||
-                                     File.Exists(disabledPath) ||
-                                     File.Exists(disabledVersionPath) ||
-                                     File.Exists(failedVersionPath);
+                var alreadyIndexed = !existingPackagesOnly &&
+                                     (
+                                         File.Exists(path) ||
+                                         File.Exists(disabledPath) ||
+                                         File.Exists(disabledVersionPath) ||
+                                         File.Exists(failedVersionPath)
+                                     );
 
                 File.Delete(disabledVersionPath);
 
