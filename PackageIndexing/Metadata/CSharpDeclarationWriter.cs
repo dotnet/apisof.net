@@ -369,10 +369,19 @@ namespace PackageIndexing
                 writer.WriteSpace();
                 WriteTypeReference(method.ReturnType, writer);
             }
-            // TODO: Support user defined operators
-            //else if (method.MethodKind == MethodKind.UserDefinedOperator)
-            //{
-            //}
+            else if (method.MethodKind == MethodKind.UserDefinedOperator)
+            {
+                var operatorKind = SyntaxFacts.GetOperatorKind(method.MetadataName);
+                var isKeyword = SyntaxFacts.IsKeywordKind(operatorKind);
+                var operatorText = SyntaxFacts.GetText(operatorKind);
+                writer.WriteKeyword("operator");
+                writer.WriteSpace();
+
+                if (isKeyword)
+                    writer.WriteKeyword(operatorText);
+                else
+                    writer.WritePunctuation(operatorText);
+            }
             else
             {
                 WriteTypeReference(method.ReturnType, writer);

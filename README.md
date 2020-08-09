@@ -10,7 +10,6 @@
 ## Indexing
 
 * Handle display of constant enum and enum flags correctly
-* Handle operator methods
 * Handle arrays in attributes (see: /catalog/0d9154acade21b26d7bd5d06341ecdb7)
 * Attributes in parameter lists cause issues
 * Split parameters on separate lines
