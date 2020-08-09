@@ -1,6 +1,7 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ using PackageIndexing;
 
 namespace ApiCatalogWeb.Services
 {
-    public class CatalogApi
+    public class CatalogApi : IComparable<CatalogApi>
     {
         public int ApiId { get; set; }
         public string ApiGuid { get; set; }
@@ -23,6 +24,118 @@ namespace ApiCatalogWeb.Services
         public ApiKind Kind { get; set; }
         public string Name { get; set; }
         public bool IsUnsupported { get; set; }
+
+        public int CompareTo([AllowNull] CatalogApi other)
+        {
+            if (other == null)
+                return 1;
+
+            if (Kind.IsType() && other.Kind.IsMember())
+                return -1;
+
+            if (Kind.IsMember() && other.Kind.IsType())
+                return 1;
+
+            if (Kind.IsMember() && other.Kind.IsMember())
+            {
+                var result = Kind.CompareTo(other.Kind);
+                if (result != 0)
+                    return result;
+            }
+
+            if (Kind == ApiKind.Namespace && other.Kind == ApiKind.Namespace)
+            {
+                var orderReversed = new[]
+                {
+                    "Windows",
+                    "Microsoft",
+                    "System",
+                };
+
+                var topLevel = GetTopLevelNamespace(Name);
+                var otherTopLevel = GetTopLevelNamespace(other.Name);
+
+                var topLevelIndex = Array.IndexOf(orderReversed, topLevel);
+                var otherTopLevelIndex = Array.IndexOf(orderReversed, otherTopLevel);
+
+                var result = -topLevelIndex.CompareTo(otherTopLevelIndex);
+                if (result != 0)
+                    return result;
+            }
+
+            if (GetMemberName(Name) == GetMemberName(other.Name))
+            {
+                var typeParameterCount = GetTypeParameterCount(Name);
+                var otherTypeParameterCount = GetTypeParameterCount(other.Name);
+
+                var result = typeParameterCount.CompareTo(otherTypeParameterCount);
+                if (result != 0)
+                    return result;
+
+                var parameterCount = GetParameterCount(Name);
+                var otherParameterCount = GetParameterCount(other.Name);
+
+                result = parameterCount.CompareTo(otherParameterCount);
+                if (result != 0)
+                    return result;
+            }
+
+            return Name.CompareTo(other.Name);
+        }
+
+        private int GetTypeParameterCount(string name)
+        {
+            return GetArity(name, '<', '>');
+        }
+
+        private int GetParameterCount(string name)
+        {
+            return GetArity(name, '(', ')');
+        }
+
+        private string GetMemberName(string name)
+        {
+            var angleIndex = name.IndexOf('<');
+            var parenthesisIndex = name.IndexOf('(');
+            if (angleIndex < 0 && parenthesisIndex < 0)
+                return name;
+
+            if (angleIndex >= 0 && parenthesisIndex >= 0)
+                return name.Substring(0, Math.Min(angleIndex, parenthesisIndex));
+
+            if (angleIndex >= 0)
+                return name.Substring(0, angleIndex);
+
+            return name.Substring(0, parenthesisIndex);
+        }
+
+        private int GetArity(string name, char openParenthesis, char closeParenthesis)
+        {
+            var openIndex = name.IndexOf(openParenthesis);
+            if (openIndex < 0)
+                return 0;
+
+            var closeIndex = name.IndexOf(closeParenthesis);
+            if (closeIndex < 0)
+                return 0;
+
+            var result = 1;
+
+            for (var i = openIndex + 1; i < closeIndex; i++)
+                if (name[i] == ',')
+                    result++;
+
+            return result;
+        }
+
+        private static string GetTopLevelNamespace(string name)
+        {
+            var dotIndex = name.IndexOf('.');
+            if (dotIndex < 0)
+                return name;
+
+            return name.Substring(0, dotIndex);
+        }
     }
 
     public class CatalogApiSpine
@@ -105,14 +218,16 @@ namespace ApiCatalogWeb.Services
 
         public async Task<IReadOnlyList<CatalogApi>> GetNamespacesAsync()
         {
-            var result = await _sqliteConnection.QueryAsync<CatalogApi>(@"
+            var rows = await _sqliteConnection.QueryAsync<CatalogApi>(@"
                 SELECT  *
                 FROM    Apis
                 WHERE   ParentApiId IS NULL
-                ORDER   BY Name
             ");
 
-            return result.ToArray();
+            var result = rows.ToArray();
+            Array.Sort(result);
+
+            return result;
         }
 
         private async Task<IReadOnlyList<CatalogApi>> GetAncestorsAndSelf(string apiFingerprint)
@@ -228,6 +343,8 @@ namespace ApiCatalogWeb.Services
                 var indexOfCurrent = result.Children.IndexOf(result.Children.Single(c => c.ApiId == selected.ApiId));
                 result.Children[indexOfCurrent] = selected;
             }
+
+            result.Children.Sort();
 
             if (!string.IsNullOrEmpty(frameworkName))
             {

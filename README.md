@@ -4,7 +4,6 @@
 
 * Maintain selected framework when navigating to other APIs
 * We need to handle multiple package versions
-* We should change the order of namespaces: System, Microsoft, Windows, the rest
 * Add symbol-specific colorization
 * Add tooltips for symbols
 
@@ -26,6 +25,8 @@
 	- Nullable
 	- NullableContext
 * It seems symbols with empty namespace don't end up in the root namespace
+* Sort interfaces and attributes
+* Don't index delegate members
 
 ## DB
 
