@@ -191,6 +191,14 @@ namespace PackageIndexing
             if (symbol.IsAccessor())
                 return false;
 
+            if (symbol is IMethodSymbol m &&
+                m.MethodKind == MethodKind.Constructor &&
+                m.Parameters.Length == 0 &&
+                m.ContainingType.IsValueType)
+            {
+                return false;
+            }
+
             return true;
         }
 
