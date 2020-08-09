@@ -16,16 +16,8 @@
 * Split parameters on separate lines
 * Split base types on separate lines
 * `typeof()` should use open generic syntax
-* Hide internal attributes
 * Hide attributes which reference internal types in `typeof()` expressions
 * Index extension methods
-* Exclude boilerplate attributes
-	- CompilerGenerated
-	- TargedPatchingOptOut
-	- Nullable
-	- NullableContext
-* Sort interfaces and attributes
-* Don't index delegate members
 
 ## DB
 

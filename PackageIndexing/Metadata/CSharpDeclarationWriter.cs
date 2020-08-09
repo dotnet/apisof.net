@@ -145,7 +145,7 @@ namespace PackageIndexing
                 {
                     var isFirst = !hasBaseType;
 
-                    foreach (var @interface in type.Interfaces)
+                    foreach (var @interface in type.Interfaces.Ordered())
                     {
                         if (isFirst)
                             isFirst = false;
@@ -187,7 +187,7 @@ namespace PackageIndexing
 
                 var isFirst = true;
 
-                foreach (var @interface in type.Interfaces)
+                foreach (var @interface in type.Interfaces.Ordered())
                 {
                     if (isFirst)
                         isFirst = false;
@@ -221,7 +221,7 @@ namespace PackageIndexing
 
                 var isFirst = true;
 
-                foreach (var @interface in type.Interfaces)
+                foreach (var @interface in type.Interfaces.Ordered())
                 {
                     if (isFirst)
                         isFirst = false;
@@ -338,6 +338,12 @@ namespace PackageIndexing
             WriteAccessibility(method.DeclaredAccessibility, writer);
             writer.WriteSpace();
 
+            if (method.IsStatic)
+            {
+                writer.WriteKeyword("static");
+                writer.WriteSpace();
+            }
+
             if (method.MethodKind == MethodKind.Constructor)
             {
                 writer.WriteReference(method, method.ContainingType.Name);
@@ -347,6 +353,26 @@ namespace PackageIndexing
                 writer.WritePunctuation("~");
                 writer.WriteReference(method, method.ContainingType.Name);
             }
+            else if (method.MethodKind == MethodKind.Conversion)
+            {
+                if (method.Name == "op_Explicit")
+                {
+                    writer.WriteKeyword("explicit");
+                }
+                else if (method.Name == "op_Implicit")
+                {
+                    writer.WriteKeyword("implicit");
+                }
+
+                writer.WriteSpace();
+                writer.WriteKeyword("operator");
+                writer.WriteSpace();
+                WriteTypeReference(method.ReturnType, writer);
+            }
+            // TODO: Support user defined operators
+            //else if (method.MethodKind == MethodKind.UserDefinedOperator)
+            //{
+            //}
             else
             {
                 WriteTypeReference(method.ReturnType, writer);
@@ -380,8 +406,8 @@ namespace PackageIndexing
                 writer.WritePunctuation("]");
             }
 
-            var getterAttributes = property.GetMethod?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
-            var setterAttributes = property.SetMethod?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
+            var getterAttributes = property.GetMethod.GetCatalogAttributes();
+            var setterAttributes = property.SetMethod.GetCatalogAttributes();
             var multipleLines = getterAttributes.Any() || setterAttributes.Any();
 
             if (!multipleLines)
@@ -446,8 +472,8 @@ namespace PackageIndexing
             writer.WriteSpace();
             writer.WriteReference(@event, @event.Name);
 
-            var adderAttributes = @event.AddMethod?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
-            var removerAttributes = @event.RemoveMethod?.GetAttributes() ?? ImmutableArray<AttributeData>.Empty;
+            var adderAttributes = @event.AddMethod.GetCatalogAttributes();
+            var removerAttributes = @event.RemoveMethod.GetCatalogAttributes();
             var multipleLines = adderAttributes.Any() || removerAttributes.Any();
 
             if (!multipleLines)
@@ -490,8 +516,11 @@ namespace PackageIndexing
 
         private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, string target, SyntaxWriter writer)
         {
-            foreach (var attribute in attributes)
+            foreach (var attribute in attributes.Ordered())
             {
+                if (!attribute.IsIncludedInCatalog())
+                    continue;
+
                 writer.WritePunctuation("[");
 
                 if (target != null)
@@ -538,7 +567,7 @@ namespace PackageIndexing
                 {
                     var isFirst = true;
 
-                    foreach (var arg in attribute.NamedArguments)
+                    foreach (var arg in attribute.NamedArguments.Ordered())
                     {
                         if (isFirst)
                         {
@@ -855,7 +884,7 @@ namespace PackageIndexing
                 {
                     var needsComma = constraintBuilders.Any();
 
-                    foreach (var constraintType in typeParameter.ConstraintTypes)
+                    foreach (var constraintType in typeParameter.ConstraintTypes.Ordered())
                     {
                         if (needsComma)
                         {

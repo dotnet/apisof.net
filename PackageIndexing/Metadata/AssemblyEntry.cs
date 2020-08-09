@@ -33,7 +33,7 @@ namespace PackageIndexing
         {
             var result = new List<ApiEntry>();
             var types = symbol.GetAllTypes()
-                              .Where(t => t.DeclaredAccessibility == Accessibility.Public)
+                              .Where(t => t.IsIncludedInCatalog())
                               .GroupBy(t => t.ContainingNamespace);
 
             foreach (var namespaceGroup in types)
@@ -50,8 +50,7 @@ namespace PackageIndexing
 
         private static void AddApi(ApiEntry parent, ITypeSymbol symbol)
         {
-            if (symbol.DeclaredAccessibility != Accessibility.Public &&
-                symbol.DeclaredAccessibility != Accessibility.Protected)
+            if (!symbol.IsIncludedInCatalog())
                 return;
 
             var apiEntry = ApiEntry.Create(symbol, parent);
@@ -69,11 +68,7 @@ namespace PackageIndexing
                 return;
             }
 
-            if (symbol.DeclaredAccessibility != Accessibility.Public &&
-                symbol.DeclaredAccessibility != Accessibility.Protected)
-                return;
-
-            if (symbol.IsAccessor())
+            if (!symbol.IsIncludedInCatalog())
                 return;
 
             var entry = ApiEntry.Create(symbol, parent);

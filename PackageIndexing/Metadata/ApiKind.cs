@@ -10,8 +10,10 @@
         Class,
         Field,
         Constructor,
+        Destructor,
         Property,
         Method,
+        Operator,
         Event
     }
 }

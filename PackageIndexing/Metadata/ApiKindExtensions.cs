@@ -23,6 +23,8 @@
             {
                 case ApiKind.Field:
                 case ApiKind.Constructor:
+                case ApiKind.Destructor:
+                case ApiKind.Operator:
                 case ApiKind.Property:
                 case ApiKind.Method:
                 case ApiKind.Event:

@@ -12,8 +12,12 @@
     {
         var name = Kind.ToString();
 
-        if (Kind == ApiKind.Constructor)
+        if (Kind == ApiKind.Constructor ||
+            Kind == ApiKind.Destructor ||
+            Kind == ApiKind.Operator)
+        {
             name = "method";
+        }
 
         Url = $"/img/{name}.svg";
     }
