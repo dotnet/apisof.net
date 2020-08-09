@@ -1,6 +1,6 @@
 ﻿@page "/catalog/{Guid}"
 @using ApiCatalogWeb.Services;
- 
+
 @if (Spine == null)
 {
     <div class="container-fluid">
@@ -78,48 +78,58 @@ else
                     <SyntaxView Syntax="@SelectedSyntax" CurrentId="@Spine.Selected.ApiGuid" />
                 }
 
-            <dl class="my-3">
 
-                @if (Availability.Current != null)
-                {
-                    <dt class="col-2">Assembly</dt>
-                    <dd class="col-10">@($"{Availability.Current.AssemblyName}, Version={Availability.Current.AssemblyVersion}, PublicKeyToken={Availability.Current.AssemblyPublicKeyToken}")</dd>
-
-                    @if (Availability.Current is ApiCatalogWeb.Services.CatalogPackageAvailability p)
+                <table class="table my-3">
+                    @if (Availability.Current != null)
                     {
-                        <dt class="col-2">Package</dt>
-                        <dd class="col-10">@($"{p.PackageName} ({p.FrameworkName})")</dd>
+                        <tr>
+                            <th style="width: 150px">Assembly</th>
+                            <td>
+                                @($"{Availability.Current.AssemblyName}, Version={Availability.Current.AssemblyVersion}, PublicKeyToken={Availability.Current.AssemblyPublicKeyToken}")
+                            </td>
+                        </tr>
                     }
-                }
 
-                @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.framework.GetFrameworkDisplayString())
-                                                                       .OrderBy(g => g.Key))
-                {
-                    <dt class="col-2">
-                        @frameworkGroup.Key
-                    </dt>
-                    <dd class="col-10">
-                        @foreach (var (fx, availability) in frameworkGroup.OrderBy(fx => fx.framework.Version)
-                                                                    .ThenBy(fx => fx.framework.Profile))
-                        {
-                            var versionFramework = fx.GetShortFolderName();
-                            var isSelectedVersion = versionFramework == SelectedFramework;
-                            var isPackage = availability is CatalogPackageAvailability;
-                            var versionClass = isPackage
-                                     ? "fx-version-package"
-                                     : "fx-version-inbox";
+                    @if (Availability.Current is ApiCatalogWeb.Services.CatalogPackageAvailability pa)
+                    {
+                        <tr>
+                            <th>Package</th>
+                            <td>
+                                @($"{pa.PackageName} ({pa.FrameworkName})")
+                            </td>
+                        </tr>
+                    }
 
-                            var activeClass = isSelectedVersion
-                                 ? "active"
-                                 : "";
+                    @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.framework.GetFrameworkDisplayString())
+                                                                         .OrderBy(g => g.Key))
+                    {
+                        <tr>
+                            <th>@frameworkGroup.Key</th>
+                            <td>
+                                <span class="d-flex flex-row flex-wrap align-content-between">
+                                    @foreach (var (fx, availability) in frameworkGroup.OrderBy(fx => fx.framework.Version)
+                                                                            .ThenBy(fx => fx.framework.Profile))
+                                    {
+                                        var versionFramework = fx.GetShortFolderName();
+                                        var isSelectedVersion = versionFramework == SelectedFramework;
+                                        var isPackage = availability is CatalogPackageAvailability;
+                                        var versionClass = isPackage
+                                                 ? "fx-version-package"
+                                                 : "fx-version-inbox";
 
-                            <span class="fx-version @versionClass @activeClass mr-2">
-                                <SetQueryParameter Key="fx" Value="@versionFramework">@fx.GetVersionDisplayString()</SetQueryParameter>
-                            </span>
-                        }
-                    </dd>
-                }
-            </dl>
+                                        var activeClass = isSelectedVersion
+                                             ? "active"
+                                             : "";
+
+                                        <span class="fx-version @versionClass @activeClass m-1">
+                                            <SetQueryParameter Key="fx" Value="@versionFramework">@fx.GetVersionDisplayString()</SetQueryParameter>
+                                        </span>
+                                    }
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </table>
             </div>
         </div>
     </div>
