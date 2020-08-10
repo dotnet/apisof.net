@@ -4,8 +4,7 @@
 
 * Maintain selected framework when navigating to other APIs
 * We need to handle multiple package versions
-* Add symbol-specific colorization
-* Add tooltips for symbols
+* Add search
 
 ## Indexing
 

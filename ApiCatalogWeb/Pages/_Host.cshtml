@@ -32,5 +32,24 @@
     </div>
 
     <script src="_framework/blazor.server.js"></script>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/twitter-bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript">
+        var observer = new MutationObserver(function (mutations, observer) {
+            $('[data-toggle="popover"]').popover({
+                placement: 'top',
+                trigger: 'hover',
+                boundary: 'body'
+            });
+            $('[data-toggle="popover"]').on('click', function () {
+                $('[data-toggle="popover"]').popover('dispose');
+            });
+        });
+        observer.observe(document, {
+            subtree: true,
+            childList: true,
+            attributes: true
+        });
+    </script>
 </body>
 </html>

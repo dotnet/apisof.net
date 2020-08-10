@@ -29,13 +29,13 @@
     display: block;
     font-size: larger;
     background-color: #e9ecef;
-    border-color: gray;
     border-radius: 0.25rem;
     padding: 1rem;
 }
 
 .syntax-view pre {
     margin-bottom: 0;
+    color: black;
 }
 
 .syntax-view .keyword {
@@ -54,13 +54,29 @@
     color: #3876c2;
 }
 
-.syntax-view .reference a:link {
-    color: black
+.syntax-view .class a {
+    color: #2b91af
 }
 
-    .syntax-view .reference a:visited {
-        color: black
-    }
+.syntax-view .delegate a {
+    color: #2b91af
+}
+
+.syntax-view .enum a {
+    color: #2b91af
+}
+
+.syntax-view .struct a {
+    color: #2b91af
+}
+
+.syntax-view .interface a {
+    color: #2b91af
+}
+
+.syntax-view .reference a {
+    color: black;
+}
 
 .syntax-view .reference-current {
     font-weight: 800
@@ -99,3 +115,7 @@
     .fx-version.fx-version-package a:link, .fx-version.fx-version-package a:visited {
         color: black;
     }
+
+.popover {
+    max-width: 100%;
+}

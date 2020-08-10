@@ -1,8 +1,12 @@
-﻿@using PackageIndexing; 
+﻿@using ApiCatalogWeb.Services;
+@using PackageIndexing;
 
 <img height="16" width="16" src="@Url" />
 
 @code {
+    [Inject]
+    public IconService IconService { get; set; }
+
     [Parameter]
     public ApiKind Kind { get; set; }
 
@@ -10,14 +14,6 @@
 
     protected override void OnParametersSet()
     {
-        var name = Kind.ToString();
-
-        if (Kind == ApiKind.Constructor ||
-            Kind == ApiKind.Destructor)
-        {
-            name = "method";
-        }
-
-        Url = $"/img/{name}.svg";
+        Url = IconService.GetIcon(Kind);
     }
 }

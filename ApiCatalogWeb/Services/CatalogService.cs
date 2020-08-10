@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using Dapper;
@@ -214,6 +215,33 @@ namespace ApiCatalogWeb.Services
             ");
 
             return result.ToArray();
+        }
+
+        public async Task<IReadOnlyList<CatalogApi>> GetApisWithParentsAsync(IReadOnlyList<Guid> apiGuids)
+        {
+            var guidList = string.Join(", ", apiGuids.Select(g => $"'{g:N}'"));
+
+            var rows = await _sqliteConnection.QueryAsync<CatalogApi>($@"
+                WITH Parents AS
+                (
+	                SELECT	a.*
+	                FROM	Apis a
+	                WHERE 	a.ApiGuid IN ({guidList})
+	
+	                UNION ALL
+	
+	                SELECT	a.*
+	                FROM	Parents p
+				                JOIN Apis a ON a.ApiId = p.ParentApiId
+                )
+                SELECT	DISTINCT
+		                *
+                FROM	Parents
+            ");
+
+            var result = rows.ToArray();
+
+            return result;
         }
 
         public async Task<IReadOnlyList<CatalogApi>> GetNamespacesAsync()

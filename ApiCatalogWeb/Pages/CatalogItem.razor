@@ -85,7 +85,7 @@ else
                         <tr>
                             <th style="width: 150px">Assembly</th>
                             <td>
-                                @($"{Availability.Current.AssemblyName}, Version={Availability.Current.AssemblyVersion}, PublicKeyToken={Availability.Current.AssemblyPublicKeyToken}")
+                                @Availability.Current.AssemblyName<span class="small text-muted">, Version=@Availability.Current.AssemblyVersion, PublicKeyToken=@Availability.Current.AssemblyPublicKeyToken</span>                                
                             </td>
                         </tr>
                     }
@@ -95,7 +95,7 @@ else
                         <tr>
                             <th>Package</th>
                             <td>
-                                @($"{pa.PackageName} ({pa.FrameworkName})")
+                                @pa.PackageName <span class="small text-muted">@pa.FrameworkName</span>
                             </td>
                         </tr>
                     }
