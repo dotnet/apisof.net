@@ -552,10 +552,10 @@ namespace PackageIndexing
                 if (hasArguments)
                     writer.WritePunctuation("(");
 
+                var isFirst = true;
+
                 if (attribute.ConstructorArguments.Any())
                 {
-                    var isFirst = true;
-
                     foreach (var arg in attribute.ConstructorArguments)
                     {
                         if (isFirst)
@@ -574,8 +574,6 @@ namespace PackageIndexing
 
                 if (attribute.NamedArguments.Any())
                 {
-                    var isFirst = true;
-
                     foreach (var arg in attribute.NamedArguments.Ordered())
                     {
                         if (isFirst)
