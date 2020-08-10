@@ -17,6 +17,18 @@ using PackageIndexing;
 
 namespace ApiCatalogWeb.Services
 {
+    public class CatalogStats
+    {
+        public int NumberOfApis { get; set; }
+        public int NumberOfDeclarations { get; set; }
+        public int NumberOfAssemblies { get; set; }
+        public int NumberOfFrameworks { get; set; }
+        public int NumberOfFrameworkAssemblies { get; set; }
+        public int NumberOfPackages { get; set; }
+        public int NumberOfPackageVersions { get; set; }
+        public int NumberOfPackageAssemblies { get; set; }
+    }
+
     public class CatalogApi : IComparable<CatalogApi>
     {
         public int ApiId { get; set; }
@@ -204,6 +216,24 @@ namespace ApiCatalogWeb.Services
 
             _sqliteConnection = new SqliteConnection(connectionString);
             _sqliteConnection.Open();
+        }
+
+        public async Task<CatalogStats> GetCatalogStatsAsync()
+        {
+            var result = await _sqliteConnection.QuerySingleAsync<CatalogStats>(@"
+                SELECT
+                    (SELECT COUNT(*) FROM [Apis])                   AS [NumberOfApis],
+                    (SELECT COUNT(*) FROM [Declarations])           AS [NumberOfDeclarations],
+                    (SELECT COUNT(*) FROM [Assemblies])             AS [NumberOfAssemblies],
+                    (SELECT COUNT(*) FROM [Packages])               AS [NumberOfPackages],
+                    (SELECT COUNT(*) FROM [PackageVersions])        AS [NumberOfPackageVersions],
+                    (SELECT COUNT(*) FROM [PackageAssemblies])      AS [NumberOfPackageAssemblies],
+                    (SELECT COUNT(*) FROM [Frameworks])             AS [NumberOfFrameworks],
+                    (SELECT COUNT(*) FROM [FrameworkAssemblies])    AS [NumberOfFrameworkAssemblies]
+            ");
+
+            return result;
+
         }
 
         public async Task<IReadOnlyList<string>> GetFrameworksAsync()
