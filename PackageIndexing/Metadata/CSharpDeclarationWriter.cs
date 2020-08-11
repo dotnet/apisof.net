@@ -1005,6 +1005,9 @@ namespace PackageIndexing
                 case TypeKind.Error:
                     writer.WritePunctuation("?");
                     break;
+                case TypeKind.Unknown:
+                case TypeKind.Module:
+                case TypeKind.Submission:
                 default:
                     throw new Exception($"Unexpected type kind: {type.TypeKind}");
             }
