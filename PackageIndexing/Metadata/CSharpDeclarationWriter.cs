@@ -1011,6 +1011,18 @@ namespace PackageIndexing
                 default:
                     throw new Exception($"Unexpected type kind: {type.TypeKind}");
             }
+
+            if (type.IsReferenceType)
+            {
+                if (type.NullableAnnotation == NullableAnnotation.Annotated)
+                {
+                    writer.WritePunctuation("?");
+                }
+                else if (type.NullableAnnotation == NullableAnnotation.NotAnnotated)
+                {
+                    writer.WritePunctuation("!");
+                }
+            }
         }
 
         private static void WriteTypeParameterReferences(ImmutableArray<ITypeSymbol> typeParameters, SyntaxWriter writer)
