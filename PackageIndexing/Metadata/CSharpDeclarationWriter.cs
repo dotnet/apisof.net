@@ -977,7 +977,7 @@ namespace PackageIndexing
                             break;
                         default:
                             writer.WriteReference(namedType, namedType.Name);
-                            WriteTypeParameterReferences(namedType.TypeParameters, writer);
+                            WriteTypeParameterReferences(namedType.TypeArguments, writer);
                             break;
                     }
                     break;
@@ -1010,7 +1010,7 @@ namespace PackageIndexing
             }
         }
 
-        private static void WriteTypeParameterReferences(ImmutableArray<ITypeParameterSymbol> typeParameters, SyntaxWriter writer)
+        private static void WriteTypeParameterReferences(ImmutableArray<ITypeSymbol> typeParameters, SyntaxWriter writer)
         {
             if (!typeParameters.Any())
                 return;
