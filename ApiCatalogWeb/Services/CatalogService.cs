@@ -13,7 +13,7 @@ using Microsoft.Data.Sqlite;
 
 using NuGet.Frameworks;
 
-using PackageIndexing;
+using ApiCatalog;
 
 namespace ApiCatalogWeb.Services
 {

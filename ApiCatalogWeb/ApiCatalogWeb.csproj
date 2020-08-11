@@ -5,16 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PackageIndexing\PackageIndexing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Pages\Catalog - Copy - Copy.razor.cs">
-      <DependentUpon>Catalog - Copy.razor.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Pages\Catalog - Copy.razor.cs">
-      <DependentUpon>CatalogItem.razor.cs</DependentUpon>
-    </Compile>
+    <ProjectReference Include="..\ApiCatalog\ApiCatalog.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
 ﻿
-using PackageIndexing;
+using ApiCatalog;
 
 namespace ApiCatalogWeb.Services
 {

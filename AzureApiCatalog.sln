@@ -3,15 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30218.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureApiCatalog", "AzureApiCatalog\AzureApiCatalog.csproj", "{093D1E33-A357-4231-8C81-98CF4E4493F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenPackageIndex", "GenPackageIndex\GenPackageIndex.csproj", "{093D1E33-A357-4231-8C81-98CF4E4493F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IndexPackageFunction", "IndexPackageFunction\IndexPackageFunction.csproj", "{04613203-3615-4CA5-81B9-DE9CAE47B057}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenIndex", "GenIndex\GenIndex.csproj", "{67B98544-7BD4-42B0-B89F-DDD529785A0F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageAnalyzerTest", "PackageAnalyzerTest\PackageAnalyzerTest.csproj", "{67B98544-7BD4-42B0-B89F-DDD529785A0F}"
-EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ApiCatalogDatabase", "ApiCatalogDatabase\ApiCatalogDatabase.sqlproj", "{2527E20D-FE7A-4309-AB31-2C22CB533E9D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageIndexing", "PackageIndexing\PackageIndexing.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiCatalog", "ApiCatalog\ApiCatalog.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiCatalogWeb", "ApiCatalogWeb\ApiCatalogWeb.csproj", "{68575F1D-8460-4B96-8AF7-AB7D14E53F37}"
 EndProject
@@ -30,20 +26,10 @@ Global
 		{093D1E33-A357-4231-8C81-98CF4E4493F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{093D1E33-A357-4231-8C81-98CF4E4493F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{093D1E33-A357-4231-8C81-98CF4E4493F9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{04613203-3615-4CA5-81B9-DE9CAE47B057}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{04613203-3615-4CA5-81B9-DE9CAE47B057}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{04613203-3615-4CA5-81B9-DE9CAE47B057}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{04613203-3615-4CA5-81B9-DE9CAE47B057}.Release|Any CPU.Build.0 = Release|Any CPU
 		{67B98544-7BD4-42B0-B89F-DDD529785A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{67B98544-7BD4-42B0-B89F-DDD529785A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67B98544-7BD4-42B0-B89F-DDD529785A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67B98544-7BD4-42B0-B89F-DDD529785A0F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2527E20D-FE7A-4309-AB31-2C22CB533E9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2527E20D-FE7A-4309-AB31-2C22CB533E9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2527E20D-FE7A-4309-AB31-2C22CB533E9D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{2527E20D-FE7A-4309-AB31-2C22CB533E9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2527E20D-FE7A-4309-AB31-2C22CB533E9D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2527E20D-FE7A-4309-AB31-2C22CB533E9D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -10,7 +10,7 @@ using ApiCatalogWeb.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-using PackageIndexing;
+using ApiCatalog;
 
 namespace ApiCatalogWeb.Shared
 {
