@@ -22,6 +22,9 @@ namespace ApiCatalogWeb.Shared
         [Inject]
         public IconService IconService { get; set; }
 
+        [Inject]
+        public HtmlEncoder HtmlEncoder { get; set; }
+
         [Parameter]
         public string Syntax { get; set; }
 
@@ -101,7 +104,7 @@ namespace ApiCatalogWeb.Shared
                     }
                 }
 
-                markupBuilder.Append(HtmlEncoder.Default.Encode(part.Text));
+                markupBuilder.Append(HtmlEncoder.Encode(part.Text));
 
                 if (part.Kind == MarkupPartKind.Reference)
                     markupBuilder.Append("</a>");
@@ -114,7 +117,6 @@ namespace ApiCatalogWeb.Shared
 
         private string GeneratedTooltip(CatalogApi leafApi, Dictionary<int, CatalogApi> apiById, Guid value)
         {
-            var fingerprint = value.ToString("N");
             var apis = new List<CatalogApi>();
             var ancestor = leafApi.ApiId;
             while (ancestor != 0)
@@ -141,7 +143,7 @@ namespace ApiCatalogWeb.Shared
                 else
                     sb.Append(".");
 
-                sb.Append(api.Name);
+                sb.Append(HtmlEncoder.Encode(api.Name));
             }
 
             return sb.ToString();
