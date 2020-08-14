@@ -12,5 +12,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NuGet.Protocol" version="5.7.0-rtm.6702" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApiCatalog\ApiCatalog.csproj" />
+  </ItemGroup>
   
 </Project>

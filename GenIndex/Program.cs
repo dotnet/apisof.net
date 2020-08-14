@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -82,6 +81,7 @@ namespace GenIndex
             {
                 packages = document.Root.Elements("package")
                                         .Select(e => (Id: e.Attribute("id").Value, Version: NuGetVersion.Parse(e.Attribute("version").Value)))
+                                        .Where(t => PackageFilter.Default.IsMatch(t.Id))
                                         .GroupBy(t => t.Id)
                                         .Select(g => (Id: g.Key, Version: g.OrderBy(t => t.Version).Select(t => t.Version).Last().ToString()))
                                         .ToArray();
