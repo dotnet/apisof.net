@@ -19,14 +19,14 @@ namespace ApiCatalog
         private static readonly string _v3_flatContainer_nupkg_template = "https://api.nuget.org/v3-flatcontainer/{0}/{1}/{0}.{1}.nupkg";
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        public static async Task<PackageEntry> Index(string id, string version)
+        public static async Task<PackageEntry> Index(string id, string version, string packagesCachePath)
         {
             var dependencies = new Dictionary<string, PackageArchiveReader>();
             var apiIdByGuid = new Dictionary<Guid, int>();
             var frameworkEntries = new List<FrameworkEntry>();
             try
             {
-                using (var root = await FetchPackageAsync(id, version))
+                using (var root = await FetchPackageAsync(id, version, packagesCachePath))
                 {
                     var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -44,7 +44,7 @@ namespace ApiCatalog
 
                         Debug.Assert(referenceGroup != null);
 
-                        await FetchDependenciesAsync(dependencies, root, target);
+                        await FetchDependenciesAsync(dependencies, root, target, packagesCachePath);
 
                         // Add references
 
@@ -75,7 +75,7 @@ namespace ApiCatalog
 
                         // Add framework
 
-                        var plaformSet = await GetPlatformSet(target);
+                        var plaformSet = await GetPlatformSet(target, packagesCachePath);
 
                         if (plaformSet == null)
                         {
@@ -119,7 +119,7 @@ namespace ApiCatalog
             return referenceGroup;
         }
 
-        private static async Task FetchDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target)
+        private static async Task FetchDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target, string packagesCachePath)
         {
             var dependencies = root.GetPackageDependencies();
             var dependencyGroup = NuGetFrameworkUtility.GetNearest(dependencies, target);
@@ -141,18 +141,44 @@ namespace ApiCatalog
                         continue;
 
                     Console.WriteLine($"Discovered dependency {d}");
-                    var dependency = await FetchPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
+                    var dependency = await FetchPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString(), packagesCachePath);
                     packages.Add(d.Id, dependency);
-                    await FetchDependenciesAsync(packages, dependency, target);
+                    await FetchDependenciesAsync(packages, dependency, target, packagesCachePath);
                 }
             }
         }
 
-        private static async Task<PackageArchiveReader> FetchPackageAsync(string id, string version)
+        public static void DeleteFromCache(string id, string version, string packagesCachePath)
         {
+            var path = GetPackagePath(id, version, packagesCachePath);
+            if (path != null)
+                File.Delete(path);
+        }
+
+        private static string GetPackagePath(string id, string version, string packagesCachePath)
+        {
+            if (packagesCachePath == null)
+                return null;
+
+            return Path.Combine(packagesCachePath, $"{id}.{version}.nupkg");
+        }
+
+        private static async Task<PackageArchiveReader> FetchPackageAsync(string id, string version, string packagesCachePath)
+        {
+            var path = GetPackagePath(id, version, packagesCachePath);
+            if (path != null && File.Exists(path))
+                return new PackageArchiveReader(File.OpenRead(path));
+
             var url = GetFlatContainerNupkgUrl(id, version);
             var nupkgStream = await _httpClient.GetStreamAsync(url);
-            return new PackageArchiveReader(nupkgStream);
+
+            if (path == null)
+                return new PackageArchiveReader(nupkgStream);
+
+            var fileStream = File.Create(path);
+            await nupkgStream.CopyToAsync(fileStream);
+            fileStream.Position = 0;
+            return new PackageArchiveReader(fileStream);
         }
 
         private static Uri GetFlatContainerNupkgUrl(string id, string version)
@@ -161,29 +187,29 @@ namespace ApiCatalog
             return new Uri(url);
         }
 
-        private static Task<FileSet> GetPlatformSet(NuGetFramework framework)
+        private static Task<FileSet> GetPlatformSet(NuGetFramework framework, string packagesCachePath)
         {
             if (framework.Framework == ".NETCoreApp")
-                return GetNetCore();
+                return GetNetCore(packagesCachePath);
             else if (framework.Framework == ".NETStandard")
-                return GetNetStandard();
+                return GetNetStandard(packagesCachePath);
             else if (framework.Framework == ".NETFramework")
-                return GetNetFramework();
+                return GetNetFramework(packagesCachePath);
             else if (framework.Framework == ".NETPortable")
                 return Task.FromResult(GetPortableFramework(framework.Profile));
             else
                 return Task.FromResult<FileSet>(null);
         }
 
-        private static async Task<FileSet> GetNetCore()
+        private static async Task<FileSet> GetNetCore(string packagesCachePath)
         {
             return new PlatformPackageSet
             {
                 Packages = new[]
                 {
-                    await FetchPackageAsync("Microsoft.AspNetCore.App.Ref", "3.1.0"),
-                    await FetchPackageAsync("Microsoft.NETCore.App.Ref", "3.1.0"),
-                    await FetchPackageAsync("Microsoft.WindowsDesktop.App.Ref", "3.1.0")
+                    await FetchPackageAsync("Microsoft.AspNetCore.App.Ref", "3.1.0", packagesCachePath),
+                    await FetchPackageAsync("Microsoft.NETCore.App.Ref", "3.1.0", packagesCachePath),
+                    await FetchPackageAsync("Microsoft.WindowsDesktop.App.Ref", "3.1.0", packagesCachePath)
                 },
                 Selector = pr => pr.GetFiles()
                                    .Where(path => path.StartsWith("ref/", StringComparison.OrdinalIgnoreCase) &&
@@ -192,13 +218,13 @@ namespace ApiCatalog
             };
         }
 
-        private static async Task<FileSet> GetNetStandard()
+        private static async Task<FileSet> GetNetStandard(string packagesCachePath)
         {
             return new PlatformPackageSet
             {
                 Packages = new[]
                 {
-                    await FetchPackageAsync("NETStandard.Library.Ref", "2.1.0")
+                    await FetchPackageAsync("NETStandard.Library.Ref", "2.1.0", packagesCachePath)
                 },
                 Selector = pr => pr.GetFiles()
                                    .Where(path => path.StartsWith("ref/", StringComparison.OrdinalIgnoreCase) &&
@@ -207,13 +233,13 @@ namespace ApiCatalog
             };
         }
 
-        private static async Task<FileSet> GetNetFramework()
+        private static async Task<FileSet> GetNetFramework(string packagesCachePath)
         {
             return new PlatformPackageSet
             {
                 Packages = new[]
                 {
-                    await FetchPackageAsync("Microsoft.NETFramework.ReferenceAssemblies.net48", "1.0.0")
+                    await FetchPackageAsync("Microsoft.NETFramework.ReferenceAssemblies.net48", "1.0.0", packagesCachePath)
                 },
                 Selector = pr => pr.GetFiles()
                                    .Where(path => path.StartsWith("build/.NETFramework/", StringComparison.OrdinalIgnoreCase) &&
