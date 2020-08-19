@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -16,17 +15,14 @@ namespace ApiCatalog
 {
     public static class PackageIndexer
     {
-        private static readonly string _v3_flatContainer_nupkg_template = "https://api.nuget.org/v3-flatcontainer/{0}/{1}/{0}.{1}.nupkg";
-        private static readonly HttpClient _httpClient = new HttpClient();
-
-        public static async Task<PackageEntry> Index(string id, string version, string packagesCachePath)
+        public static async Task<PackageEntry> Index(string id, string version, NuGetStore store)
         {
             var dependencies = new Dictionary<string, PackageArchiveReader>();
             var apiIdByGuid = new Dictionary<Guid, int>();
             var frameworkEntries = new List<FrameworkEntry>();
             try
             {
-                using (var root = await FetchPackageAsync(id, version, packagesCachePath))
+                using (var root = await store.GetPackageAsync(id, version))
                 {
                     var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -44,7 +40,7 @@ namespace ApiCatalog
 
                         Debug.Assert(referenceGroup != null);
 
-                        await FetchDependenciesAsync(dependencies, root, target, packagesCachePath);
+                        await GetDependenciesAsync(dependencies, root, target, store);
 
                         // Add references
 
@@ -75,11 +71,12 @@ namespace ApiCatalog
 
                         // Add framework
 
-                        var plaformSet = await GetPlatformSet(target, packagesCachePath);
+                        var plaformSet = await GetPlatformSet(target);
 
                         if (plaformSet == null)
                         {
-                            Console.WriteLine($"error: can't resolve platform references for {target}");
+                            if (!IsKnownUnsupportedPlatform(target))
+                                Console.WriteLine($"error: can't resolve platform references for {target}");
                             continue;
                         }
 
@@ -112,6 +109,39 @@ namespace ApiCatalog
             }
         }
 
+        private static bool IsKnownUnsupportedPlatform(NuGetFramework target)
+        {
+            var platforms = new[] {
+                ".NETCore,Version=v5.0",
+                ".NETFramework,Version=v4.6.3",
+                ".NETPlatform,Version=v5.0",
+                ".NETPlatform,Version=v5.4",
+                ".NETPortable,Version=v0.0,Profile=aspnetcore50+net45+win8+wp8+wpa81",
+                ".NETPortable,Version=v0.0,Profile=net40+sl4+win8",
+                ".NETPortable,Version=v0.0,Profile=net40+sl4+win8+wp71+wpa81",
+                ".NETPortable,Version=v0.0,Profile=net40+sl4+win8+wp8+wpa81",
+                ".NETPortable,Version=v0.0,Profile=net40+win8+wp8+wpa81",
+                ".NETPortable,Version=v0.0,Profile=net45+netcore45+wp8+wp81+wpa81",
+                ".NETPortable,Version=v0.0,Profile=net45+wp8+wpa81",
+                ".NETPortable,Version=v0.0,Profile=net451+win8+wp8+wpa81",
+                ".NETPortable,Version=v0.0,Profile=win8+wp8+wpa81",
+                ".NETPortable,Version=v0.0,Profile=win8+wpa81",
+                "Any,Version=v0.0",
+                "ASP.NETCore,Version=v5.0",
+                "DNX,Version=v4.5.1",
+                "DNXCore,Version=v5.0",
+                "native,Version=v0.0",
+                "Silverlight,Version=v4.0",
+                "Silverlight,Version=v4.0,Profile=WindowsPhone71",
+                "Silverlight,Version=v5.0",
+                "WindowsPhone,Version=v8.0",
+                "WindowsPhoneApp,Version=v8.1",
+            };
+
+            var targetString = target.ToString();
+            return platforms.Any(p => string.Equals(p, targetString, StringComparison.OrdinalIgnoreCase));
+        }
+
         private static FrameworkSpecificGroup GetReferenceItems(PackageArchiveReader root, NuGetFramework current)
         {
             var referenceItems = root.GetReferenceItems();
@@ -119,7 +149,7 @@ namespace ApiCatalog
             return referenceGroup;
         }
 
-        private static async Task FetchDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target, string packagesCachePath)
+        private static async Task GetDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target, NuGetStore store)
         {
             var dependencies = root.GetPackageDependencies();
             var dependencyGroup = NuGetFrameworkUtility.GetNearest(dependencies, target);
@@ -140,127 +170,28 @@ namespace ApiCatalog
                     if (existingPackage != null)
                         continue;
 
-                    Console.WriteLine($"Discovered dependency {d}");
-                    var dependency = await FetchPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString(), packagesCachePath);
+                    var dependency = await store.GetPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
                     packages.Add(d.Id, dependency);
-                    await FetchDependenciesAsync(packages, dependency, target, packagesCachePath);
+                    await GetDependenciesAsync(packages, dependency, target, store);
                 }
             }
         }
 
-        public static void DeleteFromCache(string id, string version, string packagesCachePath)
+        private static async Task<FileSet> GetPlatformSet(NuGetFramework framework)
         {
-            var path = GetPackagePath(id, version, packagesCachePath);
-            if (path != null)
-                File.Delete(path);
-        }
-
-        private static string GetPackagePath(string id, string version, string packagesCachePath)
-        {
-            if (packagesCachePath == null)
-                return null;
-
-            return Path.Combine(packagesCachePath, $"{id}.{version}.nupkg");
-        }
-
-        private static async Task<PackageArchiveReader> FetchPackageAsync(string id, string version, string packagesCachePath)
-        {
-            var path = GetPackagePath(id, version, packagesCachePath);
-            if (path != null && File.Exists(path))
-                return new PackageArchiveReader(File.OpenRead(path));
-
-            var url = GetFlatContainerNupkgUrl(id, version);
-            var nupkgStream = await _httpClient.GetStreamAsync(url);
-
-            if (path == null)
-                return new PackageArchiveReader(nupkgStream);
-
-            var fileStream = File.Create(path);
-            await nupkgStream.CopyToAsync(fileStream);
-            fileStream.Position = 0;
-            return new PackageArchiveReader(fileStream);
-        }
-
-        private static Uri GetFlatContainerNupkgUrl(string id, string version)
-        {
-            var url = string.Format(_v3_flatContainer_nupkg_template, id, version);
-            return new Uri(url);
-        }
-
-        private static Task<FileSet> GetPlatformSet(NuGetFramework framework, string packagesCachePath)
-        {
-            if (framework.Framework == ".NETCoreApp")
-                return GetNetCore(packagesCachePath);
-            else if (framework.Framework == ".NETStandard")
-                return GetNetStandard(packagesCachePath);
-            else if (framework.Framework == ".NETFramework")
-                return GetNetFramework(packagesCachePath);
-            else if (framework.Framework == ".NETPortable")
-                return Task.FromResult(GetPortableFramework(framework.Profile));
-            else
-                return Task.FromResult<FileSet>(null);
-        }
-
-        private static async Task<FileSet> GetNetCore(string packagesCachePath)
-        {
-            return new PlatformPackageSet
+            // TODO: Centralize this path
+            var archivePath = @"C:\Users\immo\Downloads\PlatformArchive";
+            var locators = new FrameworkLocator[]
             {
-                Packages = new[]
-                {
-                    await FetchPackageAsync("Microsoft.AspNetCore.App.Ref", "3.1.0", packagesCachePath),
-                    await FetchPackageAsync("Microsoft.NETCore.App.Ref", "3.1.0", packagesCachePath),
-                    await FetchPackageAsync("Microsoft.WindowsDesktop.App.Ref", "3.1.0", packagesCachePath)
-                },
-                Selector = pr => pr.GetFiles()
-                                   .Where(path => path.StartsWith("ref/", StringComparison.OrdinalIgnoreCase) &&
-                                                  path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-                                   .Select(p => (p, pr.GetStream(p)))
+                new ArchivedFrameworkLocator(archivePath),
+                new PclFrameworkLocator(archivePath),
             };
-        }
 
-        private static async Task<FileSet> GetNetStandard(string packagesCachePath)
-        {
-            return new PlatformPackageSet
+            foreach (var l in locators)
             {
-                Packages = new[]
-                {
-                    await FetchPackageAsync("NETStandard.Library.Ref", "2.1.0", packagesCachePath)
-                },
-                Selector = pr => pr.GetFiles()
-                                   .Where(path => path.StartsWith("ref/", StringComparison.OrdinalIgnoreCase) &&
-                                                  path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-                                   .Select(p => (p, pr.GetStream(p)))
-            };
-        }
-
-        private static async Task<FileSet> GetNetFramework(string packagesCachePath)
-        {
-            return new PlatformPackageSet
-            {
-                Packages = new[]
-                {
-                    await FetchPackageAsync("Microsoft.NETFramework.ReferenceAssemblies.net48", "1.0.0", packagesCachePath)
-                },
-                Selector = pr => pr.GetFiles()
-                                   .Where(path => path.StartsWith("build/.NETFramework/", StringComparison.OrdinalIgnoreCase) &&
-                                                  path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-                                   .Select(p => (p, pr.GetStream(p)))
-            };
-        }
-
-        private static FileSet GetPortableFramework(string profile)
-        {
-            var root = @"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETPortable";
-            var versionDirectories = Directory.GetDirectories(root);
-
-            foreach (var versionDirectory in versionDirectories)
-            {
-                var profileDirectory = Path.Join(versionDirectory, "Profile", profile);
-                if (Directory.Exists(profileDirectory))
-                {
-                    var paths = Directory.GetFiles(versionDirectory, "*.dll");
-                    return new PathFileSet(paths);
-                }
+                var fileSet = await l.LocateAsync(framework);
+                if (fileSet != null)
+                    return fileSet;
             }
 
             return null;

@@ -2,7 +2,10 @@
 
 namespace ApiCatalog
 {
-    public abstract class FrameworkResolver
+    /// <summary>
+    /// This is used to enumerate the frameworks that should be indexed.
+    /// </summary>
+    public abstract class FrameworkProvider
     {
         public abstract IEnumerable<(string FrameworkName, FileSet FileSet)> Resolve();
     }

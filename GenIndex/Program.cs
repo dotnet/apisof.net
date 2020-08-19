@@ -32,11 +32,11 @@ namespace GenIndex
 
         private static async Task GeneratePlatformIndex(string platformsPath)
         {
-            var frameworkResolvers = new FrameworkResolver[]
+            var frameworkResolvers = new FrameworkProvider[]
             {
                 // InstalledNetCoreResolver.Instance,
                 // InstalledNetFrameworkResolver.Instance
-                new ArchivedFrameworkResolver(@"C:\Users\immo\Downloads\PlatformArchive")
+                new ArchivedFrameworkProvider(@"C:\Users\immo\Downloads\PlatformArchive")
             };
 
             var frameworks = frameworkResolvers.SelectMany(r => r.Resolve());
@@ -58,7 +58,12 @@ namespace GenIndex
             var packageCachePath = Path.Combine(packagesPath, "cache");
             Directory.CreateDirectory(packageCachePath);
 
-            var incremental = false;
+            var nugetFeed = new NuGetFeed(WellKnownNuGetFeeds.NuGetOrg);
+            var nugetStore = new NuGetStore(nugetFeed, packageCachePath);
+
+            var retryIndexed = true;
+            var retryDisabled = false;
+            var retryFailed = false;
 
             static (string Id, string Version) ParsePackage(string path)
             {
@@ -85,32 +90,37 @@ namespace GenIndex
                 var disabledPath = Path.Join(packagesPath, $"{id}-all.disabled");
                 var failedVersionPath = Path.Join(packagesPath, $"{id}-{version}.failed");
 
-                var alreadyIndexed = incremental && File.Exists(path) ||
-                                     File.Exists(disabledPath) ||
-                                     File.Exists(failedVersionPath);
+                var alreadyIndexed = !retryIndexed && File.Exists(path) ||
+                                     !retryDisabled && File.Exists(disabledPath) ||
+                                     !retryFailed && File.Exists(failedVersionPath);
 
                 if (alreadyIndexed)
                 {
-                    Console.WriteLine($"Package {id} {version} already indexed.");
+                    if (File.Exists(path))
+                        Console.WriteLine($"Package {id} {version} already indexed.");
+
                     if (File.Exists(disabledPath))
-                        PackageIndexer.DeleteFromCache(id, version, packageCachePath);
+                        nugetStore.DeleteFromCache(id, version);
                 }
                 else
                 {
                     Console.WriteLine($"Indexing {id} {version}...");
                     try
                     {
-                        var packageEntry = await PackageIndexer.Index(id, version, packageCachePath);
+                        var packageEntry = await PackageIndexer.Index(id, version, nugetStore);
                         if (packageEntry == null)
                         {
                             Console.WriteLine($"Not a library package.");
                             File.WriteAllText(disabledPath, string.Empty);
-                            PackageIndexer.DeleteFromCache(id, version, packageCachePath);
+                            nugetStore.DeleteFromCache(id, version);
                         }
                         else
                         {
                             using (var stream = File.Create(path))
                                 packageEntry.Write(stream);
+
+                            File.Delete(disabledPath);
+                            File.Delete(failedVersionPath);
                         }
                     }
                     catch (Exception ex)
