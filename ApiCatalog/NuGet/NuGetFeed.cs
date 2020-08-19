@@ -106,7 +106,7 @@ namespace ApiCatalog
             return versions.ToArray();
         }
 
-        public Task<PackageArchiveReader> ReadPackageAsync(string id, string version)
+        public Task<PackageArchiveReader> GetPackageAsync(string id, string version)
         {
             var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
             return GetPackageAsync(identity);

@@ -15,19 +15,28 @@ namespace GenIndex
     {
         static async Task Main(string[] args)
         {
-            var indexPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Indexing");
+            var rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            var indexPath = Path.Combine(rootPath, "Indexing");
+            var archivePath = Path.Combine(rootPath, "PlatformArchive");
             var platformsPath = Path.Combine(indexPath, "platforms");
             var packageListPath = Path.Combine(indexPath, "packages.xml");
             var packagesPath = Path.Combine(indexPath, "packages");
 
             var stopwatch = Stopwatch.StartNew();
 
-            //await GeneratePlatformIndex(platformsPath);
-            //await GeneratePackageIndex(packageListPath, packagesPath);
+            //await UpdatePlatforms(archivePath);
+            await GeneratePlatformIndex(platformsPath);
+            await GeneratePackageIndex(packageListPath, packagesPath);
             await ProduceCatalogBinary(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.dat"));
             await ProduceCatalogSQLite(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.db"));
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
+            Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
+        }
+
+        private static async Task UpdatePlatforms(string archivePath)
+        {
+            await FrameworkDownloader.Download(archivePath);
         }
 
         private static async Task GeneratePlatformIndex(string platformsPath)
@@ -40,16 +49,26 @@ namespace GenIndex
             };
 
             var frameworks = frameworkResolvers.SelectMany(r => r.Resolve());
+            var reindex = true;
 
             Directory.CreateDirectory(platformsPath);
 
             foreach (var framework in frameworks)
             {
                 var path = Path.Join(platformsPath, $"{framework.FrameworkName}.xml");
-                Console.WriteLine($"Indexing {framework.FrameworkName}...");
-                var frameworkEntry = await FrameworkIndexer.Index(framework.FrameworkName, framework.FileSet);
-                using (var stream = File.Create(path))
-                    frameworkEntry.Write(stream);
+                var alreadyIndexed = !reindex && File.Exists(path);
+
+                if (alreadyIndexed)
+                {
+                    Console.WriteLine($"{framework.FrameworkName} already indexed.");
+                }
+                else
+                {
+                    Console.WriteLine($"Indexing {framework.FrameworkName}...");
+                    var frameworkEntry = await FrameworkIndexer.Index(framework.FrameworkName, framework.FileSet);
+                    using (var stream = File.Create(path))
+                        frameworkEntry.Write(stream);
+                }
             }
         }
 
