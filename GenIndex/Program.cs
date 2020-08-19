@@ -24,7 +24,7 @@ namespace GenIndex
 
             var stopwatch = Stopwatch.StartNew();
 
-            //await UpdatePlatforms(archivePath);
+            await UpdatePlatforms(archivePath);
             await GeneratePlatformIndex(platformsPath);
             await GeneratePackageIndex(packageListPath, packagesPath);
             await ProduceCatalogBinary(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.dat"));

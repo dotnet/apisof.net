@@ -189,6 +189,15 @@ namespace ApiCatalogWeb.Services
             foreach (var fx in parsedFrameworks)
             {
                 var match = availability.GetNearest(fx);
+
+                // For frameworks, we don't want older claiming compat for a later framework.
+                // The reason being that the platform might have made a breaking change.
+                if (match is CatalogFrameworkAvailability fxMatch)
+                {
+                    if (match.TargetFramework != fx)
+                        match = null;
+                }
+
                 if (match != null)
                     Frameworks.Add((fx, match));
             }
