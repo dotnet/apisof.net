@@ -666,7 +666,9 @@ namespace ApiCatalog
                 writer.WritePunctuation("(");
                 WriteTypeReference(type, writer);
                 writer.WritePunctuation(")");
-                var text = SyntaxFactory.Literal(Convert.ToInt64(value)).ToString();
+                var text = value is ulong
+                    ? SyntaxFactory.Literal(Convert.ToUInt64(value)).ToString()
+                    : SyntaxFactory.Literal(Convert.ToInt64(value)).ToString();
                 writer.WriteLiteralNumber(text);
             }
             else if (value is bool valueBool)
