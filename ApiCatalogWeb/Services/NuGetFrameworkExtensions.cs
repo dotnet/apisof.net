@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Sockets;
 
 using NuGet.Frameworks;
 
@@ -21,25 +22,34 @@ namespace ApiCatalogWeb.Services
 
         public static string GetVersionDisplayString(this NuGetFramework framework)
         {
-            if (framework.HasProfile)
-            {
-                if (framework.IsPCL)
-                    return framework.GetShortFolderName();
+            if (framework.IsPCL)
+                return framework.GetShortFolderName();
 
+            if (framework.HasProfile)
                 return $"{framework.Version.GetVersionDisplayString()} ({framework.Profile})";
+
+            if (!string.IsNullOrEmpty(framework.Platform))
+            {
+                if (framework.PlatformVersion != null && framework.PlatformVersion > new Version(0, 0, 0, 0))
+                    return $"{framework.Version.GetVersionDisplayString()}-{framework.Platform}{framework.PlatformVersion}";
+
+                return $"{framework.Version.GetVersionDisplayString()}-{framework.Platform}";
             }
 
             return framework.Version.GetVersionDisplayString();
         }
 
         public static string GetFrameworkDisplayString(this NuGetFramework framework)
-        {
+        {         
             switch (framework.Framework)
             {
                 case ".NETFramework":
                     return ".NET Framework";
                 case ".NETCoreApp":
-                    return ".NET Core";
+                    if (framework.Version >= new Version(5, 0, 0, 0))
+                        return ".NET";
+                    else
+                        return ".NET Core";
                 case ".NETStandard":
                     return ".NET Standard";
                 default:
