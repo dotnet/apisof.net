@@ -266,6 +266,14 @@ namespace ApiCatalog
             writer.WriteSpace();
 
             writer.WriteReference(type, type.Name);
+
+            if (type.EnumUnderlyingType != null && type.EnumUnderlyingType.SpecialType != SpecialType.System_Int32)
+            {
+                writer.WriteSpace();
+                writer.WritePunctuation(":");
+                writer.WriteSpace();
+                WriteTypeReference(type.EnumUnderlyingType, writer);
+            }
         }
 
         private static void WriteFieldDeclaration(IFieldSymbol field, SyntaxWriter writer)
