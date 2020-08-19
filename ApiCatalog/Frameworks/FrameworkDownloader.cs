@@ -11,7 +11,11 @@ namespace ApiCatalog
         private static (string Feed, string Id, string Tfm)[] _packageMappings = new[]
         {
             (WellKnownNuGetFeeds.NightlyDotnet5, "Microsoft.NETCore.App.Ref",        "net5.0"),
-            (WellKnownNuGetFeeds.NightlyDotnet5, "Microsoft.AspNetCore.App.Ref",     "net5.0"),
+
+            // Don't add ASP.NET Core. The fact that there is a shared framework is an implementation detail.
+            // Only when building for web, you don't need to add the package references.
+            //
+            //(WellKnownNuGetFeeds.NightlyDotnet5, "Microsoft.AspNetCore.App.Ref",     "net5.0"),
 
             (WellKnownNuGetFeeds.NightlyDotnet5, "Microsoft.NETCore.App.Ref",        "net5.0-windows"),
             (WellKnownNuGetFeeds.NightlyDotnet5, "Microsoft.WindowsDesktop.App.Ref", "net5.0-windows"),
