@@ -66,6 +66,8 @@ namespace ApiCatalog
             var latest = versions.Max();
             var identity = new PackageIdentity(id, latest);
 
+            System.Console.WriteLine($"Downloading {identity} to {targetFolder}...");
+
             var package = await feed.GetPackageAsync(identity);
 
             foreach (var group in package.GetItems("ref"))
