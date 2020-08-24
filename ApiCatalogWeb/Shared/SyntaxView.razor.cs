@@ -87,7 +87,7 @@ namespace ApiCatalogWeb.Shared
                         {
                             markupBuilder.Append("<span class=\"reference-current\">");
                         }
-                        else
+                        else if (api != null)
                         {
                             var referenceClass = GetReferenceClass(api.Kind);
                             markupBuilder.Append($"<span class=\"{referenceClass}\"");
