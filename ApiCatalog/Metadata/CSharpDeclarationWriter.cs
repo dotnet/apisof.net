@@ -128,7 +128,7 @@ namespace ApiCatalog
             var hasBaseType = type.BaseType != null &&
                               type.BaseType.SpecialType != SpecialType.System_Object;
 
-            var implementsInterfaces = type.Interfaces.Any();
+            var implementsInterfaces = type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any();
 
             if (hasBaseType || implementsInterfaces)
             {
@@ -145,7 +145,7 @@ namespace ApiCatalog
                 {
                     var isFirst = !hasBaseType;
 
-                    foreach (var @interface in type.Interfaces.Ordered())
+                    foreach (var @interface in type.Interfaces.Where(t => t.IsIncludedInCatalog()).Ordered())
                     {
                         if (isFirst)
                             isFirst = false;
@@ -180,14 +180,14 @@ namespace ApiCatalog
 
             WriteTypeParameterList(type.TypeParameters, writer);
 
-            if (type.Interfaces.Any())
+            if (type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any())
             {
                 writer.WriteSpace();
                 writer.WritePunctuation(":");
 
                 var isFirst = true;
 
-                foreach (var @interface in type.Interfaces.Ordered())
+                foreach (var @interface in type.Interfaces.Where(t => t.IsIncludedInCatalog()).Ordered())
                 {
                     if (isFirst)
                         isFirst = false;
@@ -214,14 +214,14 @@ namespace ApiCatalog
 
             WriteTypeParameterList(type.TypeParameters, writer);
 
-            if (type.Interfaces.Any())
+            if (type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any())
             {
                 writer.WriteSpace();
                 writer.WritePunctuation(":");
 
                 var isFirst = true;
 
-                foreach (var @interface in type.Interfaces.Ordered())
+                foreach (var @interface in type.Interfaces.Where(t => t.IsIncludedInCatalog()).Ordered())
                 {
                     if (isFirst)
                         isFirst = false;
