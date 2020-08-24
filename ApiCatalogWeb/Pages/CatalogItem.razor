@@ -100,6 +100,16 @@ else
                         </tr>
                     }
 
+                    @if (!string.IsNullOrEmpty(Spine.GetHelpLink()))
+                    {
+                        <tr>
+                            <th>Help</th>
+                            <td>
+                                <a href="@Spine.GetHelpLink()">Documentation</a>
+                            </td>
+                        </tr>
+                    }
+
                     @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.framework.GetFrameworkDisplayString())
                                                                          .OrderBy(g => g.Key))
                     {

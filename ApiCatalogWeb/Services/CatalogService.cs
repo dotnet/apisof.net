@@ -14,6 +14,7 @@ using Microsoft.Data.Sqlite;
 using NuGet.Frameworks;
 
 using ApiCatalog;
+using System.Text;
 
 namespace ApiCatalogWeb.Services
 {
@@ -157,6 +158,62 @@ namespace ApiCatalogWeb.Services
         public CatalogApi Root => Parents.First();
         public List<CatalogApi> Parents { get; } = new List<CatalogApi>();
         public List<CatalogApi> Children { get; } = new List<CatalogApi>();
+
+        public string GetHelpLink()
+        {
+            var segments = Parents.AsEnumerable().Reverse().Where(p => p.ApiId != Selected.ApiId).Concat(new[] { Selected });
+
+            var sb = new StringBuilder();
+            var inAngleBrackets = false;
+            var numberOfGenerics = 0;
+
+            foreach (var s in segments)
+            {
+                if (sb.Length > 0)
+                    sb.Append('.');
+
+                foreach (var c in s.Name)
+                {
+                    if (inAngleBrackets)
+                    {
+                        if (c == ',')
+                        {
+                            numberOfGenerics++;
+                        }
+                        else if (c == '>')
+                        {
+                            inAngleBrackets = false;
+
+                            if (s.Kind.IsType())
+                            {
+                                sb.Append('-');
+                                sb.Append(numberOfGenerics);
+                            }
+                        }
+                        continue;
+                    }
+
+                    if (c == '(')
+                    {
+                        break;
+                    }
+                    else if (c == '<')
+                    {
+                        inAngleBrackets = true;
+                        numberOfGenerics = 1;
+                        continue;
+                    }
+                    else
+                    {
+                        sb.Append(char.ToLower(c));
+                    }
+                }
+            }
+
+            var path = sb.ToString();
+
+            return $"https://docs.microsoft.com/en-us/dotnet/api/{path}";
+        }
     }
 
     public class CatalogFrameworkAvailability : IFrameworkSpecific
