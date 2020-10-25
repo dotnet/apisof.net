@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 using ApiCatalogWeb.Services;
@@ -29,6 +28,8 @@ namespace ApiCatalogWeb.Pages
 
         public string SelectedSyntax { get; set; }
 
+        public string HelpLink { get; set; }
+
         protected override void OnInitialized()
         {
             NavigationManager.LocationChanged += NavigationManager_LocationChanged;
@@ -50,6 +51,12 @@ namespace ApiCatalogWeb.Pages
             SelectedSyntax = Availability.Current == null
                 ? ""
                 : await CatalogService.GetSyntaxAsync(Spine.Selected.ApiGuid, Availability.Current.AssemblyFingerprint);
+
+            var helpLink = Spine.GetHelpLink();
+            using var httpClient = new HttpClient();
+            using var response = await httpClient.GetAsync(helpLink);
+            if (response.StatusCode == HttpStatusCode.OK)
+                HelpLink = helpLink;
         }
 
         private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
