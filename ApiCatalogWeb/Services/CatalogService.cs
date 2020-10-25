@@ -1,20 +1,25 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ApiCatalog;
+
+using Azure.Storage.Blobs;
+
 using Dapper;
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 using NuGet.Frameworks;
-
-using ApiCatalog;
-using System.Text;
 
 namespace ApiCatalogWeb.Services
 {
@@ -271,22 +276,46 @@ namespace ApiCatalogWeb.Services
 
     public class CatalogService : IDisposable
     {
-        private readonly SqliteConnection _sqliteConnection;
+        private readonly IConfiguration _configuration;
+        private SqliteConnection _sqliteConnection;
 
-        public CatalogService()
+        public CatalogService(IConfiguration configuration)
         {
-            var connectionString = new SqliteConnectionStringBuilder()
-            {
-                DataSource = @"C:\Users\immo\Downloads\Indexing\apicatalog.db"
-            }.ToString();
+            _configuration = configuration;
+        }
 
-            _sqliteConnection = new SqliteConnection(connectionString);
-            _sqliteConnection.Open();
+        public async Task<SqliteConnection> GetConnectionAsync()
+        {
+            if (_sqliteConnection == null)
+            {
+                var binDirectory = Path.GetDirectoryName(GetType().Assembly.Location);
+                var cacheLocation = Path.Combine(binDirectory, "apicatalog.db");
+                if (!File.Exists(cacheLocation))
+                {
+                    var azureConnectionString = _configuration["AzureStorageConnectionString"];
+                    var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.db.deflate");
+                    using var blobStream = await blobClient.OpenReadAsync();
+                    using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
+                    using var fileStream = File.Create(cacheLocation);
+                    await deflateStream.CopyToAsync(fileStream);
+                }
+
+                var connectionString = new SqliteConnectionStringBuilder()
+                {
+                    DataSource = cacheLocation
+                }.ToString();
+
+                _sqliteConnection = new SqliteConnection(connectionString);
+                _sqliteConnection.Open();
+            }
+
+            return _sqliteConnection;
         }
 
         public async Task<CatalogStats> GetCatalogStatsAsync()
         {
-            var result = await _sqliteConnection.QuerySingleAsync<CatalogStats>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QuerySingleAsync<CatalogStats>(@"
                 SELECT
                     (SELECT COUNT(*) FROM [Apis])                   AS [NumberOfApis],
                     (SELECT COUNT(*) FROM [Declarations])           AS [NumberOfDeclarations],
@@ -304,7 +333,8 @@ namespace ApiCatalogWeb.Services
 
         public async Task<IReadOnlyList<string>> GetFrameworksAsync()
         {
-            var result = await _sqliteConnection.QueryAsync<string>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QueryAsync<string>(@"
                 SELECT  FriendlyName
                 FROM    Frameworks
                 ORDER   BY 1 
@@ -317,7 +347,8 @@ namespace ApiCatalogWeb.Services
         {
             var guidList = string.Join(", ", apiGuids.Select(g => $"'{g:N}'"));
 
-            var rows = await _sqliteConnection.QueryAsync<CatalogApi>($@"
+            var connection = await GetConnectionAsync();
+            var rows = await connection.QueryAsync<CatalogApi>($@"
                 WITH Parents AS
                 (
 	                SELECT	a.*
@@ -342,7 +373,8 @@ namespace ApiCatalogWeb.Services
 
         public async Task<IReadOnlyList<CatalogApi>> GetNamespacesAsync()
         {
-            var rows = await _sqliteConnection.QueryAsync<CatalogApi>(@"
+            var connection = await GetConnectionAsync();
+            var rows = await connection.QueryAsync<CatalogApi>(@"
                 SELECT  *
                 FROM    Apis
                 WHERE   ParentApiId IS NULL
@@ -356,7 +388,8 @@ namespace ApiCatalogWeb.Services
 
         private async Task<IReadOnlyList<CatalogApi>> GetAncestorsAndSelf(string apiFingerprint)
         {
-            var result = await _sqliteConnection.QueryAsync<CatalogApi>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QueryAsync<CatalogApi>(@"
                 WITH Parents AS
                 (
                     SELECT  *
@@ -381,7 +414,8 @@ namespace ApiCatalogWeb.Services
 
         private async Task<IReadOnlyList<CatalogApi>> GetChildrenAsync(int apiId)
         {
-            var result = await _sqliteConnection.QueryAsync<CatalogApi>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QueryAsync<CatalogApi>(@"
                 SELECT  *
                 FROM    Apis a
                 WHERE   a.ParentApiId = @ParentApiId
@@ -395,7 +429,8 @@ namespace ApiCatalogWeb.Services
 
         private async Task<Dictionary<int, bool>> GetApiSupportAsync(int apiId, string frameworkName)
         {
-            var rows = await _sqliteConnection.QueryAsync<(int ApiId, string PlatformFrameworks, string PackageFrameworks)>(@"
+            var connection = await GetConnectionAsync();
+            var rows = await connection.QueryAsync<(int ApiId, string PlatformFrameworks, string PackageFrameworks)>(@"
                 SELECT	a.ApiId,
 		                (
 			                SELECT	GROUP_CONCAT(f.FriendlyName)
@@ -483,7 +518,8 @@ namespace ApiCatalogWeb.Services
 
         private async Task<IReadOnlyList<CatalogFrameworkAvailability>> GetFrameworkAvailabilityAsync(string apiFingerprint)
         {
-            var result = await _sqliteConnection.QueryAsync<CatalogFrameworkAvailability>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QueryAsync<CatalogFrameworkAvailability>(@"
                 SELECT	f.FriendlyName AS FrameworkName,
                         a.AssemblyGuid AS AssemblyFingerprint,
 		                a.Name AS AssemblyName,
@@ -505,7 +541,8 @@ namespace ApiCatalogWeb.Services
 
         private async Task<IReadOnlyList<CatalogPackageAvailability>> GetPackageAvailabilityAsync(string apiFingerprint)
         {
-            var result = await _sqliteConnection.QueryAsync<CatalogPackageAvailability>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QueryAsync<CatalogPackageAvailability>(@"
                 SELECT	p.Name AS PackageName,
 		                pv.Version AS PackageVersion,
 		                f.FriendlyName AS FrameworkName,
@@ -540,7 +577,8 @@ namespace ApiCatalogWeb.Services
 
         public async Task<string> GetSyntaxAsync(string apiFingerprint, string assemblyFingerprint)
         {
-            var result = await _sqliteConnection.QueryAsync<string>(@"
+            var connection = await GetConnectionAsync();
+            var result = await connection.QueryAsync<string>(@"
                 WITH ApiParents AS
                 (
                     SELECT  0 AS [Order],
@@ -609,7 +647,7 @@ namespace ApiCatalogWeb.Services
 
         public void Dispose()
         {
-            _sqliteConnection.Dispose();
+            _sqliteConnection?.Dispose();
         }
     }
 }

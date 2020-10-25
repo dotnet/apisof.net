@@ -110,7 +110,7 @@ namespace GenPackageIndex
                 root.Add(e);
             }
 
-            packageDocument.Save(@"C:\Users\immo\Downloads\Indexing\packages.xml");
+            packageDocument.Save(@"C:\Users\immo\Downloads\packages\packages.xml");
 
             timingResults.Add(("Queuing work", stopwatch.Elapsed));
 

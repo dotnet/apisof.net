@@ -1,5 +1,12 @@
 # API Catalog
 
+## Tasks
+
+* Get site running on Azure
+* Get indexer running on Azure
+* Ensure indexer can let the site know when the index is updated
+* Include meta-information about the date & time of the last indexing
+
 ## UI
 
 * Maintain selected framework when navigating to other APIs

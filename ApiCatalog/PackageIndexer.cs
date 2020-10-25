@@ -180,11 +180,12 @@ namespace ApiCatalog
         private static async Task<FileSet> GetPlatformSet(NuGetFramework framework)
         {
             // TODO: Centralize this path
-            var archivePath = @"C:\Users\immo\Downloads\PlatformArchive";
+            var frameworksPath = @"C:\Users\immo\Downloads\frameworks";
             var locators = new FrameworkLocator[]
             {
-                new ArchivedFrameworkLocator(archivePath),
-                new PclFrameworkLocator(archivePath),
+                new ArchivedFrameworkLocator(frameworksPath),
+                new PackBasedFrameworkLocator(frameworksPath),
+                new PclFrameworkLocator(frameworksPath)
             };
 
             foreach (var l in locators)

@@ -1,61 +1,107 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-using NuGet.Versioning;
-
 using ApiCatalog;
+
+using Azure.Storage.Blobs;
+
+using Microsoft.Extensions.Configuration.UserSecrets;
+
+using NuGet.Versioning;
 
 namespace GenIndex
 {
-    class Program
+    internal static class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
+            // TODO:
+            //  - Merge in GenPackageIndex
+            //  - Clean up
+
             var rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
-            var indexPath = Path.Combine(rootPath, "Indexing");
-            var archivePath = Path.Combine(rootPath, "PlatformArchive");
-            var platformsPath = Path.Combine(indexPath, "platforms");
-            var packageListPath = Path.Combine(indexPath, "packages.xml");
-            var packagesPath = Path.Combine(indexPath, "packages");
+            var indexPath = Path.Combine(rootPath, "index");
+            var indexFrameworksPath = Path.Combine(indexPath, "frameworks");
+            var indexPackagesPath = Path.Combine(indexPath, "packages");
+            var packagesPath = Path.Combine(rootPath, "packages");
+            var packageListPath = Path.Combine(packagesPath, "packages.xml");
+            var frameworksPath = Path.Combine(rootPath, "frameworks");
+            var packsPath = Path.Combine(rootPath, "packs");
+            var databasePath = Path.Combine(rootPath, "apicatalog.db");
 
             var stopwatch = Stopwatch.StartNew();
 
-            await UpdatePlatforms(archivePath);
-            await GeneratePlatformIndex(platformsPath);
-            await GeneratePackageIndex(packageListPath, packagesPath);
-            await ProduceCatalogBinary(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.dat"));
-            await ProduceCatalogSQLite(platformsPath, packagesPath, Path.Combine(indexPath, "apicatalog.db"));
+            await DownloadArchivedPlatforms(frameworksPath);
+            await DownloadPackagedPlatforms(frameworksPath, packsPath);
+            await GeneratePlatformIndex(frameworksPath, indexFrameworksPath);
+            await GeneratePackageIndex(packageListPath, packagesPath, indexPackagesPath);
+            await ProduceCatalogSQLite(indexFrameworksPath, indexPackagesPath, databasePath);
+            await UploadCatalog(databasePath);
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
         }
 
-        private static async Task UpdatePlatforms(string archivePath)
+        private static string GetAzureStorageConnectionString()
         {
-            await FrameworkDownloader.Download(archivePath);
+            var result = Environment.GetEnvironmentVariable("API_CATALOG_AZURE_STORAGE_CONNECTION_STRING");
+            if (string.IsNullOrEmpty(result))
+            {
+                var secrets = Secrets.Load();
+                result = secrets.AzureStorageConnectionString;
+            }
+
+            return result;
         }
 
-        private static async Task GeneratePlatformIndex(string platformsPath)
+        private static async Task DownloadArchivedPlatforms(string archivePath)
+        {
+            var connectionString = GetAzureStorageConnectionString();
+            var container = "archive";
+            var containerClient = new BlobContainerClient(connectionString, container);
+
+            await foreach (var blob in containerClient.GetBlobsAsync())
+            {
+                var nameWithoutExtension = Path.ChangeExtension(blob.Name, null);
+                var localDirectory = Path.Combine(archivePath, nameWithoutExtension);
+                if (!Directory.Exists(localDirectory))
+                {
+                    Console.WriteLine($"Downloading {nameWithoutExtension}...");
+                    var blobClient = new BlobClient(connectionString, container, blob.Name);
+                    using var blobStream = await blobClient.OpenReadAsync();
+                    using var archive = new ZipArchive(blobStream, ZipArchiveMode.Read);
+                    archive.ExtractToDirectory(localDirectory);
+                }
+            }
+        }
+
+        private static async Task DownloadPackagedPlatforms(string archivePath, string packsPath)
+        {
+            await FrameworkDownloader.Download(archivePath, packsPath);
+        }
+
+        private static async Task GeneratePlatformIndex(string frameworksPath, string indexFrameworksPath)
         {
             var frameworkResolvers = new FrameworkProvider[]
             {
-                // InstalledNetCoreResolver.Instance,
-                // InstalledNetFrameworkResolver.Instance
-                new ArchivedFrameworkProvider(@"C:\Users\immo\Downloads\PlatformArchive")
+                new ArchivedFrameworkProvider(frameworksPath),
+                new PackBasedFrameworkProvider(frameworksPath)
             };
 
             var frameworks = frameworkResolvers.SelectMany(r => r.Resolve());
-            var reindex = true;
+            var reindex = false;
 
-            Directory.CreateDirectory(platformsPath);
+            Directory.CreateDirectory(indexFrameworksPath);
 
             foreach (var framework in frameworks)
             {
-                var path = Path.Join(platformsPath, $"{framework.FrameworkName}.xml");
+                var path = Path.Join(indexFrameworksPath, $"{framework.FrameworkName}.xml");
                 var alreadyIndexed = !reindex && File.Exists(path);
 
                 if (alreadyIndexed)
@@ -72,26 +118,17 @@ namespace GenIndex
             }
         }
 
-        private static async Task GeneratePackageIndex(string packageListPath, string packagesPath)
+        private static async Task GeneratePackageIndex(string packageListPath, string packagesPath, string indexPackagesPath)
         {
-            var packageCachePath = Path.Combine(packagesPath, "cache");
-            Directory.CreateDirectory(packageCachePath);
+            Directory.CreateDirectory(packagesPath);
+            Directory.CreateDirectory(indexPackagesPath);
 
             var nugetFeed = new NuGetFeed(WellKnownNuGetFeeds.NuGetOrg);
-            var nugetStore = new NuGetStore(nugetFeed, packageCachePath);
+            var nugetStore = new NuGetStore(nugetFeed, packagesPath);
 
             var retryIndexed = true;
             var retryDisabled = false;
             var retryFailed = false;
-
-            static (string Id, string Version) ParsePackage(string path)
-            {
-                var name = Path.GetFileNameWithoutExtension(path);
-                var dashIndex = name.IndexOf('-');
-                var id = name.Substring(0, dashIndex);
-                var version = name.Substring(dashIndex + 1);
-                return (id, version);
-            }
 
             var document = XDocument.Load(packageListPath);
             Directory.CreateDirectory(packagesPath);
@@ -105,9 +142,9 @@ namespace GenIndex
 
             foreach (var (id, version) in packages.OrderBy(t => t.Id))
             {
-                var path = Path.Join(packagesPath, $"{id}-{version}.xml");
-                var disabledPath = Path.Join(packagesPath, $"{id}-all.disabled");
-                var failedVersionPath = Path.Join(packagesPath, $"{id}-{version}.failed");
+                var path = Path.Join(indexPackagesPath, $"{id}-{version}.xml");
+                var disabledPath = Path.Join(indexPackagesPath, $"{id}-all.disabled");
+                var failedVersionPath = Path.Join(indexPackagesPath, $"{id}-{version}.failed");
 
                 var alreadyIndexed = !retryIndexed && File.Exists(path) ||
                                      !retryDisabled && File.Exists(disabledPath) ||
@@ -151,16 +188,6 @@ namespace GenIndex
             }
         }
 
-        private static async Task ProduceCatalogBinary(string platformsPath, string packagesPath, string outputPath)
-        {
-            var builder = new CatalogBuilderBinary();
-            builder.Index(platformsPath);
-            builder.Index(packagesPath);
-
-            using (var stream = File.Create(outputPath))
-                builder.WriteTo(stream);
-        }
-
         private static async Task ProduceCatalogSQLite(string platformsPath, string packagesPath, string outputPath)
         {
             File.Delete(outputPath);
@@ -168,6 +195,33 @@ namespace GenIndex
             var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
             builder.Index(platformsPath);
             builder.Index(packagesPath);
+        }
+
+        private static async Task UploadCatalog(string databasePath)
+        {
+            var compressedFileName = databasePath + ".deflate";
+            using var inpuStream = File.OpenRead(databasePath);
+            using var outputStream = File.Create(compressedFileName);
+            using var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal);
+            await inpuStream.CopyToAsync(deflateStream);
+
+            Console.WriteLine("Uploading database...");
+            var connectionString = GetAzureStorageConnectionString();
+            var container = "catalog";
+            var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
+            await blobClient.UploadAsync(compressedFileName);
+        }
+    }
+
+    internal sealed class Secrets
+    {
+        public string AzureStorageConnectionString { get; set; }
+
+        public static Secrets Load()
+        {
+            var secretsPath = PathHelper.GetSecretsPathFromSecretsId("ApiCatalog");
+            var secretsJson = File.ReadAllText(secretsPath);
+            return JsonSerializer.Deserialize<Secrets>(secretsJson)!;
         }
     }
 }

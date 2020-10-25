@@ -5,29 +5,32 @@
 
     A better and more accurate API Catalog.
 
-    <dl>
-        <dt>NumberOfApis</dt>
-        <dd>@CatalogStats.NumberOfApis.ToString("N0")</dd>
+    @if (CatalogStats != null)
+    {
+        <dl>
+            <dt>NumberOfApis</dt>
+            <dd>@CatalogStats.NumberOfApis.ToString("N0")</dd>
 
-        <dt>NumberOfDeclarations</dt>
-        <dd>@CatalogStats.NumberOfDeclarations.ToString("N0")</dd>
+            <dt>NumberOfDeclarations</dt>
+            <dd>@CatalogStats.NumberOfDeclarations.ToString("N0")</dd>
 
-        <dt>NumberOfAssemblies</dt>
-        <dd>@CatalogStats.NumberOfAssemblies.ToString("N0")</dd>
+            <dt>NumberOfAssemblies</dt>
+            <dd>@CatalogStats.NumberOfAssemblies.ToString("N0")</dd>
 
-        <dt>NumberOfFrameworks</dt>
-        <dd>@CatalogStats.NumberOfFrameworks.ToString("N0")</dd>
+            <dt>NumberOfFrameworks</dt>
+            <dd>@CatalogStats.NumberOfFrameworks.ToString("N0")</dd>
 
-        <dt>NumberOfPlatformAssemblies</dt>
-        <dd>@CatalogStats.NumberOfFrameworkAssemblies.ToString("N0")</dd>
+            <dt>NumberOfPlatformAssemblies</dt>
+            <dd>@CatalogStats.NumberOfFrameworkAssemblies.ToString("N0")</dd>
 
-        <dt>NumberOfPackages</dt>
-        <dd>@CatalogStats.NumberOfPackages.ToString("N0")</dd>
+            <dt>NumberOfPackages</dt>
+            <dd>@CatalogStats.NumberOfPackages.ToString("N0")</dd>
 
-        <dt>NumberOfPackageVersions</dt>
-        <dd>@CatalogStats.NumberOfPackageVersions.ToString("N0")</dd>
+            <dt>NumberOfPackageVersions</dt>
+            <dd>@CatalogStats.NumberOfPackageVersions.ToString("N0")</dd>
 
-        <dt>NumberOfPackageAssemblies</dt>
-        <dd>@CatalogStats.NumberOfPackageAssemblies.ToString("N0")</dd>
-    </dl>
+            <dt>NumberOfPackageAssemblies</dt>
+            <dd>@CatalogStats.NumberOfPackageAssemblies.ToString("N0")</dd>
+        </dl>
+    }
 </div>
