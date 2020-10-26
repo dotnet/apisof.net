@@ -15,7 +15,7 @@ using Microsoft.Extensions.Configuration.UserSecrets;
 
 using NuGet.Versioning;
 
-namespace GenIndex
+namespace GenCatalog
 {
     internal static class Program
     {
