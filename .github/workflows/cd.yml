@@ -1,0 +1,25 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: azure/docker-login@v1
+      with:
+        login-server: apicatalog.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - name: ApiCatalogWeb
+      run: |
+        docker build src -f src/ApiCatalogWeb/Dockerfile -t apicatalog.azurecr.io/apicatalogweb:latest
+        docker push apicatalog.azurecr.io/apicatalogweb:latest
+    - name: GenCatalog
+      run: |
+        docker build src -f src/GenCatalog/Dockerfile -t apicatalog.azurecr.io/gencatalog:latest
+        docker push apicatalog.azurecr.io/gencatalog:latest
