@@ -21,10 +21,6 @@ namespace GenIndex
     {
         private static async Task Main(string[] args)
         {
-            // TODO:
-            //  - Merge in GenPackageIndex
-            //  - Clean up
-
             var rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
             var indexPath = Path.Combine(rootPath, "index");
             var indexFrameworksPath = Path.Combine(indexPath, "frameworks");
@@ -39,6 +35,7 @@ namespace GenIndex
 
             await DownloadArchivedPlatforms(frameworksPath);
             await DownloadPackagedPlatforms(frameworksPath, packsPath);
+            await DownloadDotnetPackageList(packageListPath);
             await GeneratePlatformIndex(frameworksPath, indexFrameworksPath);
             await GeneratePackageIndex(packageListPath, packagesPath, indexPackagesPath);
             await ProduceCatalogSQLite(indexFrameworksPath, indexPackagesPath, databasePath);
@@ -84,6 +81,11 @@ namespace GenIndex
         private static async Task DownloadPackagedPlatforms(string archivePath, string packsPath)
         {
             await FrameworkDownloader.Download(archivePath, packsPath);
+        }
+
+        private static Task DownloadDotnetPackageList(string packageListPath)
+        {
+            return DotnetPackageIndex.CreateAsync(packageListPath);
         }
 
         private static async Task GeneratePlatformIndex(string frameworksPath, string indexFrameworksPath)
