@@ -2,18 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using ApiCatalog;
-
-using Microsoft.Extensions.Configuration.UserSecrets;
-
-using Newtonsoft.Json;
 
 using NuGet.Packaging.Core;
 
@@ -56,7 +50,7 @@ namespace GenPackageIndex
             var feed = new NuGetFeed(sourceUrl);
 
             Console.Error.WriteLine($"Fetching owner information...");
-            var ownerInformation = await GetOwnerInformation(httpClient);
+            var ownerInformation = await feed.GetOwnerMappingAsync();
             timingResults.Add(("Fetching owners", stopwatch.Elapsed));
 
             // Find all pages in the catalog index.
@@ -68,33 +62,6 @@ namespace GenPackageIndex
             var filteredPackages = new ConcurrentBag<PackageIdentity>(packages.Where(l => IsOwnedByDotNet(ownerInformation, l.Id)));
 
             Console.Error.WriteLine($"Processing {filteredPackages.Count:N0} packages...");
-
-            // Instantiate a QueueClient which will be used to create and manipulate the queue
-            //var userSecret = UserSecrets.Load();
-
-            //var processTasks = RunInParallel(async () =>
-            //{
-            //    var queueClient = new QueueClient(userSecret.QueueConnectionString, "package-queue");
-            //    await queueClient.CreateIfNotExistsAsync();
-
-            //    while (filteredPackages.TryTake(out var leaf))
-            //    {
-            //        var message = new PackageQueueMessage
-            //        {
-            //            PackageId = leaf.Id,
-            //            PackageVersion = leaf.Version.ToNormalizedString()
-            //        };
-
-            //        var json = JsonConvert.SerializeObject(message);
-            //        // See https://github.com/Azure/azure-sdk-for-net/issues/10242
-            //        // Why we're doing base 64 here.
-            //        var jsonBytes = Encoding.UTF8.GetBytes(json);
-            //        var jsonBase64 = Convert.ToBase64String(jsonBytes);
-            //        await queueClient.SendMessageAsync(jsonBase64);
-            //    }
-            //});
-
-            //await Task.WhenAll(processTasks);
 
             var packageDocument = new XDocument();
             var root = new XElement("packages");
@@ -143,39 +110,5 @@ namespace GenPackageIndex
 
             return false;
         }
-
-        private static Task<Dictionary<string, string[]>> GetOwnerInformation(HttpClient httpClient)
-        {
-            var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-014/owners/owners.v2.json";
-            return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
-        }
-
-        private static List<Task> RunInParallel(Func<Task> work)
-        {
-            return Enumerable
-                .Range(0, 64)
-                .Select(i => work())
-                .ToList();
-        }
-    }
-
-    internal class UserSecrets
-    {
-        public string QueueConnectionString { get; set; }
-
-        public static UserSecrets Load()
-        {
-            var path = PathHelper.GetSecretsPathFromSecretsId("a65cd530-6c72-4fa1-a7d6-002260365e65");
-            var json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<UserSecrets>(json);
-        }
-    }
-
-    //----------------------
-
-    public class PackageQueueMessage
-    {
-        public string PackageId { get; set; }
-        public string PackageVersion { get; set; }
     }
 }

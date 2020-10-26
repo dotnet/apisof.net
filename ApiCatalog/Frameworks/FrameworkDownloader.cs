@@ -27,7 +27,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.NETCore.App.Ref",
                         TargetingPackVersion = "3.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" }
                     },
                     new FrameworkReferenceDefinition
@@ -35,7 +35,7 @@ namespace ApiCatalog
                         Name = "Microsoft.AspNetCore.App",
                         TargetingPackName = "Microsoft.AspNetCore.App.Ref",
                         TargetingPackVersion = "3.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" },
                         ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
                     },
@@ -44,7 +44,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "3.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" }
                     },
                     new FrameworkReferenceDefinition
@@ -52,7 +52,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WPF",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "3.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" },
                         Profile = "WPF",
                         ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -63,7 +63,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WindowsForms",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "3.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" },
                         Profile = "WindowsForms",
                         ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -80,7 +80,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.NETCore.App.Ref",
                         TargetingPackVersion = "3.1",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" }
                     },
                     new FrameworkReferenceDefinition
@@ -88,7 +88,7 @@ namespace ApiCatalog
                         Name = "Microsoft.AspNetCore.App",
                         TargetingPackName = "Microsoft.AspNetCore.App.Ref",
                         TargetingPackVersion = "3.1",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" },
                         ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
                     },
@@ -97,7 +97,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "3.1",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" }
                     },
                     new FrameworkReferenceDefinition
@@ -105,7 +105,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WPF",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "3.1",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" },
                         Profile = "WPF",
                         ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -116,7 +116,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WindowsForms",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "3.1",
-                        NuGetFeed = WellKnownNuGetFeeds.NuGetOrg,
+                        NuGetFeed = NuGetFeeds.NuGetOrg,
                         Platforms = { "" },
                         Profile = "WindowsForms",
                         ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
@@ -133,7 +133,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.NETCore.App.Ref",
                         TargetingPackVersion = "5.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet5,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet5,
                         Platforms = { "", "windows" }
                     },
                     new FrameworkReferenceDefinition
@@ -141,7 +141,7 @@ namespace ApiCatalog
                         Name = "Microsoft.AspNetCore.App",
                         TargetingPackName = "Microsoft.AspNetCore.App.Ref",
                         TargetingPackVersion = "5.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet5,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet5,
                         Platforms = { "", "windows" },
                         ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
                     },
@@ -153,7 +153,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "5.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet5,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet5,
                         Platforms = { "windows" },
                     },
                     new FrameworkReferenceDefinition
@@ -161,7 +161,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WPF",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "5.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet5,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet5,
                         Platforms = { "windows" },
                         Profile = "WPF",
                         ImplicitViaProperty = "UseWPF"
@@ -171,7 +171,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WindowsForms",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "5.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet5,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet5,
                         Platforms = { "windows" },
                         Profile = "WindowsForms",
                         ImplicitViaProperty = "UseWindowsForms"
@@ -187,7 +187,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.NETCore.App.Ref",
                         TargetingPackVersion = "6.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet6,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet6,
                         Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
                     },
                     new FrameworkReferenceDefinition
@@ -195,7 +195,7 @@ namespace ApiCatalog
                         Name = "Microsoft.AspNetCore.App",
                         TargetingPackName = "Microsoft.AspNetCore.App.Ref",
                         TargetingPackVersion = "6.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet6,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet6,
                         Platforms = { "", "windows" },
                         ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
                     },
@@ -207,7 +207,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "6.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet6,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet6,
                         Platforms = { "windows" },
                     },
                     new FrameworkReferenceDefinition
@@ -215,7 +215,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WPF",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "6.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet6,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet6,
                         Platforms = { "windows" },
                         Profile = "WPF",
                         ImplicitViaProperty = "UseWPF"
@@ -225,7 +225,7 @@ namespace ApiCatalog
                         Name = "Microsoft.WindowsDesktop.App.WindowsForms",
                         TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                         TargetingPackVersion = "6.0",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyDotnet6,
+                        NuGetFeed = NuGetFeeds.NightlyDotnet6,
                         Platforms = { "windows" },
                         Profile = "WindowsForms",
                         ImplicitViaProperty = "UseWindowsForms"
@@ -237,7 +237,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.Android.Ref",
                         TargetingPackVersion = "11",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyXamarin,
+                        NuGetFeed = NuGetFeeds.NightlyXamarin,
                         Platforms = { "android" }
                     },
                     //
@@ -247,7 +247,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.iOS.Ref",
                         TargetingPackVersion = "14",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyXamarin,
+                        NuGetFeed = NuGetFeeds.NightlyXamarin,
                         Platforms = { "ios" }
                     },
                     //
@@ -257,7 +257,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.macOS.Ref",
                         TargetingPackVersion = "15",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyXamarin,
+                        NuGetFeed = NuGetFeeds.NightlyXamarin,
                         Platforms = { "macos" }
                     },
                     //
@@ -267,7 +267,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.tvOS.Ref",
                         TargetingPackVersion = "14",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyXamarin,
+                        NuGetFeed = NuGetFeeds.NightlyXamarin,
                         Platforms = { "tvos" }
                     },
                     //
@@ -277,7 +277,7 @@ namespace ApiCatalog
                     {
                         TargetingPackName = "Microsoft.watchOS.Ref",
                         TargetingPackVersion = "7",
-                        NuGetFeed = WellKnownNuGetFeeds.NightlyXamarin,
+                        NuGetFeed = NuGetFeeds.NightlyXamarin,
                         Platforms = { "tvos" }
                     },
                 }
@@ -302,7 +302,7 @@ namespace ApiCatalog
 
     public static class FrameworkPackIndex
     {
-        public static string FileName { get; } = "packIndex.json";
+        public static string FileName => "packIndex.json";
 
         public static void Save(IReadOnlyList<FrameworkPackIndexEntry> entries, string path)
         {

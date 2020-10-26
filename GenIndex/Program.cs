@@ -123,7 +123,7 @@ namespace GenIndex
             Directory.CreateDirectory(packagesPath);
             Directory.CreateDirectory(indexPackagesPath);
 
-            var nugetFeed = new NuGetFeed(WellKnownNuGetFeeds.NuGetOrg);
+            var nugetFeed = new NuGetFeed(NuGetFeeds.NuGetOrg);
             var nugetStore = new NuGetStore(nugetFeed, packagesPath);
 
             var retryIndexed = true;

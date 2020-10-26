@@ -1,6 +1,6 @@
 ﻿namespace ApiCatalog
 {
-    public static class WellKnownNuGetFeeds
+    public static class NuGetFeeds
     {
         public static string NuGetOrg => "https://api.nuget.org/v3/index.json";
         public static string NightlyDotnet5 => "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json";

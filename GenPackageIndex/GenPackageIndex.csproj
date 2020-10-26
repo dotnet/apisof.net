@@ -3,13 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <UserSecretsId>a65cd530-6c72-4fa1-a7d6-002260365e65</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Azure.Storage.Queues" Version="12.4.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0-preview.7.20364.11" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ApiCatalog\ApiCatalog.csproj" />

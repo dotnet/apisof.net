@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -139,6 +140,16 @@ namespace ApiCatalog
             var id = identity.Id.ToLowerInvariant();
             var version = identity.Version.ToNormalizedString().ToLowerInvariant();
             return $"{packageBaseAddress}{id}/{version}/{id}.{version}.nupkg";
+        }
+
+        public Task<Dictionary<string, string[]>> GetOwnerMappingAsync()
+        {
+            if (FeedUrl != NuGetFeeds.NuGetOrg)
+                throw new NotSupportedException("We can only retreive owner information for nuget.org");
+
+            var httpClient = new HttpClient();
+            var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-014/owners/owners.v2.json";
+            return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
         }
 
         private abstract class CatalogEntity
