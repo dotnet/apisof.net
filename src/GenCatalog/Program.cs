@@ -19,9 +19,35 @@ namespace GenCatalog
 {
     internal static class Program
     {
-        private static async Task Main(string[] args)
+        private static async Task<int> Main(string[] args)
         {
-            var rootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            if (args.Length > 1)
+            {
+                var exeName = Path.GetFileNameWithoutExtension(typeof(Program).Assembly.Location);
+                Console.Error.Write("error: incorrect number of arguments");
+                Console.Error.Write($"usage: {exeName} [<download-directory>]");
+                return -1;
+            }
+
+            var rootPath = args.Length == 1
+                            ? args[0]
+                            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+
+            try
+            {
+                await Run(rootPath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return -1;
+            }
+
+            return 0;
+        }
+
+        private static async Task Run(string rootPath)
+        {
             var indexPath = Path.Combine(rootPath, "index");
             var indexFrameworksPath = Path.Combine(indexPath, "frameworks");
             var indexPackagesPath = Path.Combine(indexPath, "packages");
