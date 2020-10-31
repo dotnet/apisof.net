@@ -1,0 +1,31 @@
+# Disable CI & PR build
+
+trigger: none
+pr: none
+
+# Run on a schedule, regardless of code changes
+
+schedules:
+- cron: "0 12 * * 1-5"
+  displayName: Weekday 12 PM UTC build
+  branches:
+    include:
+    - main
+  always: true
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '5.x'
+    includePreviewVersions: true
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'run'
+    projects: './src/GenCatalog/GenCatalog.csproj'
+    arguments: '$(System.DefaultWorkingDirectory)'
+  env:
+    API_CATALOG_AZURE_STORAGE_CONNECTION_STRING: $(API_CATALOG_AZURE_STORAGE_CONNECTION_STRING)
