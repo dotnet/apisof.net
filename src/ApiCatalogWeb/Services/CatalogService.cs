@@ -299,6 +299,8 @@ namespace ApiCatalogWeb.Services
             {
                 _sqliteConnection.Dispose();
                 _sqliteConnection = null;
+                var path = GetDatabasePath();
+                File.Delete(path);
             }
 
             _jobInfo = null;
@@ -321,21 +323,20 @@ namespace ApiCatalogWeb.Services
         {
             if (_sqliteConnection == null)
             {
-                var binDirectory = Path.GetDirectoryName(GetType().Assembly.Location);
-                var cacheLocation = Path.Combine(binDirectory, "apicatalog.db");
-                if (!File.Exists(cacheLocation))
+                var path = GetDatabasePath();
+                if (!File.Exists(path))
                 {
                     var azureConnectionString = _configuration["AzureStorageConnectionString"];
                     var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.db.deflate");
                     using var blobStream = await blobClient.OpenReadAsync();
                     using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
-                    using var fileStream = File.Create(cacheLocation);
+                    using var fileStream = File.Create(path);
                     await deflateStream.CopyToAsync(fileStream);
                 }
 
                 var connectionString = new SqliteConnectionStringBuilder()
                 {
-                    DataSource = cacheLocation
+                    DataSource = path
                 }.ToString();
 
                 _sqliteConnection = new SqliteConnection(connectionString);
@@ -343,6 +344,13 @@ namespace ApiCatalogWeb.Services
             }
 
             return _sqliteConnection;
+        }
+
+        private string GetDatabasePath()
+        {
+            var binDirectory = Path.GetDirectoryName(GetType().Assembly.Location);
+            var cacheLocation = Path.Combine(binDirectory, "apicatalog.db");
+            return cacheLocation;
         }
 
         public async Task<CatalogStats> GetCatalogStatsAsync()
