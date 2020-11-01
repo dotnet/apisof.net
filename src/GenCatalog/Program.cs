@@ -272,7 +272,7 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
-            await blobClient.UploadAsync(compressedFileName);
+            await blobClient.UploadAsync(compressedFileName, overwrite: true);
         }
 
         private static async Task UploadSummaryAsync(bool success)
@@ -291,7 +291,7 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "job.json");
-            await blobClient.UploadAsync(jobStream);
+            await blobClient.UploadAsync(jobStream, overwrite: true);
         }
     }
 
