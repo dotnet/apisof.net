@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using ApiCatalog;
@@ -274,17 +275,38 @@ namespace ApiCatalogWeb.Services
         public List<(NuGetFramework framework, CatalogFrameworkAvailability)> Frameworks { get; } = new List<(NuGetFramework framework, CatalogFrameworkAvailability)>();
     }
 
+    public class CatalogJobInfo
+    {
+        public DateTimeOffset Date { get; set; }
+        public bool Success { get; set; }
+        public string DetailsUrl { get; set; }
+    }
+
     public class CatalogService : IDisposable
     {
         private readonly IConfiguration _configuration;
         private SqliteConnection _sqliteConnection;
+        private CatalogJobInfo _jobInfo;
 
         public CatalogService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public async Task<SqliteConnection> GetConnectionAsync()
+        public async Task<CatalogJobInfo> GetJobInfoAsync()
+        {
+            if (_jobInfo == null)
+            {
+                var azureConnectionString = _configuration["AzureStorageConnectionString"];
+                var blobClient = new BlobClient(azureConnectionString, "catalog", "job.json");
+                using var blobStream = await blobClient.OpenReadAsync();
+                _jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(blobStream);
+            }
+
+            return _jobInfo;
+        }
+
+        private async Task<SqliteConnection> GetConnectionAsync()
         {
             if (_sqliteConnection == null)
             {
