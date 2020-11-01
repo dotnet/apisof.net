@@ -8,7 +8,7 @@ namespace ApiCatalog
     /// This is used to resolve a framework when indexing the contents of a NuGet
     /// package for a given framework.
     /// </summary>
-    internal abstract class FrameworkLocator
+    public abstract class FrameworkLocator
     {
         public abstract Task<FileSet> LocateAsync(NuGetFramework framework);
     }

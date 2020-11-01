@@ -13,16 +13,25 @@ using NuGet.Packaging;
 
 namespace ApiCatalog
 {
-    public static class PackageIndexer
+    public sealed class PackageIndexer
     {
-        public static async Task<PackageEntry> Index(string id, string version, NuGetStore store)
+        private readonly NuGetStore _store;
+        private readonly IReadOnlyList<FrameworkLocator> _frameworkLocators;
+
+        public PackageIndexer(NuGetStore store, IEnumerable<FrameworkLocator> frameworkLocators)
+        {
+            _store = store;
+            _frameworkLocators = frameworkLocators.ToArray();
+        }
+
+        public async Task<PackageEntry> Index(string id, string version)
         {
             var dependencies = new Dictionary<string, PackageArchiveReader>();
             var apiIdByGuid = new Dictionary<Guid, int>();
             var frameworkEntries = new List<FrameworkEntry>();
             try
             {
-                using (var root = await store.GetPackageAsync(id, version))
+                using (var root = await _store.GetPackageAsync(id, version))
                 {
                     var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -40,7 +49,7 @@ namespace ApiCatalog
 
                         Debug.Assert(referenceGroup != null);
 
-                        await GetDependenciesAsync(dependencies, root, target, store);
+                        await GetDependenciesAsync(dependencies, root, target);
 
                         // Add references
 
@@ -149,7 +158,7 @@ namespace ApiCatalog
             return referenceGroup;
         }
 
-        private static async Task GetDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target, NuGetStore store)
+        private async Task GetDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target)
         {
             var dependencies = root.GetPackageDependencies();
             var dependencyGroup = NuGetFrameworkUtility.GetNearest(dependencies, target);
@@ -170,25 +179,16 @@ namespace ApiCatalog
                     if (existingPackage != null)
                         continue;
 
-                    var dependency = await store.GetPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
+                    var dependency = await _store.GetPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
                     packages.Add(d.Id, dependency);
-                    await GetDependenciesAsync(packages, dependency, target, store);
+                    await GetDependenciesAsync(packages, dependency, target);
                 }
             }
         }
 
-        private static async Task<FileSet> GetPlatformSet(NuGetFramework framework)
+        private async Task<FileSet> GetPlatformSet(NuGetFramework framework)
         {
-            // TODO: Centralize this path
-            var frameworksPath = @"C:\Users\immo\Downloads\frameworks";
-            var locators = new FrameworkLocator[]
-            {
-                new ArchivedFrameworkLocator(frameworksPath),
-                new PackBasedFrameworkLocator(frameworksPath),
-                new PclFrameworkLocator(frameworksPath)
-            };
-
-            foreach (var l in locators)
+            foreach (var l in _frameworkLocators)
             {
                 var fileSet = await l.LocateAsync(framework);
                 if (fileSet != null)

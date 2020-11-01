@@ -5,7 +5,7 @@ using NuGet.Frameworks;
 
 namespace ApiCatalog
 {
-    internal sealed class PclFrameworkLocator : FrameworkLocator
+    public sealed class PclFrameworkLocator : FrameworkLocator
     {
         private readonly string _archiveFolder;
 

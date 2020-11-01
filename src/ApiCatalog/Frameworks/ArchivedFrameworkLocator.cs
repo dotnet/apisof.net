@@ -6,7 +6,7 @@ using NuGet.Frameworks;
 
 namespace ApiCatalog
 {
-    internal sealed class ArchivedFrameworkLocator : FrameworkLocator
+    public sealed class ArchivedFrameworkLocator : FrameworkLocator
     {
         private readonly string _frameworksPath;
 

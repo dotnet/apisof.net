@@ -35,7 +35,7 @@ namespace GenCatalog
 
             try
             {
-                await Run(rootPath);
+                await RunAsync(rootPath);
             }
             catch (Exception ex)
             {
@@ -46,7 +46,7 @@ namespace GenCatalog
             return 0;
         }
 
-        private static async Task Run(string rootPath)
+        private static async Task RunAsync(string rootPath)
         {
             var indexPath = Path.Combine(rootPath, "index");
             var indexFrameworksPath = Path.Combine(indexPath, "frameworks");
@@ -59,13 +59,13 @@ namespace GenCatalog
 
             var stopwatch = Stopwatch.StartNew();
 
-            await DownloadArchivedPlatforms(frameworksPath);
-            await DownloadPackagedPlatforms(frameworksPath, packsPath);
-            await DownloadDotnetPackageList(packageListPath);
-            await GeneratePlatformIndex(frameworksPath, indexFrameworksPath);
-            await GeneratePackageIndex(packageListPath, packagesPath, indexPackagesPath);
-            await ProduceCatalogSQLite(indexFrameworksPath, indexPackagesPath, databasePath);
-            await UploadCatalog(databasePath);
+            await DownloadArchivedPlatformsAsync(frameworksPath);
+            await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
+            await DownloadDotnetPackageListAsync(packageListPath);
+            await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
+            await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, indexFrameworksPath);
+            await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, databasePath);
+            await UploadCatalogAsync(databasePath);
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
@@ -83,7 +83,7 @@ namespace GenCatalog
             return result;
         }
 
-        private static async Task DownloadArchivedPlatforms(string archivePath)
+        private static async Task DownloadArchivedPlatformsAsync(string archivePath)
         {
             var connectionString = GetAzureStorageConnectionString();
             var container = "archive";
@@ -104,17 +104,17 @@ namespace GenCatalog
             }
         }
 
-        private static async Task DownloadPackagedPlatforms(string archivePath, string packsPath)
+        private static async Task DownloadPackagedPlatformsAsync(string archivePath, string packsPath)
         {
             await FrameworkDownloader.Download(archivePath, packsPath);
         }
 
-        private static Task DownloadDotnetPackageList(string packageListPath)
+        private static Task DownloadDotnetPackageListAsync(string packageListPath)
         {
             return DotnetPackageIndex.CreateAsync(packageListPath);
         }
 
-        private static async Task GeneratePlatformIndex(string frameworksPath, string indexFrameworksPath)
+        private static async Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
         {
             var frameworkResolvers = new FrameworkProvider[]
             {
@@ -146,13 +146,21 @@ namespace GenCatalog
             }
         }
 
-        private static async Task GeneratePackageIndex(string packageListPath, string packagesPath, string indexPackagesPath)
+        private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string indexPackagesPath, string indexFrameworksPath)
         {
+            var frameworkLocators = new FrameworkLocator[]
+            {
+                new ArchivedFrameworkLocator(indexFrameworksPath),
+                new PackBasedFrameworkLocator(indexFrameworksPath),
+                new PclFrameworkLocator(indexFrameworksPath)
+            };
+
             Directory.CreateDirectory(packagesPath);
             Directory.CreateDirectory(indexPackagesPath);
 
             var nugetFeed = new NuGetFeed(NuGetFeeds.NuGetOrg);
             var nugetStore = new NuGetStore(nugetFeed, packagesPath);
+            var packageIndexer = new PackageIndexer(nugetStore, frameworkLocators);
 
             var retryIndexed = true;
             var retryDisabled = false;
@@ -191,7 +199,7 @@ namespace GenCatalog
                     Console.WriteLine($"Indexing {id} {version}...");
                     try
                     {
-                        var packageEntry = await PackageIndexer.Index(id, version, nugetStore);
+                        var packageEntry = await packageIndexer.Index(id, version);
                         if (packageEntry == null)
                         {
                             Console.WriteLine($"Not a library package.");
@@ -216,7 +224,7 @@ namespace GenCatalog
             }
         }
 
-        private static async Task ProduceCatalogSQLite(string platformsPath, string packagesPath, string outputPath)
+        private static async Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string outputPath)
         {
             File.Delete(outputPath);
 
@@ -225,7 +233,7 @@ namespace GenCatalog
             builder.Index(packagesPath);
         }
 
-        private static async Task UploadCatalog(string databasePath)
+        private static async Task UploadCatalogAsync(string databasePath)
         {
             var compressedFileName = databasePath + ".deflate";
             using var inpuStream = File.OpenRead(databasePath);
