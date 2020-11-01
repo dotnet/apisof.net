@@ -28,4 +28,5 @@ steps:
     projects: './src/GenCatalog/GenCatalog.csproj'
     arguments: '$(System.DefaultWorkingDirectory)'
   env:
+    DOTNET_NOLOGO: true
     API_CATALOG_AZURE_STORAGE_CONNECTION_STRING: $(API_CATALOG_AZURE_STORAGE_CONNECTION_STRING)
