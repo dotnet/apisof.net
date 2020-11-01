@@ -9,17 +9,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: azure/docker-login@v1
+    - name: Get code
+      uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
       with:
-        login-server: apicatalog.azurecr.io
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    - name: ApiCatalogWeb
+        dotnet-version: 3.1.x
+
+    # Publishing
+
+    - name: dotnet publish
       run: |
-        docker build src -f src/ApiCatalogWeb/Dockerfile -t apicatalog.azurecr.io/apicatalogweb:latest
-        docker push apicatalog.azurecr.io/apicatalogweb:latest
-    - name: GenCatalog
-      run: |
-        docker build src -f src/GenCatalog/Dockerfile -t apicatalog.azurecr.io/gencatalog:latest
-        docker push apicatalog.azurecr.io/gencatalog:latest
+        cd src/ApiCatalogWeb
+        dotnet publish -c Release -o '../../artifacts/ApiCatalogWeb'
+        cd ../..
+
+    # Deploy to Azure
+
+    - name: webapps-deploy
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: apisof
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }}
+        package: ./artifacts/ApiCatalogWeb

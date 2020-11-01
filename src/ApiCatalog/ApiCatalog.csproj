@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0-preview.7.20364.11" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="NuGet.Protocol" version="5.8.0-preview.1" />
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0-rc.2.20475.5" />
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
-
-using NuGet.Packaging.Signing;
 
 namespace ApiCatalogWeb.Services
 {
@@ -27,7 +27,10 @@ namespace ApiCatalogWeb.Services
             parameters.Remove(key);
             parameters.Add(key, value);
 
-            return QueryHelpers.AddQueryString(uri.ToString(), parameters);
+            var newParameters = parameters.SelectMany(kvp => kvp.Value, (kvp, v) => KeyValuePair.Create<string, string?>(kvp.Key, v))
+                                          .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+            return QueryHelpers.AddQueryString(uri.ToString(), newParameters);
         }
     }
 }
