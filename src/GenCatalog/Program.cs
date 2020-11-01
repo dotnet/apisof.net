@@ -79,7 +79,7 @@ namespace GenCatalog
             await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
             await DownloadDotnetPackageListAsync(packageListPath);
             await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
-            await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, indexFrameworksPath);
+            await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
             await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, databasePath);
             await UploadCatalogAsync(databasePath);
 
@@ -177,13 +177,13 @@ namespace GenCatalog
             }
         }
 
-        private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string indexPackagesPath, string indexFrameworksPath)
+        private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string indexPackagesPath, string frameworksPath)
         {
             var frameworkLocators = new FrameworkLocator[]
             {
-                new ArchivedFrameworkLocator(indexFrameworksPath),
-                new PackBasedFrameworkLocator(indexFrameworksPath),
-                new PclFrameworkLocator(indexFrameworksPath)
+                new ArchivedFrameworkLocator(frameworksPath),
+                new PackBasedFrameworkLocator(frameworksPath),
+                new PclFrameworkLocator(frameworksPath)
             };
 
             Directory.CreateDirectory(packagesPath);
