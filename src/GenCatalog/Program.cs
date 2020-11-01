@@ -77,8 +77,11 @@ namespace GenCatalog
             if (string.IsNullOrEmpty(result))
             {
                 var secrets = Secrets.Load();
-                result = secrets.AzureStorageConnectionString;
+                result = secrets?.AzureStorageConnectionString;
             }
+
+            if (string.IsNullOrEmpty(result))
+                throw new Exception("Cannot retreive connection string for Azure blob storage. You either need to define an environment variable or a user secret.");
 
             return result;
         }
@@ -169,8 +172,8 @@ namespace GenCatalog
             var document = XDocument.Load(packageListPath);
             Directory.CreateDirectory(packagesPath);
 
-            var packages = document.Root.Elements("package")
-                                   .Select(e => (Id: e.Attribute("id").Value, Version: NuGetVersion.Parse(e.Attribute("version").Value)))
+            var packages = document.Root!.Elements("package")
+                                   .Select(e => (Id: e.Attribute("id")!.Value, Version: NuGetVersion.Parse(e.Attribute("version")!.Value)))
                                    .Where(t => PackageFilter.Default.IsMatch(t.Id))
                                    .GroupBy(t => t.Id)
                                    .Select(g => (Id: g.Key, Version: g.OrderBy(t => t.Version).Select(t => t.Version).Last().ToString()))
@@ -251,11 +254,14 @@ namespace GenCatalog
 
     internal sealed class Secrets
     {
-        public string AzureStorageConnectionString { get; set; }
+        public string? AzureStorageConnectionString { get; set; }
 
-        public static Secrets Load()
+        public static Secrets? Load()
         {
             var secretsPath = PathHelper.GetSecretsPathFromSecretsId("ApiCatalog");
+            if (!File.Exists(secretsPath))
+                return null;
+
             var secretsJson = File.ReadAllText(secretsPath);
             return JsonSerializer.Deserialize<Secrets>(secretsJson)!;
         }
