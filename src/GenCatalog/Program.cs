@@ -33,6 +33,8 @@ namespace GenCatalog
                             ? args[0]
                             : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
+            var success = true;
+
             try
             {
                 await RunAsync(rootPath);
@@ -40,10 +42,20 @@ namespace GenCatalog
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                return -1;
+                success = false;
             }
 
-            return 0;
+            try
+            {
+                await UploadSummaryAsync(success);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                success = false;
+            }
+
+            return success ? 0 : -1;
         }
 
         private static async Task RunAsync(string rootPath)
@@ -84,6 +96,18 @@ namespace GenCatalog
                 throw new Exception("Cannot retreive connection string for Azure blob storage. You either need to define an environment variable or a user secret.");
 
             return result;
+        }
+
+        private static string? GetAzureDevOpsUrl()
+        {
+            var baseUrl = Environment.GetEnvironmentVariable("SYSTEM_TEAMFOUNDATIONSERVERURI");
+            var project = Environment.GetEnvironmentVariable("SYSTEM_TEAMPROJECT");
+            var buildId = Environment.GetEnvironmentVariable("BUILD_BUILDID");
+
+            if (string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(project) || string.IsNullOrEmpty(buildId))
+                return null;
+
+            return $"{baseUrl}/{project}/_build/results?buildId={buildId}&view=logs";
         }
 
         private static async Task DownloadArchivedPlatformsAsync(string archivePath)
@@ -250,6 +274,25 @@ namespace GenCatalog
             var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
             await blobClient.UploadAsync(compressedFileName);
         }
+
+        private static async Task UploadSummaryAsync(bool success)
+        {
+            var job = new Job
+            {
+                Date = DateTimeOffset.UtcNow,
+                Success = success,
+                DetailsUrl = GetAzureDevOpsUrl()
+            };
+
+            using var jobStream = new MemoryStream();
+            await JsonSerializer.SerializeAsync(jobStream, job);
+            jobStream.Position = 0;
+
+            var connectionString = GetAzureStorageConnectionString();
+            var container = "catalog";
+            var blobClient = new BlobClient(connectionString, container, "job.json");
+            await blobClient.UploadAsync(jobStream);
+        }
     }
 
     internal sealed class Secrets
@@ -265,5 +308,12 @@ namespace GenCatalog
             var secretsJson = File.ReadAllText(secretsPath);
             return JsonSerializer.Deserialize<Secrets>(secretsJson)!;
         }
+    }
+
+    internal sealed class Job
+    {
+        public DateTimeOffset Date { get; set; }
+        public bool Success { get; set; }
+        public string? DetailsUrl { get; set; }
     }
 }
