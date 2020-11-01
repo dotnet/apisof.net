@@ -20,6 +20,7 @@ namespace ApiCatalogWeb
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddControllers();
             services.AddSingleton<CatalogService>();
             services.AddSingleton<IconService>();
         }
@@ -44,6 +45,7 @@ namespace ApiCatalogWeb
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
+                endpoints.MapDefaultControllerRoute();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

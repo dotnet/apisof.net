@@ -29,4 +29,6 @@ steps:
     arguments: '$(System.DefaultWorkingDirectory)'
   env:
     DOTNET_NOLOGO: true
-    API_CATALOG_AZURE_STORAGE_CONNECTION_STRING: $(API_CATALOG_AZURE_STORAGE_CONNECTION_STRING)
+    AzureStorageConnectionString: $(AzureStorageConnectionString)
+    GenCatalogWebHookUrl: $(GenCatalogWebHookUrl)
+    GenCatalogWebHookSecret: $(GenCatalogWebHookSecret)

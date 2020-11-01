@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -55,6 +56,9 @@ namespace GenCatalog
                 success = false;
             }
 
+            if (success)
+                await PostToGenCatalogWebHook();
+
             return success ? 0 : -1;
         }
 
@@ -85,7 +89,7 @@ namespace GenCatalog
 
         private static string GetAzureStorageConnectionString()
         {
-            var result = Environment.GetEnvironmentVariable("API_CATALOG_AZURE_STORAGE_CONNECTION_STRING");
+            var result = Environment.GetEnvironmentVariable("AzureStorageConnectionString");
             if (string.IsNullOrEmpty(result))
             {
                 var secrets = Secrets.Load();
@@ -275,6 +279,36 @@ namespace GenCatalog
             await blobClient.UploadAsync(compressedFileName, overwrite: true);
         }
 
+        private static async Task PostToGenCatalogWebHook()
+        {
+            var secrets = Secrets.Load();
+
+            var url = Environment.GetEnvironmentVariable("GenCatalogWebHookUrl");
+            if (string.IsNullOrEmpty(url))
+                url = secrets?.GenCatalogWebHookUrl;
+
+            var secret = Environment.GetEnvironmentVariable("GenCatalogWebHookSecret");
+            if (string.IsNullOrEmpty(url))
+                secret = secrets?.GenCatalogWebHookSecret;
+
+            if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(secret))
+            {
+                Console.WriteLine("warning: cannot retreive secret for GenCatalog web hook.");
+                return;
+            }
+
+            try
+            {
+                var client = new HttpClient();
+                var response = await client.PostAsync(url, new StringContent(secret));
+                response.EnsureSuccessStatusCode();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"warning: there was a problem calling the web hook: {ex}");
+            }
+        }
+
         private static async Task UploadSummaryAsync(bool success)
         {
             var job = new Job
@@ -298,6 +332,8 @@ namespace GenCatalog
     internal sealed class Secrets
     {
         public string? AzureStorageConnectionString { get; set; }
+        public string? GenCatalogWebHookUrl { get; set; }
+        public string? GenCatalogWebHookSecret { get; set; }
 
         public static Secrets? Load()
         {

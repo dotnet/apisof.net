@@ -293,6 +293,17 @@ namespace ApiCatalogWeb.Services
             _configuration = configuration;
         }
 
+        public void Invalidate()
+        {
+            if (_sqliteConnection != null)
+            {
+                _sqliteConnection.Dispose();
+                _sqliteConnection = null;
+            }
+
+            _jobInfo = null;
+        }
+
         public async Task<CatalogJobInfo> GetJobInfoAsync()
         {
             if (_jobInfo == null)
