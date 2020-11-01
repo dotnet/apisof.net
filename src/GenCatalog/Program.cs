@@ -236,10 +236,10 @@ namespace GenCatalog
         private static async Task UploadCatalogAsync(string databasePath)
         {
             var compressedFileName = databasePath + ".deflate";
-            using var inpuStream = File.OpenRead(databasePath);
-            using var outputStream = File.Create(compressedFileName);
-            using var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal);
-            await inpuStream.CopyToAsync(deflateStream);
+            using (var inputStream = File.OpenRead(databasePath))
+            using (var outputStream = File.Create(compressedFileName))
+            using (var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal))
+                await inputStream.CopyToAsync(deflateStream);
 
             Console.WriteLine("Uploading database...");
             var connectionString = GetAzureStorageConnectionString();
