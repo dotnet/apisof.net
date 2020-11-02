@@ -282,6 +282,7 @@ namespace GenCatalog
 
         private static async Task PostToGenCatalogWebHook()
         {
+            Console.WriteLine("Invoking webhook...");
             var secrets = Secrets.Load();
 
             var url = Environment.GetEnvironmentVariable("GenCatalogWebHookUrl");
@@ -302,6 +303,7 @@ namespace GenCatalog
             {
                 var client = new HttpClient();
                 var response = await client.PostAsync(url, new StringContent(secret));
+                Console.WriteLine($"Webhook returned: {response.StatusCode}");
                 response.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
