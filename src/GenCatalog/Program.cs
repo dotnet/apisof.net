@@ -140,9 +140,10 @@ namespace GenCatalog
             await FrameworkDownloader.Download(archivePath, packsPath);
         }
 
-        private static Task DownloadDotnetPackageListAsync(string packageListPath)
+        private static async Task DownloadDotnetPackageListAsync(string packageListPath)
         {
-            return DotnetPackageIndex.CreateAsync(packageListPath);
+            if (!File.Exists(packageListPath))
+                await DotnetPackageIndex.CreateAsync(packageListPath);
         }
 
         private static async Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
