@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 using NuGet.Frameworks;
@@ -17,7 +16,8 @@ namespace ApiCatalog
 
         public override async Task<FileSet> LocateAsync(NuGetFramework framework)
         {
-            var path = Path.Combine(_frameworksPath, framework.GetShortFolderName());
+            var shortFolderName = GetFolderName(framework);
+            var path = Path.Combine(_frameworksPath, shortFolderName);
             if (!Directory.Exists(path))
                 return null;
 
@@ -26,6 +26,30 @@ namespace ApiCatalog
                 return null;
 
             return new PathFileSet(paths);
+        }
+
+        private string GetFolderName(NuGetFramework framework)
+        {
+            // Special case Xamarin platforms
+
+            if (framework.Framework == FrameworkConstants.FrameworkIdentifiers.MonoAndroid)
+                return "monoandroid";
+
+            if (framework.Framework == FrameworkConstants.FrameworkIdentifiers.XamarinIOs ||
+                framework.Framework == FrameworkConstants.FrameworkIdentifiers.MonoTouch)
+                return "xamarinios";
+
+            if (framework.Framework == FrameworkConstants.FrameworkIdentifiers.XamarinMac ||
+                framework.Framework == FrameworkConstants.FrameworkIdentifiers.MonoMac)
+                return "xamarinmac";
+
+            if (framework.Framework == FrameworkConstants.FrameworkIdentifiers.XamarinWatchOS)
+                return "xamarinwatchos";
+
+            if (framework.Framework == FrameworkConstants.FrameworkIdentifiers.XamarinTVOS)
+                return "xamarintvos";
+
+            return framework.GetShortFolderName();
         }
     }
 }
