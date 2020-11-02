@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ApiCatalog;
@@ -19,6 +20,7 @@ using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 using NuGet.Frameworks;
 
@@ -282,15 +284,38 @@ namespace ApiCatalogWeb.Services
         public string DetailsUrl { get; set; }
     }
 
+    public class CatalogServiceWarmUp : IHostedService
+    {
+        private readonly CatalogService _catalogService;
+
+        public CatalogServiceWarmUp(CatalogService catalogService)
+        {
+            _catalogService = catalogService;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            return _catalogService.GetCatalogStatsAsync();
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+    }
+
     public class CatalogService : IDisposable
     {
         private readonly IConfiguration _configuration;
         private SqliteConnection _sqliteConnection;
         private CatalogJobInfo _jobInfo;
 
-        public CatalogService(IConfiguration configuration)
+        public CatalogService(IConfiguration configuration, IWebHostEnvironment environment)
         {
             _configuration = configuration;
+
+            if (!environment.IsDevelopment())
+                Invalidate();
         }
 
         public void Invalidate()

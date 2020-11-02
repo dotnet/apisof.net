@@ -23,6 +23,7 @@ namespace ApiCatalogWeb
             services.AddControllers();
             services.AddSingleton<CatalogService>();
             services.AddSingleton<IconService>();
+            services.AddHostedService<CatalogServiceWarmUp>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
