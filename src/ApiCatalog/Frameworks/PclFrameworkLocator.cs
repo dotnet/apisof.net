@@ -28,7 +28,7 @@ namespace ApiCatalog
                 var profileDirectory = Path.Join(versionDirectory, "Profile", framework.Profile);
                 if (Directory.Exists(profileDirectory))
                 {
-                    var paths = Directory.GetFiles(versionDirectory, "*.dll");
+                    var paths = Directory.GetFiles(profileDirectory, "*.dll");
                     return new PathFileSet(paths);
                 }
             }
