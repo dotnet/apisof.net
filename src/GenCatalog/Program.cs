@@ -292,7 +292,7 @@ namespace GenCatalog
                 url = secrets?.GenCatalogWebHookUrl;
 
             var secret = Environment.GetEnvironmentVariable("GenCatalogWebHookSecret");
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrEmpty(secret))
                 secret = secrets?.GenCatalogWebHookSecret;
 
             if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(secret))
