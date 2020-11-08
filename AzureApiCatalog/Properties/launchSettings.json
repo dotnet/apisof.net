@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AzureApiCatalog": {
+      "commandName": "Project",
+      "commandLineArgs": "https://api.nuget.org/v3/index.json 5/1/2020"
+    }
+  }
+}
