@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-
-using Microsoft.Extensions.Configuration.UserSecrets;
-
-using Newtonsoft.Json;
 
 using PackageIndexing;
 
@@ -15,33 +12,70 @@ namespace PackageAnalyzerTest
     {
         static async Task Main(string[] args)
         {
-            var secrets = UserSecrets.Load();
-            var packages = new[]
-            {
-                //("System.Memory", "4.5.4"),
-                //("System.Collections.Immutable", "5.0.0-preview.7.20364.11"),
-                ("System.Collections.Immutable", "1.3.1"),
-                //("System.Collections.Immutable", "1.7.1"),
-            };
+            var indexPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Indexing");
 
             var stopwatch = Stopwatch.StartNew();
 
-            foreach (var (id, version) in packages)
-                await Indexer.Index(id, version, secrets.SqlConnectionString);
+            //await GenerateIndex(indexPath);
+            await ProduceCatalogBinary(indexPath, Path.Combine(indexPath, "apicatalog.dat"));
+            await ProduceCatalogSQLite(indexPath, Path.Combine(indexPath, "apicatalog.db"));
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
         }
-    }
 
-    class UserSecrets
-    {
-        public string SqlConnectionString { get; set; }
-
-        public static UserSecrets Load()
+        private static async Task GenerateIndex(string indexPath)
         {
-            var path = PathHelper.GetSecretsPathFromSecretsId("a65cd530-6c72-4fa1-a7d6-002260365e65");
-            var json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject<UserSecrets>(json);
+            var frameworkResolvers = new FrameworkResolver[]
+            {
+                // InstalledNetCoreResolver.Instance,
+                // InstalledNetFrameworkResolver.Instance
+                new ArchivedFrameworkResolver(@"C:\Users\immo\Downloads\PlatformArchive")
+            };
+
+            var frameworks = frameworkResolvers.SelectMany(r => r.Resolve());
+
+            var packages = new[]
+            {
+                ("System.Memory", "4.5.4"),
+                ("System.Collections.Immutable", "1.7.1"),
+            };
+
+            Directory.CreateDirectory(indexPath);
+
+            foreach (var framework in frameworks)
+            {
+                var path = Path.Join(indexPath, $"{framework.FrameworkName}.xml");
+                Console.WriteLine($"Indexing {framework.FrameworkName}...");
+                var frameworkEntry = await FrameworkIndexer.Index(framework.FrameworkName, framework.FileSet);
+                using (var stream = File.Create(path))
+                    frameworkEntry.Write(stream);
+            }
+
+            foreach (var (id, version) in packages)
+            {
+                var path = Path.Join(indexPath, $"{id}-{version}.xml");
+                Console.WriteLine($"Indexing {id} {version}...");
+                var packageEntry = await PackageIndexer.Index(id, version);
+                using (var stream = File.Create(path))
+                    packageEntry.Write(stream);
+            }
+        }
+
+        private static async Task ProduceCatalogBinary(string indexPath, string outputPath)
+        {
+            var builder = new CatalogBuilderBinary();
+            builder.Index(indexPath);
+
+            using (var stream = File.Create(outputPath))
+                builder.WriteTo(stream);
+        }
+
+        private static async Task ProduceCatalogSQLite(string indexPath, string outputPath)
+        {
+            File.Delete(outputPath);
+
+            var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
+            builder.Index(indexPath);
         }
     }
 }

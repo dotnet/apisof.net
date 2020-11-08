@@ -18,7 +18,7 @@ namespace IndexPackageFunction
         {
             var sqlConnectionString = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING");
             var message = JsonConvert.DeserializeObject<PackageQueueMessage>(messageJson);
-            await Indexer.Index(message.PackageId, message.PackageVersion, sqlConnectionString);
+            //await Indexer.Index(message.PackageId, message.PackageVersion, sqlConnectionString);
         }
 
         public class PackageQueueMessage
