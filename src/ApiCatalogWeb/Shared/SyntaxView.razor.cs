@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using ApiCatalogWeb.Services;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 using ApiCatalog;
 

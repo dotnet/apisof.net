@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿
 using NuGet.Frameworks;
 
 namespace ApiCatalog
@@ -10,6 +9,6 @@ namespace ApiCatalog
     /// </summary>
     public abstract class FrameworkLocator
     {
-        public abstract FileSet Locate(NuGetFramework framework);
+        public abstract string[] Locate(NuGetFramework framework);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 
 using NuGet.Frameworks;
 
@@ -14,7 +13,7 @@ namespace ApiCatalog
             _frameworksPath = frameworksPath;
         }
 
-        public override FileSet Locate(NuGetFramework framework)
+        public override string[] Locate(NuGetFramework framework)
         {
             var shortFolderName = GetFolderName(framework);
             var path = Path.Combine(_frameworksPath, shortFolderName);
@@ -25,7 +24,7 @@ namespace ApiCatalog
             if (paths.Length == 0)
                 return null;
 
-            return new PathFileSet(paths);
+            return paths;
         }
 
         private string GetFolderName(NuGetFramework framework)

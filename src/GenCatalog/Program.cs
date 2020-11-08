@@ -146,7 +146,7 @@ namespace GenCatalog
                 await DotnetPackageIndex.CreateAsync(packageListPath);
         }
 
-        private static async Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
+        private static Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
         {
             var frameworkResolvers = new FrameworkProvider[]
             {
@@ -159,23 +159,25 @@ namespace GenCatalog
 
             Directory.CreateDirectory(indexFrameworksPath);
 
-            foreach (var framework in frameworks)
+            foreach (var (frameworkName, paths) in frameworks)
             {
-                var path = Path.Join(indexFrameworksPath, $"{framework.FrameworkName}.xml");
+                var path = Path.Join(indexFrameworksPath, $"{frameworkName}.xml");
                 var alreadyIndexed = !reindex && File.Exists(path);
 
                 if (alreadyIndexed)
                 {
-                    Console.WriteLine($"{framework.FrameworkName} already indexed.");
+                    Console.WriteLine($"{frameworkName} already indexed.");
                 }
                 else
                 {
-                    Console.WriteLine($"Indexing {framework.FrameworkName}...");
-                    var frameworkEntry = await FrameworkIndexer.Index(framework.FrameworkName, framework.FileSet);
+                    Console.WriteLine($"Indexing {frameworkName}...");
+                    var frameworkEntry = FrameworkIndexer.Index(frameworkName, paths);
                     using (var stream = File.Create(path))
                         frameworkEntry.Write(stream);
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string indexPackagesPath, string frameworksPath)

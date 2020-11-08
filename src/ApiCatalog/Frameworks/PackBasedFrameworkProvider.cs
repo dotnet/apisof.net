@@ -13,7 +13,7 @@ namespace ApiCatalog
             _frameworksPath = frameworksPath;
         }
 
-        public override IEnumerable<(string FrameworkName, FileSet FileSet)> Resolve()
+        public override IEnumerable<(string FrameworkName, string[] Paths)> Resolve()
         {
             foreach (var directory in Directory.GetDirectories(_frameworksPath))
             {
@@ -30,8 +30,7 @@ namespace ApiCatalog
                                               .Select(p => Path.GetFullPath(Path.Combine(directory, p)))
                                               .Distinct()
                                               .ToArray();
-                    var fileSet = new PathFileSet(files);
-                    yield return (framework, fileSet);
+                    yield return (framework, files);
                 }
             }
         }

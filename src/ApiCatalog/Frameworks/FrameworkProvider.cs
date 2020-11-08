@@ -7,6 +7,6 @@ namespace ApiCatalog
     /// </summary>
     public abstract class FrameworkProvider
     {
-        public abstract IEnumerable<(string FrameworkName, FileSet FileSet)> Resolve();
+        public abstract IEnumerable<(string FrameworkName, string[] Paths)> Resolve();
     }
 }

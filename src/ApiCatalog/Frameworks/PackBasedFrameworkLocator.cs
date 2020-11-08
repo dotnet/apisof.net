@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using NuGet.Frameworks;
 
@@ -8,26 +7,26 @@ namespace ApiCatalog
     public sealed class PackBasedFrameworkLocator : FrameworkLocator
     {
         private readonly string _frameworksPath;
-        private Dictionary<string, FileSet> _mappings;
+        private Dictionary<string, string[]> _mappings;
 
         public PackBasedFrameworkLocator(string frameworksPath)
         {
             _frameworksPath = frameworksPath;
         }
 
-        public override FileSet Locate(NuGetFramework framework)
+        public override string[] Locate(NuGetFramework framework)
         {
             if (_mappings == null)
             {
-                _mappings = new Dictionary<string, FileSet>();
+                _mappings = new Dictionary<string, string[]>();
                 var provider = new PackBasedFrameworkProvider(_frameworksPath);
-                foreach (var (tfm, pathSet) in provider.Resolve())
-                    _mappings.Add(tfm, pathSet);
+                foreach (var (tfm, paths) in provider.Resolve())
+                    _mappings.Add(tfm, paths);
             }
 
             var key = framework.GetShortFolderName();
-            _mappings.TryGetValue(key, out var fileSet);
-            return fileSet;
+            _mappings.TryGetValue(key, out var mappingPaths);
+            return mappingPaths;
         }
     }
 }

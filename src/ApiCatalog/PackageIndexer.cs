@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
@@ -80,18 +79,18 @@ namespace ApiCatalog
 
                         // Add framework
 
-                        var plaformSet = GetPlatformSet(target);
+                        var platformPaths = GetPlatformSet(target);
 
-                        if (plaformSet == null)
+                        if (platformPaths == null)
                         {
                             if (!IsKnownUnsupportedPlatform(target))
                                 Console.WriteLine($"error: can't resolve platform references for {target}");
                             continue;
                         }
 
-                        foreach (var (path, stream) in plaformSet.GetFiles())
+                        foreach (var path in platformPaths)
                         {
-                            var metadata = await AssemblyStream.CreateAsync(stream, path);
+                            var metadata = MetadataReference.CreateFromFile(path);
                             dependencyMetadata.Add(metadata);
                         }
 
@@ -186,13 +185,13 @@ namespace ApiCatalog
             }
         }
 
-        private FileSet GetPlatformSet(NuGetFramework framework)
+        private string[] GetPlatformSet(NuGetFramework framework)
         {
             foreach (var l in _frameworkLocators)
             {
-                var fileSet = l.Locate(framework);
-                if (fileSet != null)
-                    return fileSet;
+                var paths = l.Locate(framework);
+                if (paths != null)
+                    return paths;
             }
 
             return null;

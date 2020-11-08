@@ -8,13 +8,13 @@ namespace ApiCatalog
 {
     public static class FrameworkIndexer
     {
-        public static async Task<FrameworkEntry> Index(string frameworkName, FileSet fileSet)
+        public static FrameworkEntry Index(string frameworkName, IEnumerable<string> assemblyPaths)
         {
             var references = new List<MetadataReference>();
 
-            foreach (var (path, stream) in fileSet.GetFiles())
-            {
-                var metadata = await AssemblyStream.CreateAsync(stream, path);
+            foreach (var path in assemblyPaths)
+            {               
+                var metadata = MetadataReference.CreateFromFile(path);
                 references.Add(metadata);
             }
 

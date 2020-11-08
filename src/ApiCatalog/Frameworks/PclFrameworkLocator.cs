@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 
 using NuGet.Frameworks;
 
@@ -14,7 +13,7 @@ namespace ApiCatalog
             _archiveFolder = archiveFolder;
         }
 
-        public override FileSet Locate(NuGetFramework framework)
+        public override string[] Locate(NuGetFramework framework)
         {
             var portablePath = Path.Combine(_archiveFolder, framework.Framework);
 
@@ -29,7 +28,7 @@ namespace ApiCatalog
                 if (Directory.Exists(profileDirectory))
                 {
                     var paths = Directory.GetFiles(profileDirectory, "*.dll");
-                    return new PathFileSet(paths);
+                    return paths;
                 }
             }
 

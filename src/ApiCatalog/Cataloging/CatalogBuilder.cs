@@ -10,7 +10,6 @@ namespace ApiCatalog
         public void Index(string indexPath)
         {
             var files = Directory.GetFiles(indexPath, "*.xml");
-            var fileSet = new PathFileSet(files);
 
             static void DefineApis(CatalogBuilder builder, IEnumerable<XElement> apiElements)
             {
@@ -27,10 +26,10 @@ namespace ApiCatalog
                 }
             }
 
-            foreach (var (path, data) in fileSet.GetFiles())
+            foreach (var path in files)
             {
                 Console.WriteLine($"Processing {path}...");
-                var doc = XDocument.Load(data);
+                var doc = XDocument.Load(path);
                 if (doc.Root.IsEmpty)
                     continue;
 
