@@ -260,7 +260,7 @@ namespace GenCatalog
         {
             File.Delete(outputPath);
 
-            var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
+            using var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
             builder.Index(platformsPath);
             builder.Index(packagesPath);
         }
