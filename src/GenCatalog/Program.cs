@@ -194,7 +194,7 @@ namespace GenCatalog
             var nugetStore = new NuGetStore(nugetFeed, packagesPath);
             var packageIndexer = new PackageIndexer(nugetStore, frameworkLocators);
 
-            var retryIndexed = true;
+            var retryIndexed = false;
             var retryDisabled = false;
             var retryFailed = false;
 
