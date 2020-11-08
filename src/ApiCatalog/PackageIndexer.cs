@@ -80,7 +80,7 @@ namespace ApiCatalog
 
                         // Add framework
 
-                        var plaformSet = await GetPlatformSet(target);
+                        var plaformSet = GetPlatformSet(target);
 
                         if (plaformSet == null)
                         {
@@ -186,11 +186,11 @@ namespace ApiCatalog
             }
         }
 
-        private async Task<FileSet> GetPlatformSet(NuGetFramework framework)
+        private FileSet GetPlatformSet(NuGetFramework framework)
         {
             foreach (var l in _frameworkLocators)
             {
-                var fileSet = await l.LocateAsync(framework);
+                var fileSet = l.Locate(framework);
                 if (fileSet != null)
                     return fileSet;
             }

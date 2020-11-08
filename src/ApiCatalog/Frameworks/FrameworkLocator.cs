@@ -10,6 +10,6 @@ namespace ApiCatalog
     /// </summary>
     public abstract class FrameworkLocator
     {
-        public abstract Task<FileSet> LocateAsync(NuGetFramework framework);
+        public abstract FileSet Locate(NuGetFramework framework);
     }
 }

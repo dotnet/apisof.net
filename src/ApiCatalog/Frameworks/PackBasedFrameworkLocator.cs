@@ -15,7 +15,7 @@ namespace ApiCatalog
             _frameworksPath = frameworksPath;
         }
 
-        public override async Task<FileSet> LocateAsync(NuGetFramework framework)
+        public override FileSet Locate(NuGetFramework framework)
         {
             if (_mappings == null)
             {

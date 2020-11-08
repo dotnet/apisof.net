@@ -14,7 +14,7 @@ namespace ApiCatalog
             _archiveFolder = archiveFolder;
         }
 
-        public override async Task<FileSet> LocateAsync(NuGetFramework framework)
+        public override FileSet Locate(NuGetFramework framework)
         {
             var portablePath = Path.Combine(_archiveFolder, framework.Framework);
 

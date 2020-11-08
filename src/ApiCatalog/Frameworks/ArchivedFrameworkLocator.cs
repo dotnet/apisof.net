@@ -14,7 +14,7 @@ namespace ApiCatalog
             _frameworksPath = frameworksPath;
         }
 
-        public override async Task<FileSet> LocateAsync(NuGetFramework framework)
+        public override FileSet Locate(NuGetFramework framework)
         {
             var shortFolderName = GetFolderName(framework);
             var path = Path.Combine(_frameworksPath, shortFolderName);

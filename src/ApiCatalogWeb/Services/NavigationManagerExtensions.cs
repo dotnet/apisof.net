@@ -27,7 +27,7 @@ namespace ApiCatalogWeb.Services
             parameters.Remove(key);
             parameters.Add(key, value);
 
-            var newParameters = parameters.SelectMany(kvp => kvp.Value, (kvp, v) => KeyValuePair.Create<string, string?>(kvp.Key, v))
+            var newParameters = parameters.SelectMany(kvp => kvp.Value, (kvp, v) => KeyValuePair.Create<string, string>(kvp.Key, v))
                                           .ToDictionary(kv => kv.Key, kv => kv.Value);
 
             return QueryHelpers.AddQueryString(uri.ToString(), newParameters);
