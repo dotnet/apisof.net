@@ -44,12 +44,31 @@
             $('[data-toggle="popover"]').on('click', function () {
                 $('[data-toggle="popover"]').popover('dispose');
             });
+            $('.search-result-row.selected').each(function () {
+                this.scrollIntoView({block: "nearest"});
+            });
         });
         observer.observe(document, {
             subtree: true,
             childList: true,
             attributes: true
         });
+        window.registerSearchInputKeyDown = (element, helper) => {
+            $(element).keydown(function (e) {
+                if (e.keyCode == 38) {
+                    helper.invokeMethodAsync('SelectPrevious');
+                    e.preventDefault();
+                }
+                else if (e.keyCode == 40) {
+                    helper.invokeMethodAsync('SelectNext');
+                    e.preventDefault();
+                }
+                else if (e.keyCode == 13) {
+                    helper.invokeMethodAsync('Accept');
+                    e.preventDefault();
+                }
+            });
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,35 @@
+﻿@inject IJSRuntime JSRuntime
+
+<div class="modal @_modalClass" tabindex="-1" role="dialog" style="display:@_modalDisplay">
+    <div class="modal-dialog modal-full" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Search</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="_ => Close()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input" @bind="SearchText" @oninput="e => UpdateSearchResults(e)" />
+
+                @if (SearchResults != null && SearchResults.Length > 0)
+                {
+                    <ul class="list-unstyled search-results mt-2">
+                        @foreach (var result in SearchResults)
+                        {
+                            var selectedClass = result == SelectedResult ? "selected" : "";
+                            <li class="search-result-row @selectedClass">
+                                <ApiIcon Kind="result.Kind" />&nbsp;@result.Fullname
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (IsOpen)
+{
+    <div class="modal-backdrop fade show"></div>
+}

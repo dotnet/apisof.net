@@ -159,6 +159,11 @@ namespace ApiCatalogWeb.Services
         }
     }
 
+    public class CatalogSearchResult : CatalogApi
+    {
+        public string Fullname { get; set; }
+    }
+
     public class CatalogApiSpine
     {
         public CatalogApi Selected { get; set; }
@@ -308,6 +313,7 @@ namespace ApiCatalogWeb.Services
         private readonly IConfiguration _configuration;
         private SqliteConnection _sqliteConnection;
         private CatalogJobInfo _jobInfo;
+        private SuffixTree _suffixTree;
 
         public CatalogService(IConfiguration configuration, IWebHostEnvironment environment)
         {
@@ -367,6 +373,22 @@ namespace ApiCatalogWeb.Services
                 _sqliteConnection.Open();
             }
 
+            if (_suffixTree == null)
+            {
+                var path = GetSuffixTreePath();
+                if (!File.Exists(path))
+                {
+                    var azureConnectionString = _configuration["AzureStorageConnectionString"];
+                    var blobClient = new BlobClient(azureConnectionString, "catalog", "suffixtree.dat.deflate");
+                    using var blobStream = await blobClient.OpenReadAsync();
+                    using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
+                    using var fileStream = File.Create(path);
+                    await deflateStream.CopyToAsync(fileStream);
+                }
+
+                _suffixTree = SuffixTree.Load(path);
+            }
+
             return _sqliteConnection;
         }
 
@@ -374,6 +396,14 @@ namespace ApiCatalogWeb.Services
         {
             var binDirectory = Path.GetDirectoryName(GetType().Assembly.Location);
             var cacheLocation = Path.Combine(binDirectory, "apicatalog.db");
+            return cacheLocation;
+        }
+
+        private string GetSuffixTreePath()
+        {
+            var databasePath = GetDatabasePath();
+            var directory = Path.GetDirectoryName(databasePath);
+            var cacheLocation = Path.Combine(directory, "suffixTree.dat");
             return cacheLocation;
         }
 
@@ -708,6 +738,42 @@ namespace ApiCatalogWeb.Services
             writer.Flush();
 
             return stringWriter.ToString();
+        }
+
+        public async Task<IEnumerable<CatalogSearchResult>> Search(string query)
+        {
+            var apiIds = _suffixTree.Lookup(query).ToArray().Select(t => t.Value).Take(200);
+            var idStrings = string.Join(", ", apiIds);
+            var sql = $@"
+                WITH ApisH AS (
+	                SELECT	a.ApiId,
+			                a.Kind,
+			                a.ApiGuid,
+			                a.ParentApiId,
+			                a.Name,
+			                a.Name AS FullName
+	                FROM	Apis a
+	                WHERE   a.ApiId IN ({idStrings})
+
+	                UNION	ALL
+
+	                SELECT	h.ApiId,
+			                h.Kind,
+			                h.ApiGuid,
+			                a.ParentApiId,
+			                h.Name,
+			                a.Name || '.' || h.FullName
+	                FROM	ApisH h
+				                JOIN Apis a ON a.ApiId = h.ParentApiId
+                )
+                SELECT	*
+                FROM	ApisH
+                WHERE	ParentApiId IS NULL
+            ";
+
+            var connection = await GetConnectionAsync();
+            var results = await connection.QueryAsync<CatalogSearchResult>(sql);
+            return results.OrderBy(x => x.Fullname);
         }
 
         public void Dispose()

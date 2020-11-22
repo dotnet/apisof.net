@@ -23,6 +23,42 @@
     border-radius: 0rem;
 }
 
+/* General */
+
+.nofocus:focus {
+    outline: none;
+}
+
+/* Search */
+
+.modal-dialog.modal-full {
+    max-width: unset !important;
+    margin-top: 30px auto;
+    margin-bottom: 30px auto;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.search-results {
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.search-result-row {
+    color: black;
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    padding-left: 0.5rem;
+    background-color: transparent;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+    .search-result-row.selected {
+        color: white;
+        background-color: #007bff;
+    }
+
 /* Code */
 
 .syntax-view {

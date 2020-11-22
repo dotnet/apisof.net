@@ -12,6 +12,9 @@ using ApiCatalog;
 
 using Azure.Storage.Blobs;
 
+using Dapper;
+
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.UserSecrets;
 
 using NuGet.Versioning;
@@ -72,6 +75,7 @@ namespace GenCatalog
             var frameworksPath = Path.Combine(rootPath, "frameworks");
             var packsPath = Path.Combine(rootPath, "packs");
             var databasePath = Path.Combine(rootPath, "apicatalog.db");
+            var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");          
 
             var stopwatch = Stopwatch.StartNew();
 
@@ -81,7 +85,9 @@ namespace GenCatalog
             await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
             await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
             await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, databasePath);
+            await GenerateSuffixTreeAsync(databasePath, suffixTreePath);
             await UploadCatalogAsync(databasePath);
+            await UploadSuffixTreeAsync(suffixTreePath);
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
@@ -260,11 +266,57 @@ namespace GenCatalog
 
         private static async Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string outputPath)
         {
+            if (File.Exists(outputPath))
+                return;
+
             File.Delete(outputPath);
 
             using var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
             builder.Index(platformsPath);
             builder.Index(packagesPath);
+        }
+
+        private static async Task GenerateSuffixTreeAsync(string databasePath, string suffixTreePath)
+        {
+            if (File.Exists(suffixTreePath))
+                return;
+
+            var connectionString = new SqliteConnectionStringBuilder()
+            {
+                DataSource = databasePath
+            }.ToString();
+
+            using var connection = new SqliteConnection(connectionString);
+            connection.Open();
+
+            var rows = await connection.QueryAsync<(int Id, string FullName)>(@"
+                WITH ApiH AS
+                (
+                       SELECT  a.ApiId,
+                                       a.Name AS FullName
+                       FROM    Apis a
+                       WHERE   a.ParentApiId IS NULL
+
+                       UNION   ALL
+
+                       SELECT  a.ApiId,
+                                       h.FullName || '.' || a.Name
+                       FROM    ApiH h
+                                               JOIN Apis a ON a.ParentApiId = h.ApiId
+                )
+
+                SELECT ApiId,
+                        FullName
+                FROM   ApiH
+            ");
+
+            var builder = new SuffixTreeBuilder();
+
+            foreach (var (id, fullName) in rows)
+                builder.Add(fullName, id);
+
+            using var stream = File.Create(suffixTreePath);
+            builder.WriteSuffixTree(stream);
         }
 
         private static async Task UploadCatalogAsync(string databasePath)
@@ -279,6 +331,21 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
+            await blobClient.UploadAsync(compressedFileName, overwrite: true);
+        }
+
+        private static async Task UploadSuffixTreeAsync(string suffixTreePath)
+        {
+            var compressedFileName = suffixTreePath + ".deflate";
+            using (var inputStream = File.OpenRead(suffixTreePath))
+            using (var outputStream = File.Create(compressedFileName))
+            using (var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal))
+                await inputStream.CopyToAsync(deflateStream);
+
+            Console.WriteLine("Uploading suffix tree...");
+            var connectionString = GetAzureStorageConnectionString();
+            var container = "catalog";
+            var blobClient = new BlobClient(connectionString, container, "suffixtree.dat.deflate");
             await blobClient.UploadAsync(compressedFileName, overwrite: true);
         }
 

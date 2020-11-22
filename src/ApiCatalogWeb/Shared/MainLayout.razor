@@ -16,7 +16,11 @@
     </div>
 </nav>
 
-@Body
+<div class="nofocus" @ref="_bodyDiv" @onkeydown="KeyDown" tabindex="0">
+    @Body
+
+    <ApiSearch @ref="_apiSearch" OnClose="() => _bodyDiv.FocusAsync()"></ApiSearch>
+</div>
 
 <hr />
 
@@ -44,11 +48,33 @@
 }
 
 @code {
+    private ElementReference _bodyDiv;
+    private ApiSearch _apiSearch;
 
     public CatalogJobInfo CatalogJobInfo { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         CatalogJobInfo = await CatalogService.GetJobInfoAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await _bodyDiv.FocusAsync();
+    }
+
+    private async Task KeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "/")
+        {
+            if (_apiSearch.IsOpen)
+                await _apiSearch.Close();
+            else
+                await _apiSearch.Open();
+        }
+        else if (e.Key == "Escape")
+        {
+            await _apiSearch.Close();
+        }
     }
 }
