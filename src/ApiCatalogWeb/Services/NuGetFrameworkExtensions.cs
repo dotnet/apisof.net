@@ -51,6 +51,16 @@ namespace ApiCatalogWeb.Services
                         return ".NET Core";
                 case ".NETStandard":
                     return ".NET Standard";
+                case "MonoAndroid":
+                    return "Xamarin Android";
+                case "Xamarin.iOS":
+                    return "Xamarin iOS";
+                case "Xamarin.Mac":
+                    return "Xamarin macOS";
+                case "Xamarin.TVOS":
+                    return "Xamarin tvOS";
+                case "Xamarin.WatchOS":
+                    return "Xamarin watchOS";
                 default:
                     return framework.Framework;
             }
