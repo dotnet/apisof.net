@@ -142,6 +142,9 @@ namespace ApiCatalog
                 ",
                 @"
                     CREATE INDEX [IX_FrameworkAssemblies_FrameworkId] ON [FrameworkAssemblies] ([FrameworkId])
+                ",
+                @"
+                    CREATE INDEX [IX_FrameworkAssemblies_AssemblyId] ON [FrameworkAssemblies] ([AssemblyId])
                 "
             };
 
