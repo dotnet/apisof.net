@@ -325,13 +325,12 @@ namespace ApiCatalogWeb.Services
 
         public void Invalidate()
         {
-            if (_sqliteConnection != null)
-            {
-                _sqliteConnection.Dispose();
-                _sqliteConnection = null;
-                var path = GetDatabasePath();
-                File.Delete(path);
-            }
+            _sqliteConnection?.Dispose();
+            _sqliteConnection = null;
+            _suffixTree = null;
+
+            File.Delete(GetDatabasePath());
+            File.Delete(GetSuffixTreePath());
 
             _jobInfo = null;
         }
