@@ -14,5 +14,13 @@ namespace ApiCatalog
         public MarkupPartKind Kind { get; }
         public string Text { get; }
         public Guid? Reference { get; }
+
+        public override string ToString()
+        {
+            if (Reference == null)
+                return $"{Kind}: {Text}";
+            else
+                return $"{Kind}: {Text} --> {Reference}";
+        }
     }
 }

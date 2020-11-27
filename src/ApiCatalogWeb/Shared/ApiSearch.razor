@@ -19,7 +19,7 @@
                         {
                             var selectedClass = result == SelectedResult ? "selected" : "";
                             <li class="search-result-row @selectedClass">
-                                <ApiIcon Kind="result.Kind" />&nbsp;@result.Fullname
+                                <ApiIcon Kind="result.Kind" />&nbsp;@result.GetFullName()
                             </li>
                         }
                     </ul>

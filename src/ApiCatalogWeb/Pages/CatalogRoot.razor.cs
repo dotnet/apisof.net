@@ -11,12 +11,5 @@ namespace ApiCatalogWeb.Pages
     {
         [Inject]
         public CatalogService CatalogService { get; set; }
-
-        public IReadOnlyList<CatalogApi> Namespaces { get; set; }
-
-        protected override async Task OnInitializedAsync()
-        {
-            Namespaces = await CatalogService.GetNamespacesAsync();
-        }
     }
 }

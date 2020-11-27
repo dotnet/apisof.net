@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -82,6 +83,11 @@ namespace ApiCatalog
             }
 
             return new Markup(parts);
+        }
+
+        public override string ToString()
+        {
+            return string.Concat(Parts.Select(p => p.Text));
         }
     }
 }

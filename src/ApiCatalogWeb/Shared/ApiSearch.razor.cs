@@ -3,6 +3,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using ApiCatalog.CatalogModel;
+
 using ApiCatalogWeb.Services;
 
 using Microsoft.AspNetCore.Components;
@@ -18,8 +20,8 @@ namespace ApiCatalogWeb.Shared
         private CancellationTokenSource _cts;
 
         private string SearchText { get; set; }
-        private CatalogSearchResult[] SearchResults { get; set; }
-        private CatalogSearchResult SelectedResult { get; set; }
+        private ApiModel[] SearchResults { get; set; }
+        private ApiModel SelectedResult { get; set; }
 
         [Inject]
         private CatalogService CatalogService { get; set; }
@@ -77,7 +79,7 @@ namespace ApiCatalogWeb.Shared
         {
             if (SelectedResult != null)
             {
-                NavigationManager.NavigateTo($"/catalog/{SelectedResult.ApiGuid}");
+                NavigationManager.NavigateTo($"/catalog/{SelectedResult.Guid}");
                 Close();
             }
         }
@@ -87,8 +89,8 @@ namespace ApiCatalogWeb.Shared
             _modalDisplay = "block;";
             _modalClass = "Show";
             SearchText = "";
-            SearchResults = Array.Empty<CatalogSearchResult>();
-            SelectedResult = null;
+            SearchResults = Array.Empty<ApiModel>();
+            SelectedResult = default;
             IsOpen = true;
         }
 
@@ -110,7 +112,7 @@ namespace ApiCatalogWeb.Shared
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
 
-            var results = (await CatalogService.Search(SearchText)).ToArray();
+            var results = CatalogService.Search(SearchText).ToArray();
 
             if (!token.IsCancellationRequested)
             {

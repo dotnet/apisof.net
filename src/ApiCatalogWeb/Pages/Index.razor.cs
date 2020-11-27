@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-
+﻿using ApiCatalog.CatalogModel;
 using ApiCatalogWeb.Services;
 
 using Microsoft.AspNetCore.Components;
@@ -11,11 +10,11 @@ namespace ApiCatalogWeb.Pages
         [Inject]
         public CatalogService CatalogService { get; set; }
 
-        public CatalogStats CatalogStats { get; set; }
+        public ApiCatalogStatistics Statistics { get; set; }
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            CatalogStats = await CatalogService.GetCatalogStatsAsync();
+            Statistics = CatalogService.Catalog.GetStatistics();
         }
     }
 }

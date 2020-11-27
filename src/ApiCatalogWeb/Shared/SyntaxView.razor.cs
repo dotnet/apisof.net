@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 
 using ApiCatalogWeb.Services;
 
 using Microsoft.AspNetCore.Components;
 
 using ApiCatalog;
+using ApiCatalog.CatalogModel;
 
 namespace ApiCatalogWeb.Shared
 {
@@ -25,37 +24,23 @@ namespace ApiCatalogWeb.Shared
         public HtmlEncoder HtmlEncoder { get; set; }
 
         [Parameter]
-        public string Syntax { get; set; }
+        public Markup Markup { get; set; }
 
         [Parameter]
-        public string CurrentId { get; set; }
+        public ApiModel Current { get; set; }
 
         public MarkupString Output { get; set; }
 
-        protected override async Task OnParametersSetAsync()
+        protected override void OnParametersSet()
         {
-            var currentGuid = Guid.Parse(CurrentId);
-            var markup = Markup.Parse(Syntax);
-
-            var references = markup.Parts
-                                   .Where(p => p.Reference != null)
-                                   .Select(p => p.Reference.Value)
-                                   .Distinct()
-                                   .ToArray();
-
-            var apis = await CatalogService.GetApisWithParentsAsync(references);
-
-            Output = ToMarkupString(currentGuid, apis, markup);
+            Output = ToMarkupString();
         }
 
-        private MarkupString ToMarkupString(Guid currentGuid, IReadOnlyList<CatalogApi> apis, Markup markup)
+        private MarkupString ToMarkupString()
         {
-            var apiByGuid = apis.ToDictionary(a => Guid.Parse(a.ApiGuid));
-            var apiById = apis.ToDictionary(a => a.ApiId);
-
             var markupBuilder = new StringBuilder();
 
-            foreach (var part in markup.Parts)
+            foreach (var part in Markup.Parts)
             {
                 switch (part.Kind)
                 {
@@ -75,20 +60,19 @@ namespace ApiCatalogWeb.Shared
                         break;
                     case MarkupPartKind.Reference:
                     {
-                        var api = part.Reference == null || !apiByGuid.ContainsKey(part.Reference.Value)
-                            ? null
-                            : apiByGuid[part.Reference.Value];
+                        var api = part.Reference == null
+                            ? (ApiModel?)null
+                            : CatalogService.GetApiByGuid(part.Reference.Value);
 
-                        var isCurrent = part.Reference == currentGuid;
-                        var tooltip = api == null ? null : GeneratedTooltip(api, apiById, part.Reference.Value);
+                        var tooltip = api == null ? null : GeneratedTooltip(api.Value);
 
-                        if (isCurrent)
+                        if (api == Current)
                         {
                             markupBuilder.Append("<span class=\"reference-current\">");
                         }
                         else if (api != null)
                         {
-                            var referenceClass = GetReferenceClass(api.Kind);
+                            var referenceClass = GetReferenceClass(api.Value.Kind);
                             markupBuilder.Append($"<span class=\"{referenceClass}\"");
                             if (tooltip != null)
                                 markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
@@ -96,7 +80,7 @@ namespace ApiCatalogWeb.Shared
                             markupBuilder.Append(">");
                         }
 
-                        if (!isCurrent && api != null)
+                        if (api != null && api != Current)
                             markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
 
                         break;
@@ -114,20 +98,8 @@ namespace ApiCatalogWeb.Shared
             return new MarkupString(markupBuilder.ToString());
         }
 
-        private string GeneratedTooltip(CatalogApi leafApi, Dictionary<int, CatalogApi> apiById, Guid value)
+        private string GeneratedTooltip(ApiModel current)
         {
-            var apis = new List<CatalogApi>();
-            var ancestor = leafApi.ApiId;
-            while (ancestor != 0)
-            {
-                var api = apiById[ancestor];
-                apis.Add(api);
-                ancestor = api.ParentApiId;
-            }
-
-            apis.Reverse();
-            var current = apis.Last();
-
             var iconUrl = IconService.GetIcon(current.Kind);
 
             var sb = new StringBuilder();
@@ -135,7 +107,7 @@ namespace ApiCatalogWeb.Shared
 
             var isFirst = true;
             
-            foreach (var api in apis)
+            foreach (var api in current.AncestorsAndSelf().Reverse())
             {
                 if (isFirst)
                     isFirst = false;

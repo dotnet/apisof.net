@@ -1,10 +1,9 @@
 ﻿@page "/catalog/{Guid}"
-@using ApiCatalogWeb.Services;
 
-@if (Spine == null)
+@if (Api == default)
 {
     <div class="container-fluid">
-        <p>Loading...</p>
+        <p>API not found.</p>
     </div>
 }
 else
@@ -14,21 +13,16 @@ else
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><img height="16" width="16" src="/img/Database.svg" /> <a href="/catalog">Catalog</a></li>
 
-                @foreach (var p in Spine.Parents.AsEnumerable().Reverse())
+                @foreach (var api in Breadcrumbs)
                 {
-                    if (p == Spine.Selected)
+                    if (api == Api)
                     {
-                        <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@p.Kind" /> @p.Name</li>
+                        <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@api.Kind" /> @api.Name</li>
                     }
                     else
                     {
-                        <li class="breadcrumb-item"><ApiIcon Kind="@p.Kind" /> <a href="/catalog/@p.ApiGuid">@p.Name</a></li>
+                        <li class="breadcrumb-item"><ApiIcon Kind="@api.Kind" /> <a href="/catalog/@api.Guid">@api.Name</a></li>
                     }
-                }
-
-                @if (!Spine.Parents.Any(p => p == Spine.Selected))
-                {
-                    <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@Spine.Selected.Kind" /> @Spine.Selected.Name</li>
                 }
             </ol>
         </nav>
@@ -39,31 +33,31 @@ else
             <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right">
                 <li>
                     @{
-                        var rootUnsupportedClass = Spine.Root.IsUnsupported ? "text-muted" : "";
+                        var rootUnsupportedClass = ""; // TODO: Spine.Root.IsUnsupported ? "text-muted" : "";
                     }
 
-                    @if (Spine.Root == Spine.Selected)
+                    @if (Parent == Api)
                     {
-                        <ApiIcon Kind="@Spine.Root.Kind" /> <span class="font-weight-bold @rootUnsupportedClass">@Spine.Root.Name</span>
+                        <ApiIcon Kind="@Parent.Kind" /> <span class="font-weight-bold @rootUnsupportedClass">@Parent.Name</span>
                     }
                     else
                     {
-                        <ApiIcon Kind="@Spine.Root.Kind" /> <a class="@rootUnsupportedClass" href="/catalog/@Spine.Root.ApiGuid">@Spine.Root.Name</a>
+                        <ApiIcon Kind="@Parent.Kind" /> <a class="@rootUnsupportedClass" href="/catalog/@Parent.Guid">@Parent.Name</a>
                     }
 
                     <ul class="list-unstyled pl-4">
-                        @foreach (var child in Spine.Children)
+                        @foreach (var child in Parent.Children.OrderBy(x => x)) // TODO: Ideally the catalog is pre-sorted
                         {
-                            var childUnsupportedClass = child.IsUnsupported ? "text-muted" : "";
+                            var childUnsupportedClass = ""; // TODO: child.IsUnsupported ? "text-muted" : "";
 
                             <li>
-                                @if (child.ApiId == Spine.Selected.ApiId)
+                                @if (child == Api)
                                 {
                                     <ApiIcon Kind="@child.Kind" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
                                 }
                                 else
                                 {
-                                    <ApiIcon Kind="@child.Kind" /> <a class="@childUnsupportedClass" href="/catalog/@child.ApiGuid">@child.Name</a>
+                                    <ApiIcon Kind="@child.Kind" /> <a class="@childUnsupportedClass" href="/catalog/@child.Guid">@child.Name</a>
                                 }
                             </li>
                         }
@@ -73,29 +67,31 @@ else
 
             <div class="col-md-9">
 
-                @if (SelectedSyntax != null)
+                @if (SelectedMarkup != null)
                 {
-                    <SyntaxView Syntax="@SelectedSyntax" CurrentId="@Spine.Selected.ApiGuid" />
+                    <SyntaxView Markup="@SelectedMarkup" Current="@Api" />
                 }
 
-
                 <table class="table my-3">
-                    @if (Availability.Current != null)
+                    @if (SelectedAvailability != null)
                     {
+                        var assembly = SelectedAvailability.Declaration.Assembly;
                         <tr>
                             <th style="width: 150px">Assembly</th>
                             <td>
-                                @Availability.Current.AssemblyName<span class="small text-muted">, Version=@Availability.Current.AssemblyVersion, PublicKeyToken=@Availability.Current.AssemblyPublicKeyToken</span>                                
+                                @assembly.Name <span class="small text-muted">, Version=@assembly.Version, PublicKeyToken=@assembly.PublicKeyToken</span>
                             </td>
                         </tr>
                     }
 
-                    @if (Availability.Current is ApiCatalogWeb.Services.CatalogPackageAvailability pa)
+                    @if (SelectedAvailability != null && !SelectedAvailability.IsInBox)
                     {
+                        var package = SelectedAvailability.Package;
+                        var folder = SelectedAvailability.PackageFramework.GetShortFolderName();
                         <tr>
                             <th>Package</th>
                             <td>
-                                @pa.PackageName <span class="small text-muted">@pa.FrameworkName</span>
+                                <a href="https://nuget.org/packages/@package.Name">@package.Name</a> <span class="small text-muted">@folder</span>
                             </td>
                         </tr>
                     }
@@ -110,29 +106,30 @@ else
                         </tr>
                     }
 
-                    @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.framework.GetFrameworkDisplayString())
-                                                                         .OrderBy(g => g.Key))
+                    @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
+                                                                           .OrderBy(g => g.Key))
                     {
                         <tr>
                             <th>@frameworkGroup.Key</th>
                             <td>
                                 <span class="d-flex flex-row flex-wrap align-content-between">
-                                    @foreach (var (fx, availability) in frameworkGroup.OrderBy(fx => fx.framework.Version)
-                                                                            .ThenBy(fx => fx.framework.Profile))
+                                    @foreach (var group in frameworkGroup.GroupBy(fx => fx.Framework)
+                                                                         .OrderBy(g => g.Key.Version)
+                                                                         .ThenBy(g => g.Key.Profile))
                                     {
-                                        var versionFramework = fx.GetShortFolderName();
+                                        var availability = group.First();
+                                        var versionFramework = availability.Framework.GetShortFolderName();
                                         var isSelectedVersion = versionFramework == SelectedFramework;
-                                        var isPackage = availability is CatalogPackageAvailability;
-                                        var versionClass = isPackage
-                                                 ? "fx-version-package"
-                                                 : "fx-version-inbox";
+                                        var versionClass = availability.IsInBox
+                                                 ? "fx-version-inbox"
+                                                 : "fx-version-package";
 
                                         var activeClass = isSelectedVersion
                                              ? "active"
                                              : "";
 
                                         <span class="fx-version @versionClass @activeClass m-1">
-                                            <SetQueryParameter Key="fx" Value="@versionFramework">@fx.GetVersionDisplayString()</SetQueryParameter>
+                                            <SetQueryParameter Key="fx" Value="@versionFramework">@availability.Framework.GetVersionDisplayString()</SetQueryParameter>
                                         </span>
                                     }
                                 </span>

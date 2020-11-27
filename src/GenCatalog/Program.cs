@@ -9,12 +9,10 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using ApiCatalog;
+using ApiCatalog.CatalogModel;
 
 using Azure.Storage.Blobs;
 
-using Dapper;
-
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration.UserSecrets;
 
 using NuGet.Versioning;
@@ -75,7 +73,8 @@ namespace GenCatalog
             var frameworksPath = Path.Combine(rootPath, "frameworks");
             var packsPath = Path.Combine(rootPath, "packs");
             var databasePath = Path.Combine(rootPath, "apicatalog.db");
-            var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");          
+            var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
+            var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
 
             var stopwatch = Stopwatch.StartNew();
 
@@ -85,8 +84,10 @@ namespace GenCatalog
             await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
             await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
             await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, databasePath);
-            await GenerateSuffixTreeAsync(databasePath, suffixTreePath);
-            await UploadCatalogAsync(databasePath);
+            await GenerateCatalogModel(databasePath, catalogModelPath);
+            await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
+            await UploadCatalogDatabaseAsync(databasePath);
+            await UploadCatalogModelAsync(catalogModelPath);
             await UploadSuffixTreeAsync(suffixTreePath);
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
@@ -276,50 +277,34 @@ namespace GenCatalog
             builder.Index(packagesPath);
         }
 
-        private static async Task GenerateSuffixTreeAsync(string databasePath, string suffixTreePath)
+        private static async Task GenerateCatalogModel(string databasePath, string catalogModelPath)
         {
-            if (File.Exists(suffixTreePath))
+            if (File.Exists(catalogModelPath))
                 return;
 
-            var connectionString = new SqliteConnectionStringBuilder()
-            {
-                DataSource = databasePath
-            }.ToString();
+            Console.WriteLine($"Generating {Path.GetFileName(catalogModelPath)}...");
+            await ApiCatalogModel.ConvertAsync(databasePath, catalogModelPath);
+        }
 
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+        private static Task GenerateSuffixTreeAsync(string catalogModelPath, string suffixTreePath)
+        {
+            if (File.Exists(suffixTreePath))
+                return Task.CompletedTask;
 
-            var rows = await connection.QueryAsync<(int Id, string FullName)>(@"
-                WITH ApiH AS
-                (
-                       SELECT  a.ApiId,
-                                       a.Name AS FullName
-                       FROM    Apis a
-                       WHERE   a.ParentApiId IS NULL
-
-                       UNION   ALL
-
-                       SELECT  a.ApiId,
-                                       h.FullName || '.' || a.Name
-                       FROM    ApiH h
-                                               JOIN Apis a ON a.ParentApiId = h.ApiId
-                )
-
-                SELECT ApiId,
-                        FullName
-                FROM   ApiH
-            ");
-
+            Console.WriteLine($"Generating {Path.GetFileName(suffixTreePath)}...");
+            var catalog = ApiCatalogModel.Load(catalogModelPath);
             var builder = new SuffixTreeBuilder();
 
-            foreach (var (id, fullName) in rows)
-                builder.Add(fullName, id);
+            foreach (var api in catalog.GetAllApis())
+                builder.Add(api.ToString(), api.Id);
 
             using var stream = File.Create(suffixTreePath);
             builder.WriteSuffixTree(stream);
+
+            return Task.CompletedTask;
         }
 
-        private static async Task UploadCatalogAsync(string databasePath)
+        private static async Task UploadCatalogDatabaseAsync(string databasePath)
         {
             var compressedFileName = databasePath + ".deflate";
             using (var inputStream = File.OpenRead(databasePath))
@@ -327,11 +312,21 @@ namespace GenCatalog
             using (var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal))
                 await inputStream.CopyToAsync(deflateStream);
 
-            Console.WriteLine("Uploading database...");
+            Console.WriteLine("Uploading catalog database...");
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
             await blobClient.UploadAsync(compressedFileName, overwrite: true);
+        }
+
+        private static async Task UploadCatalogModelAsync(string catalogModelPath)
+        {
+            Console.WriteLine("Uploading catalog mode...");
+            var connectionString = GetAzureStorageConnectionString();
+            var container = "catalog";
+            var name = Path.GetFileName(catalogModelPath);
+            var blobClient = new BlobClient(connectionString, container, name);
+            await blobClient.UploadAsync(catalogModelPath, overwrite: true);
         }
 
         private static async Task UploadSuffixTreeAsync(string suffixTreePath)

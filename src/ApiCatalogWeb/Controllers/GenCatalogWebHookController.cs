@@ -38,7 +38,7 @@ namespace ApiCatalogWeb.Controllers
             if (secret != expectedSecret)
                 return Unauthorized();
 
-            _catalogService.Invalidate();
+            await _catalogService.InvalidateAsync();
 
             return Ok();
         }

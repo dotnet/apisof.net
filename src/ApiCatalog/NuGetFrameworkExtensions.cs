@@ -2,7 +2,7 @@
 
 using NuGet.Frameworks;
 
-namespace ApiCatalogWeb.Services
+namespace ApiCatalog
 {
     public static class NuGetFrameworkExtensions
     {
@@ -39,7 +39,7 @@ namespace ApiCatalogWeb.Services
         }
 
         public static string GetFrameworkDisplayString(this NuGetFramework framework)
-        {         
+        {
             switch (framework.Framework)
             {
                 case ".NETFramework":
