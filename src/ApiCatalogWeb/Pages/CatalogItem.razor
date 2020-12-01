@@ -115,6 +115,8 @@ else
                                 <span class="d-flex flex-row flex-wrap align-content-between">
                                     @foreach (var group in frameworkGroup.GroupBy(fx => fx.Framework)
                                                                          .OrderBy(g => g.Key.Version)
+                                                                         .ThenBy(g => g.Key.Platform)
+                                                                         .ThenBy(g => g.Key.PlatformVersion)
                                                                          .ThenBy(g => g.Key.Profile))
                                     {
                                         var availability = group.First();
