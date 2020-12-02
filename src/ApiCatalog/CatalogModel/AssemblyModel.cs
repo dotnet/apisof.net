@@ -34,7 +34,7 @@ namespace ApiCatalog.CatalogModel
             }
         }
 
-        public string Version
+        public string PublicKeyToken
         {
             get
             {
@@ -43,7 +43,7 @@ namespace ApiCatalog.CatalogModel
             }
         }
 
-        public string PublicKeyToken
+        public string Version
         {
             get
             {
