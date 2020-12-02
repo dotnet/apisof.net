@@ -9,9 +9,14 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav mr-auto">
-            <NavLink class="nav-link" href="/catalog" Match="NavLinkMatch.All">
-                Browse
-            </NavLink>
+            <li>
+                <NavLink class="nav-link" href="/catalog" Match="NavLinkMatch.All">
+                    Browse
+                </NavLink>
+            </li>
+            <li>
+                <a class="nav-link" href="javascript:window.showSearch()">Search</a>
+            </li>
         </ul>
     </div>
 </nav>
@@ -70,7 +75,7 @@
             if (_apiSearch.IsOpen)
                 await _apiSearch.Close();
             else
-                await _apiSearch.Open();
+                _apiSearch.Open();
         }
         else if (e.Key == "Escape")
         {

@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 using ApiCatalog;
@@ -26,6 +27,7 @@ namespace ApiCatalogWeb.Services
         private ApiCatalogModel _catalog;
         private SuffixTree _suffixTree;
         private Dictionary<Guid, ApiModel> _apiByGuid;
+        private ApiCatalogStatistics _statistics;
 
         public CatalogService(IConfiguration configuration, IWebHostEnvironment environment)
         {
@@ -67,6 +69,7 @@ namespace ApiCatalogWeb.Services
             var suffixTree = SuffixTree.Load(suffixTreePath);
 
             _catalog = catalog;
+            _statistics = catalog.GetStatistics();
             _apiByGuid = apiByGuid;
             _suffixTree = suffixTree;
         }
@@ -87,6 +90,8 @@ namespace ApiCatalogWeb.Services
         }
 
         public ApiCatalogModel Catalog => _catalog;
+
+        public ApiCatalogStatistics CatalogStatistics => _statistics;
 
         public async Task<CatalogJobInfo> GetJobInfoAsync()
         {

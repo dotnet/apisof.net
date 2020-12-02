@@ -1,36 +1,13 @@
 ﻿@page "/"
 
-<div class="container-fluid">
-    <h1>Azure API Catalog</h1>
+<div class="jumbotron jumbotron-fluid">
+    <div class="container">
+        <h1 class="display-4">.NET API Catalog</h1>
+        <p class="lead">The catalog contains <strong>@Statistics.NumberOfApis.ToString("N0")</strong> APIs.</p>
 
-    A better and more accurate API Catalog.
-
-    @if (Statistics != null)
-    {
-        <dl>
-            <dt>NumberOfApis</dt>
-            <dd>@Statistics.NumberOfApis.ToString("N0")</dd>
-
-            <dt>NumberOfDeclarations</dt>
-            <dd>@Statistics.NumberOfDeclarations.ToString("N0")</dd>
-
-            <dt>NumberOfAssemblies</dt>
-            <dd>@Statistics.NumberOfAssemblies.ToString("N0")</dd>
-
-            <dt>NumberOfFrameworks</dt>
-            <dd>@Statistics.NumberOfFrameworks.ToString("N0")</dd>
-
-            <dt>NumberOfPlatformAssemblies</dt>
-            <dd>@Statistics.NumberOfFrameworkAssemblies.ToString("N0")</dd>
-
-            <dt>NumberOfPackages</dt>
-            <dd>@Statistics.NumberOfPackages.ToString("N0")</dd>
-
-            <dt>NumberOfPackageVersions</dt>
-            <dd>@Statistics.NumberOfPackageVersions.ToString("N0")</dd>
-
-            <dt>NumberOfPackageAssemblies</dt>
-            <dd>@Statistics.NumberOfPackageAssemblies.ToString("N0")</dd>
-        </dl>
-    }
+        <div class="btn-group" role="group">
+            <a type="button" class="btn btn-lg btn-primary" href="/catalog">Browse</a>
+            <button type="button" class="btn btn-lg btn-info" onclick="window.showSearch()">Search</button>
+        </div>
+    </div>
 </div>

@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>.NET API Catalog (Beta)</title>
+    <title>.NET API Catalog</title>
     <base href="~/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link href="css/site.css" rel="stylesheet" />
@@ -54,6 +54,9 @@
             attributes: true
         });
         window.registerSearchInputKeyDown = (element, helper) => {
+            window.showSearch = () => {
+                helper.invokeMethodAsync('ShowSearch');
+            }
             $(element).keydown(function (e) {
                 if (e.keyCode == 38) {
                     helper.invokeMethodAsync('SelectPrevious');

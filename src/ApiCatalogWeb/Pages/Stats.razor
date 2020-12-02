@@ -1,0 +1,29 @@
+﻿@page "/stats"
+
+<div class="container-fluid">
+    <dl>
+        <dt>#Apis</dt>
+        <dd>@Statistics.NumberOfApis.ToString("N0")</dd>
+
+        <dt>#Declarations</dt>
+        <dd>@Statistics.NumberOfDeclarations.ToString("N0")</dd>
+
+        <dt>#Assemblies</dt>
+        <dd>@Statistics.NumberOfAssemblies.ToString("N0")</dd>
+
+        <dt>#Frameworks</dt>
+        <dd>@Statistics.NumberOfFrameworks.ToString("N0")</dd>
+
+        <dt>#Framework Assemblies</dt>
+        <dd>@Statistics.NumberOfFrameworkAssemblies.ToString("N0")</dd>
+
+        <dt>#Packages</dt>
+        <dd>@Statistics.NumberOfPackages.ToString("N0")</dd>
+
+        <dt>#Package Versions</dt>
+        <dd>@Statistics.NumberOfPackageVersions.ToString("N0")</dd>
+
+        <dt>#Package Assemblies</dt>
+        <dd>@Statistics.NumberOfPackageAssemblies.ToString("N0")</dd>
+    </dl>
+</div>

@@ -41,7 +41,7 @@ namespace ApiCatalogWeb.Shared
 
             if (firstRender)
             {
-                var helper = new NextAndPreviousHelper(SelectedPrevious, SelectedNext, Accept);
+                var helper = new NextAndPreviousHelper(Open, SelectedPrevious, SelectedNext, Accept);
                 var helperReference = DotNetObjectReference.Create(helper);
                 await JSRuntime.InvokeVoidAsync("registerSearchInputKeyDown", _inputElement, helperReference);
             }
@@ -84,7 +84,7 @@ namespace ApiCatalogWeb.Shared
             }
         }
 
-        public async Task Open()
+        public void Open()
         {
             _modalDisplay = "block;";
             _modalClass = "Show";
@@ -92,6 +92,7 @@ namespace ApiCatalogWeb.Shared
             SearchResults = Array.Empty<ApiModel>();
             SelectedResult = default;
             IsOpen = true;
+            StateHasChanged();
         }
 
         public async Task Close()
@@ -123,15 +124,23 @@ namespace ApiCatalogWeb.Shared
 
         public class NextAndPreviousHelper
         {
+            private readonly Action _showSearch;
             private readonly Action _previous;
             private readonly Action _next;
             private readonly Action _accept;
 
-            public NextAndPreviousHelper(Action previous, Action next, Action accept)
+            public NextAndPreviousHelper(Action showSearch, Action previous, Action next, Action accept)
             {
+                _showSearch = showSearch;
                 _previous = previous;
                 _next = next;
                 _accept = accept;
+            }
+
+            [JSInvokable]
+            public void ShowSearch()
+            {
+                _showSearch.Invoke();
             }
 
             [JSInvokable]
