@@ -10,11 +10,6 @@ namespace ApiCatalogWeb.Pages
         [Inject]
         public CatalogService CatalogService { get; set; }
 
-        public ApiCatalogStatistics Statistics { get; set; }
-
-        protected override void OnInitialized()
-        {
-            Statistics = CatalogService.Catalog.GetStatistics();
-        }
+        public ApiCatalogStatistics Statistics => CatalogService.CatalogStatistics;
     }
 }

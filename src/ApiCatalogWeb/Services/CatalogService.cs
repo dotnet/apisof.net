@@ -43,10 +43,11 @@ namespace ApiCatalogWeb.Services
                 File.Delete(GetSuffixTreePath());
             }
 
+            var azureConnectionString = _configuration["AzureStorageConnectionString"];
+
             var databasePath = GetDatabasePath();
             if (!File.Exists(databasePath))
             {
-                var azureConnectionString = _configuration["AzureStorageConnectionString"];
                 var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
                 await blobClient.DownloadToAsync(databasePath);
             }
@@ -58,7 +59,6 @@ namespace ApiCatalogWeb.Services
             if (!File.Exists(suffixTreePath))
             {
                 // TODO: Ideally the underlying file format uses compression. This seems weird.
-                var azureConnectionString = _configuration["AzureStorageConnectionString"];
                 var blobClient = new BlobClient(azureConnectionString, "catalog", "suffixtree.dat.deflate");
                 using var blobStream = await blobClient.OpenReadAsync();
                 using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
@@ -68,10 +68,15 @@ namespace ApiCatalogWeb.Services
 
             var suffixTree = SuffixTree.Load(suffixTreePath);
 
+            var jobBlobClient = new BlobClient(azureConnectionString, "catalog", "job.json");
+            using var jobStream = await jobBlobClient.OpenReadAsync();
+            var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream);
+
             _catalog = catalog;
             _statistics = catalog.GetStatistics();
             _apiByGuid = apiByGuid;
             _suffixTree = suffixTree;
+            _jobInfo = jobInfo;
         }
 
         private string GetDatabasePath()
@@ -93,18 +98,7 @@ namespace ApiCatalogWeb.Services
 
         public ApiCatalogStatistics CatalogStatistics => _statistics;
 
-        public async Task<CatalogJobInfo> GetJobInfoAsync()
-        {
-            if (_jobInfo == null)
-            {
-                var azureConnectionString = _configuration["AzureStorageConnectionString"];
-                var blobClient = new BlobClient(azureConnectionString, "catalog", "job.json");
-                using var blobStream = await blobClient.OpenReadAsync();
-                _jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(blobStream);
-            }
-
-            return _jobInfo;
-        }
+        public CatalogJobInfo JobInfo => _jobInfo;
 
         public ApiModel GetApiByGuid(Guid guid)
         {
