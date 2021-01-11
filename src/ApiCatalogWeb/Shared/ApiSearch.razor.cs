@@ -110,6 +110,8 @@ namespace ApiCatalogWeb.Shared
             if (_cts != null)
                 _cts.Cancel();
 
+            StateHasChanged();
+
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
 
