@@ -67,7 +67,7 @@
 }
 
 .search-result-row {
-    color: black;
+    color: var(--color-text-primary);
     border-radius: 0.25rem;
     padding: 0.25rem;
     padding-left: 0.5rem;
@@ -139,6 +139,58 @@
 .syntax-view .reference-current {
     font-weight: 800
 }
+
+@media (prefers-color-scheme: dark) {
+    .syntax-view {
+        background-color: rgb(40, 40, 40);
+    }
+
+        .syntax-view pre {
+            color: rgb(220, 220, 220);
+        }
+
+        .syntax-view .keyword {
+            color: rgb(86, 156, 214);
+        }
+
+        .syntax-view .punctuation {
+            color: rgb(220, 220, 220);
+        }
+
+        .syntax-view .string {
+            color: rgb(214, 157, 133);
+        }
+
+        .syntax-view .number {
+            color: rgb(181, 206, 168);
+        }
+
+        .syntax-view .class a {
+            color: rgb(78, 201, 176);
+        }
+
+        .syntax-view .delegate a {
+            color: rgb(78, 201, 176);
+        }
+
+        .syntax-view .enum a {
+            color: rgb(184, 215, 163);
+        }
+
+        .syntax-view .struct a {
+            color: rgb(134, 198, 145);
+        }
+
+        .syntax-view .interface a {
+            color: rgb(184, 215, 163);
+        }
+
+        .syntax-view .reference a {
+            color: rgb(220, 220, 220);
+        }
+}
+
+/* Version table */
 
 .fx-version {
     border-radius: .5rem;
