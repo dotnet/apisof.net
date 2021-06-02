@@ -14,9 +14,11 @@ namespace ApiCatalog
         public static async Task<CatalogBuilderSQLite> CreateAsync(string path)
         {
             var exists = File.Exists(path);
-            var cb = new SqliteConnectionStringBuilder();
-            cb.DataSource = path;
-            cb.Mode = SqliteOpenMode.ReadWriteCreate;
+            var cb = new SqliteConnectionStringBuilder
+            {
+                DataSource = path,
+                Mode = SqliteOpenMode.ReadWriteCreate
+            };
 
             var connection = new SqliteConnection(cb.ToString());
             var result = new CatalogBuilderSQLite(connection);

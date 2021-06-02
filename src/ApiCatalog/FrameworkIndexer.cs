@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 using Microsoft.CodeAnalysis;
 
@@ -13,7 +12,7 @@ namespace ApiCatalog
             var references = new List<MetadataReference>();
 
             foreach (var path in assemblyPaths)
-            {               
+            {
                 var metadata = MetadataReference.CreateFromFile(path);
                 references.Add(metadata);
             }

@@ -121,7 +121,7 @@ namespace ApiCatalog.CatalogModel
 
             private int WriteSyntax(string value)
             {
-                if (!_stringOffsetByString.TryGetValue(value, out int offset))
+                if (!_stringOffsetByString.TryGetValue(value, out var offset))
                 {
                     var parts = Markup.Parse(value).Parts.ToList();
                     foreach (var part in parts)
@@ -171,7 +171,7 @@ namespace ApiCatalog.CatalogModel
 
                 _frameworkTable.WriteInt32Placeholders(rowList.Count);
 
-                for (int i = 0; i < rowList.Count; i++)
+                for (var i = 0; i < rowList.Count; i++)
                 {
                     var rowOffset = _frameworkTable.Offset;
                     _frameworkTable.Offset = tableStart + i * 4;
@@ -217,7 +217,7 @@ namespace ApiCatalog.CatalogModel
 
                 _packageTable.WriteInt32Placeholders(rowList.Count);
 
-                for (int i = 0; i < rowList.Count; i++)
+                for (var i = 0; i < rowList.Count; i++)
                 {
                     var rowOffset = _packageTable.Offset;
                     _packageTable.Offset = tableStart + i * 4;
@@ -285,7 +285,7 @@ namespace ApiCatalog.CatalogModel
 
                 _assemblyTable.WriteInt32Placeholders(rowList.Count);
 
-                for (int i = 0; i < rowList.Count; i++)
+                for (var i = 0; i < rowList.Count; i++)
                 {
                     var rowOffset = _assemblyTable.Offset;
                     _assemblyTable.Offset = tableStart + i * 4;
@@ -361,7 +361,7 @@ namespace ApiCatalog.CatalogModel
 
             private async Task WriteApisAsync(IReadOnlyList<ApiRow> rows, int parentOffset, int parentChildArrayStart)
             {
-                for (int rowIndex = 0; rowIndex < rows.Count; rowIndex++)
+                for (var rowIndex = 0; rowIndex < rows.Count; rowIndex++)
                 {
                     var row = rows[rowIndex];
                     var childRows = await _connection.QueryAsync<ApiRow>(@"
@@ -558,10 +558,7 @@ namespace ApiCatalog.CatalogModel
                         return (int)_stream.Position;
                     }
 
-                    set
-                    {
-                        _stream.Position = value;
-                    }
+                    set => _stream.Position = value;
                 }
 
                 public int Length

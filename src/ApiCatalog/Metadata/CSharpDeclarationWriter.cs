@@ -1065,7 +1065,7 @@ namespace ApiCatalog
 
         private static void WriteParameters(ImmutableArray<IParameterSymbol> parameters, SyntaxWriter writer)
         {
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
                 if (i > 0)
                 {

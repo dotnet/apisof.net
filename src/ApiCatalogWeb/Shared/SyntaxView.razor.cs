@@ -3,12 +3,12 @@ using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 
+using ApiCatalog;
+using ApiCatalog.CatalogModel;
+
 using ApiCatalogWeb.Services;
 
 using Microsoft.AspNetCore.Components;
-
-using ApiCatalog;
-using ApiCatalog.CatalogModel;
 
 namespace ApiCatalogWeb.Shared
 {
@@ -59,32 +59,32 @@ namespace ApiCatalogWeb.Shared
                         markupBuilder.Append("<span class=\"keyword\">");
                         break;
                     case MarkupPartKind.Reference:
-                    {
-                        var api = part.Reference == null
-                            ? (ApiModel?)null
-                            : CatalogService.GetApiByGuid(part.Reference.Value);
-
-                        var tooltip = api == null ? null : GeneratedTooltip(api.Value);
-
-                        if (api == Current)
                         {
-                            markupBuilder.Append("<span class=\"reference-current\">");
+                            var api = part.Reference == null
+                                ? (ApiModel?)null
+                                : CatalogService.GetApiByGuid(part.Reference.Value);
+
+                            var tooltip = api == null ? null : GeneratedTooltip(api.Value);
+
+                            if (api == Current)
+                            {
+                                markupBuilder.Append("<span class=\"reference-current\">");
+                            }
+                            else if (api != null)
+                            {
+                                var referenceClass = GetReferenceClass(api.Value.Kind);
+                                markupBuilder.Append($"<span class=\"{referenceClass}\"");
+                                if (tooltip != null)
+                                    markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
+
+                                markupBuilder.Append(">");
+                            }
+
+                            if (api != null && api != Current)
+                                markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
+
+                            break;
                         }
-                        else if (api != null)
-                        {
-                            var referenceClass = GetReferenceClass(api.Value.Kind);
-                            markupBuilder.Append($"<span class=\"{referenceClass}\"");
-                            if (tooltip != null)
-                                markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
-
-                            markupBuilder.Append(">");
-                        }
-
-                        if (api != null && api != Current)
-                            markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
-
-                        break;
-                    }
                 }
 
                 markupBuilder.Append(HtmlEncoder.Encode(part.Text));
@@ -106,7 +106,7 @@ namespace ApiCatalogWeb.Shared
             sb.Append($"<img src=\"{iconUrl}\" heigth=\"16\" width=\"16\" /> ");
 
             var isFirst = true;
-            
+
             foreach (var api in current.AncestorsAndSelf().Reverse())
             {
                 if (isFirst)

@@ -15,7 +15,7 @@ namespace ApiCatalogWeb.Services
                 name = "method";
             }
 
-           return $"/img/{name}.svg";
+            return $"/img/{name}.svg";
         }
     }
 }

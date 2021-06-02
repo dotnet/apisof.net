@@ -36,7 +36,7 @@ namespace ApiCatalog.CatalogModel
             get
             {
                 var rowSpan = _catalog.ApiTable[_offset..];
-                return (ApiKind) rowSpan[16..][0];
+                return (ApiKind)rowSpan[16..][0];
             }
         }
 
@@ -65,13 +65,7 @@ namespace ApiCatalog.CatalogModel
             }
         }
 
-        public IEnumerable<ApiModel> Children
-        {
-            get
-            {
-                return _catalog.GetApis(_offset + 25);
-            }
-        }
+        public IEnumerable<ApiModel> Children => _catalog.GetApis(_offset + 25);
 
         public IEnumerable<ApiDeclarationModel> Declarations
         {

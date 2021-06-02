@@ -8,9 +8,9 @@ using ApiCatalog.CatalogModel;
 
 namespace ConsoleApp1
 {
-    class Program
+    internal class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main()
         {
             var catalogDbPath = @"c:\Users\immo\Downloads\apicatalog.db";
             var catalogPath = @"c:\Users\immo\Downloads\apicatalog.dat";

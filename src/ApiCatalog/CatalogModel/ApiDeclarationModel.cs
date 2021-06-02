@@ -84,7 +84,7 @@ namespace ApiCatalog.CatalogModel
                 indent++;
             }
 
-            for (int i = markups.Count - 1 - 1; i >= 0; i--)
+            for (var i = markups.Count - 1 - 1; i >= 0; i--)
             {
                 if (i > 0)
                     parts.Add(new MarkupPart(MarkupPartKind.Whitespace, new string(' ', 4 * i)));

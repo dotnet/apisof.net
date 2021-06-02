@@ -25,7 +25,7 @@ namespace ApiCatalog
         {
             var text = tokens[tokenIndex];
             var childIndex = node.GetChildIndex(text);
-            
+
             if (childIndex < 0)
             {
                 childIndex = ~childIndex;

@@ -313,7 +313,7 @@ namespace ApiCatalog
         public static IReadOnlyList<FrameworkPackIndexEntry> Load(string path)
         {
             var json = File.ReadAllText(path);
-            return JsonConvert.DeserializeObject< IReadOnlyList<FrameworkPackIndexEntry>>(json);
+            return JsonConvert.DeserializeObject<IReadOnlyList<FrameworkPackIndexEntry>>(json);
         }
     }
 

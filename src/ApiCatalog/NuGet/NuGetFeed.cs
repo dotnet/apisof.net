@@ -45,8 +45,10 @@ namespace ApiCatalog
             ServicePointManager.DefaultConnectionLimit = MaxDegreeOfParallelism;
             ServicePointManager.MaxServicePointIdleTime = 10000;
 
-            var handler = new HttpClientHandler();
-            handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+            var handler = new HttpClientHandler
+            {
+                SslProtocols = System.Security.Authentication.SslProtocols.Tls12
+            };
             using var httpClient = new HttpClient(handler);
 
             var indexString = await httpClient.GetStringAsync(catalogIndexUrl);

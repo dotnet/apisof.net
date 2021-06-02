@@ -285,7 +285,7 @@ namespace ApiCatalog.CatalogModel
 
                 var numberOfTables = reader.ReadInt32();
                 var tableSizes = new int[numberOfTables];
-                for (int i = 0; i < tableSizes.Length; i++)
+                for (var i = 0; i < tableSizes.Length; i++)
                     tableSizes[i] = reader.ReadInt32();
 
                 var bufferSize = tableSizes.Sum();

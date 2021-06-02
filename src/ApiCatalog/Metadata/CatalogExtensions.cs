@@ -14,7 +14,7 @@ namespace ApiCatalog
         private static readonly SymbolDisplayFormat _nameFormat = new SymbolDisplayFormat(
             memberOptions: SymbolDisplayMemberOptions.IncludeParameters,
             parameterOptions: SymbolDisplayParameterOptions.IncludeType,
-            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters            
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
         );
 
         public static Guid GetCatalogGuid(this ISymbol symbol)
@@ -73,7 +73,7 @@ namespace ApiCatalog
                 {
                     sb.Append("<");
 
-                    for (int i = 0; i < type.TypeParameters.Length; i++)
+                    for (var i = 0; i < type.TypeParameters.Length; i++)
                     {
                         if (i > 0)
                             sb.Append(", ");

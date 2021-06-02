@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-
-using NuGet.Packaging.Signing;
 
 namespace ApiCatalog
 {
@@ -42,19 +39,13 @@ namespace ApiCatalog
         private ReadOnlySpan<byte> StringTable
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return new ReadOnlySpan<byte>(_buffer, _stringsStart, _stringsLength);
-            }
+            get => new ReadOnlySpan<byte>(_buffer, _stringsStart, _stringsLength);
         }
 
         private ReadOnlySpan<byte> NodeTable
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return new ReadOnlySpan<byte>(_buffer, _nodesStart, _nodesLength);
-            }
+            get => new ReadOnlySpan<byte>(_buffer, _nodesStart, _nodesLength);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
