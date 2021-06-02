@@ -114,7 +114,7 @@ namespace GenCatalog
             var serverUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL");
             var repository = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
             var runId = Environment.GetEnvironmentVariable("GITHUB_RUN_ID");
-            return $"{serverUrl}/{repository}/runs/{runId}";
+            return $"{serverUrl}/{repository}/actions/runs/{runId}";
         }
 
         private static async Task DownloadArchivedPlatformsAsync(string archivePath)
