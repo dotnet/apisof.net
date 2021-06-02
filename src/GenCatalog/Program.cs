@@ -109,16 +109,12 @@ namespace GenCatalog
             return result;
         }
 
-        private static string? GetAzureDevOpsUrl()
+        private static string? GetDetailsUrl()
         {
-            var baseUrl = Environment.GetEnvironmentVariable("SYSTEM_TEAMFOUNDATIONSERVERURI");
-            var project = Environment.GetEnvironmentVariable("SYSTEM_TEAMPROJECT");
-            var buildId = Environment.GetEnvironmentVariable("BUILD_BUILDID");
-
-            if (string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(project) || string.IsNullOrEmpty(buildId))
-                return null;
-
-            return $"{baseUrl}/{project}/_build/results?buildId={buildId}&view=logs";
+            var serverUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL");
+            var repository = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
+            var runId = Environment.GetEnvironmentVariable("GITHUB_RUN_ID");
+            return $"{serverUrl}/{repository}/runs/{runId}";
         }
 
         private static async Task DownloadArchivedPlatformsAsync(string archivePath)
@@ -382,7 +378,7 @@ namespace GenCatalog
             {
                 Date = DateTimeOffset.UtcNow,
                 Success = success,
-                DetailsUrl = GetAzureDevOpsUrl()
+                DetailsUrl = GetDetailsUrl()
             };
 
             using var jobStream = new MemoryStream();
