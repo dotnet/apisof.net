@@ -15,6 +15,7 @@ namespace ApiCatalog
             "dotnetframework",
             "EntityFramework",
             "RoslynTeam",
+            "nugetsqltools"
             //"dotnetfoundation"
         };
 
