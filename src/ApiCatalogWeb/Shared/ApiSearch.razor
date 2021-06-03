@@ -10,7 +10,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input" @bind="SearchText" @oninput="e => UpdateSearchResults(e)" />
+                <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input" 
+					@bind="SearchText" @oninput="_ => RestartDebounce()" />
 
                 @if (SearchResults != null && SearchResults.Length > 0)
                 {
@@ -18,7 +19,7 @@
                         @foreach (var result in SearchResults)
                         {
                             var selectedClass = result == SelectedResult ? "selected" : "";
-                            <li class="search-result-row @selectedClass">
+                            <li class="search-result-row @selectedClass" @onclick="_ => SelectAndAccept(result)">
                                 <ApiIcon Kind="result.Kind" />&nbsp;@result.GetFullName()
                             </li>
                         }

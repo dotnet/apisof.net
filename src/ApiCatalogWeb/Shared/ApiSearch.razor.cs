@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-
+using System.Timers;
 using ApiCatalog.CatalogModel;
-
 using ApiCatalogWeb.Services;
-
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -17,7 +14,7 @@ namespace ApiCatalogWeb.Shared
         private ElementReference _inputElement;
         private string _modalDisplay = "none;";
         private string _modalClass = "";
-        private CancellationTokenSource _cts;
+        private Timer _debounceTimer;
 
         private string SearchText { get; set; }
         private ApiModel[] SearchResults { get; set; }
@@ -34,6 +31,18 @@ namespace ApiCatalogWeb.Shared
 
         public bool IsOpen { get; private set; }
 
+        protected override void OnInitialized()
+        {
+            // Allow the user to type, and only perform the auto complete search after 700 milliseconds.
+            // This limits the number of actual searches and let's the user type a bit before searching.
+            _debounceTimer = new Timer
+            {
+                AutoReset = false,
+                Interval = 700
+            };
+            _debounceTimer.Elapsed += OnDebounceTimerElapsed;
+        }
+
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (IsOpen)
@@ -45,6 +54,13 @@ namespace ApiCatalogWeb.Shared
                 var helperReference = DotNetObjectReference.Create(helper);
                 await JSRuntime.InvokeVoidAsync("registerSearchInputKeyDown", _inputElement, helperReference);
             }
+        }
+
+        private async void OnDebounceTimerElapsed(object sender, EventArgs args)
+        {
+            _debounceTimer.Stop();
+
+            await UpdateSearchResults();
         }
 
         private void SelectedPrevious()
@@ -75,6 +91,12 @@ namespace ApiCatalogWeb.Shared
             }
         }
 
+        private void SelectAndAccept(ApiModel selection)
+        {
+            SelectedResult = selection;
+            Accept();
+        }
+
         private void Accept()
         {
             if (SelectedResult != null)
@@ -103,25 +125,22 @@ namespace ApiCatalogWeb.Shared
             await OnClose.InvokeAsync();
         }
 
-        private async Task UpdateSearchResults(ChangeEventArgs e)
+        private void RestartDebounce()
         {
-            SearchText = e.Value?.ToString();
+            _debounceTimer.Stop();
+            _debounceTimer.Start();
+        }
 
-            if (_cts != null)
-                _cts.Cancel();
-
-            StateHasChanged();
-
-            _cts = new CancellationTokenSource();
-            var token = _cts.Token;
+        private async Task UpdateSearchResults()
+        {
+            if (SearchText is { Length: 0 })
+                return;
 
             var results = CatalogService.Search(SearchText).ToArray();
+            SearchResults = results;
+            SelectedResult = results.FirstOrDefault();
 
-            if (!token.IsCancellationRequested)
-            {
-                SearchResults = results;
-                SelectedResult = results.FirstOrDefault();
-            }
+            await InvokeAsync(StateHasChanged);
         }
 
         public class NextAndPreviousHelper
@@ -140,28 +159,16 @@ namespace ApiCatalogWeb.Shared
             }
 
             [JSInvokable]
-            public void ShowSearch()
-            {
-                _showSearch.Invoke();
-            }
+            public void ShowSearch() => _showSearch.Invoke();
 
             [JSInvokable]
-            public void SelectPrevious()
-            {
-                _previous.Invoke();
-            }
+            public void SelectPrevious() => _previous.Invoke();
 
             [JSInvokable]
-            public void SelectNext()
-            {
-                _next.Invoke();
-            }
+            public void SelectNext() => _next.Invoke();
 
             [JSInvokable]
-            public void Accept()
-            {
-                _accept.Invoke();
-            }
+            public void Accept() => _accept.Invoke();
         }
     }
 }
