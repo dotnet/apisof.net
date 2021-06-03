@@ -2,8 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+
 using ApiCatalog.CatalogModel;
+
 using ApiCatalogWeb.Services;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
