@@ -33,12 +33,12 @@ namespace ApiCatalogWeb.Shared
 
         protected override void OnInitialized()
         {
-            // Allow the user to type, and only perform the auto complete search after 700 milliseconds.
+            // Allow the user to type, and only perform the auto complete search after some milliseconds.
             // This limits the number of actual searches and let's the user type a bit before searching.
             _debounceTimer = new Timer
             {
                 AutoReset = false,
-                Interval = 700
+                Interval = 150
             };
             _debounceTimer.Elapsed += OnDebounceTimerElapsed;
         }
