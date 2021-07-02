@@ -65,16 +65,27 @@ namespace ApiCatalog
                     if (since != null && pageItem.CommitTimeStamp < since.Value)
                         continue;
 
-                    // Download the catalog page and deserialize it.
-                    var pageString = await httpClient.GetStringAsync(pageItem.Url);
-                    var page = JsonConvert.DeserializeObject<CatalogPage>(pageString);
-
-                    var pageLeafItems = page.Items;
-
-                    foreach (var pageLeafItem in page.Items)
+                    var retryCount = 3;
+                Retry:
+                    try
                     {
-                        if (pageLeafItem.Type == "nuget:PackageDetails")
-                            catalogLeaves.Add(pageLeafItem);
+                        // Download the catalog page and deserialize it.
+                        var pageString = await httpClient.GetStringAsync(pageItem.Url);
+                        var page = JsonConvert.DeserializeObject<CatalogPage>(pageString);
+
+                        var pageLeafItems = page.Items;
+
+                        foreach (var pageLeafItem in page.Items)
+                        {
+                            if (pageLeafItem.Type == "nuget:PackageDetails")
+                                catalogLeaves.Add(pageLeafItem);
+                        }                       
+                    }
+                    catch (Exception ex) when (retryCount > 0)
+                    {                        
+                        retryCount--;
+                        Console.Error.WriteLine($"error: {ex.Message}, retries left = {retryCount}");
+                        goto Retry;
                     }
                 }
             });
@@ -128,9 +139,20 @@ namespace ApiCatalog
         {
             var url = await GetPackageUrlAsync(identity);
 
-            using var httpClient = new HttpClient();
-            var nupkgStream = await httpClient.GetStreamAsync(url);
-            await nupkgStream.CopyToAsync(destination);
+            var retryCount = 3;
+        Retry:
+            try
+            {
+                using var httpClient = new HttpClient();
+                var nupkgStream = await httpClient.GetStreamAsync(url);
+                await nupkgStream.CopyToAsync(destination);               
+            }
+            catch (Exception ex) when (retryCount > 0)
+            {
+                retryCount--;
+                Console.Error.WriteLine($"error: {ex.Message}, retries left = {retryCount}");
+                goto Retry;
+            }
         }
 
         private async Task<string> GetPackageUrlAsync(PackageIdentity identity)
