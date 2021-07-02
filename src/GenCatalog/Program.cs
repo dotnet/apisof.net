@@ -157,7 +157,8 @@ namespace GenCatalog
                 new PackBasedFrameworkProvider(frameworksPath)
             };
 
-            var frameworks = frameworkResolvers.SelectMany(r => r.Resolve());
+            var frameworks = frameworkResolvers.SelectMany(r => r.Resolve())
+                                               .OrderBy(t => t.FrameworkName);
             var reindex = false;
 
             Directory.CreateDirectory(indexFrameworksPath);
