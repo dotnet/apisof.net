@@ -378,7 +378,10 @@ namespace ApiCatalog
 
                 foreach (var node in frameworkList.Descendants("File"))
                 {
+                    var type = node.Attribute("Type")?.Value;
                     var relativePath = node.Attribute("Path").Value;
+                    if (type is not null && type != "Managed")
+                        continue;
                     if (!relativePath.StartsWith("ref/"))
                         relativePath = $"ref/{frameworkDefinition.FrameworkName}/{relativePath}";
                     var path = Path.GetRelativePath(frameworkPath, Path.Combine(packDirectoryPath, relativePath));
