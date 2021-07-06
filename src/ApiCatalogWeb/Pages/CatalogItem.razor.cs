@@ -84,6 +84,8 @@ namespace ApiCatalogWeb.Pages
             using var response = await httpClient.GetAsync(helpLink);
             if (response.StatusCode == HttpStatusCode.OK)
                 HelpLink = helpLink;
+            else
+                HelpLink = null;
         }
 
         private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
