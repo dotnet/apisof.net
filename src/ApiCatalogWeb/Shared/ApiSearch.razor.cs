@@ -18,8 +18,18 @@ namespace ApiCatalogWeb.Shared
         private string _modalDisplay = "none;";
         private string _modalClass = "";
         private Timer _debounceTimer;
+        private string _searchText;
 
-        private string SearchText { get; set; }
+        private string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                _searchText = value;
+                RestartDebounce();
+            }
+        }
+
         private ApiModel[] SearchResults { get; set; }
         private ApiModel SelectedResult { get; set; }
 

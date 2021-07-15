@@ -11,7 +11,7 @@
             </div>
             <div class="modal-body">
                 <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input" 
-					@bind="SearchText" @oninput="_ => RestartDebounce()" />
+					   @bind="SearchText" @bind:event="oninput" />
 
                 @if (SearchResults != null && SearchResults.Length > 0)
                 {
