@@ -408,14 +408,15 @@ namespace ApiCatalog
             WriteAttributeList(property.GetAttributes(), writer);
             WriteAccessibility(property.DeclaredAccessibility, writer);
             writer.WriteSpace();
-            WriteTypeReference(property.Type, writer);
-            writer.WriteSpace();
 
             if (property.IsStatic)
             {
                 writer.WriteKeyword("static");
                 writer.WriteSpace();
             }
+
+            WriteTypeReference(property.Type, writer);
+            writer.WriteSpace();
 
             if (!property.IsIndexer)
             {
