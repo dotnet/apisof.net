@@ -411,6 +411,12 @@ namespace ApiCatalog
             WriteTypeReference(property.Type, writer);
             writer.WriteSpace();
 
+            if (property.IsStatic)
+            {
+                writer.WriteKeyword("static");
+                writer.WriteSpace();
+            }
+
             if (!property.IsIndexer)
             {
                 writer.WriteReference(property, property.Name);
@@ -483,6 +489,13 @@ namespace ApiCatalog
             WriteAttributeList(@event.GetAttributes(), writer);
             WriteAccessibility(@event.DeclaredAccessibility, writer);
             writer.WriteSpace();
+
+            if (@event.IsStatic)
+            {
+                writer.WriteKeyword("static");
+                writer.WriteSpace();
+            }
+
             writer.WriteKeyword("event");
             writer.WriteSpace();
             WriteTypeReference(@event.Type, writer);
