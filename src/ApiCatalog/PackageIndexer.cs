@@ -34,7 +34,7 @@ namespace ApiCatalog
                 {
                     var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (var item in root.GetReferenceItems().Concat(root.GetLibItems()))
+                    foreach (var item in GetReferenceItems(root))
                         targetNames.Add(item.TargetFramework.GetShortFolderName());
 
                     var targets = targetNames.Select(NuGetFramework.Parse);
@@ -150,9 +150,24 @@ namespace ApiCatalog
             return platforms.Any(p => string.Equals(p, targetString, StringComparison.OrdinalIgnoreCase));
         }
 
+        private static IEnumerable<FrameworkSpecificGroup> GetReferenceItems(PackageArchiveReader root)
+        {
+            // NOTE: We're not using root.GetReferenceItems() because it apparently doesn't always
+            //       return items from the ref folder. One package where this reproduces is
+            //       System.Security.Cryptography.Csp 4.3.0
+
+            var tfms = new HashSet<string>();
+
+            foreach (var group in root.GetItems("ref").Concat(root.GetItems("lib")))
+            {
+                if (tfms.Add(group.TargetFramework.GetShortFolderName()))
+                    yield return group;
+            }
+        }
+
         private static FrameworkSpecificGroup GetReferenceItems(PackageArchiveReader root, NuGetFramework current)
         {
-            var referenceItems = root.GetReferenceItems();
+            var referenceItems = GetReferenceItems(root);
             var referenceGroup = NuGetFrameworkUtility.GetNearest(referenceItems, current);
             return referenceGroup;
         }
