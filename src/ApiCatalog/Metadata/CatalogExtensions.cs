@@ -181,7 +181,8 @@ namespace ApiCatalog
         public static bool IsIncludedInCatalog(this ISymbol symbol)
         {
             if (symbol.DeclaredAccessibility != Accessibility.Public &&
-                symbol.DeclaredAccessibility != Accessibility.Protected)
+                symbol.DeclaredAccessibility != Accessibility.Protected &&
+                symbol.DeclaredAccessibility != Accessibility.ProtectedOrInternal)
                 return false;
 
             if (symbol.ContainingType?.TypeKind == TypeKind.Delegate)
