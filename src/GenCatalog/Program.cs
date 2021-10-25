@@ -313,7 +313,7 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
-            await blobClient.UploadAsync(compressedFileName, overwrite: true);
+            await RunWithRetry(() => blobClient.UploadAsync(compressedFileName, overwrite: true));
         }
 
         private static async Task UploadCatalogModelAsync(string catalogModelPath)
@@ -323,7 +323,7 @@ namespace GenCatalog
             var container = "catalog";
             var name = Path.GetFileName(catalogModelPath);
             var blobClient = new BlobClient(connectionString, container, name);
-            await blobClient.UploadAsync(catalogModelPath, overwrite: true);
+            await RunWithRetry(() => blobClient.UploadAsync(catalogModelPath, overwrite: true));
         }
 
         private static async Task UploadSuffixTreeAsync(string suffixTreePath)
@@ -338,7 +338,7 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "suffixtree.dat.deflate");
-            await blobClient.UploadAsync(compressedFileName, overwrite: true);
+            await RunWithRetry(() => blobClient.UploadAsync(compressedFileName, overwrite: true));
         }
 
         private static async Task PostToGenCatalogWebHook()
@@ -389,7 +389,29 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "job.json");
-            await blobClient.UploadAsync(jobStream, overwrite: true);
+            await RunWithRetry(() => blobClient.UploadAsync(jobStream, overwrite: true));
+        }
+
+        private static async Task RunWithRetry(Func<Task> operation)
+        {
+            var retryCount = 3;
+
+            while (retryCount-- > 0)
+            {
+                try
+                {
+                     await operation();
+                     break;
+                }
+                catch (Exception ex) when (retryCount > 0)
+                {
+                    var delay = TimeSpan.FromSeconds(10);
+                    var until = DateTime.Now + delay;
+                    Console.WriteLine($"error: {ex.Message}");
+                    Console.WriteLine($"Waiting for {delay.TotalSeconds} seconds until {until} before trying again...");
+                    await Task.Delay(delay);
+                }
+            }
         }
     }
 
