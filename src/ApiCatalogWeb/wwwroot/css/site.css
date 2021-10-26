@@ -220,6 +220,7 @@
 
 .fx-version.fx-version-package {
     background-color: #ffc107;
+    color: black;
 }
 
     .fx-version.fx-version-package a:link, .fx-version.fx-version-package a:visited {
