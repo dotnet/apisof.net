@@ -22,7 +22,7 @@ jobs:
     - name: dotnet publish
       run: |
         cd src/ApiCatalogWeb
-        dotnet publish -c Release -o '../../artifacts/ApiCatalogWeb'
+        dotnet publish -c Release -o '../../artifacts/ApiCatalogWeb' /p:SourceRevisionId=${{ github.sha }}
         cd ../..
 
     # Deploy to Azure
