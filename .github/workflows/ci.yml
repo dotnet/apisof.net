@@ -12,6 +12,11 @@ jobs:
     - name: Get code
       uses: actions/checkout@v2
 
+    - name: Get .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.*'
+
     - name: dotnet build
       run: |
         cd src/ApiCatalogWeb
