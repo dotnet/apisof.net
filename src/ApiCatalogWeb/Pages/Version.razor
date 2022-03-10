@@ -3,17 +3,21 @@
 @using System.Reflection;
 @using System.Runtime.InteropServices;
 
-@if (_commit is not null)
-{
-    <dt>Commit</dt>
-    <dd><a href="https://github.com/terrajobst/themesof.net/commit/@(_commit)">@_commit</a></dd>
-}
+<div class="container-fluid">
 
-<dt>Framework</dt>
-<dd>@RuntimeInformation.FrameworkDescription</dd>
+    @if (_commit is not null)
+    {
+        <dt>Commit</dt>
+        <dd><a href="https://github.com/terrajobst/themesof.net/commit/@(_commit)">@_commit</a></dd>
+    }
 
-<dt>OS</dt>
-<dd>@RuntimeInformation.OSDescription</dd>
+    <dt>Framework</dt>
+    <dd>@RuntimeInformation.FrameworkDescription</dd>
+
+    <dt>OS</dt>
+    <dd>@RuntimeInformation.OSDescription</dd>
+
+</div>
 
 @code {
     private string _commit;
