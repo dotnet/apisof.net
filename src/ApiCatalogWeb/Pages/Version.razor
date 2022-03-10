@@ -1,0 +1,33 @@
+@page "/version"
+
+@using System.Reflection;
+@using System.Runtime.InteropServices;
+
+@if (_commit is not null)
+{
+    <dt>Commit</dt>
+    <dd><a href="https://github.com/terrajobst/themesof.net/commit/@(_commit)">@_commit</a></dd>
+}
+
+<dt>Framework</dt>
+<dd>@RuntimeInformation.FrameworkDescription</dd>
+
+<dt>OS</dt>
+<dd>@RuntimeInformation.OSDescription</dd>
+
+@code {
+    private string _commit;
+
+    protected override void OnInitialized()
+    {
+        var informationalVersion = GetType().Assembly.GetCustomAttributesData()
+                                                     .Where(ca => ca.AttributeType == typeof(AssemblyInformationalVersionAttribute))
+                                                     .SelectMany(ca => ca.ConstructorArguments.Select(a => a.Value as string))
+                                                     .FirstOrDefault(string.Empty)!;
+
+        var indexOfPlus = informationalVersion.IndexOf('+');
+        _commit = indexOfPlus >= 0
+                    ? informationalVersion.Substring(indexOfPlus + 1)
+                    : null;
+    }
+}
