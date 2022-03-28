@@ -75,6 +75,7 @@ namespace GenCatalog
             var databasePath = Path.Combine(rootPath, "apicatalog.db");
             var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
             var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
+            var ancestorsPath = Path.Combine(rootPath, "api_ancestors.tsv");
 
             var stopwatch = Stopwatch.StartNew();
 
@@ -86,9 +87,11 @@ namespace GenCatalog
             await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, databasePath);
             await GenerateCatalogModel(databasePath, catalogModelPath);
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
+            await GenerateApiAncestorsAsync(catalogModelPath, ancestorsPath);
             await UploadCatalogDatabaseAsync(databasePath);
             await UploadCatalogModelAsync(catalogModelPath);
             await UploadSuffixTreeAsync(suffixTreePath);
+            await UploadApiAncestorsAsync(ancestorsPath);
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
@@ -301,6 +304,28 @@ namespace GenCatalog
             return Task.CompletedTask;
         }
 
+        private static async Task GenerateApiAncestorsAsync(string catalogModelPath, string ancestorsPath)
+        {
+            if (File.Exists(ancestorsPath))
+                return;
+
+            Console.WriteLine($"Generating {Path.GetFileName(ancestorsPath)}...");
+            var catalog = ApiCatalogModel.Load(catalogModelPath);
+            var builder = new SuffixTreeBuilder();
+
+            foreach (var api in catalog.GetAllApis())
+                builder.Add(api.ToString(), api.Id);
+
+            await using var streamWriter = new StreamWriter(ancestorsPath);
+            await streamWriter.WriteLineAsync($"API\tParent");
+        
+            foreach (var api in catalog.GetAllApis())
+            {
+                foreach (var parent in api.AncestorsAndSelf())
+                    await streamWriter.WriteLineAsync($"{api.Guid:N}\t{parent.Guid:N}");
+            }
+        }
+
         private static async Task UploadCatalogDatabaseAsync(string databasePath)
         {
             var compressedFileName = databasePath + ".deflate";
@@ -318,7 +343,7 @@ namespace GenCatalog
 
         private static async Task UploadCatalogModelAsync(string catalogModelPath)
         {
-            Console.WriteLine("Uploading catalog mode...");
+            Console.WriteLine("Uploading catalog model...");
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var name = Path.GetFileName(catalogModelPath);
@@ -339,6 +364,16 @@ namespace GenCatalog
             var container = "catalog";
             var blobClient = new BlobClient(connectionString, container, "suffixtree.dat.deflate");
             await RunWithRetry(() => blobClient.UploadAsync(compressedFileName, overwrite: true));
+        }
+
+        private static async Task UploadApiAncestorsAsync(string ancestorsPath)
+        {
+            Console.WriteLine("Uploading ancestors file...");
+            var connectionString = GetAzureStorageConnectionString();
+            var container = "catalog";
+            var name = Path.GetFileName(ancestorsPath);
+            var blobClient = new BlobClient(connectionString, container, name);
+            await RunWithRetry(() => blobClient.UploadAsync(ancestorsPath, overwrite: true));
         }
 
         private static async Task PostToGenCatalogWebHook()
