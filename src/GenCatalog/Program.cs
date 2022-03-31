@@ -327,7 +327,7 @@ namespace GenCatalog
 
             File.Delete(outputPath);
 
-            using var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
+            using var builder = await CatalogBuilder.CreateAsync(outputPath);
             builder.Index(platformsPath);
             builder.Index(packagesPath);
 
