@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -79,6 +80,25 @@ namespace ApiCatalog.CatalogModel
                 {
                     var offset = declarationTableOffset + 4 + i * 8;
                     yield return new ApiDeclarationModel(this, offset);
+                }
+            }
+        }
+
+        public IEnumerable<ApiUsageModel> Usages
+        {
+            get
+            {
+                var childCount = _catalog.GetApiTableInt32(_offset + 25);
+                var declarationTableOffset = _offset + 29 + childCount * 4;
+
+                var declarationCount = _catalog.GetApiTableInt32(declarationTableOffset);
+                var usagesTableOffset = declarationTableOffset + 4 + declarationCount * 8;
+                var count = _catalog.GetApiTableInt32(usagesTableOffset);
+
+                for (var i = 0; i < count; i++)
+                {
+                    var offset = usagesTableOffset + 4 + i * 8;
+                    yield return new ApiUsageModel(_catalog, offset);
                 }
             }
         }

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace ApiCatalog
 {
+    // TODO: We should probably delete CatalogBuilderBinary and merge CatalogBuilder with CatalogBuilderSQLite
     public sealed class CatalogBuilderBinary : CatalogBuilder
     {
         internal const short Version = 0;
@@ -145,6 +146,14 @@ namespace ApiCatalog
             _packageAssemblyTable.WriteInt32(packageRowIndex);
             _packageAssemblyTable.WriteInt32(frameworkRowIndex);
             _packageAssemblyTable.WriteInt32(assemblyRowIndex);
+        }
+
+        protected override void DefineUsageSource(string name, DateOnly date)
+        {
+        }
+
+        protected override void DefineApiUsage(string usageSourceName, Guid apiFingerprint, float percentage)
+        {
         }
 
         private struct Table

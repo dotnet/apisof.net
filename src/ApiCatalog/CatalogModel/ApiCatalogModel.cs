@@ -63,7 +63,7 @@ namespace ApiCatalog.CatalogModel
     public sealed partial class ApiCatalogModel
     {
         private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-        private const int FormatVersion = 1;
+        private const int FormatVersion = 2;
 
         private readonly byte[] _buffer;
         private readonly int _stringTableLength;
@@ -73,12 +73,14 @@ namespace ApiCatalog.CatalogModel
         private readonly int _packageTableLength;
         private readonly int _assemblyTableOffset;
         private readonly int _assemblyTableLength;
+        private readonly int _usageSourcesTableOffset;
+        private readonly int _usageSourcesTableLength;
         private readonly int _apiTableOffset;
         private readonly int _apiTableLength;
 
         private ApiCatalogModel(byte[] buffer, int[] tableSizes)
         {
-            Debug.Assert(tableSizes.Length == 5);
+            Debug.Assert(tableSizes.Length == 6);
 
             _stringTableLength = tableSizes[0];
 
@@ -91,8 +93,11 @@ namespace ApiCatalog.CatalogModel
             _assemblyTableOffset = _packageTableOffset + _packageTableLength;
             _assemblyTableLength = tableSizes[3];
 
-            _apiTableOffset = _assemblyTableOffset + _assemblyTableLength;
-            _apiTableLength = tableSizes[4];
+            _usageSourcesTableOffset = _assemblyTableOffset + _assemblyTableLength;
+            _usageSourcesTableLength = tableSizes[4];
+
+            _apiTableOffset = _usageSourcesTableOffset + _usageSourcesTableLength;
+            _apiTableLength = tableSizes[5];
 
             _buffer = buffer;
         }
@@ -104,6 +109,8 @@ namespace ApiCatalog.CatalogModel
         internal ReadOnlySpan<byte> PackageTable => new ReadOnlySpan<byte>(_buffer, _packageTableOffset, _packageTableLength);
 
         internal ReadOnlySpan<byte> AssemblyTable => new ReadOnlySpan<byte>(_buffer, _assemblyTableOffset, _assemblyTableLength);
+
+        internal ReadOnlySpan<byte> UsageSourcesTable => new ReadOnlySpan<byte>(_buffer, _usageSourcesTableOffset, _usageSourcesTableLength);
 
         internal ReadOnlySpan<byte> ApiTable => new ReadOnlySpan<byte>(_buffer, _apiTableOffset, _apiTableLength);
 
@@ -146,6 +153,18 @@ namespace ApiCatalog.CatalogModel
                     var offset = GetAssemblyTableInt32(4 + 4 * i);
                     yield return new AssemblyModel(this, offset);
                 }
+            }
+        }
+
+        public IEnumerable<UsageSourceModel> UsageSources
+        {
+            get
+            {
+                var count = GetUsageSourcesTableInt32(0);
+                var offset = 4;
+
+                for (var i = 0; i < count; i++, offset += 8)
+                    yield return new UsageSourceModel(this, offset);
             }
         }
 
@@ -235,9 +254,19 @@ namespace ApiCatalog.CatalogModel
             return BinaryPrimitives.ReadInt32LittleEndian(AssemblyTable.Slice(offset));
         }
 
+        internal int GetUsageSourcesTableInt32(int offset)
+        {
+            return BinaryPrimitives.ReadInt32LittleEndian(UsageSourcesTable.Slice(offset));
+        }
+
         internal int GetApiTableInt32(int offset)
         {
             return BinaryPrimitives.ReadInt32LittleEndian(ApiTable.Slice(offset));
+        }
+
+        internal float GetApiTableSingle(int offset)
+        {
+            return BinaryPrimitives.ReadSingleLittleEndian(ApiTable.Slice(offset));
         }
 
         public void Dump(string fileName)

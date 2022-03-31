@@ -92,6 +92,31 @@ namespace ApiCatalog
             }
         }
 
+        public void IndexUsages(string path, string name, DateOnly date)
+        {
+            using var streamReader = new StreamReader(path);
+            Console.WriteLine($"Processing {path}...");
+
+            DefineUsageSource(name, date);
+
+            while (streamReader.ReadLine() is { } line)
+            {
+                var tabIndex = line.IndexOf('\t');
+                var lastTabIndex = line.LastIndexOf('\t');
+                if (tabIndex > 0 && tabIndex == lastTabIndex)
+                {
+                    var guidTextSpan = line.AsSpan(0, tabIndex);
+                    var percentageSpan = line.AsSpan(tabIndex + 1);
+
+                    if (Guid.TryParse(guidTextSpan, out var apiFingerprint) &&
+                        float.TryParse(percentageSpan, out var percentage))
+                    {
+                        DefineApiUsage(name, apiFingerprint, percentage);
+                    }
+                }
+            }
+        }
+
         protected abstract void DefineApi(Guid fingerprint, ApiKind kind, Guid parentFingerprint, string name);
         protected abstract bool DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken);
         protected abstract void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax);
@@ -99,5 +124,7 @@ namespace ApiCatalog
         protected abstract void DefineFrameworkAssembly(string framework, Guid assemblyFingerprint);
         protected abstract void DefinePackage(Guid fingerprint, string id, string version);
         protected abstract void DefinePackageAssembly(Guid packageFingerprint, string framework, Guid assemblyFingerprint);
+        protected abstract void DefineUsageSource(string name, DateOnly date);
+        protected abstract void DefineApiUsage(string usageSourceName, Guid apiFingerprint, float percentage);
     }
 }

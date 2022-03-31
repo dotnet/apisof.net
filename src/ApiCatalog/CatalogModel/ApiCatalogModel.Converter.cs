@@ -24,6 +24,7 @@ namespace ApiCatalog.CatalogModel
             private readonly Dictionary<int, int> _frameworkOffsetById = new Dictionary<int, int>();
             private readonly Dictionary<int, int> _packageOffsetById = new Dictionary<int, int>();
             private readonly Dictionary<int, int> _assemblyOffsetById = new Dictionary<int, int>();
+            private readonly Dictionary<int, int> _usageSourceOffsetById = new Dictionary<int, int>();
             private readonly Dictionary<int, int> _apiOffsetById = new Dictionary<int, int>();
             private readonly Dictionary<Guid, int> _apiOffsetByGuid = new Dictionary<Guid, int>();
 
@@ -31,6 +32,7 @@ namespace ApiCatalog.CatalogModel
             private readonly TableWriter _frameworkTable = new TableWriter();
             private readonly TableWriter _packageTable = new TableWriter();
             private readonly TableWriter _assemblyTable = new TableWriter();
+            private readonly TableWriter _usageSourcesTable = new TableWriter();
             private readonly TableWriter _apiTable = new TableWriter();
 
             private readonly List<int> _frameworkTableAssemblyPatchups = new List<int>();
@@ -67,12 +69,14 @@ namespace ApiCatalog.CatalogModel
                     _frameworkTable,
                     _packageTable,
                     _assemblyTable,
+                    _usageSourcesTable,
                     _apiTable,
                 };
 
                 await WriteFrameworksAsync();
                 await WritePackagesAsync();
                 await WriteAssembliesAsync();
+                await WriteUsageSourcesAsync();
                 await WriteApisAsync();
 
                 PatchFrameworks();
@@ -334,6 +338,32 @@ namespace ApiCatalog.CatalogModel
                 }
             }
 
+            private async Task WriteUsageSourcesAsync()
+            {
+                var rows = await _connection.QueryAsync<UsageSourceRow>(@"
+                    SELECT  u.UsageSourceId,
+                            u.Name,
+                            u.Date
+                    FROM    UsageSources u
+                    ORDER   BY u.Name
+                ");
+
+                var rowList = rows.ToList();
+
+                _usageSourcesTable.WriteInt32(rowList.Count);
+
+                foreach (var row in rowList)
+                {
+                    _usageSourceOffsetById.Add(row.UsageSourceId, _usageSourcesTable.Offset);
+
+                    var nameOffset = WriteString(row.Name);
+                    var dayNumber = DateOnly.FromDateTime(row.Date).DayNumber;
+
+                    _usageSourcesTable.WriteInt32(nameOffset);
+                    _usageSourcesTable.WriteInt32(dayNumber);
+                }
+            }
+
             private async Task WriteApisAsync()
             {
                 var rows = await _connection.QueryAsync<ApiRow>(@"
@@ -387,6 +417,15 @@ namespace ApiCatalog.CatalogModel
 
                     var declarationRowList = declarationRows.ToList();
 
+                    var usageRows = await _connection.QueryAsync<ApiUsageRow>(@"
+                        SELECT  u.UsageSourceId,
+                                u.Percentage
+                        FROM    ApiUsages u
+                        WHERE   u.ApiId = @ApiId
+                    ", new { ApiId = row.ApiId });
+
+                    var usageRowList = usageRows.ToList();
+
                     var rowOffset = _apiTable.Offset;
                     _apiOffsetById.Add(row.ApiId, rowOffset);
                     _apiOffsetByGuid.Add(Guid.Parse(row.ApiGuid), rowOffset);
@@ -414,6 +453,14 @@ namespace ApiCatalog.CatalogModel
                     {
                         _apiTable.WriteInt32(_assemblyOffsetById[declarationRowList[i].AssemblyId]);
                         _apiTable.WriteInt32(WriteSyntax(declarationRowList[i].Syntax));
+                    }
+
+                    _apiTable.WriteInt32(usageRowList.Count);
+
+                    for (var i = 0; i < usageRowList.Count; i++)
+                    {
+                        _apiTable.WriteInt32(_usageSourceOffsetById[usageRowList[i].UsageSourceId]);
+                        _apiTable.WriteSingle(usageRowList[i].Percentage);
                     }
 
                     await WriteApisAsync(childRowsList, rowOffset, childArrayStart);
@@ -524,6 +571,13 @@ namespace ApiCatalog.CatalogModel
                 public string PackageIds { get; set; }
             }
 
+            private sealed class UsageSourceRow
+            {
+                public int UsageSourceId { get; set; }
+                public string Name { get; set; }
+                public DateTime Date { get; set; }
+            }
+
             private sealed class ApiRow
             {
                 public int ApiId { get; set; }
@@ -537,6 +591,12 @@ namespace ApiCatalog.CatalogModel
             {
                 public int AssemblyId { get; set; }
                 public string Syntax { get; set; }
+            }
+
+            private sealed class ApiUsageRow
+            {
+                public int UsageSourceId { get; set; }
+                public float Percentage { get; set; }
             }
 
             private sealed class TableWriter
@@ -578,6 +638,11 @@ namespace ApiCatalog.CatalogModel
                 public void WriteByte(int value)
                 {
                     _writer.Write((byte)value);
+                }
+
+                public void WriteSingle(float value)
+                {
+                    _writer.Write(value);
                 }
 
                 public void WriteGuid(string value)

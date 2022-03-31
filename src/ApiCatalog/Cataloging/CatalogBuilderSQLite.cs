@@ -147,7 +147,26 @@ namespace ApiCatalog
                 ",
                 @"
                     CREATE INDEX [IX_FrameworkAssemblies_AssemblyId] ON [FrameworkAssemblies] ([AssemblyId])
-                "
+                ",
+                @"
+                    CREATE TABLE [UsageSources]
+                    (
+                        [UsageSourceId] INTEGER NOT NULL PRIMARY KEY,
+                        [Name] TEXT NOT NULL,
+                        [Date] TEXT NOT NULL
+                    )
+                ",
+                @"
+                    CREATE TABLE [ApiUsages]
+                    (
+                        [ApiId] INTEGER NOT NULL,
+                        [UsageSourceId] INTEGER NOT NULL,
+                        [Percentage] REAL NOT NULL
+                    )
+                ",
+                @"
+                    CREATE INDEX [IX_ApiUsages_ApiId] ON [ApiUsages] ([ApiId])
+                ",
             };
 
             using var cmd = new SqliteCommand();
@@ -166,6 +185,7 @@ namespace ApiCatalog
         private readonly Dictionary<string, int> _packageIdByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<Guid, int> _packageVersionIdByFingerprint = new Dictionary<Guid, int>();
         private readonly Dictionary<string, int> _frameworkIdByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> _usageSourceIdByName = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         private int DefineSyntax(string syntax)
         {
@@ -361,6 +381,49 @@ namespace ApiCatalog
                 PackageVersionId = packageVersionId,
                 FrameworkId = frameworkId,
                 AssemblyId = assemblyId
+            });
+        }
+
+        protected override void DefineUsageSource(string name, DateOnly date)
+        {
+            if (_usageSourceIdByName.ContainsKey(name))
+                return;
+
+            var usageSourceId = _usageSourceIdByName.Count + 1;
+
+            _connection.Execute(@"
+                INSERT INTO [UsageSources]
+                    (UsageSourceId, Name, Date)
+                VALUES
+                    (@UsageSourceId, @Name, @Date)
+            ", new
+            {
+                UsageSourceId = usageSourceId,
+                Name = name,
+                Date = new DateTime(date.Year, date.Month, date.Day)
+            });
+
+            _usageSourceIdByName.Add(name, usageSourceId);
+        }
+
+        protected override void DefineApiUsage(string usageSourceName, Guid apiFingerprint, float percentage)
+        {
+            if (!_usageSourceIdByName.TryGetValue(usageSourceName, out var usageSourceId))
+                return;
+
+            if (!_apiIdByFingerprint.TryGetValue(apiFingerprint, out var apiId))
+                return;
+
+            _connection.Execute(@"
+                INSERT INTO [ApiUsages]
+                    (ApiId, UsageSourceId, Percentage)
+                VALUES
+                    (@ApiId, @UsageSourceId, @Percentage)
+            ", new
+            {
+                ApiId = apiId,
+                UsageSourceId = usageSourceId,
+                Percentage = percentage
             });
         }
     }

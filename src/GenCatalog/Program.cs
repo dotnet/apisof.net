@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -72,6 +73,8 @@ namespace GenCatalog
             var packageListPath = Path.Combine(packagesPath, "packages.xml");
             var frameworksPath = Path.Combine(rootPath, "frameworks");
             var packsPath = Path.Combine(rootPath, "packs");
+            var apiUsagesPath = Path.Combine(rootPath, "api-usages");
+            var nugetUsagesPath = Path.Combine(apiUsagesPath, "nuget.org.tsv");
             var databasePath = Path.Combine(rootPath, "apicatalog.db");
             var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
             var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
@@ -82,9 +85,10 @@ namespace GenCatalog
             await DownloadArchivedPlatformsAsync(frameworksPath);
             await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
             await DownloadDotnetPackageListAsync(packageListPath);
+            await DownloadNuGetUsages(nugetUsagesPath);
             await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
             await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
-            await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, databasePath);
+            await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, databasePath);
             await GenerateCatalogModel(databasePath, catalogModelPath);
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
             await GenerateApiAncestorsAsync(catalogModelPath, ancestorsPath);
@@ -108,6 +112,21 @@ namespace GenCatalog
 
             if (string.IsNullOrEmpty(result))
                 throw new Exception("Cannot retreive connection string for Azure blob storage. You either need to define an environment variable or a user secret.");
+
+            return result;
+        }
+
+        private static string GetAzureStorageUsageConnectionString()
+        {
+            var result = Environment.GetEnvironmentVariable("AzureStorageUsageConnectionString");
+            if (string.IsNullOrEmpty(result))
+            {
+                var secrets = Secrets.Load();
+                result = secrets?.AzureStorageUsageConnectionString;
+            }
+
+            if (string.IsNullOrEmpty(result))
+                throw new Exception("Cannot retreive connection string for Azure blob storage of API usage. You either need to define an environment variable or a user secret.");
 
             return result;
         }
@@ -150,6 +169,23 @@ namespace GenCatalog
         {
             if (!File.Exists(packageListPath))
                 await DotnetPackageIndex.CreateAsync(packageListPath);
+        }
+
+        private static async Task DownloadNuGetUsages(string nugetUsagesPath)
+        {
+            if (File.Exists(nugetUsagesPath))
+                return;
+
+            Directory.CreateDirectory(Path.GetDirectoryName(nugetUsagesPath)!);
+
+            Console.WriteLine("Downloading NuGet usages...");
+
+            var connectionString = GetAzureStorageUsageConnectionString();
+            var blobClient = new BlobClient(connectionString, "usages", "results/usage_percentage.tsv");
+            var props = await blobClient.GetPropertiesAsync();
+            var lastModified = props.Value.LastModified;
+            await blobClient.DownloadToAsync(nugetUsagesPath);
+            File.SetLastAccessTimeUtc(nugetUsagesPath, lastModified.UtcDateTime);
         }
 
         private static Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
@@ -265,7 +301,7 @@ namespace GenCatalog
             }
         }
 
-        private static async Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string outputPath)
+        private static async Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string usagesPath, string outputPath)
         {
             if (File.Exists(outputPath))
                 return;
@@ -275,6 +311,10 @@ namespace GenCatalog
             using var builder = await CatalogBuilderSQLite.CreateAsync(outputPath);
             builder.Index(platformsPath);
             builder.Index(packagesPath);
+
+            var usageFiles = GetUsageFiles(usagesPath);
+            foreach (var (path, name, date) in usageFiles)
+                builder.IndexUsages(path, name, date);
         }
 
         private static async Task GenerateCatalogModel(string databasePath, string catalogModelPath)
@@ -448,11 +488,28 @@ namespace GenCatalog
                 }
             }
         }
+
+        private static IReadOnlyList<UsageFile> GetUsageFiles(string usagePath)
+        {
+            var result = new List<UsageFile>();
+            var files = Directory.GetFiles(usagePath, "*.tsv");
+
+            foreach (var file in files)
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                var date = DateOnly.FromDateTime(File.GetLastWriteTime(file));
+                var usageFile = new UsageFile(file, name, date);
+                result.Add(usageFile);
+            }
+
+            return result.ToArray();
+        }
     }
 
     internal sealed class Secrets
     {
         public string? AzureStorageConnectionString { get; set; }
+        public string? AzureStorageUsageConnectionString { get; set; }
         public string? GenCatalogWebHookUrl { get; set; }
         public string? GenCatalogWebHookSecret { get; set; }
 
@@ -473,4 +530,6 @@ namespace GenCatalog
         public bool Success { get; set; }
         public string? DetailsUrl { get; set; }
     }
+
+    internal record UsageFile(string Path, string Name, DateOnly Date);
 }
