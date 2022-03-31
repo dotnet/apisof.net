@@ -343,6 +343,10 @@ namespace GenCatalog
 
             Console.WriteLine($"Generating {Path.GetFileName(catalogModelPath)}...");
             await ApiCatalogModel.ConvertAsync(databasePath, catalogModelPath);
+
+            var model = ApiCatalogModel.Load(catalogModelPath);
+            var stats = model.GetStatistics().ToString();
+            await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), stats);
         }
 
         private static Task GenerateSuffixTreeAsync(string catalogModelPath, string suffixTreePath)

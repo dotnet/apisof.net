@@ -65,6 +65,7 @@ namespace ApiCatalog.CatalogModel
         private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
         private const int FormatVersion = 2;
 
+        private readonly int _sizeOnDisk;
         private readonly byte[] _buffer;
         private readonly int _stringTableLength;
         private readonly int _frameworkTableOffset;
@@ -78,7 +79,7 @@ namespace ApiCatalog.CatalogModel
         private readonly int _apiTableOffset;
         private readonly int _apiTableLength;
 
-        private ApiCatalogModel(byte[] buffer, int[] tableSizes)
+        private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
         {
             Debug.Assert(tableSizes.Length == 6);
 
@@ -100,6 +101,7 @@ namespace ApiCatalog.CatalogModel
             _apiTableLength = tableSizes[5];
 
             _buffer = buffer;
+            _sizeOnDisk = sizeOnDisk;
         }
 
         internal ReadOnlySpan<byte> StringTable => new ReadOnlySpan<byte>(_buffer, 0, _stringTableLength);
@@ -283,6 +285,8 @@ namespace ApiCatalog.CatalogModel
         {
             var allApis = RootApis.SelectMany(a => a.DescendantsAndSelf());
             return new ApiCatalogStatistics(
+                sizeOnDisk: _sizeOnDisk,
+                sizeInMemory: _buffer.Length,
                 numberOfApis: allApis.Count(),
                 numberOfDeclarations: allApis.SelectMany(a => a.Declarations).Count(),
                 numberOfAssemblies: Assemblies.Count(),
@@ -302,6 +306,8 @@ namespace ApiCatalog.CatalogModel
 
         public static ApiCatalogModel Load(Stream stream)
         {
+            var start = stream.Position;
+            
             using (var reader = new BinaryReader(stream))
             {
                 var magicHeader = reader.ReadBytes(8);
@@ -323,7 +329,9 @@ namespace ApiCatalog.CatalogModel
                 using (var decompressedReader = new BinaryReader(decompressedStream))
                 {
                     var buffer = decompressedReader.ReadBytes(bufferSize);
-                    return new ApiCatalogModel(buffer, tableSizes);
+                    var end = stream.Position;
+                    var sizeOnDisk = (int)(end - start);
+                    return new ApiCatalogModel(sizeOnDisk, buffer, tableSizes);
                 }
             }
         }
