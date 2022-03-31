@@ -1,4 +1,6 @@
-﻿namespace ApiCatalog
+﻿using System;
+
+namespace ApiCatalog
 {
     public static class ApiKindExtensions
     {
@@ -28,13 +30,32 @@
                 case ApiKind.Destructor:
                 case ApiKind.Operator:
                 case ApiKind.Property:
+                case ApiKind.PropertyGetter:
+                case ApiKind.PropertySetter:
                 case ApiKind.Method:
                 case ApiKind.Event:
+                case ApiKind.EventAdder:
+                case ApiKind.EventRemover:
+                case ApiKind.EventRaiser:
                     return true;
                 default:
                     return false;
             }
         }
 
+        public static bool IsAccessor(this ApiKind kind)
+        {
+            switch (kind)
+            {
+                case ApiKind.PropertyGetter:
+                case ApiKind.PropertySetter:
+                case ApiKind.EventAdder:
+                case ApiKind.EventRemover:
+                case ApiKind.EventRaiser:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

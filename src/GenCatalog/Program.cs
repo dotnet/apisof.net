@@ -359,7 +359,12 @@ namespace GenCatalog
             var builder = new SuffixTreeBuilder();
 
             foreach (var api in catalog.GetAllApis())
+            {
+                if (api.Kind.IsAccessor())
+                    continue;
+
                 builder.Add(api.ToString(), api.Id);
+            }
 
             using var stream = File.Create(suffixTreePath);
             builder.WriteSuffixTree(stream);

@@ -137,9 +137,14 @@ namespace ApiCatalogWeb.Shared
                 case ApiKind.Constructor:
                 case ApiKind.Destructor:
                 case ApiKind.Property:
+                case ApiKind.PropertyGetter:
+                case ApiKind.PropertySetter:
                 case ApiKind.Method:
                 case ApiKind.Operator:
                 case ApiKind.Event:
+                case ApiKind.EventAdder:
+                case ApiKind.EventRemover:
+                case ApiKind.EventRaiser:
                 default:
                     return "reference";
             }

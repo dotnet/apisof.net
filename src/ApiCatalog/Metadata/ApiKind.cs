@@ -14,8 +14,13 @@
         Constructor,
         Destructor,
         Property,
+        PropertyGetter,
+        PropertySetter,
         Method,
         Operator,
-        Event
+        Event,
+        EventAdder,
+        EventRemover,
+        EventRaiser
     }
 }

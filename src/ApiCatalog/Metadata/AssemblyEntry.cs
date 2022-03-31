@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -34,7 +33,7 @@ namespace ApiCatalog
             var result = new List<ApiEntry>();
             var types = symbol.GetAllTypes()
                               .Where(t => t.IsIncludedInCatalog())
-                              .GroupBy(t => t.ContainingNamespace);
+                              .GroupBy(t => t.ContainingNamespace, SymbolEqualityComparer.Default);
 
             foreach (var namespaceGroup in types)
             {
@@ -42,13 +41,13 @@ namespace ApiCatalog
                 result.Add(entry);
 
                 foreach (var type in namespaceGroup)
-                    AddApi(entry, type);
+                    AddType(entry, type);
             }
 
             return result;
         }
 
-        private static void AddApi(ApiEntry parent, ITypeSymbol symbol)
+        private static void AddType(ApiEntry parent, ITypeSymbol symbol)
         {
             if (!symbol.IsIncludedInCatalog())
                 return;
@@ -64,14 +63,41 @@ namespace ApiCatalog
         {
             if (symbol is INamedTypeSymbol type)
             {
-                AddApi(parent, type);
+                AddType(parent, type);
                 return;
             }
 
             if (!symbol.IsIncludedInCatalog())
                 return;
 
+            // We don't want to include accessors at the type level; we'll add them as children
+            // under properties and events.
+            if (symbol.IsAccessor())
+                return;
+            
             var entry = ApiEntry.Create(symbol, parent);
+            parent.Children.Add(entry);
+
+            switch (symbol)
+            {
+                case IPropertySymbol property:
+                    AddOptionalAccessor(property.GetMethod, entry);
+                    AddOptionalAccessor(property.SetMethod, entry);
+                    break;
+                case IEventSymbol @event:
+                    AddOptionalAccessor(@event.AddMethod, entry);
+                    AddOptionalAccessor(@event.RemoveMethod, entry);
+                    AddOptionalAccessor(@event.RaiseMethod, entry);
+                    break;
+            }
+        }
+
+        private static void AddOptionalAccessor(IMethodSymbol accessor, ApiEntry parent)
+        {
+            if (accessor is null)
+                return;
+
+            var entry = ApiEntry.Create(accessor, parent);
             parent.Children.Add(entry);
         }
 
@@ -87,11 +113,11 @@ namespace ApiCatalog
 
             stream.Position = 0;
 
-            var md5 = MD5.Create();
+            using var md5 = MD5.Create();
             var hashBytes = md5.ComputeHash(stream);
             return new Guid(hashBytes);
 
-            static void WriteDeclarations(StreamWriter writer, List<ApiEntry> roots)
+            static void WriteDeclarations(TextWriter writer, List<ApiEntry> roots)
             {
                 foreach (var a in roots)
                 {

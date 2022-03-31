@@ -9,8 +9,13 @@ namespace ApiCatalogWeb.Services
         {
             var name = kind.ToString();
 
-            if (kind == ApiKind.Constructor ||
-                kind == ApiKind.Destructor)
+            if (kind is ApiKind.Constructor or
+                        ApiKind.Destructor or
+                        ApiKind.PropertyGetter or
+                        ApiKind.PropertySetter or
+                        ApiKind.EventAdder or
+                        ApiKind.EventRemover or
+                        ApiKind.EventRaiser)
             {
                 name = "method";
             }

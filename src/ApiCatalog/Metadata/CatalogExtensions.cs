@@ -92,67 +92,49 @@ namespace ApiCatalog
 
         public static bool IsAccessor(this ISymbol symbol)
         {
-            if (symbol is IMethodSymbol method)
+            return symbol is IMethodSymbol
             {
-                return method.MethodKind == MethodKind.PropertyGet ||
-                       method.MethodKind == MethodKind.PropertySet ||
-                       method.MethodKind == MethodKind.EventAdd ||
-                       method.MethodKind == MethodKind.EventRemove ||
-                       method.MethodKind == MethodKind.EventRaise;
-            }
-
-            return false;
+                MethodKind: MethodKind.PropertyGet or
+                            MethodKind.PropertySet or
+                            MethodKind.EventAdd or
+                            MethodKind.EventRemove or
+                            MethodKind.EventRaise
+            };
         }
 
         public static ApiKind GetApiKind(this ISymbol symbol)
         {
-            if (symbol is INamespaceSymbol)
-                return ApiKind.Namespace;
-
-            if (symbol is INamedTypeSymbol type)
+            return symbol switch
             {
-                if (type.TypeKind == TypeKind.Interface)
-                    return ApiKind.Interface;
-                else if (type.TypeKind == TypeKind.Delegate)
-                    return ApiKind.Delegate;
-                else if (type.TypeKind == TypeKind.Enum)
-                    return ApiKind.Enum;
-                else if (type.TypeKind == TypeKind.Struct)
-                    return ApiKind.Struct;
-                else
-                    return ApiKind.Class;
-            }
-
-            if (symbol is IMethodSymbol method)
-            {
-                if (method.MethodKind == MethodKind.Constructor)
-                    return ApiKind.Constructor;
-                else if (method.MethodKind == MethodKind.Destructor)
-                    return ApiKind.Destructor;
-                else if (method.MethodKind == MethodKind.UserDefinedOperator || method.MethodKind == MethodKind.Conversion)
-                    return ApiKind.Operator;
-
-                return ApiKind.Method;
-            }
-
-            if (symbol is IFieldSymbol f)
-            {
-                if (f.ContainingType.TypeKind == TypeKind.Enum)
-                    return ApiKind.EnumItem;
-
-                if (f.IsConst)
-                    return ApiKind.Constant;
-
-                return ApiKind.Field;
-            }
-
-            if (symbol is IPropertySymbol)
-                return ApiKind.Property;
-
-            if (symbol is IEventSymbol)
-                return ApiKind.Event;
-
-            throw new Exception($"Unpexected symbol kind {symbol.Kind}");
+                INamespaceSymbol => ApiKind.Namespace,
+                INamedTypeSymbol t => t.TypeKind switch
+                {
+                    TypeKind.Interface => ApiKind.Interface,
+                    TypeKind.Delegate => ApiKind.Delegate,
+                    TypeKind.Enum => ApiKind.Enum,
+                    TypeKind.Struct => ApiKind.Struct,
+                    _ => ApiKind.Class
+                },
+                IMethodSymbol m => m.MethodKind switch
+                {
+                    MethodKind.Constructor => ApiKind.Constructor,
+                    MethodKind.Destructor => ApiKind.Destructor,
+                    MethodKind.UserDefinedOperator => ApiKind.Operator,
+                    MethodKind.Conversion => ApiKind.Operator,
+                    MethodKind.PropertyGet => ApiKind.PropertyGetter,
+                    MethodKind.PropertySet => ApiKind.PropertySetter,
+                    MethodKind.EventAdd => ApiKind.EventAdder,
+                    MethodKind.EventRemove => ApiKind.EventRemover,
+                    MethodKind.EventRaise => ApiKind.EventRaiser,
+                    _ => ApiKind.Method
+                },
+                IFieldSymbol f when f.ContainingType.TypeKind == TypeKind.Enum => ApiKind.EnumItem,
+                IFieldSymbol {IsConst: true} => ApiKind.Constant,
+                IFieldSymbol => ApiKind.Field,
+                IPropertySymbol => ApiKind.Property,
+                IEventSymbol => ApiKind.Event,
+                _ => throw new Exception($"Unexpected symbol kind {symbol.Kind}")
+            };
         }
 
         public static string GetPublicKeyTokenString(this AssemblyIdentity identity)
@@ -188,16 +170,8 @@ namespace ApiCatalog
             if (symbol.ContainingType?.TypeKind == TypeKind.Delegate)
                 return false;
 
-            if (symbol.IsAccessor())
+            if (symbol is IMethodSymbol {MethodKind: MethodKind.Constructor, Parameters.Length: 0} m && m.ContainingType.IsValueType)
                 return false;
-
-            if (symbol is IMethodSymbol m &&
-                m.MethodKind == MethodKind.Constructor &&
-                m.Parameters.Length == 0 &&
-                m.ContainingType.IsValueType)
-            {
-                return false;
-            }
 
             return true;
         }
