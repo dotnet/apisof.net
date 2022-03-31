@@ -72,32 +72,31 @@ else
                     <SyntaxView Markup="@SelectedMarkup" Current="@Api" />
                 }
 
-                @if (Api.Usages.Any())
-                {
-                    <div class="my-4">
-                        @foreach (var usage in Api.Usages)
-                        {
-                            var value = usage.Percentage * 100;
-                            var title = $"Usage on {usage.Source.Name} is {usage.Percentage:P1} (as of {usage.Source.Date})";
+                <table class="table my-3">
+                    @foreach (var usage in Api.Usages)
+                    {
+                        var value = usage.Percentage * 100;
+                        var title = $"Usage on {usage.Source.Name} is {usage.Percentage:P1} (as of {usage.Source.Date})";
 
-                            <div class="row align-items-center" title="@title">
-                                <div class="col-auto">
-                                    <strong>@usage.Source.Name</strong>
-                                </div>
-                                <div class="col col-md-5 col-xl-3">
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: @(value)%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                        <tr title="@title">
+                            <th>
+                                @usage.Source.Name
+                            </th>
+                            <td>
+                                <div class="row align-items-center">
+                                    <div class="col col-md-5 col-xl-3">
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: @(value)%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        @usage.Percentage.ToString("P1")
                                     </div>
                                 </div>
-                                <div class="col-auto">
-                                    @usage.Percentage.ToString("P1")
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
+                            </td>
+                        </tr>
+                    }
 
-                <table class="table my-3">
                     @if (SelectedAvailability != null)
                     {
                         var assembly = SelectedAvailability.Declaration.Assembly;
