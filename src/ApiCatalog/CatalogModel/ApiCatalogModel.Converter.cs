@@ -14,6 +14,9 @@ using Microsoft.Data.Sqlite;
 
 namespace ApiCatalog.CatalogModel
 {
+    // TODO: Consider adding flags to the API table
+    //       We can use this to remove the need to store sizes e.g. HasUsages, HasChildren
+    //       This makes the computation of members on APIs more complicated, but it seems we can save space.
     public sealed partial class ApiCatalogModel
     {
         internal sealed class Converter
