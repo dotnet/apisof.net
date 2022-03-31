@@ -75,6 +75,7 @@ namespace GenCatalog
             var packsPath = Path.Combine(rootPath, "packs");
             var apiUsagesPath = Path.Combine(rootPath, "api-usages");
             var nugetUsagesPath = Path.Combine(apiUsagesPath, "nuget.org.tsv");
+            var netfxCompatLabPath = Path.Combine(apiUsagesPath, "NetFx Compat Lab.tsv");
             var databasePath = Path.Combine(rootPath, "apicatalog.db");
             var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
             var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
@@ -86,6 +87,7 @@ namespace GenCatalog
             await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
             await DownloadDotnetPackageListAsync(packageListPath);
             await DownloadNuGetUsages(nugetUsagesPath);
+            await DownloadNetFxCompatLabUsages(netfxCompatLabPath);
             await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
             await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
             await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, databasePath);
@@ -186,6 +188,23 @@ namespace GenCatalog
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(nugetUsagesPath);
             File.SetLastAccessTimeUtc(nugetUsagesPath, lastModified.UtcDateTime);
+        }
+
+        private static async Task DownloadNetFxCompatLabUsages(string netfxCompatLabPath)
+        {
+            if (File.Exists(netfxCompatLabPath))
+                return;
+
+            Directory.CreateDirectory(Path.GetDirectoryName(netfxCompatLabPath)!);
+
+            Console.WriteLine("Downloading NetFx Compat Lab usages...");
+
+            var connectionString = GetAzureStorageUsageConnectionString();
+            var blobClient = new BlobClient(connectionString, "usages-archive", "netfxcompatlab.tsv");
+            var props = await blobClient.GetPropertiesAsync();
+            var lastModified = props.Value.LastModified;
+            await blobClient.DownloadToAsync(netfxCompatLabPath);
+            File.SetLastAccessTimeUtc(netfxCompatLabPath, lastModified.UtcDateTime);
         }
 
         private static Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
@@ -494,7 +513,7 @@ namespace GenCatalog
             var result = new List<UsageFile>();
             var files = Directory.GetFiles(usagePath, "*.tsv");
 
-            foreach (var file in files)
+            foreach (var file in files.OrderBy(f => f))
             {
                 var name = Path.GetFileNameWithoutExtension(file);
                 var date = DateOnly.FromDateTime(File.GetLastWriteTime(file));
