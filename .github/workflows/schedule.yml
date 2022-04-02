@@ -22,7 +22,6 @@ jobs:
       env:
         DOTNET_NOLOGO: true
         AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        AzureStorageUsageConnectionString: ${{ secrets.AZURE_STORAGE_USAGE_CONNECTION_STRING }}
         GenCatalogWebHookUrl: ${{ secrets.GEN_CATALOG_WEB_HOOK_URL }}
         GenCatalogWebHookSecret: ${{ secrets.GEN_CATALOG_WEB_HOOK_SECRET }}
       run: |

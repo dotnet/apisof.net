@@ -118,21 +118,6 @@ namespace GenCatalog
             return result;
         }
 
-        private static string GetAzureStorageUsageConnectionString()
-        {
-            var result = Environment.GetEnvironmentVariable("AzureStorageUsageConnectionString");
-            if (string.IsNullOrEmpty(result))
-            {
-                var secrets = Secrets.Load();
-                result = secrets?.AzureStorageUsageConnectionString;
-            }
-
-            if (string.IsNullOrEmpty(result))
-                throw new Exception("Cannot retreive connection string for Azure blob storage of API usage. You either need to define an environment variable or a user secret.");
-
-            return result;
-        }
-
         private static string? GetDetailsUrl()
         {
             var serverUrl = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL");
@@ -182,8 +167,8 @@ namespace GenCatalog
 
             Console.WriteLine("Downloading NuGet usages...");
 
-            var connectionString = GetAzureStorageUsageConnectionString();
-            var blobClient = new BlobClient(connectionString, "usages", "results/usage_percentage.tsv");
+            var connectionString = GetAzureStorageConnectionString();
+            var blobClient = new BlobClient(connectionString, "usages", "usages.tsv");
             var props = await blobClient.GetPropertiesAsync();
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(nugetUsagesPath);
@@ -199,8 +184,8 @@ namespace GenCatalog
 
             Console.WriteLine("Downloading NetFx Compat Lab usages...");
 
-            var connectionString = GetAzureStorageUsageConnectionString();
-            var blobClient = new BlobClient(connectionString, "usages-archive", "netfxcompatlab.tsv");
+            var connectionString = GetAzureStorageConnectionString();
+            var blobClient = new BlobClient(connectionString, "usages", "netfxcompatlab.tsv");
             var props = await blobClient.GetPropertiesAsync();
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(netfxCompatLabPath);
@@ -537,7 +522,6 @@ namespace GenCatalog
     internal sealed class Secrets
     {
         public string? AzureStorageConnectionString { get; set; }
-        public string? AzureStorageUsageConnectionString { get; set; }
         public string? GenCatalogWebHookUrl { get; set; }
         public string? GenCatalogWebHookSecret { get; set; }
 
