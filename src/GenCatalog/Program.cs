@@ -168,7 +168,7 @@ namespace GenCatalog
             Console.WriteLine("Downloading NuGet usages...");
 
             var connectionString = GetAzureStorageConnectionString();
-            var blobClient = new BlobClient(connectionString, "usages", "usages.tsv");
+            var blobClient = new BlobClient(connectionString, "usage", "usages.tsv");
             var props = await blobClient.GetPropertiesAsync();
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(nugetUsagesPath);
@@ -185,7 +185,7 @@ namespace GenCatalog
             Console.WriteLine("Downloading NetFx Compat Lab usages...");
 
             var connectionString = GetAzureStorageConnectionString();
-            var blobClient = new BlobClient(connectionString, "usages", "netfxcompatlab.tsv");
+            var blobClient = new BlobClient(connectionString, "usage", "netfxcompatlab.tsv");
             var props = await blobClient.GetPropertiesAsync();
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(netfxCompatLabPath);
