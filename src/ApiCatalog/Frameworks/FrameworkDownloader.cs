@@ -232,7 +232,7 @@ namespace ApiCatalog
                     },
                     //
                     // Android
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.Android.Ref",
@@ -242,7 +242,7 @@ namespace ApiCatalog
                     },
                     //
                     // iOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.iOS.Ref",
@@ -252,7 +252,7 @@ namespace ApiCatalog
                     },
                     //
                     // macOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.macOS.Ref",
@@ -262,7 +262,7 @@ namespace ApiCatalog
                     },
                     //
                     // tvOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.tvOS.Ref",
@@ -272,7 +272,7 @@ namespace ApiCatalog
                     },
                     //
                     // watchOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.watchOS.Ref",
@@ -336,7 +336,7 @@ namespace ApiCatalog
                     },
                     //
                     // Android
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.Android.Ref",
@@ -346,7 +346,7 @@ namespace ApiCatalog
                     },
                     //
                     // iOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.iOS.Ref",
@@ -356,7 +356,7 @@ namespace ApiCatalog
                     },
                     //
                     // macOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.macOS.Ref",
@@ -366,7 +366,7 @@ namespace ApiCatalog
                     },
                     //
                     // tvOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.tvOS.Ref",
@@ -376,7 +376,7 @@ namespace ApiCatalog
                     },
                     //
                     // watchOS
-                    // 
+                    //
                     new FrameworkReferenceDefinition
                     {
                         TargetingPackName = "Microsoft.watchOS.Ref",

@@ -386,7 +386,7 @@ namespace GenCatalog
 
             await using var streamWriter = new StreamWriter(ancestorsPath);
             await streamWriter.WriteLineAsync($"API\tParent");
-        
+
             foreach (var api in catalog.GetAllApis())
             {
                 foreach (var parent in api.AncestorsAndSelf())

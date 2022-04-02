@@ -307,7 +307,7 @@ namespace ApiCatalog.CatalogModel
         public static ApiCatalogModel Load(Stream stream)
         {
             var start = stream.Position;
-            
+
             using (var reader = new BinaryReader(stream))
             {
                 var magicHeader = reader.ReadBytes(8);

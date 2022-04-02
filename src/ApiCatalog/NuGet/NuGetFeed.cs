@@ -79,10 +79,10 @@ namespace ApiCatalog
                         {
                             if (pageLeafItem.Type == "nuget:PackageDetails")
                                 catalogLeaves.Add(pageLeafItem);
-                        }                       
+                        }
                     }
                     catch (Exception ex) when (retryCount > 0)
-                    {                        
+                    {
                         retryCount--;
                         Console.Error.WriteLine($"error: {ex.Message}, retries left = {retryCount}");
                         goto Retry;
@@ -145,7 +145,7 @@ namespace ApiCatalog
             {
                 using var httpClient = new HttpClient();
                 var nupkgStream = await httpClient.GetStreamAsync(url);
-                await nupkgStream.CopyToAsync(destination);               
+                await nupkgStream.CopyToAsync(destination);
             }
             catch (Exception ex) when (retryCount > 0)
             {

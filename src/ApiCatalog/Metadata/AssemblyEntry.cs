@@ -74,7 +74,7 @@ namespace ApiCatalog
             // under properties and events.
             if (symbol.IsAccessor())
                 return;
-            
+
             var entry = ApiEntry.Create(symbol, parent);
             parent.Children.Add(entry);
 

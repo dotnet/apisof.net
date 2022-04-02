@@ -15,5 +15,5 @@
   <ItemGroup>
     <ProjectReference Include="..\ApiCatalog\ApiCatalog.csproj" />
   </ItemGroup>
-  
+
 </Project>

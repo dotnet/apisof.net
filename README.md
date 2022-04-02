@@ -17,7 +17,7 @@
       126 MB total.
 * Build an object-model over the binary data so we don't need to use SQLite
   when serving requests
-* Combine Suffix Tree with binary data so we can use a combined table for 
+* Combine Suffix Tree with binary data so we can use a combined table for
   all interned strings
 * Add NuGet, API Port, and Compat Lab usage
 * Expose what's necessary to reference a given assembly (framework reference,
