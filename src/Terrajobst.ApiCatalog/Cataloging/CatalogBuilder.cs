@@ -135,8 +135,9 @@ public sealed class CatalogBuilder : IDisposable
         try
         {
             await connection.OpenAsync();
-            connection.Execute("PRAGMA JOURNAL_MODE = OFF");
-            connection.Execute("PRAGMA SYNCHRONOUS = OFF");
+            await connection.ExecuteAsync("PRAGMA JOURNAL_MODE = OFF");
+            await connection.ExecuteAsync("PRAGMA SYNCHRONOUS = OFF");
+            await connection.ExecuteAsync("PRAGMA FOREIGN_KEYS = OFF");
             if (!exists)
                 await result.CreateSchemaAsync();
         }
@@ -163,130 +164,92 @@ public sealed class CatalogBuilder : IDisposable
 
     private async Task CreateSchemaAsync()
     {
-        var commands = new[]
-        {
-            @"
-                    CREATE TABLE [Syntaxes]
-                    (
-                        [SyntaxId] INTEGER PRIMARY KEY,
-                        [Syntax] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE TABLE [Apis]
-                    (
-                        [ApiId] INTEGER PRIMARY KEY,
-                        [Kind] INTEGER NOT NULL,
-                        [ApiGuid] TEXT NOT NULL,
-                        [ParentApiId] INTEGER,
-                        [Name] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE UNIQUE INDEX [IX_Apis_ApiGuid] ON [Apis] ([ApiGuid])
-                ",
-            @"
-                    CREATE INDEX [IX_Apis_ParentApiId] ON [Apis] ([ParentApiId])
-                ",
-            @"
-                    CREATE TABLE [Assemblies]
-                    (
-                        [AssemblyId] INTEGER NOT NULL PRIMARY KEY,
-                        [AssemblyGuid] TEXT NOT NULL,
-                        [Name] TEXT NOT NULL,
-                        [Version] TEXT NOT NULL,
-                        [PublicKeyToken] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE UNIQUE INDEX [IX_Assemblies_AssemblyGuid] ON [Assemblies] ([AssemblyGuid])
-                ",
-            @"
-                    CREATE TABLE [Declarations]
-                    (
-                        [ApiId] INTEGER NOT NULL,
-                        [AssemblyId] INTEGER NOT NULL,
-                        [SyntaxId] INTEGER NOT NULL
-                    )
-                ",
-            @"
-                    CREATE INDEX [IX_Declarations_ApiId] ON [Declarations] ([ApiId])
-                ",
-            @"
-                    CREATE TABLE [Frameworks]
-                    (
-                        [FrameworkId] INTEGER NOT NULL PRIMARY KEY,
-                        [FriendlyName] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE TABLE [PackageAssemblies]
-                    (
-                        [PackageVersionId] INTEGER NOT NULL,
-                        [FrameworkId] INTEGER NOT NULL,
-                        [AssemblyId] INTEGER NOT NULL
-                    )
-                ",
-            @"
-                    CREATE INDEX [IX_PackageAssemblies_AssemblyId] ON [PackageAssemblies] ([AssemblyId])
-                ",
-            @"
-                    CREATE TABLE [Packages]
-                    (
-                        [PackageId] INTEGER NOT NULL PRIMARY KEY,
-                        [Name] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE TABLE [PackageVersions]
-                    (
-                        [PackageVersionId] INTEGER NOT NULL PRIMARY KEY,
-                        [PackageId] INTEGER NOT NULL,
-                        [Version] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE TABLE [FrameworkAssemblies]
-                    (
-                        [FrameworkId] INTEGER NOT NULL,
-                        [AssemblyId] INTEGER NOT NULL
-                    )
-                ",
-            @"
-                    CREATE INDEX [IX_FrameworkAssemblies_FrameworkId] ON [FrameworkAssemblies] ([FrameworkId])
-                ",
-            @"
-                    CREATE INDEX [IX_FrameworkAssemblies_AssemblyId] ON [FrameworkAssemblies] ([AssemblyId])
-                ",
-            @"
-                    CREATE TABLE [UsageSources]
-                    (
-                        [UsageSourceId] INTEGER NOT NULL PRIMARY KEY,
-                        [Name] TEXT NOT NULL,
-                        [Date] TEXT NOT NULL
-                    )
-                ",
-            @"
-                    CREATE TABLE [ApiUsages]
-                    (
-                        [ApiId] INTEGER NOT NULL,
-                        [UsageSourceId] INTEGER NOT NULL,
-                        [Percentage] REAL NOT NULL
-                    )
-                ",
-            @"
-                    CREATE INDEX [IX_ApiUsages_ApiId] ON [ApiUsages] ([ApiId])
-                ",
-        };
+        await _connection.ExecuteAsync(@"
+            CREATE TABLE Apis
+            (
+                ApiId       INTEGER PRIMARY KEY,
+                Kind        INTEGER NOT NULL,
+                ApiGuid     TEXT    NOT NULL,
+                ParentApiId INTEGER REFERENCES Apis,
+                Name        TEXT    NOT NULL
+            );
+            CREATE UNIQUE INDEX IX_Apis_ApiGuid ON Apis (ApiGuid);
+            CREATE INDEX IX_Apis_ParentApiId ON Apis (ParentApiId);
 
-        using var cmd = new SqliteCommand();
-        cmd.Connection = _connection;
+            CREATE TABLE Assemblies
+            (
+                AssemblyId     INTEGER NOT NULL PRIMARY KEY,
+                AssemblyGuid   TEXT    NOT NULL,
+                Name           TEXT    NOT NULL,
+                Version        TEXT    NOT NULL,
+                PublicKeyToken TEXT    NOT NULL
+            );
+            CREATE UNIQUE INDEX IX_Assemblies_AssemblyGuid ON Assemblies (AssemblyGuid);
 
-        foreach (var sql in commands)
-        {
-            cmd.CommandText = sql;
-            await cmd.ExecuteNonQueryAsync();
-        }
+            CREATE TABLE Frameworks
+            (
+                FrameworkId  INTEGER NOT NULL PRIMARY KEY,
+                FriendlyName TEXT    NOT NULL
+            );
+
+            CREATE TABLE FrameworkAssemblies
+            (
+                FrameworkId INTEGER NOT NULL REFERENCES Frameworks,
+                AssemblyId  INTEGER NOT NULL REFERENCES Assemblies
+            );
+            CREATE INDEX IX_FrameworkAssemblies_AssemblyId ON FrameworkAssemblies (AssemblyId);
+            CREATE INDEX IX_FrameworkAssemblies_FrameworkId ON FrameworkAssemblies (FrameworkId);
+
+            CREATE TABLE Packages
+            (
+                PackageId INTEGER NOT NULL PRIMARY KEY,
+                Name      TEXT    NOT NULL
+            );
+
+            CREATE TABLE PackageVersions
+            (
+                PackageVersionId INTEGER NOT NULL PRIMARY KEY,
+                PackageId        INTEGER NOT NULL REFERENCES Packages,
+                Version          TEXT    NOT NULL
+            );
+
+            CREATE TABLE PackageAssemblies
+            (
+                PackageVersionId INTEGER NOT NULL REFERENCES PackageVersions,
+                FrameworkId      INTEGER NOT NULL REFERENCES Frameworks,
+                AssemblyId       INTEGER NOT NULL REFERENCES Assemblies
+            );
+            CREATE INDEX IX_PackageAssemblies_AssemblyId ON PackageAssemblies (AssemblyId);
+
+            CREATE TABLE Syntaxes
+            (
+                SyntaxId INTEGER PRIMARY KEY,
+                Syntax   TEXT NOT NULL
+            );
+
+            CREATE TABLE Declarations
+            (
+                ApiId      INTEGER NOT NULL REFERENCES Apis,
+                AssemblyId INTEGER NOT NULL REFERENCES Assemblies,
+                SyntaxId   INTEGER NOT NULL REFERENCES Syntaxes
+            );
+            CREATE INDEX IX_Declarations_ApiId ON Declarations (ApiId);
+
+            CREATE TABLE UsageSources
+            (
+                UsageSourceId INTEGER NOT NULL PRIMARY KEY,
+                Name          TEXT    NOT NULL,
+                Date          TEXT    NOT NULL
+            );
+
+            CREATE TABLE ApiUsages
+            (
+                ApiId         INTEGER NOT NULL REFERENCES Apis,
+                UsageSourceId INTEGER NOT NULL REFERENCES UsageSources,
+                Percentage    REAL    NOT NULL
+            );
+            CREATE INDEX IX_ApiUsages_ApiId ON ApiUsages (ApiId);
+        ");
     }
 
     private readonly Dictionary<string, int> _syntaxIdBySyntax = new();
