@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapper;
 using Microsoft.Data.Sqlite;
-using Terrajobst.ApiCatalog;
 
 namespace Terrajobst.ApiCatalog.Cataloging;
 
@@ -121,50 +120,44 @@ public sealed class CatalogBuilder : IDisposable
         }
     }
 
-    public static async Task<CatalogBuilder> CreateAsync(string path)
+    public static CatalogBuilder Create(string path)
     {
-        var exists = File.Exists(path);
-        var cb = new SqliteConnectionStringBuilder
+        var connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = path,
             Mode = SqliteOpenMode.ReadWriteCreate
-        };
+        }.ToString();
 
-        var connection = new SqliteConnection(cb.ToString());
-        var result = new CatalogBuilder(connection);
-        try
-        {
-            await connection.OpenAsync();
-            await connection.ExecuteAsync("PRAGMA JOURNAL_MODE = OFF");
-            await connection.ExecuteAsync("PRAGMA SYNCHRONOUS = OFF");
-            await connection.ExecuteAsync("PRAGMA FOREIGN_KEYS = OFF");
-            if (!exists)
-                await result.CreateSchemaAsync();
-        }
-        catch
-        {
-            result.Dispose();
-            throw;
-        }
+        var connection = new SqliteConnection(connectionString);
+        connection.Open();
+        connection.Execute("PRAGMA JOURNAL_MODE = OFF");
+        connection.Execute("PRAGMA SYNCHRONOUS = OFF");
+        connection.Execute("PRAGMA FOREIGN_KEYS = OFF");
+        CreateSchema(connection);
 
-        return result;
+        var transaction = connection.BeginTransaction();
+        return new CatalogBuilder(connection, transaction);
     }
 
     private readonly SqliteConnection _connection;
+    private readonly SqliteTransaction _transaction;
 
-    public CatalogBuilder(SqliteConnection connection)
+    private CatalogBuilder(SqliteConnection connection, SqliteTransaction transaction)
     {
         _connection = connection;
+        _transaction = transaction;
     }
 
     public void Dispose()
     {
+        _transaction.Commit();
+        _transaction.Dispose();
         _connection.Dispose();
     }
 
-    private async Task CreateSchemaAsync()
+    private static void CreateSchema(SqliteConnection connection)
     {
-        await _connection.ExecuteAsync(@"
+        connection.Execute(@"
             CREATE TABLE Apis
             (
                 ApiId       INTEGER PRIMARY KEY,
@@ -267,16 +260,19 @@ public sealed class CatalogBuilder : IDisposable
 
         syntaxId = _syntaxIdBySyntax.Count + 1;
 
-        _connection.Execute(@"
-                    INSERT INTO [Syntaxes]
-                        (SyntaxId, Syntax)
-                    VALUES
-                        (@SyntaxId, @Syntax)
-                ", new
-        {
-            SyntaxId = syntaxId,
-            Syntax = syntax
-        });
+        _connection.Execute(
+            @"
+                INSERT INTO [Syntaxes]
+                    (SyntaxId, Syntax)
+                VALUES
+                    (@SyntaxId, @Syntax)
+            ",
+            new {
+                SyntaxId = syntaxId,
+                Syntax = syntax
+            },
+            _transaction
+        );
 
         _syntaxIdBySyntax.Add(syntax, syntaxId);
 
@@ -293,19 +289,22 @@ public sealed class CatalogBuilder : IDisposable
             ? (int?)null
             : _apiIdByFingerprint[parentFingerprint];
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [Apis]
                     (ApiId, Kind, ApiGuid, ParentApiId, Name)
                 VALUES
                     (@ApiId, @Kind, @ApiGuid, @ParentApiId, @Name)
-            ", new
-        {
-            ApiId = apiId,
-            Kind = kind,
-            ApiGuid = fingerprint.ToString("N"),
-            ParentApiId = parentApiId,
-            Name = name
-        });
+            ",
+            new {
+                ApiId = apiId,
+                Kind = kind,
+                ApiGuid = fingerprint.ToString("N"),
+                ParentApiId = parentApiId,
+                Name = name
+            },
+            _transaction
+        );
 
         _apiIdByFingerprint.Add(fingerprint, apiId);
     }
@@ -317,19 +316,22 @@ public sealed class CatalogBuilder : IDisposable
 
         var assemblyId = _assemblyIdByFingerprint.Count + 1;
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [Assemblies]
                     (AssemblyId, AssemblyGuid, Name, Version, PublicKeyToken)
                 VALUES
                     (@AssemblyId, @AssemblyGuid, @Name, @Version, @PublicKeyToken)
-            ", new
-        {
-            AssemblyId = assemblyId,
-            AssemblyGuid = fingerprint.ToString("N"),
-            Name = name,
-            Version = version,
-            PublicKeyToken = publicKeyToken,
-        });
+            ",
+            new {
+                AssemblyId = assemblyId,
+                AssemblyGuid = fingerprint.ToString("N"),
+                Name = name,
+                Version = version,
+                PublicKeyToken = publicKeyToken,
+            },
+            _transaction
+        );
 
         _assemblyIdByFingerprint.Add(fingerprint, assemblyId);
         return true;
@@ -341,17 +343,20 @@ public sealed class CatalogBuilder : IDisposable
         var apiId = _apiIdByFingerprint[apiFingerprint];
         var syntaxId = DefineSyntax(syntax);
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [Declarations]
                     (AssemblyId, ApiId, SyntaxId)
                 VALUES
                     (@AssemblyId, @ApiId, @SyntaxId)
-            ", new
-        {
-            AssemblyId = assemblyId,
-            ApiId = apiId,
-            SyntaxId = syntaxId
-        });
+            ",
+            new {
+                AssemblyId = assemblyId,
+                ApiId = apiId,
+                SyntaxId = syntaxId
+            },
+            _transaction
+        );
     }
 
     private void DefineFramework(string frameworkName)
@@ -361,16 +366,19 @@ public sealed class CatalogBuilder : IDisposable
 
         var frameworkId = _frameworkIdByName.Count + 1;
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [Frameworks]
                     (FrameworkId, FriendlyName)
                 VALUES
                     (@FrameworkId, @FriendlyName)
-            ", new
-        {
-            FrameworkId = frameworkId,
-            FriendlyName = frameworkName
-        });
+            ",
+            new  {
+                FrameworkId = frameworkId,
+                FriendlyName = frameworkName
+            }, 
+            _transaction
+        );
 
         _frameworkIdByName.Add(frameworkName, frameworkId);
     }
@@ -380,16 +388,19 @@ public sealed class CatalogBuilder : IDisposable
         var frameworkId = _frameworkIdByName[framework];
         var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [FrameworkAssemblies]
                     (FrameworkId, AssemblyId)
                 VALUES
                     (@FrameworkId, @AssemblyId)
-            ", new
-        {
-            FrameworkId = frameworkId,
-            AssemblyId = assemblyId
-        });
+            ",
+            new {
+                FrameworkId = frameworkId,
+                AssemblyId = assemblyId
+            },
+            _transaction
+        );
     }
 
     private void DefinePackage(Guid fingerprint, string id, string version)
@@ -400,17 +411,20 @@ public sealed class CatalogBuilder : IDisposable
         var packageVersionId = _packageVersionIdByFingerprint.Count + 1;
         var packageId = DefinePackageName(id);
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [PackageVersions]
                     (PackageVersionId, PackageId, Version)
                 VALUES
                     (@PackageVersionId, @PackageId, @Version)
-            ", new
-        {
-            PackageVersionId = packageVersionId,
-            PackageId = packageId,
-            Version = version
-        });
+            ",
+            new {
+                PackageVersionId = packageVersionId,
+                PackageId = packageId,
+                Version = version
+            },
+            _transaction
+        );
 
         _packageVersionIdByFingerprint.Add(fingerprint, packageVersionId);
     }
@@ -421,16 +435,19 @@ public sealed class CatalogBuilder : IDisposable
         {
             packageId = _packageIdByName.Count + 1;
 
-            _connection.Execute(@"
+            _connection.Execute(
+                @"
                     INSERT INTO [Packages]
                         (PackageId, Name)
                     VALUES
                         (@PackageId, @Name)
-                ", new
-            {
-                PackageId = packageId,
-                Name = name,
-            });
+                ",
+                new {
+                    PackageId = packageId,
+                    Name = name,
+                },
+                _transaction
+            );
 
             _packageIdByName.Add(name, packageId);
         }
@@ -444,17 +461,20 @@ public sealed class CatalogBuilder : IDisposable
         var frameworkId = _frameworkIdByName[frameworkName];
         var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [PackageAssemblies]
                     (PackageVersionId, FrameworkId, AssemblyId)
                 VALUES
                     (@PackageVersionId, @FrameworkId, @AssemblyId)
-            ", new
-        {
-            PackageVersionId = packageVersionId,
-            FrameworkId = frameworkId,
-            AssemblyId = assemblyId
-        });
+            ",
+            new {
+                PackageVersionId = packageVersionId,
+                FrameworkId = frameworkId,
+                AssemblyId = assemblyId
+            },
+            _transaction
+        );
     }
 
     private void DefineUsageSource(string name, DateOnly date)
@@ -464,17 +484,20 @@ public sealed class CatalogBuilder : IDisposable
 
         var usageSourceId = _usageSourceIdByName.Count + 1;
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [UsageSources]
                     (UsageSourceId, Name, Date)
                 VALUES
                     (@UsageSourceId, @Name, @Date)
-            ", new
-        {
-            UsageSourceId = usageSourceId,
-            Name = name,
-            Date = new DateTime(date.Year, date.Month, date.Day)
-        });
+            ",
+            new {
+                UsageSourceId = usageSourceId,
+                Name = name,
+                Date = new DateTime(date.Year, date.Month, date.Day)
+            },
+            _transaction
+        );
 
         _usageSourceIdByName.Add(name, usageSourceId);
     }
@@ -487,16 +510,19 @@ public sealed class CatalogBuilder : IDisposable
         if (!_apiIdByFingerprint.TryGetValue(apiFingerprint, out var apiId))
             return;
 
-        _connection.Execute(@"
+        _connection.Execute(
+            @"
                 INSERT INTO [ApiUsages]
                     (ApiId, UsageSourceId, Percentage)
                 VALUES
                     (@ApiId, @UsageSourceId, @Percentage)
-            ", new
-        {
-            ApiId = apiId,
-            UsageSourceId = usageSourceId,
-            Percentage = percentage
-        });
+            ",
+            new {
+                ApiId = apiId,
+                UsageSourceId = usageSourceId,
+                Percentage = percentage
+            },
+            _transaction
+        );
     }
 }

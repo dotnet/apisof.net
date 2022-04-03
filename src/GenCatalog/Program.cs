@@ -302,20 +302,22 @@ internal static class Program
         }
     }
 
-    private static async Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string usagesPath, string outputPath)
+    private static Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string usagesPath, string outputPath)
     {
         if (File.Exists(outputPath))
-            return;
+            return Task.CompletedTask;
 
         File.Delete(outputPath);
 
-        using var builder = await CatalogBuilder.CreateAsync(outputPath);
+        using var builder = CatalogBuilder.Create(outputPath);
         builder.Index(platformsPath);
         builder.Index(packagesPath);
 
         var usageFiles = GetUsageFiles(usagesPath);
         foreach (var (path, name, date) in usageFiles)
             builder.IndexUsages(path, name, date);
+
+        return Task.CompletedTask;
     }
 
     private static async Task GenerateCatalogModel(string databasePath, string catalogModelPath)
