@@ -12,6 +12,7 @@ using System.Xml.Linq;
 using ApiCatalog;
 using ApiCatalog.CatalogModel;
 
+using Azure.Core;
 using Azure.Storage.Blobs;
 
 using Microsoft.Extensions.Configuration.UserSecrets;
@@ -130,7 +131,7 @@ namespace GenCatalog
         {
             var connectionString = GetAzureStorageConnectionString();
             var container = "archive";
-            var containerClient = new BlobContainerClient(connectionString, container);
+            var containerClient = new BlobContainerClient(connectionString, container, options: GetBlobOptions());
 
             await foreach (var blob in containerClient.GetBlobsAsync())
             {
@@ -139,7 +140,7 @@ namespace GenCatalog
                 if (!Directory.Exists(localDirectory))
                 {
                     Console.WriteLine($"Downloading {nameWithoutExtension}...");
-                    var blobClient = new BlobClient(connectionString, container, blob.Name);
+                    var blobClient = new BlobClient(connectionString, container, blob.Name, options: GetBlobOptions());
                     using var blobStream = await blobClient.OpenReadAsync();
                     using var archive = new ZipArchive(blobStream, ZipArchiveMode.Read);
                     archive.ExtractToDirectory(localDirectory);
@@ -168,7 +169,7 @@ namespace GenCatalog
             Console.WriteLine("Downloading NuGet usages...");
 
             var connectionString = GetAzureStorageConnectionString();
-            var blobClient = new BlobClient(connectionString, "usage", "usages.tsv");
+            var blobClient = new BlobClient(connectionString, "usage", "usages.tsv", options: GetBlobOptions());
             var props = await blobClient.GetPropertiesAsync();
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(nugetUsagesPath);
@@ -185,7 +186,7 @@ namespace GenCatalog
             Console.WriteLine("Downloading NetFx Compat Lab usages...");
 
             var connectionString = GetAzureStorageConnectionString();
-            var blobClient = new BlobClient(connectionString, "usage", "netfxcompatlab.tsv");
+            var blobClient = new BlobClient(connectionString, "usage", "netfxcompatlab.tsv", options: GetBlobOptions());
             var props = await blobClient.GetPropertiesAsync();
             var lastModified = props.Value.LastModified;
             await blobClient.DownloadToAsync(netfxCompatLabPath);
@@ -390,8 +391,8 @@ namespace GenCatalog
             Console.WriteLine("Uploading catalog database...");
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
-            var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate");
-            await RunWithRetry(() => blobClient.UploadAsync(compressedFileName, overwrite: true));
+            var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate", options: GetBlobOptions());
+            await blobClient.UploadAsync(compressedFileName, overwrite: true);
         }
 
         private static async Task UploadCatalogModelAsync(string catalogModelPath)
@@ -400,8 +401,8 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var name = Path.GetFileName(catalogModelPath);
-            var blobClient = new BlobClient(connectionString, container, name);
-            await RunWithRetry(() => blobClient.UploadAsync(catalogModelPath, overwrite: true));
+            var blobClient = new BlobClient(connectionString, container, name, options: GetBlobOptions());
+            await blobClient.UploadAsync(catalogModelPath, overwrite: true);
         }
 
         private static async Task UploadSuffixTreeAsync(string suffixTreePath)
@@ -415,8 +416,8 @@ namespace GenCatalog
             Console.WriteLine("Uploading suffix tree...");
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
-            var blobClient = new BlobClient(connectionString, container, "suffixtree.dat.deflate");
-            await RunWithRetry(() => blobClient.UploadAsync(compressedFileName, overwrite: true));
+            var blobClient = new BlobClient(connectionString, container, "suffixtree.dat.deflate", options: GetBlobOptions());
+            await blobClient.UploadAsync(compressedFileName, overwrite: true);
         }
 
         private static async Task UploadApiAncestorsAsync(string ancestorsPath)
@@ -425,8 +426,8 @@ namespace GenCatalog
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
             var name = Path.GetFileName(ancestorsPath);
-            var blobClient = new BlobClient(connectionString, container, name);
-            await RunWithRetry(() => blobClient.UploadAsync(ancestorsPath, overwrite: true));
+            var blobClient = new BlobClient(connectionString, container, name, options: GetBlobOptions());
+            await blobClient.UploadAsync(ancestorsPath, overwrite: true);
         }
 
         private static async Task PostToGenCatalogWebHook()
@@ -476,30 +477,22 @@ namespace GenCatalog
 
             var connectionString = GetAzureStorageConnectionString();
             var container = "catalog";
-            var blobClient = new BlobClient(connectionString, container, "job.json");
-            await RunWithRetry(() => blobClient.UploadAsync(jobStream, overwrite: true));
+            var blobClient = new BlobClient(connectionString, container, "job.json", options: GetBlobOptions());
+            await blobClient.UploadAsync(jobStream, overwrite: true);
         }
 
-        private static async Task RunWithRetry(Func<Task> operation)
+        private static BlobClientOptions GetBlobOptions()
         {
-            var retryCount = 3;
-
-            while (retryCount-- > 0)
+            return new BlobClientOptions
             {
-                try
+                Retry =
                 {
-                     await operation();
-                     break;
+                    Mode = RetryMode.Exponential,
+                    Delay = TimeSpan.FromSeconds(90),
+                    MaxRetries = 10,
+                    NetworkTimeout = TimeSpan.FromMinutes(5),
                 }
-                catch (Exception ex) when (retryCount > 0)
-                {
-                    var delay = TimeSpan.FromSeconds(10);
-                    var until = DateTime.Now + delay;
-                    Console.WriteLine($"error: {ex.Message}");
-                    Console.WriteLine($"Waiting for {delay.TotalSeconds} seconds until {until} before trying again...");
-                    await Task.Delay(delay);
-                }
-            }
+            };
         }
 
         private static IReadOnlyList<UsageFile> GetUsageFiles(string usagePath)
