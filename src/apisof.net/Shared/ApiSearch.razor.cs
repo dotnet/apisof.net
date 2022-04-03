@@ -4,13 +4,11 @@ using System.Threading.Tasks;
 using System.Timers;
 
 using ApiCatalog.CatalogModel;
-
-using ApiCatalogWeb.Services;
-
+using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace ApiCatalogWeb.Shared
+namespace ApiCatalog.Shared
 {
     public partial class ApiSearch
     {

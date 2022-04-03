@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 
-namespace ApiCatalogWeb.Services
+namespace ApiCatalog.Services
 {
     public sealed class CatalogServiceWarmUp : IHostedService
     {

@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 using ApiCatalog;
 using ApiCatalog.CatalogModel;
-
-using ApiCatalogWeb.Services;
-
+using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace ApiCatalogWeb.Pages
+namespace ApiCatalog.Pages
 {
     public partial class CatalogItem
     {

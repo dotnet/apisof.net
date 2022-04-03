@@ -1,10 +1,8 @@
 ﻿using ApiCatalog.CatalogModel;
-
-using ApiCatalogWeb.Services;
-
+using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace ApiCatalogWeb.Pages
+namespace ApiCatalog.Pages
 {
     public partial class Stats
     {

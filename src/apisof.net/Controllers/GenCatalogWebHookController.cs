@@ -1,13 +1,11 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-
-using ApiCatalogWeb.Services;
-
+using ApiCatalog.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace ApiCatalogWeb.Controllers
+namespace ApiCatalog.Controllers
 {
     [ApiController]
     [Route("gencatalog-webhook")]

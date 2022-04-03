@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
-namespace ApiCatalogWeb.Services
+namespace ApiCatalog.Services
 {
     public sealed class CatalogService
     {

@@ -19,6 +19,6 @@ jobs:
 
     - name: dotnet build
       run: |
-        cd src/ApiCatalogWeb
-        dotnet build -c Release -o '../../artifacts/ApiCatalogWeb'
+        cd src/apisof.net
+        dotnet build -c Release -o '../../artifacts/apisof.net'
         cd ../..

@@ -5,7 +5,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace ApiCatalogWeb.Services
+namespace ApiCatalog.Services
 {
     public static class NavigationManagerExtensions
     {

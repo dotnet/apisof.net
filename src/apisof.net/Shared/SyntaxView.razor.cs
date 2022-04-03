@@ -5,12 +5,10 @@ using System.Text.Encodings.Web;
 
 using ApiCatalog;
 using ApiCatalog.CatalogModel;
-
-using ApiCatalogWeb.Services;
-
+using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace ApiCatalogWeb.Shared
+namespace ApiCatalog.Shared
 {
     public partial class SyntaxView
     {

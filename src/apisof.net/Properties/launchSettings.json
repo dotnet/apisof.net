@@ -15,7 +15,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "ApiCatalogWeb": {
+    "Project": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {

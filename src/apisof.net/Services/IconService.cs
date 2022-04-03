@@ -1,7 +1,7 @@
 ﻿
 using ApiCatalog;
 
-namespace ApiCatalogWeb.Services
+namespace ApiCatalog.Services
 {
     public class IconService
     {

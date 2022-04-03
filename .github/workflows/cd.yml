@@ -21,8 +21,8 @@ jobs:
 
     - name: dotnet publish
       run: |
-        cd src/ApiCatalogWeb
-        dotnet publish -c Release -o '../../artifacts/ApiCatalogWeb' /p:SourceRevisionId=${{ github.sha }}
+        cd src/apisof.net
+        dotnet publish -c Release -o '../../artifacts/apisof.net' /p:SourceRevisionId=${{ github.sha }}
         cd ../..
 
     # Deploy to Azure
@@ -32,4 +32,4 @@ jobs:
       with:
         app-name: apisof
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }}
-        package: ./artifacts/ApiCatalogWeb
+        package: ./artifacts/apisof.net

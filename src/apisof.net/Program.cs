@@ -3,7 +3,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace ApiCatalogWeb
+namespace ApiCatalog
 {
     public class Program
     {
