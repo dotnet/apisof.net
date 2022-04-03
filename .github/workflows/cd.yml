@@ -3,6 +3,10 @@ name: CD
 on:
   push:
     branches: [ main ]
+    paths:
+      - .github/workflows/cd.yml
+      - src/apisof.net/**
+      - src/Terrajobst.ApiCatalog/**
 
 jobs:
   build-and-deploy:
