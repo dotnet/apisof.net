@@ -8,6 +8,9 @@ on:
       - src/apisof.net/**
       - src/Terrajobst.ApiCatalog/**
 
+env:
+  DOTNET_NOLOGO: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest

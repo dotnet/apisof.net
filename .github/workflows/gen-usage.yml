@@ -1,0 +1,29 @@
+name: Generate Usage
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '21 09 * * *' # every day at 09:21 AM UTC (01:21 AM PT)
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get code
+      uses: actions/checkout@v2
+
+    - name: Get .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.*'
+
+    - name: Generate usage
+      env:
+        AzureBlobStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      run: |
+        cd ./src/genusage
+        dotnet run -- crawl

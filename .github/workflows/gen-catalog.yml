@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '21 12 * * *' # every day at 12:21 PM UTC (5:21 AM PT)
 
+env:
+  DOTNET_NOLOGO: true
+
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
@@ -20,7 +23,6 @@ jobs:
 
     - name: Generate catalog
       env:
-        DOTNET_NOLOGO: true
         AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         GenCatalogWebHookUrl: ${{ secrets.GEN_CATALOG_WEB_HOOK_URL }}
         GenCatalogWebHookSecret: ${{ secrets.GEN_CATALOG_WEB_HOOK_SECRET }}
