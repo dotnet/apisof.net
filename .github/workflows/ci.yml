@@ -19,6 +19,10 @@ jobs:
 
     - name: dotnet build
       run: |
-        cd src/apisof.net
-        dotnet build -c Release -o '../../artifacts/apisof.net'
-        cd ../..
+        cd src
+        dotnet build -c Release
+
+    - name: dotnet test
+      run: |
+        cd src
+        dotnet test --nologo --no-build
