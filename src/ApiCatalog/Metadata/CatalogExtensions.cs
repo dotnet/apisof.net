@@ -129,7 +129,7 @@ internal static class CatalogExtensions
                 _ => ApiKind.Method
             },
             IFieldSymbol f when f.ContainingType.TypeKind == TypeKind.Enum => ApiKind.EnumItem,
-            IFieldSymbol {IsConst: true} => ApiKind.Constant,
+            IFieldSymbol { IsConst: true } => ApiKind.Constant,
             IFieldSymbol => ApiKind.Field,
             IPropertySymbol => ApiKind.Property,
             IEventSymbol => ApiKind.Event,
@@ -170,7 +170,7 @@ internal static class CatalogExtensions
         if (symbol.ContainingType?.TypeKind == TypeKind.Delegate)
             return false;
 
-        if (symbol is IMethodSymbol {MethodKind: MethodKind.Constructor, Parameters.Length: 0} m && m.ContainingType.IsValueType)
+        if (symbol is IMethodSymbol { MethodKind: MethodKind.Constructor, Parameters.Length: 0 } m && m.ContainingType.IsValueType)
             return false;
 
         return true;

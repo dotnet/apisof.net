@@ -63,7 +63,7 @@ public sealed class NuGetFeed
                     continue;
 
                 var retryCount = 3;
-                Retry:
+            Retry:
                 try
                 {
                     // Download the catalog page and deserialize it.
@@ -137,7 +137,7 @@ public sealed class NuGetFeed
         var url = await GetPackageUrlAsync(identity);
 
         var retryCount = 3;
-        Retry:
+    Retry:
         try
         {
             using var httpClient = new HttpClient();

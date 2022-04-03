@@ -120,6 +120,7 @@ public sealed class CatalogBuilder : IDisposable
             }
         }
     }
+
     public static async Task<CatalogBuilder> CreateAsync(string path)
     {
         var exists = File.Exists(path);
