@@ -5,40 +5,39 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-namespace ApiCatalog.Controllers
+namespace ApiCatalog.Controllers;
+
+[ApiController]
+[Route("gencatalog-webhook")]
+[AllowAnonymous]
+public sealed class GenCatalogWebHookController : Controller
 {
-    [ApiController]
-    [Route("gencatalog-webhook")]
-    [AllowAnonymous]
-    public sealed class GenCatalogWebHookController : Controller
+    private readonly IConfiguration _configuration;
+    private readonly CatalogService _catalogService;
+
+    public GenCatalogWebHookController(IConfiguration configuration, CatalogService catalogService)
     {
-        private readonly IConfiguration _configuration;
-        private readonly CatalogService _catalogService;
+        _configuration = configuration;
+        _catalogService = catalogService;
+    }
 
-        public GenCatalogWebHookController(IConfiguration configuration, CatalogService catalogService)
-        {
-            _configuration = configuration;
-            _catalogService = catalogService;
-        }
+    [HttpPost]
+    public async Task<IActionResult> Post()
+    {
+        string secret;
+        using (var reader = new StreamReader(Request.Body))
+            secret = await reader.ReadToEndAsync();
 
-        [HttpPost]
-        public async Task<IActionResult> Post()
-        {
-            string secret;
-            using (var reader = new StreamReader(Request.Body))
-                secret = await reader.ReadToEndAsync();
+        if (secret != null)
+            secret.Trim();
 
-            if (secret != null)
-                secret.Trim();
+        var expectedSecret = _configuration["GenCatalogWebHookSecret"].Trim();
 
-            var expectedSecret = _configuration["GenCatalogWebHookSecret"].Trim();
+        if (secret != expectedSecret)
+            return Unauthorized();
 
-            if (secret != expectedSecret)
-                return Unauthorized();
+        await _catalogService.InvalidateAsync();
 
-            await _catalogService.InvalidateAsync();
-
-            return Ok();
-        }
+        return Ok();
     }
 }

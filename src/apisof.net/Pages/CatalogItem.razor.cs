@@ -6,90 +6,90 @@ using System.Threading.Tasks;
 
 using ApiCatalog;
 using ApiCatalog.CatalogModel;
+using ApiCatalog.Metadata;
 using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
-namespace ApiCatalog.Pages
+namespace ApiCatalog.Pages;
+
+public partial class CatalogItem
 {
-    public partial class CatalogItem
+    [Inject]
+    public CatalogService CatalogService { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
+    [Parameter]
+    public string Guid { get; set; }
+
+    public string SelectedFramework { get; set; }
+
+    public ApiModel Api { get; set; }
+
+    public IEnumerable<ApiModel> Breadcrumbs { get; set; }
+
+    public ApiModel Parent { get; set; }
+
+    public ApiAvailability Availability { get; set; }
+
+    public ApiFrameworkAvailability SelectedAvailability { get; set; }
+
+    public Markup.Markup SelectedMarkup { get; set; }
+
+    public string HelpLink { get; set; }
+
+    protected override void OnInitialized()
     {
-        [Inject]
-        public CatalogService CatalogService { get; set; }
+        NavigationManager.LocationChanged += NavigationManager_LocationChanged;
+    }
 
-        [Inject]
-        public NavigationManager NavigationManager { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+        await UpdateSyntaxAsync();
+    }
 
-        [Parameter]
-        public string Guid { get; set; }
+    private async Task UpdateSyntaxAsync()
+    {
+        SelectedFramework = NavigationManager.GetQueryParameter("fx");
 
-        public string SelectedFramework { get; set; }
+        // TODO: Handle invalide GUID
+        // TODO: Handle API not found
 
-        public ApiModel Api { get; set; }
+        Api = CatalogService.GetApiByGuid(System.Guid.Parse(Guid));
+        Availability = Api.GetAvailability();
+        SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework);
+        if (SelectedAvailability == null)
+            SelectedAvailability = Availability.Frameworks.FirstOrDefault();
 
-        public IEnumerable<ApiModel> Breadcrumbs { get; set; }
+        Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 
-        public ApiModel Parent { get; set; }
-
-        public ApiAvailability Availability { get; set; }
-
-        public ApiFrameworkAvailability SelectedAvailability { get; set; }
-
-        public Markup SelectedMarkup { get; set; }
-
-        public string HelpLink { get; set; }
-
-        protected override void OnInitialized()
+        if (Api.Kind.IsMember())
         {
-            NavigationManager.LocationChanged += NavigationManager_LocationChanged;
+            Parent = Api.Parent;
+        }
+        else
+        {
+            Parent = Api;
         }
 
-        protected override async Task OnParametersSetAsync()
-        {
-            await UpdateSyntaxAsync();
-        }
+        SelectedMarkup = SelectedAvailability == null
+            ? null
+            : SelectedAvailability.Declaration.GetMarkup();
 
-        private async Task UpdateSyntaxAsync()
-        {
-            SelectedFramework = NavigationManager.GetQueryParameter("fx");
+        var helpLink = Api.GetHelpLink();
+        using var httpClient = new HttpClient();
+        using var response = await httpClient.GetAsync(helpLink);
+        if (response.StatusCode == HttpStatusCode.OK)
+            HelpLink = helpLink;
+        else
+            HelpLink = null;
+    }
 
-            // TODO: Handle invalide GUID
-            // TODO: Handle API not found
-
-            Api = CatalogService.GetApiByGuid(System.Guid.Parse(Guid));
-            Availability = Api.GetAvailability();
-            SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework);
-            if (SelectedAvailability == null)
-                SelectedAvailability = Availability.Frameworks.FirstOrDefault();
-
-            Breadcrumbs = Api.AncestorsAndSelf().Reverse();
-
-            if (Api.Kind.IsMember())
-            {
-                Parent = Api.Parent;
-            }
-            else
-            {
-                Parent = Api;
-            }
-
-            SelectedMarkup = SelectedAvailability == null
-                ? null
-                : SelectedAvailability.Declaration.GetMarkup();
-
-            var helpLink = Api.GetHelpLink();
-            using var httpClient = new HttpClient();
-            using var response = await httpClient.GetAsync(helpLink);
-            if (response.StatusCode == HttpStatusCode.OK)
-                HelpLink = helpLink;
-            else
-                HelpLink = null;
-        }
-
-        private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
-        {
-            await UpdateSyntaxAsync();
-            StateHasChanged();
-        }
+    private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        await UpdateSyntaxAsync();
+        StateHasChanged();
     }
 }

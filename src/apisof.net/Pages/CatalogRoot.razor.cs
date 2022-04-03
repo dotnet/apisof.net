@@ -2,11 +2,10 @@
 using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace ApiCatalog.Pages
+namespace ApiCatalog.Pages;
+
+public partial class CatalogRoot
 {
-    public partial class CatalogRoot
-    {
-        [Inject]
-        public CatalogService CatalogService { get; set; }
-    }
+    [Inject]
+    public CatalogService CatalogService { get; set; }
 }

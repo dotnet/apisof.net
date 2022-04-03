@@ -1,32 +1,30 @@
 ﻿using System.Collections.Generic;
-
 using NuGet.Frameworks;
 
-namespace ApiCatalog
+namespace ApiCatalog.Frameworks;
+
+public sealed class PackBasedFrameworkLocator : FrameworkLocator
 {
-    public sealed class PackBasedFrameworkLocator : FrameworkLocator
+    private readonly string _frameworksPath;
+    private Dictionary<string, string[]> _mappings;
+
+    public PackBasedFrameworkLocator(string frameworksPath)
     {
-        private readonly string _frameworksPath;
-        private Dictionary<string, string[]> _mappings;
+        _frameworksPath = frameworksPath;
+    }
 
-        public PackBasedFrameworkLocator(string frameworksPath)
+    public override string[] Locate(NuGetFramework framework)
+    {
+        if (_mappings == null)
         {
-            _frameworksPath = frameworksPath;
+            _mappings = new Dictionary<string, string[]>();
+            var provider = new PackBasedFrameworkProvider(_frameworksPath);
+            foreach (var (tfm, paths) in provider.Resolve())
+                _mappings.Add(tfm, paths);
         }
 
-        public override string[] Locate(NuGetFramework framework)
-        {
-            if (_mappings == null)
-            {
-                _mappings = new Dictionary<string, string[]>();
-                var provider = new PackBasedFrameworkProvider(_frameworksPath);
-                foreach (var (tfm, paths) in provider.Resolve())
-                    _mappings.Add(tfm, paths);
-            }
-
-            var key = framework.GetShortFolderName();
-            _mappings.TryGetValue(key, out var mappingPaths);
-            return mappingPaths;
-        }
+        var key = framework.GetShortFolderName();
+        _mappings.TryGetValue(key, out var mappingPaths);
+        return mappingPaths;
     }
 }

@@ -1,67 +1,66 @@
 using System;
 
-namespace ApiCatalog.CatalogModel
+namespace ApiCatalog.CatalogModel;
+
+public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
 {
-    public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
+    private readonly ApiCatalogModel _catalog;
+    private readonly int _offset;
+
+    internal UsageSourceModel(ApiCatalogModel catalog, int offset)
     {
-        private readonly ApiCatalogModel _catalog;
-        private readonly int _offset;
+        _catalog = catalog;
+        _offset = offset;
+    }
 
-        internal UsageSourceModel(ApiCatalogModel catalog, int offset)
+    public ApiCatalogModel Catalog => _catalog;
+
+    public string Name
+    {
+        get
         {
-            _catalog = catalog;
-            _offset = offset;
+            var stringOffset = _catalog.GetUsageSourcesTableInt32(_offset);
+            return _catalog.GetString(stringOffset);
         }
+    }
 
-        public ApiCatalogModel Catalog => _catalog;
-
-        public string Name
+    public DateOnly Date
+    {
+        get
         {
-            get
-            {
-                var stringOffset = _catalog.GetUsageSourcesTableInt32(_offset);
-                return _catalog.GetString(stringOffset);
-            }
+            var dayNumber = _catalog.GetUsageSourcesTableInt32(_offset + 4);
+            return DateOnly.FromDayNumber(dayNumber);
         }
+    }
 
-        public DateOnly Date
-        {
-            get
-            {
-                var dayNumber = _catalog.GetUsageSourcesTableInt32(_offset + 4);
-                return DateOnly.FromDayNumber(dayNumber);
-            }
-        }
+    public override bool Equals(object obj)
+    {
+        return obj is AssemblyModel model && Equals(model);
+    }
 
-        public override bool Equals(object obj)
-        {
-            return obj is AssemblyModel model && Equals(model);
-        }
+    public bool Equals(UsageSourceModel other)
+    {
+        return ReferenceEquals(_catalog, other._catalog) &&
+               _offset == other._offset;
+    }
 
-        public bool Equals(UsageSourceModel other)
-        {
-            return ReferenceEquals(_catalog, other._catalog) &&
-                   _offset == other._offset;
-        }
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(_catalog, _offset);
+    }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(_catalog, _offset);
-        }
+    public static bool operator ==(UsageSourceModel left, UsageSourceModel right)
+    {
+        return left.Equals(right);
+    }
 
-        public static bool operator ==(UsageSourceModel left, UsageSourceModel right)
-        {
-            return left.Equals(right);
-        }
+    public static bool operator !=(UsageSourceModel left, UsageSourceModel right)
+    {
+        return !(left == right);
+    }
 
-        public static bool operator !=(UsageSourceModel left, UsageSourceModel right)
-        {
-            return !(left == right);
-        }
-
-        public override string ToString()
-        {
-            return $"{Name} ({Date})";
-        }
+    public override string ToString()
+    {
+        return $"{Name} ({Date})";
     }
 }

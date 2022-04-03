@@ -6,88 +6,87 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 
-namespace ApiCatalog
+namespace ApiCatalog.Markup;
+
+public class Markup
 {
-    public class Markup
+    public Markup(IEnumerable<MarkupPart> parts)
     {
-        public Markup(IEnumerable<MarkupPart> parts)
+        Parts = parts.ToImmutableArray();
+    }
+
+    public ImmutableArray<MarkupPart> Parts { get; }
+
+    public static Markup Parse(string text)
+    {
+        var settings = new XmlReaderSettings
         {
-            Parts = parts.ToImmutableArray();
-        }
+            ConformanceLevel = ConformanceLevel.Auto
+        };
+        using var stringReader = new StringReader(text);
+        using var reader = XmlReader.Create(stringReader, settings);
 
-        public ImmutableArray<MarkupPart> Parts { get; }
+        var parts = new List<MarkupPart>();
+        var kind = (MarkupPartKind?)null;
+        var reference = (Guid?)null;
+        var sb = new StringBuilder();
 
-        public static Markup Parse(string text)
+        while (reader.Read())
         {
-            var settings = new XmlReaderSettings
+            if (reader.NodeType == XmlNodeType.Element)
             {
-                ConformanceLevel = ConformanceLevel.Auto
-            };
-            using var stringReader = new StringReader(text);
-            using var reader = XmlReader.Create(stringReader, settings);
-
-            var parts = new List<MarkupPart>();
-            var kind = (MarkupPartKind?)null;
-            var reference = (Guid?)null;
-            var sb = new StringBuilder();
-
-            while (reader.Read())
-            {
-                if (reader.NodeType == XmlNodeType.Element)
+                if (sb.Length > 0)
                 {
-                    if (sb.Length > 0)
-                    {
-                        parts.Add(new MarkupPart(MarkupPartKind.Whitespace, sb.ToString()));
-                        sb.Clear();
-                    }
-
-                    if (reader.LocalName == "p")
-                    {
-                        kind = MarkupPartKind.Punctuation;
-                    }
-                    else if (reader.LocalName == "k")
-                    {
-                        kind = MarkupPartKind.Keyword;
-                    }
-                    else if (reader.LocalName == "n")
-                    {
-                        kind = MarkupPartKind.LiteralNumber;
-                    }
-                    else if (reader.LocalName == "s")
-                    {
-                        kind = MarkupPartKind.LiteralString;
-                    }
-                    else if (reader.LocalName == "r")
-                    {
-                        var id = reader.GetAttribute("i");
-                        if (id != null)
-                            reference = Guid.Parse(id);
-                        kind = MarkupPartKind.Reference;
-                    }
-                }
-                else if (reader.NodeType == XmlNodeType.EndElement)
-                {
-                    if (kind != null)
-                        parts.Add(new MarkupPart(kind.Value, sb.ToString(), reference));
-
-                    kind = null;
-                    reference = null;
+                    parts.Add(new MarkupPart(MarkupPartKind.Whitespace, sb.ToString()));
                     sb.Clear();
                 }
-                else if (reader.NodeType == XmlNodeType.Text ||
-                         reader.NodeType == XmlNodeType.Whitespace ||
-                         reader.NodeType == XmlNodeType.SignificantWhitespace)
+
+                if (reader.LocalName == "p")
                 {
-                    sb.Append(reader.Value);
+                    kind = MarkupPartKind.Punctuation;
+                }
+                else if (reader.LocalName == "k")
+                {
+                    kind = MarkupPartKind.Keyword;
+                }
+                else if (reader.LocalName == "n")
+                {
+                    kind = MarkupPartKind.LiteralNumber;
+                }
+                else if (reader.LocalName == "s")
+                {
+                    kind = MarkupPartKind.LiteralString;
+                }
+                else if (reader.LocalName == "r")
+                {
+                    var id = reader.GetAttribute("i");
+                    if (id != null)
+                        reference = Guid.Parse(id);
+                    kind = MarkupPartKind.Reference;
                 }
             }
+            else if (reader.NodeType == XmlNodeType.EndElement)
+            {
+                if (kind != null)
+                    parts.Add(new MarkupPart(kind.Value, sb.ToString(), reference));
 
-            return new Markup(parts);
+                kind = null;
+                reference = null;
+                sb.Clear();
+            }
+            else if (reader.NodeType == XmlNodeType.Text ||
+                     reader.NodeType == XmlNodeType.Whitespace ||
+                     reader.NodeType == XmlNodeType.SignificantWhitespace)
+            {
+                sb.Append(reader.Value);
+            }
         }
 
-        public override string ToString()
-        {
-            return string.Concat(Parts.Select(p => p.Text));
-        }
+        return new Markup(parts);
+    }
+
+    public override string ToString()
+    {
+        return string.Concat(Parts.Select(p => p.Text));
     }
 }

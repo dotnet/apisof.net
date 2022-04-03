@@ -1,12 +1,11 @@
-﻿namespace ApiCatalog
+﻿namespace ApiCatalog.Markup;
+
+public enum MarkupPartKind
 {
-    public enum MarkupPartKind
-    {
-        Whitespace,
-        LiteralNumber,
-        LiteralString,
-        Punctuation,
-        Keyword,
-        Reference
-    }
+    Whitespace,
+    LiteralNumber,
+    LiteralString,
+    Punctuation,
+    Keyword,
+    Reference
 }

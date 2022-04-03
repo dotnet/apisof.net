@@ -2,36 +2,35 @@
 using System.IO;
 using System.Linq;
 
-namespace ApiCatalog
+namespace ApiCatalog.Frameworks;
+
+public sealed class PackBasedFrameworkProvider : FrameworkProvider
 {
-    public sealed class PackBasedFrameworkProvider : FrameworkProvider
+    private readonly string _frameworksPath;
+
+    public PackBasedFrameworkProvider(string frameworksPath)
     {
-        private readonly string _frameworksPath;
+        _frameworksPath = frameworksPath;
+    }
 
-        public PackBasedFrameworkProvider(string frameworksPath)
+    public override IEnumerable<(string FrameworkName, string[] Paths)> Resolve()
+    {
+        foreach (var directory in Directory.GetDirectories(_frameworksPath))
         {
-            _frameworksPath = frameworksPath;
-        }
+            var packIndexPath = Path.Combine(directory, FrameworkPackIndex.FileName);
+            if (!File.Exists(packIndexPath))
+                continue;
 
-        public override IEnumerable<(string FrameworkName, string[] Paths)> Resolve()
-        {
-            foreach (var directory in Directory.GetDirectories(_frameworksPath))
+            var entries = FrameworkPackIndex.Load(packIndexPath);
+
+            foreach (var frameworkGroup in entries.GroupBy(e => e.FrameworkName))
             {
-                var packIndexPath = Path.Combine(directory, FrameworkPackIndex.FileName);
-                if (!File.Exists(packIndexPath))
-                    continue;
-
-                var entries = FrameworkPackIndex.Load(packIndexPath);
-
-                foreach (var frameworkGroup in entries.GroupBy(e => e.FrameworkName))
-                {
-                    var framework = frameworkGroup.Key;
-                    var files = frameworkGroup.SelectMany(g => g.AssemblyPaths)
-                                              .Select(p => Path.GetFullPath(Path.Combine(directory, p)))
-                                              .Distinct()
-                                              .ToArray();
-                    yield return (framework, files);
-                }
+                var framework = frameworkGroup.Key;
+                var files = frameworkGroup.SelectMany(g => g.AssemblyPaths)
+                    .Select(p => Path.GetFullPath(Path.Combine(directory, p)))
+                    .Distinct()
+                    .ToArray();
+                yield return (framework, files);
             }
         }
     }

@@ -1,14 +1,13 @@
 ﻿
 using NuGet.Frameworks;
 
-namespace ApiCatalog
+namespace ApiCatalog.Frameworks;
+
+/// <summary>
+/// This is used to resolve a framework when indexing the contents of a NuGet
+/// package for a given framework.
+/// </summary>
+public abstract class FrameworkLocator
 {
-    /// <summary>
-    /// This is used to resolve a framework when indexing the contents of a NuGet
-    /// package for a given framework.
-    /// </summary>
-    public abstract class FrameworkLocator
-    {
-        public abstract string[] Locate(NuGetFramework framework);
-    }
+    public abstract string[] Locate(NuGetFramework framework);
 }

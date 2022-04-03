@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace ApiCatalog
+namespace ApiCatalog.Frameworks;
+
+/// <summary>
+/// This is used to enumerate the frameworks that should be indexed.
+/// </summary>
+public abstract class FrameworkProvider
 {
-    /// <summary>
-    /// This is used to enumerate the frameworks that should be indexed.
-    /// </summary>
-    public abstract class FrameworkProvider
-    {
-        public abstract IEnumerable<(string FrameworkName, string[] Paths)> Resolve();
-    }
+    public abstract IEnumerable<(string FrameworkName, string[] Paths)> Resolve();
 }

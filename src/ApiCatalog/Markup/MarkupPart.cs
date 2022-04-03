@@ -1,26 +1,25 @@
 ﻿using System;
 
-namespace ApiCatalog
+namespace ApiCatalog.Markup;
+
+public sealed class MarkupPart
 {
-    public sealed class MarkupPart
+    public MarkupPart(MarkupPartKind kind, string text, Guid? reference = null)
     {
-        public MarkupPart(MarkupPartKind kind, string text, Guid? reference = null)
-        {
-            Kind = kind;
-            Text = text;
-            Reference = reference;
-        }
+        Kind = kind;
+        Text = text;
+        Reference = reference;
+    }
 
-        public MarkupPartKind Kind { get; }
-        public string Text { get; }
-        public Guid? Reference { get; }
+    public MarkupPartKind Kind { get; }
+    public string Text { get; }
+    public Guid? Reference { get; }
 
-        public override string ToString()
-        {
-            if (Reference == null)
-                return $"{Kind}: {Text}";
-            else
-                return $"{Kind}: {Text} --> {Reference}";
-        }
+    public override string ToString()
+    {
+        if (Reference == null)
+            return $"{Kind}: {Text}";
+        else
+            return $"{Kind}: {Text} --> {Reference}";
     }
 }

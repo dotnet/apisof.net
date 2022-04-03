@@ -2,18 +2,17 @@
 using ApiCatalog.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace ApiCatalog.Pages
+namespace ApiCatalog.Pages;
+
+public partial class Stats
 {
-    public partial class Stats
+    [Inject]
+    public CatalogService CatalogService { get; set; }
+
+    public ApiCatalogStatistics Statistics { get; set; }
+
+    protected override void OnInitialized()
     {
-        [Inject]
-        public CatalogService CatalogService { get; set; }
-
-        public ApiCatalogStatistics Statistics { get; set; }
-
-        protected override void OnInitialized()
-        {
-            Statistics = CatalogService.CatalogStatistics;
-        }
+        Statistics = CatalogService.CatalogStatistics;
     }
 }
