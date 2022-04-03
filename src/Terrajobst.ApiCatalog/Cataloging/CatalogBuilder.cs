@@ -254,7 +254,7 @@ public sealed class CatalogBuilder : IDisposable
 
     private readonly Dictionary<string, int> _syntaxIdBySyntax = new();
     private readonly Dictionary<Guid, int> _apiIdByFingerprint = new();
-    private readonly Dictionary<Guid, int> _assemblydIdByFingerprint = new();
+    private readonly Dictionary<Guid, int> _assemblyIdByFingerprint = new();
     private readonly Dictionary<string, int> _packageIdByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<Guid, int> _packageVersionIdByFingerprint = new();
     private readonly Dictionary<string, int> _frameworkIdByName = new(StringComparer.OrdinalIgnoreCase);
@@ -312,10 +312,10 @@ public sealed class CatalogBuilder : IDisposable
 
     private bool DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken)
     {
-        if (_assemblydIdByFingerprint.ContainsKey(fingerprint))
+        if (_assemblyIdByFingerprint.ContainsKey(fingerprint))
             return false;
 
-        var assemblyId = _assemblydIdByFingerprint.Count + 1;
+        var assemblyId = _assemblyIdByFingerprint.Count + 1;
 
         _connection.Execute(@"
                 INSERT INTO [Assemblies]
@@ -331,13 +331,13 @@ public sealed class CatalogBuilder : IDisposable
             PublicKeyToken = publicKeyToken,
         });
 
-        _assemblydIdByFingerprint.Add(fingerprint, assemblyId);
+        _assemblyIdByFingerprint.Add(fingerprint, assemblyId);
         return true;
     }
 
     private void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax)
     {
-        var assemblyId = _assemblydIdByFingerprint[assemblyFingerprint];
+        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
         var apiId = _apiIdByFingerprint[apiFingerprint];
         var syntaxId = DefineSyntax(syntax);
 
@@ -378,7 +378,7 @@ public sealed class CatalogBuilder : IDisposable
     private void DefineFrameworkAssembly(string framework, Guid assemblyFingerprint)
     {
         var frameworkId = _frameworkIdByName[framework];
-        var assemblyId = _assemblydIdByFingerprint[assemblyFingerprint];
+        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
 
         _connection.Execute(@"
                 INSERT INTO [FrameworkAssemblies]
@@ -442,7 +442,7 @@ public sealed class CatalogBuilder : IDisposable
     {
         var packageVersionId = _packageVersionIdByFingerprint[packageFingerprint];
         var frameworkId = _frameworkIdByName[frameworkName];
-        var assemblyId = _assemblydIdByFingerprint[assemblyFingerprint];
+        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
 
         _connection.Execute(@"
                 INSERT INTO [PackageAssemblies]
