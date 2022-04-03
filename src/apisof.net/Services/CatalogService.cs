@@ -5,17 +5,13 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-
-using ApiCatalog;
-using ApiCatalog.CatalogModel;
-
 using Azure.Storage.Blobs;
-
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Terrajobst.ApiCatalog;
 
-namespace ApiCatalog.Services;
+namespace ApisOfDotNet.Services;
 
 public sealed class CatalogService
 {
@@ -24,7 +20,7 @@ public sealed class CatalogService
 
     private CatalogJobInfo _jobInfo;
     private ApiCatalogModel _catalog;
-    private SuffixTree.SuffixTree _suffixTree;
+    private SuffixTree _suffixTree;
     private Dictionary<Guid, ApiModel> _apiByGuid;
     private ApiCatalogStatistics _statistics;
 
@@ -65,7 +61,7 @@ public sealed class CatalogService
             await deflateStream.CopyToAsync(fileStream);
         }
 
-        var suffixTree = SuffixTree.SuffixTree.Load(suffixTreePath);
+        var suffixTree = SuffixTree.Load(suffixTreePath);
 
         var jobBlobClient = new BlobClient(azureConnectionString, "catalog", "job.json");
         using var jobStream = await jobBlobClient.OpenReadAsync();

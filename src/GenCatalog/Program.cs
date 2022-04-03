@@ -9,13 +9,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-using ApiCatalog;
-using ApiCatalog.Cataloging;
-using ApiCatalog.CatalogModel;
-using ApiCatalog.Frameworks;
-using ApiCatalog.Metadata;
-using ApiCatalog.NuGet;
-using ApiCatalog.SuffixTree;
+using Terrajobst.ApiCatalog;
+using Terrajobst.ApiCatalog.Cataloging;
 using Azure.Core;
 using Azure.Storage.Blobs;
 

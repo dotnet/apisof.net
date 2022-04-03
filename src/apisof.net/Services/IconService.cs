@@ -1,8 +1,6 @@
-﻿
-using ApiCatalog;
-using ApiCatalog.Metadata;
+﻿using Terrajobst.ApiCatalog;
 
-namespace ApiCatalog.Services;
+namespace ApisOfDotNet.Services;
 
 public class IconService
 {

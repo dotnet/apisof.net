@@ -2,13 +2,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
-
-using ApiCatalog.CatalogModel;
-using ApiCatalog.Services;
+using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Terrajobst.ApiCatalog;
 
-namespace ApiCatalog.Shared;
+namespace ApisOfDotNet.Shared;
 
 public partial class ApiSearch
 {

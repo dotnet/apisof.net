@@ -1,16 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-
-using ApiCatalog;
-using ApiCatalog.CatalogModel;
-using ApiCatalog.Markup;
-using ApiCatalog.Metadata;
-using ApiCatalog.Services;
+using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
+using Terrajobst.ApiCatalog;
 
-namespace ApiCatalog.Shared;
+namespace ApisOfDotNet.Shared;
 
 public partial class SyntaxView
 {
@@ -24,7 +19,7 @@ public partial class SyntaxView
     public HtmlEncoder HtmlEncoder { get; set; }
 
     [Parameter]
-    public Markup.Markup Markup { get; set; }
+    public Markup Markup { get; set; }
 
     [Parameter]
     public ApiModel Current { get; set; }

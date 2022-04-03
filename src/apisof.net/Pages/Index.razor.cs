@@ -1,8 +1,8 @@
-﻿using ApiCatalog.CatalogModel;
-using ApiCatalog.Services;
+﻿using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
+using Terrajobst.ApiCatalog;
 
-namespace ApiCatalog.Pages;
+namespace ApisOfDotNet.Pages;
 
 public partial class Index
 {

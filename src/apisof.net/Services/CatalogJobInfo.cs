@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ApiCatalog.Services;
+namespace ApisOfDotNet.Services;
 
 public class CatalogJobInfo
 {

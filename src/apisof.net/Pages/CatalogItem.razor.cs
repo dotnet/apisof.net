@@ -3,15 +3,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-
-using ApiCatalog;
-using ApiCatalog.CatalogModel;
-using ApiCatalog.Metadata;
-using ApiCatalog.Services;
+using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+using Terrajobst.ApiCatalog;
 
-namespace ApiCatalog.Pages;
+namespace ApisOfDotNet.Pages;
 
 public partial class CatalogItem
 {
@@ -36,7 +33,7 @@ public partial class CatalogItem
 
     public ApiFrameworkAvailability SelectedAvailability { get; set; }
 
-    public Markup.Markup SelectedMarkup { get; set; }
+    public Markup SelectedMarkup { get; set; }
 
     public string HelpLink { get; set; }
 

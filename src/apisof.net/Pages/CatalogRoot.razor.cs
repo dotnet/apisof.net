@@ -1,8 +1,7 @@
-﻿
-using ApiCatalog.Services;
+﻿using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace ApiCatalog.Pages;
+namespace ApisOfDotNet.Pages;
 
 public partial class CatalogRoot
 {

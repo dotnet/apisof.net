@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30218.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenCatalog", "GenCatalog\GenCatalog.csproj", "{67B98544-7BD4-42B0-B89F-DDD529785A0F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiCatalog", "ApiCatalog\ApiCatalog.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terrajobst.ApiCatalog", "Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj", "{DCBC4D4C-0855-4E5C-ABBB-0BB9C83451BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "apisof.net", "apisof.net\apisof.net.csproj", "{68575F1D-8460-4B96-8AF7-AB7D14E53F37}"
 EndProject

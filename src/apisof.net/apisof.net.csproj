@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>ApiCatalog</UserSecretsId>
-    <RootNamespace>ApiCatalog</RootNamespace>
+    <RootNamespace>ApisOfDotNet</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ApiCatalog\ApiCatalog.csproj" />
+    <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
   </ItemGroup>
 
 </Project>

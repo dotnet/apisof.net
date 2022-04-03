@@ -1,9 +1,7 @@
-﻿
-using ApiCatalog.Services;
-
+﻿using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
 
-namespace ApiCatalog.Shared;
+namespace ApisOfDotNet.Shared;
 
 public partial class SetQueryParameter
 {
