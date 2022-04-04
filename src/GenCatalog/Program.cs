@@ -296,6 +296,8 @@ internal static class Program
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Failed: " + ex.Message);
+                    File.Delete(disabledPath);
+                    File.Delete(path);
                     File.WriteAllText(failedVersionPath, ex.ToString());
                 }
             }
