@@ -77,6 +77,7 @@ internal static class Program
         var nugetUsagesPath = Path.Combine(apiUsagesPath, "nuget.org.tsv");
         var netfxCompatLabPath = Path.Combine(apiUsagesPath, "NetFx Compat Lab.tsv");
         var databasePath = Path.Combine(rootPath, "apicatalog.db");
+        var compressedDatabasePath = Path.Combine(rootPath, "apicatalog.db.deflate");
         var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
         var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
 
@@ -89,10 +90,11 @@ internal static class Program
         await DownloadNetFxCompatLabUsages(netfxCompatLabPath);
         await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
         await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
-        await ProduceCatalogSQLiteAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, databasePath);
+        await GenerateCatalogDatabaseAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, databasePath);
+        await CompressCatalogDatabaseAsync(databasePath, compressedDatabasePath);
         await GenerateCatalogModel(databasePath, catalogModelPath);
         await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
-        await UploadCatalogDatabaseAsync(databasePath);
+        await UploadCatalogDatabaseAsync(compressedDatabasePath);
         await UploadCatalogModelAsync(catalogModelPath);
         await UploadSuffixTreeAsync(suffixTreePath);
 
@@ -304,7 +306,7 @@ internal static class Program
         }
     }
 
-    private static Task ProduceCatalogSQLiteAsync(string platformsPath, string packagesPath, string usagesPath, string outputPath)
+    private static Task GenerateCatalogDatabaseAsync(string platformsPath, string packagesPath, string usagesPath, string outputPath)
     {
         if (File.Exists(outputPath))
             return Task.CompletedTask;
@@ -320,6 +322,14 @@ internal static class Program
             builder.IndexUsages(path, name, date);
 
         return Task.CompletedTask;
+    }
+
+    private static async Task CompressCatalogDatabaseAsync(string databasePath, string compressedDatabasePath)
+    {
+        await using var inputStream = File.OpenRead(databasePath);
+        await using var outputStream = File.Create(compressedDatabasePath);
+        await using var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal);
+        await inputStream.CopyToAsync(deflateStream);
     }
 
     private static async Task GenerateCatalogModel(string databasePath, string catalogModelPath)
@@ -358,19 +368,13 @@ internal static class Program
         return Task.CompletedTask;
     }
 
-    private static async Task UploadCatalogDatabaseAsync(string databasePath)
+    private static async Task UploadCatalogDatabaseAsync(string compressedDatabasePath)
     {
-        var compressedFileName = databasePath + ".deflate";
-        using (var inputStream = File.OpenRead(databasePath))
-        using (var outputStream = File.Create(compressedFileName))
-        using (var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal))
-            await inputStream.CopyToAsync(deflateStream);
-
         Console.WriteLine("Uploading catalog database...");
         var connectionString = GetAzureStorageConnectionString();
         var container = "catalog";
         var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate", options: GetBlobOptions());
-        await blobClient.UploadAsync(compressedFileName, overwrite: true);
+        await blobClient.UploadAsync(compressedDatabasePath, overwrite: true);
     }
 
     private static async Task UploadCatalogModelAsync(string catalogModelPath)

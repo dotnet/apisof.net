@@ -122,9 +122,12 @@ public sealed class CatalogBuilder : IDisposable
 
     public static CatalogBuilder Create(string path)
     {
+        // NOTE: We disable pooling to avoid the database from being locked when we're disposed.
+        //       This is critical to allow later parts of the catalog generation to read the file.
         var connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = path,
+            Pooling = false,
             Mode = SqliteOpenMode.ReadWriteCreate
         }.ToString();
 
