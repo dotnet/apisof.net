@@ -193,7 +193,8 @@ public sealed class PackageIndexer
                 if (existingPackage != null)
                     continue;
 
-                var dependency = await _store.GetPackageAsync(d.Id, d.VersionRange.MinVersion.ToNormalizedString());
+                var requestedVersion = d.VersionRange.MinVersion?.ToNormalizedString() ?? "0.0.0";
+                var dependency = await _store.GetPackageAsync(d.Id, requestedVersion);
                 packages.Add(d.Id, dependency);
                 await GetDependenciesAsync(packages, dependency, target);
             }
