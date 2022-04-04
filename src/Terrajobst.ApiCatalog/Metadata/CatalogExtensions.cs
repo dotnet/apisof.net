@@ -235,4 +235,34 @@ internal static class CatalogExtensions
     {
         return namedArguments.OrderBy(kv => kv.Key);
     }
+
+    public static string GetNamedArgument(this AttributeData attribute, string name)
+    {
+        foreach (var (key, argument) in attribute.NamedArguments)
+        {
+            if (string.Equals(key, name, StringComparison.Ordinal) && argument.Value is string value)
+                return value;
+        }
+
+        return null;
+    }
+
+    public static bool MatchesName(this INamedTypeSymbol symbol, string namespace1, string typeName)
+    {
+        return symbol is not null &&
+               symbol.Name == typeName &&
+               symbol.ContainingNamespace?.Name == namespace1 &&
+               symbol.ContainingNamespace?.ContainingNamespace?.IsGlobalNamespace == true;
+    }
+
+    public static bool MatchesName(this INamedTypeSymbol symbol, string namespace1, string namespace2, string namespace3, string typeName)
+    {
+        return symbol is not null &&
+               symbol.Name == typeName &&
+               symbol.ContainingNamespace?.Name == namespace3 &&
+               symbol.ContainingNamespace?.ContainingNamespace?.Name == namespace2 &&
+               symbol.ContainingNamespace?.ContainingNamespace?.ContainingNamespace?.Name == namespace1 &&
+               symbol.ContainingNamespace?.ContainingNamespace?.ContainingNamespace?.ContainingNamespace?.IsGlobalNamespace is true;
+    }
+
 }

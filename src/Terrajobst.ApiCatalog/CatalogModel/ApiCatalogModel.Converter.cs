@@ -27,11 +27,14 @@ public sealed partial class ApiCatalogModel
         private readonly Dictionary<Guid, int> _apiOffsetByGuid = new();
 
         private readonly TableWriter _stringTable = new();
+        private readonly TableWriter _platformTable = new();
         private readonly TableWriter _frameworkTable = new();
         private readonly TableWriter _packageTable = new();
         private readonly TableWriter _assemblyTable = new();
         private readonly TableWriter _usageSourcesTable = new();
         private readonly TableWriter _apiTable = new();
+        private readonly TableWriter _obsoletionTable = new();
+        private readonly TableWriter _platformSupportTable = new();
 
         private readonly List<int> _frameworkTableAssemblyPatchups = new();
         private readonly List<int> _packagesTableAssemblyPatchups = new();
@@ -64,18 +67,24 @@ public sealed partial class ApiCatalogModel
             var tables = new[]
             {
                 _stringTable,
+                _platformTable,
                 _frameworkTable,
                 _packageTable,
                 _assemblyTable,
                 _usageSourcesTable,
                 _apiTable,
+                _obsoletionTable,
+                _platformSupportTable,
             };
 
+            await WritePlatformsAsync();
             await WriteFrameworksAsync();
             await WritePackagesAsync();
             await WriteAssembliesAsync();
             await WriteUsageSourcesAsync();
             await WriteApisAsync();
+            await WriteObsoletionsAsync();
+            await WritePlatformSupportAsync();
 
             PatchFrameworks();
             PatchPackages();
@@ -150,6 +159,26 @@ public sealed partial class ApiCatalogModel
             }
 
             return offset;
+        }
+
+        private async Task WritePlatformsAsync()
+        {
+            var platforms = await _connection.QueryAsync<string>(@"
+                    SELECT  p.Name
+                    FROM    OSPlatforms p
+                ");
+
+            var platformList = platforms.ToList();
+
+            _platformTable.WriteInt32(platformList.Count);
+
+            for (var i = 0; i < platformList.Count; i++)
+            {
+                var platform = platformList[i];
+                var stringOffset = WriteString(platform);
+
+                _platformTable.WriteInt32(stringOffset);
+            }
         }
 
         private async Task WriteFrameworksAsync()
@@ -465,6 +494,71 @@ public sealed partial class ApiCatalogModel
             }
         }
 
+        private async Task WriteObsoletionsAsync()
+        {
+            var rows = await _connection.QueryAsync<(int ApiId, int AssemblyId, string Message, bool IsError, string DiagnosticId, string UrlFormat)>(@"
+                SELECT  ApiId,
+                        AssemblyId,
+                        coalesce(Message, '') AS Message,
+                        IsError,
+                        coalesce(DiagnosticId, '') AS DiagnosticId,
+                        coalesce(UrlFormat, '') AS UrlFormat
+                FROM    Obsoletions o
+            ");
+
+            var entries = rows.Select(t => (ApiOffset: _apiOffsetById[t.ApiId],
+                                            AssemblyOffset: _assemblyOffsetById[t.AssemblyId],
+                                            MessageOffset: WriteString(t.Message),
+                                            t.IsError,
+                                            DiagnosticIdOffset: WriteString(t.DiagnosticId),
+                                            UrlFormatOffset: WriteString(t.UrlFormat)))
+                              .OrderBy(t => t.ApiOffset)
+                              .ThenBy(t => t.AssemblyOffset)
+                              .ToArray();
+
+            _obsoletionTable.WriteInt32(entries.Length);
+
+            foreach (var entry in entries)
+            {
+                _obsoletionTable.WriteInt32(entry.ApiOffset);
+                _obsoletionTable.WriteInt32(entry.AssemblyOffset);
+                _obsoletionTable.WriteInt32(entry.MessageOffset);
+                _obsoletionTable.WriteBoolean(entry.IsError);
+                _obsoletionTable.WriteInt32(entry.DiagnosticIdOffset);
+                _obsoletionTable.WriteInt32(entry.UrlFormatOffset);
+            }
+        }
+
+        private async Task WritePlatformSupportAsync()
+        {
+            var rows = await _connection.QueryAsync<(int? ApiId, int AssemblyId, string PlatformName, bool IsSupported)>($@"
+                SELECT  ps.ApiId,
+                        ps.AssemblyId,
+                        p.Name,
+                        ps.IsSupported
+                FROM    OSPlatformsSupport ps
+                            JOIN OSPlatforms p ON ps.OSPlatformId = p.OSPlatformId
+            ");
+
+            var entries = rows.Select(t => (ApiOffset: t.ApiId is null ? -1 : _apiOffsetById[t.ApiId.Value],
+                                            AssemblyOffset: _assemblyOffsetById[t.AssemblyId],
+                                            PlatformOffset: WriteString(t.PlatformName),
+                                            t.IsSupported))
+                              .OrderBy(t => t.ApiOffset)
+                              .ThenBy(t => t.AssemblyOffset)
+                              .ToArray();
+
+            _platformSupportTable.WriteInt32(entries.Length);
+
+            foreach (var entry in entries)
+            {
+                _platformSupportTable.WriteInt32(entry.ApiOffset);
+                _platformSupportTable.WriteInt32(entry.AssemblyOffset);
+                _platformSupportTable.WriteInt32(entry.PlatformOffset);
+                _platformSupportTable.WriteBoolean(entry.IsSupported);
+            }
+        }
+
         private void PatchFrameworks()
         {
             var offset = _frameworkTable.Offset;
@@ -636,6 +730,11 @@ public sealed partial class ApiCatalogModel
             public void WriteByte(int value)
             {
                 _writer.Write((byte)value);
+            }
+
+            public void WriteBoolean(bool value)
+            {
+                WriteByte(value ? 1 : 0);
             }
 
             public void WriteSingle(float value)

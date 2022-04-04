@@ -96,7 +96,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
             if (current.Parent is null)
                 break;
-            
+
             current = current.Parent.Value;
         }
     }
@@ -130,7 +130,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     public string GetFullName()
     {
         var sb = new StringBuilder();
-        
+
         foreach (var c in AncestorsAndSelf())
         {
             if (sb.Length > 0)
@@ -160,7 +160,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         if (Kind == ApiKind.Namespace)
             return GetFullName();
-        
+
         var containingNamespace = GetContainingNamespace();
         return containingNamespace is not null
             ? containingNamespace.Value.GetFullName()

@@ -6,22 +6,25 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class AssemblyEntry
 {
-    private AssemblyEntry(AssemblyIdentity identity, List<ApiEntry> apis)
+    private AssemblyEntry(AssemblyIdentity identity, PlatformSupportEntry platformSupportEntry, List<ApiEntry> apis)
     {
         Fingerprint = ComputeFingerprint(identity, apis);
         Identity = identity;
+        PlatformSupportEntry = platformSupportEntry;
         Apis = apis;
     }
 
     public Guid Fingerprint { get; }
     public AssemblyIdentity Identity { get; }
+    public PlatformSupportEntry PlatformSupportEntry { get; }
     public List<ApiEntry> Apis { get; }
 
     public static AssemblyEntry Create(IAssemblySymbol assembly)
     {
         var identity = assembly.Identity;
+        var platformSupportEntry = PlatformSupportEntry.Create(assembly.Modules.First()) ?? PlatformSupportEntry.Create(assembly);
         var apis = GetApis(assembly);
-        return new AssemblyEntry(identity, apis);
+        return new AssemblyEntry(identity, platformSupportEntry, apis);
     }
 
     private static List<ApiEntry> GetApis(IAssemblySymbol symbol)

@@ -295,7 +295,184 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
-    public async Task Type_Availability()
+    public async Task Type_Obsoletion()
+    {
+        var source = @"
+            namespace System
+            {
+                [Obsolete(""Do not use"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Obsoletion);
+        Assert.Equal("Do not use", declaration.Obsoletion!.Value.Message);
+        Assert.Equal("", declaration.Obsoletion!.Value.Url);
+        Assert.Equal("", declaration.Obsoletion!.Value.UrlFormat);
+        Assert.Equal("", declaration.Obsoletion!.Value.DiagnosticId);
+        Assert.False(declaration.Obsoletion!.Value.IsError);
+    }
+
+    [Fact]
+    public async Task Type_Obsoletion_IsError()
+    {
+        var source = @"
+            namespace System
+            {
+                [Obsolete(""Do not use"", true)]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Obsoletion);
+        Assert.Equal("Do not use", declaration.Obsoletion!.Value.Message);
+        Assert.Equal("", declaration.Obsoletion!.Value.Url);
+        Assert.Equal("", declaration.Obsoletion!.Value.UrlFormat);
+        Assert.Equal("", declaration.Obsoletion!.Value.DiagnosticId);
+        Assert.True(declaration.Obsoletion!.Value.IsError);
+    }
+
+    [Fact]
+    public async Task Type_Obsoletion_DiagnosticId()
+    {
+        var source = @"
+            namespace System
+            {
+                [Obsolete(""Do not use"", DiagnosticId = ""CA123"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Obsoletion);
+        Assert.Equal("Do not use", declaration.Obsoletion!.Value.Message);
+        Assert.Equal("", declaration.Obsoletion!.Value.Url);
+        Assert.Equal("", declaration.Obsoletion!.Value.UrlFormat);
+        Assert.Equal("CA123", declaration.Obsoletion!.Value.DiagnosticId);
+        Assert.False(declaration.Obsoletion!.Value.IsError);
+    }
+
+    [Fact]
+    public async Task Type_Obsoletion_UrlFormat()
+    {
+        var source = @"
+            namespace System
+            {
+                [Obsolete(""Do not use"", UrlFormat = ""https://aka.ms/an-issue"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Obsoletion);
+        Assert.Equal("Do not use", declaration.Obsoletion!.Value.Message);
+        Assert.Equal("https://aka.ms/an-issue", declaration.Obsoletion!.Value.Url);
+        Assert.Equal("https://aka.ms/an-issue", declaration.Obsoletion!.Value.UrlFormat);
+        Assert.Equal("", declaration.Obsoletion!.Value.DiagnosticId);
+        Assert.False(declaration.Obsoletion!.Value.IsError);
+    }
+
+    [Fact]
+    public async Task Type_Obsoletion_UrlFormat_And_DiagnosticId()
+    {
+        var source = @"
+            namespace System
+            {
+                [Obsolete(""Do not use"", UrlFormat = ""https://aka.ms/{0}"", DiagnosticId=""CA123"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Obsoletion);
+        Assert.Equal("Do not use", declaration.Obsoletion!.Value.Message);
+        Assert.Equal("https://aka.ms/CA123", declaration.Obsoletion!.Value.Url);
+        Assert.Equal("https://aka.ms/{0}", declaration.Obsoletion!.Value.UrlFormat);
+        Assert.Equal("CA123", declaration.Obsoletion!.Value.DiagnosticId);
+        Assert.False(declaration.Obsoletion!.Value.IsError);
+    }
+
+    [Fact]
+    public async Task Type_PlatformSupport()
+    {
+        var source = @"
+            using System.Runtime.Versioning;
+            namespace System
+            {
+                [UnsupportedOSPlatform(""windows"")]
+                [SupportedOSPlatform(""windows10"")]
+                [UnsupportedOSPlatform(""browser"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var declaration = Assert.Single(api.Declarations);
+
+        var actual = declaration.PlatformSupport.Select(ps => (ps.PlatformName, ps.IsSupported))
+                                                .OrderBy(t => t.PlatformName)
+                                                .ToArray();
+        var expected = new[] {
+            ("browser", false),
+            ("windows", false),
+            ("windows10", true)
+        };
+
+        Assert.Equal(expected, actual);
+
+        var expectedPlatforms = expected.Select(t => t.Item1).Distinct();
+        Assert.Equal(expectedPlatforms, catalog.Platforms.OrderBy(p => p.Name).Select(p => p.Name));
+    }
+
+    [Fact]
+    public async Task Type_Availability_Framework()
     {
         var source = @"
             namespace System
@@ -327,6 +504,107 @@ public class ApiCatalogModelTests
         var net462 = availability.Frameworks.Single(fx => fx.Framework.GetShortFolderName() == "net462");
         Assert.False(net462.IsInBox);
         Assert.Equal("System.Oob", net462.Package!.Value.Name);
+    }
+
+    [Fact]
+    public async Task Type_Availability_Platform_Exclusion()
+    {
+        var source = @"
+            using System.Runtime.Versioning;
+            namespace System
+            {
+                [UnsupportedOSPlatform(""windows"")]
+                [SupportedOSPlatform(""windows10"")]
+                [UnsupportedOSPlatform(""browser"")]
+                public class TheClass { }
+
+                // Only so that the catalog knows of iOS
+                [SupportedOSPlatform(""ios14"")]
+                public class Unrelated { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var declaration = Assert.Single(api.Declarations);
+
+        var availability = ApiPlatformAvailability.Create(declaration);
+
+        Assert.False(availability.IsSupported("windows"));
+        Assert.True(availability.IsSupported("windows10"));
+        Assert.True(availability.IsSupported("windows11"));
+        Assert.False(availability.IsSupported("browser"));
+        Assert.False(availability.IsSupported("browser2.0"));
+        Assert.True(availability.IsSupported("ios"));
+        Assert.True(availability.IsSupported("ios14"));
+
+        var supportedActual = availability.GetSupport()
+                                          .GroupBy(t => t.Name)
+                                          .Select(g => $"{g.Key} {string.Join(", ", g.Select(t => t.Version))}")
+                                          .ToArray();
+
+        var supportedExpected = new[] {
+            "ios 0.0.0.0",
+            "windows 10.0.0.0"
+        };
+
+        Assert.Equal(supportedExpected, supportedActual);
+    }
+
+    [Fact]
+    public async Task Type_Availability_Platform_Inclusion()
+    {
+        var source = @"
+            using System.Runtime.Versioning;
+            namespace System
+            {
+                [SupportedOSPlatform(""windows"")]
+                [SupportedOSPlatform(""android"")]
+                [UnsupportedOSPlatform(""android10"")]
+                [SupportedOSPlatform(""android11"")]
+                public class TheClass { }
+
+                // Only so that the catalog knows of iOS
+                [SupportedOSPlatform(""ios14"")]
+                public class Unrelated { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var declaration = Assert.Single(api.Declarations);
+
+        var availability = ApiPlatformAvailability.Create(declaration);
+
+        Assert.True(availability.IsSupported("windows"));
+        Assert.True(availability.IsSupported("android"));
+        Assert.True(availability.IsSupported("android9.0"));
+        Assert.False(availability.IsSupported("android10.0"));
+        Assert.False(availability.IsSupported("android10.1"));
+        Assert.True(availability.IsSupported("android11"));
+        Assert.True(availability.IsSupported("android11.1"));
+        Assert.False(availability.IsSupported("ios"));
+        Assert.False(availability.IsSupported("ios14"));
+
+        var supportedActual = availability.GetSupport()
+            .GroupBy(t => t.Name)
+            .Select(g => $"{g.Key} {string.Join(", ", g.Select(t => t.Version))}")
+            .ToArray();
+
+        var supportedExpected = new[] {
+            "android 0.0.0.0, 11.0.0.0",
+            "windows 0.0.0.0"
+        };
+
+        Assert.Equal(supportedExpected, supportedActual);
     }
 
     [Fact]

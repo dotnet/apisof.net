@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 
 using Dapper;
 
@@ -45,11 +45,14 @@ public sealed class CatalogBuilder : IDisposable
             var name = assemblyElement.Attribute("name").Value;
             var version = assemblyElement.Attribute("version").Value;
             var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
-            var assemblyExists = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
+            var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
             DefineFrameworkAssembly(framework, assemblyFingerprint);
 
-            if (assemblyExists)
+            if (assemblyCreated)
             {
+                DefinePlatformSupport(assemblyFingerprint, assemblyElement);
+                DefineObsoletions(assemblyFingerprint, assemblyElement);
+
                 foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                 {
                     var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
@@ -81,6 +84,9 @@ public sealed class CatalogBuilder : IDisposable
 
             if (assemblyCreated)
             {
+                DefinePlatformSupport(assemblyFingerprint, assemblyElement);
+                DefineObsoletions(assemblyFingerprint, assemblyElement);
+
                 foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                 {
                     var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
@@ -220,6 +226,34 @@ public sealed class CatalogBuilder : IDisposable
             CREATE INDEX IX_FrameworkAssemblies_AssemblyId ON FrameworkAssemblies (AssemblyId);
             CREATE INDEX IX_FrameworkAssemblies_FrameworkId ON FrameworkAssemblies (FrameworkId);
 
+            CREATE TABLE OSPlatforms
+            (
+                OSPlatformId INTEGER PRIMARY KEY,
+                Name         TEXT NOT NULL
+            );
+
+            CREATE TABLE OSPlatformsSupport
+            (
+                ApiId        INTEGER REFERENCES Apis,
+                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
+                OSPlatformId INTEGER NOT NULL REFERENCES OSPlatforms,
+                IsSupported  INTEGER NOT NULL
+            );
+            CREATE INDEX IX_OSPlatformsSupport_ApiId ON OSPlatformsSupport (ApiId);
+            CREATE INDEX IX_OSPlatformsSupport_AssemblyId ON OSPlatformsSupport (AssemblyId);
+
+            CREATE TABLE Obsoletions
+            (
+                ApiId        INTEGER REFERENCES Apis,
+                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
+                Message      TEXT,
+                IsError      INTEGER,
+                DiagnosticId TEXT,
+                UrlFormat    TEXT
+            );
+            CREATE INDEX IX_Obsoletions_ApiId ON Obsoletions (ApiId);
+            CREATE INDEX IX_Obsoletions_AssemblyId ON Obsoletions (AssemblyId);
+
             CREATE TABLE Packages
             (
                 PackageId INTEGER NOT NULL PRIMARY KEY,
@@ -278,6 +312,7 @@ public sealed class CatalogBuilder : IDisposable
     private readonly Dictionary<string, int> _packageIdByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<Guid, int> _packageVersionIdByFingerprint = new();
     private readonly Dictionary<string, int> _frameworkIdByName = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, int> _osPlatformIdByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _usageSourceIdByName = new(StringComparer.OrdinalIgnoreCase);
 
     private int DefineSyntax(string syntax)
@@ -362,6 +397,112 @@ public sealed class CatalogBuilder : IDisposable
 
         _assemblyIdByFingerprint.Add(fingerprint, assemblyId);
         return true;
+    }
+
+    private void DefinePlatformSupport(Guid assemblyFingerprint, XElement element)
+    {
+        DefinePlatformSupport(assemblyFingerprint, element, isSupported: true);
+        DefinePlatformSupport(assemblyFingerprint, element, isSupported: false);
+    }
+
+    private void DefinePlatformSupport(Guid assemblyFingerprint, XElement element, bool isSupported)
+    {
+        var elementName = isSupported ? "supportedPlatform" : "unsupportedPlatform";
+
+        foreach (var supportElement in element.Elements(elementName))
+        {
+            var id = supportElement.Attribute("id")?.Value;
+            var apiFingerprint = id is null ? (Guid?)null : Guid.Parse(id);
+            var platformName = supportElement.Attribute("name").Value;
+
+            DefinePlatformSupport(apiFingerprint, assemblyFingerprint, platformName, isSupported);
+        }
+    }
+
+    private void DefinePlatform(string platformName)
+    {
+        if (_osPlatformIdByName.ContainsKey(platformName))
+            return;
+
+        var osPlatformId = _osPlatformIdByName.Count + 1;
+
+        _connection.Execute(
+            @"
+                INSERT INTO OSPlatforms
+                    (OSPlatformId, Name)
+                VALUES
+                    (@OSPlatformId, @Name)
+            ",
+            new {
+                OSPlatformId = osPlatformId,
+                Name = platformName
+            },
+            _transaction
+        );
+
+        _osPlatformIdByName.Add(platformName, osPlatformId);
+    }
+
+    private void DefinePlatformSupport(Guid? apiFingerprint, Guid assemblyFingerprint, string platformName, bool isSupported)
+    {
+        DefinePlatform(platformName);
+
+        var apiId = apiFingerprint is null ? (int?)null : _apiIdByFingerprint[apiFingerprint.Value];
+        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+        var osPlatformId = _osPlatformIdByName[platformName];
+
+        _connection.Execute(
+            @"
+                INSERT INTO OSPlatformsSupport
+                    (ApiId, AssemblyId, OSPlatformId, IsSupported)
+                VALUES
+                    (@ApiId, @AssemblyId, @OSPlatformId, @IsSupported)
+            ",
+            new {
+                ApiId = apiId,
+                AssemblyId = assemblyId,
+                OSPlatformId = osPlatformId,
+                IsSupported = isSupported
+            },
+            _transaction
+        );
+    }
+
+    private void DefineObsoletions(Guid assemblyFingerprint, XElement element)
+    {
+        foreach (var obsoleteElement in element.Elements("obsolete"))
+        {
+            var apiFingerprint = Guid.Parse(obsoleteElement.Attribute("id").Value);
+            var isError = bool.Parse(obsoleteElement.Attribute("isError")?.Value ?? bool.FalseString);
+            var message = obsoleteElement.Attribute("message")?.Value;
+            var diagnosticId = obsoleteElement.Attribute("diagnosticId")?.Value;
+            var urlFormat = obsoleteElement.Attribute("urlFormat")?.Value;
+            DefineObsoletion(apiFingerprint, assemblyFingerprint, isError, message, diagnosticId, urlFormat);
+        }
+    }
+
+    private void DefineObsoletion(Guid apiFingerprint, Guid assemblyFingerprint, bool isError, string message, string diagnosticId, string urlFormat)
+    {
+        var apiId = _apiIdByFingerprint[apiFingerprint];
+        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+
+        _connection.Execute(
+            @"
+                INSERT INTO Obsoletions
+                    (ApiId, AssemblyId, Message, IsError, DiagnosticId, UrlFormat)
+                VALUES
+                    (@ApiId, @AssemblyId, @Message, @IsError, @DiagnosticId, @UrlFormat)
+            ",
+            new {
+                ApiId = apiId,
+                AssemblyId = assemblyId,
+                Message = message,
+                IsError = isError,
+                DiagnosticId = diagnosticId,
+                UrlFormat = urlFormat
+            },
+            _transaction
+        );
     }
 
     private void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax)

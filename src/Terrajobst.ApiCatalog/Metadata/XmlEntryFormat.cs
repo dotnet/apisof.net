@@ -69,6 +69,10 @@ internal static class XmlEntryFormat
             new XAttribute("publicKeyToken", assembly.Identity.GetPublicKeyTokenString()),
             new XAttribute("version", assembly.Identity.Version.ToString())
         );
+
+        if (assembly.PlatformSupportEntry is not null)
+            AddPlatformSupport(assemblyElement, assembly.PlatformSupportEntry);
+
         parent.Add(assemblyElement);
 
         foreach (var api in assembly.AllApis())
@@ -78,6 +82,12 @@ internal static class XmlEntryFormat
             var syntaxElement = new XElement("syntax", new XAttribute("id", fingerprint));
             assemblyElement.Add(syntaxElement);
             syntaxElement.Add(api.Syntax);
+
+            if (api.ObsoletionEntry is not null)
+                AddObsoletion(assemblyElement, api.ObsoletionEntry, fingerprint);
+
+            if (api.PlatformSupportEntry is not null)
+                AddPlatformSupport(assemblyElement, api.PlatformSupportEntry, fingerprint);
         }
     }
 
@@ -92,5 +102,45 @@ internal static class XmlEntryFormat
 
         if (api.Parent != null)
             apiElement.Add(new XAttribute("parent", api.Parent.Fingerprint.ToString("N")));
+    }
+
+    private static void AddObsoletion(XContainer parent, ObsoletionEntry obsoletion, string apiFingerprint)
+    {
+        var obsoletionElement = new XElement("obsolete",
+            new XAttribute("id", apiFingerprint),
+            new XAttribute("isError", obsoletion.IsError)
+        );
+
+        if (obsoletion.Message is not null)
+            obsoletionElement.Add(new XAttribute("message", obsoletion.Message));
+
+        if (obsoletion.DiagnosticId is not null)
+            obsoletionElement.Add(new XAttribute("diagnosticId", obsoletion.DiagnosticId));
+
+        if (obsoletion.UrlFormat is not null)
+            obsoletionElement.Add(new XAttribute("urlFormat", obsoletion.UrlFormat));
+
+        parent.Add(obsoletionElement);
+    }
+
+    private static void AddPlatformSupport(XContainer parent, PlatformSupportEntry platformSupport, string apiFingerprint = null)
+    {
+        foreach (var supported in platformSupport.SupportedPlatforms)
+        {
+            var supportedElement = new XElement("supportedPlatform",
+                apiFingerprint is null ? null : new XAttribute("id", apiFingerprint),
+                new XAttribute("name", supported)
+            );
+            parent.Add(supportedElement);
+        }
+
+        foreach (var unsupported in platformSupport.UnsupportedPlatforms)
+        {
+            var unsupportedElement = new XElement("unsupportedPlatform",
+                apiFingerprint is null ? null : new XAttribute("id", apiFingerprint),
+                new XAttribute("name", unsupported)
+            );
+            parent.Add(unsupportedElement);
+        }
     }
 }

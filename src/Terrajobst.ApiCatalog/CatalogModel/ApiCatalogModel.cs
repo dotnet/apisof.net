@@ -9,11 +9,13 @@ namespace Terrajobst.ApiCatalog;
 public sealed partial class ApiCatalogModel
 {
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-    private const int FormatVersion = 2;
+    private const int FormatVersion = 3;
 
     private readonly int _sizeOnDisk;
     private readonly byte[] _buffer;
     private readonly int _stringTableLength;
+    private readonly int _platformTableOffset;
+    private readonly int _platformTableLength;
     private readonly int _frameworkTableOffset;
     private readonly int _frameworkTableLength;
     private readonly int _packageTableOffset;
@@ -24,35 +26,50 @@ public sealed partial class ApiCatalogModel
     private readonly int _usageSourcesTableLength;
     private readonly int _apiTableOffset;
     private readonly int _apiTableLength;
+    private readonly int _obsoletionTableOffset;
+    private readonly int _obsoletionTableLength;
+    private readonly int _platformSupportTableOffset;
+    private readonly int _platformSupportTableLength;
 
     private Dictionary<int, int> _forwardedApis;
 
     private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
-        Debug.Assert(tableSizes.Length == 6);
+        Debug.Assert(tableSizes.Length == 9);
 
         _stringTableLength = tableSizes[0];
 
-        _frameworkTableOffset = _stringTableLength;
-        _frameworkTableLength = tableSizes[1];
+        _platformTableOffset = _stringTableLength;
+        _platformTableLength = tableSizes[1];
+
+        _frameworkTableOffset = _platformTableOffset + _platformTableLength;
+        _frameworkTableLength = tableSizes[2];
 
         _packageTableOffset = _frameworkTableOffset + _frameworkTableLength;
-        _packageTableLength = tableSizes[2];
+        _packageTableLength = tableSizes[3];
 
         _assemblyTableOffset = _packageTableOffset + _packageTableLength;
-        _assemblyTableLength = tableSizes[3];
+        _assemblyTableLength = tableSizes[4];
 
         _usageSourcesTableOffset = _assemblyTableOffset + _assemblyTableLength;
-        _usageSourcesTableLength = tableSizes[4];
+        _usageSourcesTableLength = tableSizes[5];
 
         _apiTableOffset = _usageSourcesTableOffset + _usageSourcesTableLength;
-        _apiTableLength = tableSizes[5];
+        _apiTableLength = tableSizes[6];
+
+        _obsoletionTableOffset = _apiTableOffset + _apiTableLength;
+        _obsoletionTableLength = tableSizes[7];
+
+        _platformSupportTableOffset = _obsoletionTableOffset + _obsoletionTableLength;
+        _platformSupportTableLength = tableSizes[8];
 
         _buffer = buffer;
         _sizeOnDisk = sizeOnDisk;
     }
 
     internal ReadOnlySpan<byte> StringTable => new(_buffer, 0, _stringTableLength);
+
+    internal ReadOnlySpan<byte> PlatformTable => new(_buffer, _platformTableOffset, _platformTableLength);
 
     internal ReadOnlySpan<byte> FrameworkTable => new(_buffer, _frameworkTableOffset, _frameworkTableLength);
 
@@ -64,11 +81,23 @@ public sealed partial class ApiCatalogModel
 
     internal ReadOnlySpan<byte> ApiTable => new(_buffer, _apiTableOffset, _apiTableLength);
 
+    internal ReadOnlySpan<byte> ObsoletionTable => new(_buffer, _obsoletionTableOffset, _obsoletionTableLength);
+
+    internal ReadOnlySpan<byte> PlatformSupportTable => new(_buffer, _platformSupportTableOffset, _platformSupportTableLength);
+
     public FrameworkEnumerator Frameworks
     {
         get
         {
             return new FrameworkEnumerator(this);
+        }
+    }
+
+    public PlatformEnumerator Platforms
+    {
+        get
+        {
+            return new PlatformEnumerator(this);
         }
     }
 
@@ -162,6 +191,82 @@ public sealed partial class ApiCatalogModel
         }
 
         return new Markup(parts);
+    }
+
+    private static int GetDeclarationTableOffset(ReadOnlySpan<byte> table, int rowSize, int apiId, int assemblyId)
+    {
+        Debug.Assert((table.Length - 4) % rowSize == 0);
+
+        var low = 0;
+        var high = (table.Length - 4) / rowSize;
+
+        while (low <= high)
+        {
+            var middle = low + ((high - low) >> 1);
+            var rowStart = 4 + middle * rowSize;
+
+            var rowApiId = table.ReadInt32(rowStart);
+            var rowAssemblyId = table.ReadInt32(rowStart + 4);
+
+            var comparison = (rowApiId, rowAssemblyId).CompareTo((apiId, assemblyId));
+
+            if (comparison == 0)
+            {
+                // The declaration table is allowed to contain multiple entries for a given apiId/assemblyId
+                // combination. Our binary search may hav jumped in the middle of sequence of rows with the same
+                // apiId/assemblyId. Just look backwards and adjust the row offset until we find a row with different
+                // values.
+                var previousRowStart = rowStart - rowSize;
+                while (previousRowStart > 0)
+                {
+                    var previousRowApiId = table.ReadInt32(previousRowStart);
+                    var previousRowAssemblyId = table.ReadInt32(previousRowStart + 4);
+                    var same = (previousRowApiId, previousRowAssemblyId) == (apiId, assemblyId);
+                    if (!same)
+                        break;
+
+                    rowStart = previousRowStart;
+                    previousRowStart -= rowSize;
+                }
+
+                return rowStart;
+            }
+
+            if (comparison < 0)
+                high = middle - 1;
+            else
+                low = middle + 1;
+        }
+
+        return -1;
+    }
+
+    internal ObsoletionModel? GetObsoletion(int apiId, int assemblyId)
+    {
+        var offset = GetDeclarationTableOffset(ObsoletionTable, 21, apiId, assemblyId);
+        return offset < 0 ? null : new ObsoletionModel(this, offset);
+    }
+
+    internal IEnumerable<PlatformSupportModel> GetPlatformSupport(int apiId, int assemblyId)
+    {
+        const int rowSize = 13;
+
+        var offset = GetDeclarationTableOffset(PlatformSupportTable, rowSize, apiId, assemblyId);
+        if (offset < 0)
+            yield break;
+
+        while (offset < PlatformSupportTable.Length)
+        {
+            var rowApiId = PlatformSupportTable.ReadInt32(offset);
+            var rowAssemblyId = PlatformSupportTable.ReadInt32(offset + 4);
+
+            if (rowApiId != apiId ||
+                rowAssemblyId != assemblyId)
+                yield break;
+
+            yield return new PlatformSupportModel(this, offset);
+            offset += rowSize;
+        }
     }
 
     public ApiCatalogStatistics GetStatistics()
@@ -324,6 +429,67 @@ public sealed partial class ApiCatalogModel
             {
                 var offset = _catalog.FrameworkTable.ReadInt32(4 + _index * 4);
                 return new FrameworkModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct PlatformEnumerator : IEnumerable<PlatformModel>, IEnumerator<PlatformModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _count;
+        private int _index;
+
+        public PlatformEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _index = -1;
+            _count = _catalog.PlatformTable.ReadInt32(0);
+        }
+
+        IEnumerator<PlatformModel> IEnumerable<PlatformModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public PlatformEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public PlatformModel Current
+        {
+            get
+            {
+                var offset = 4 + _index * 4;
+                return new PlatformModel(_catalog, offset);
             }
         }
 

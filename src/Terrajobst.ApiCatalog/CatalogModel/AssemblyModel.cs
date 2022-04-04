@@ -15,6 +15,8 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     public ApiCatalogModel Catalog => _catalog;
 
+    public int Id => _offset;
+
     public Guid Guid
     {
         get
@@ -80,6 +82,14 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
             var packageTableOffset = frameworkCountOffset + 4 + frameworkCount * 4;
             return new PackageEnumerator(_catalog, packageTableOffset);
+        }
+    }
+
+    public IEnumerable<PlatformSupportModel> PlatformSupport
+    {
+        get
+        {
+            return _catalog.GetPlatformSupport(-1, _offset);
         }
     }
 

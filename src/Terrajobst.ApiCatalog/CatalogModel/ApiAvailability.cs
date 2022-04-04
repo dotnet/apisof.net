@@ -4,7 +4,7 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class ApiAvailability
 {
-    public ApiAvailability(IEnumerable<ApiFrameworkAvailability> frameworks)
+    private ApiAvailability(IEnumerable<ApiFrameworkAvailability> frameworks)
     {
         Frameworks = frameworks.ToArray();
     }
