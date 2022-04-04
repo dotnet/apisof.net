@@ -342,6 +342,8 @@ internal static class Program
 
         var model = ApiCatalogModel.Load(catalogModelPath);
         var stats = model.GetStatistics().ToString();
+        Console.WriteLine("Catalog stats:");
+        Console.Write(stats);
         await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), stats);
     }
 
