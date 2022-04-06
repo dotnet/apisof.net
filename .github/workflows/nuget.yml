@@ -1,0 +1,30 @@
+name: Push apisofdotnet to NuGet
+
+on:
+  push:
+    branches: [ release/apisofdotnet ]
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get code
+        uses: actions/checkout@v2
+
+      - name: Get .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.*'
+      
+      - name: dotnet publish
+        run: |
+          cd src/apisofdotnet
+          dotnet publish -c Release -o '../../artifacts/apisofdotnet' /p:SourceRevisionId=${{ github.sha }}
+      
+      - name: dotnet nuget push
+        run: |
+          dotnet nuget push ./artifacts/apisofdotnet/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_TOKEN }} --skip-duplicate

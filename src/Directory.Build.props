@@ -1,0 +1,17 @@
+<Project>
+    
+    <PropertyGroup Label="Package Info">
+        <Copyright>Copyright (c) Immo Landwerth</Copyright>
+        <Company>Immo Landwerth</Company>
+        <Product>apisof.net</Product>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Authors>$(Company)</Authors>
+        <RepositoryUrl>https://github.com/terrajobst/apisof.net</RepositoryUrl>
+        <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    </PropertyGroup>
+
+</Project>

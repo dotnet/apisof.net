@@ -151,6 +151,44 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         return sb.ToString();
     }
 
+    public string GetNamespaceName()
+    {
+        var c = this;
+        while (c != default && c.Kind != ApiKind.Namespace)
+            c = c.Parent;
+
+        return c != default
+            ? GetFullName()
+            : string.Empty;
+    }
+
+    public string GetTypeName()
+    {
+        var sb = new StringBuilder();
+        var c = this;
+        while (c != default)
+        {
+            if (c.Kind.IsType())
+            {
+                if (sb.Length > 0)
+                    sb.Insert(0, '.');
+
+                sb.Insert(0, c.Name);
+            }
+
+            c = c.Parent;
+        }
+
+        return sb.ToString();
+    }
+
+    public string GetMemberName()
+    {
+        return Kind.IsMember()
+                ? Name
+                : string.Empty;
+    }
+
     public ApiAvailability GetAvailability()
     {
         return ApiAvailability.Create(this);
