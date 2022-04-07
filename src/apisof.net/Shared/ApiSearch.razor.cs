@@ -75,7 +75,7 @@ public partial class ApiSearch
 
     private void SelectedPrevious()
     {
-        if (SelectedResult == null || SearchResults.Length == 0)
+        if (SelectedResult == default || SearchResults.Length == 0)
             SelectedResult = SearchResults.FirstOrDefault();
         else
         {
@@ -89,7 +89,7 @@ public partial class ApiSearch
 
     private void SelectedNext()
     {
-        if (SelectedResult == null || SearchResults.Length == 0)
+        if (SelectedResult == default || SearchResults.Length == 0)
             SelectedResult = SearchResults.FirstOrDefault();
         else
         {
@@ -109,7 +109,7 @@ public partial class ApiSearch
 
     private void Accept()
     {
-        if (SelectedResult != null)
+        if (SelectedResult != default)
         {
             NavigationManager.NavigateTo($"/catalog/{SelectedResult.Guid}");
             Close();
@@ -127,7 +127,7 @@ public partial class ApiSearch
         StateHasChanged();
     }
 
-    public async Task Close()
+    public async void Close()
     {
         _modalDisplay = "none";
         _modalClass = "";

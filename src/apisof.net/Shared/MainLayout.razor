@@ -70,18 +70,18 @@
         await _bodyDiv.FocusAsync();
     }
 
-    private async Task KeyDown(KeyboardEventArgs e)
+    private void KeyDown(KeyboardEventArgs e)
     {
         if (e.Key == "/")
         {
             if (_apiSearch.IsOpen)
-                await _apiSearch.Close();
+                _apiSearch.Close();
             else
                 _apiSearch.Open();
         }
         else if (e.Key == "Escape")
         {
-            await _apiSearch.Close();
+            _apiSearch.Close();
         }
     }
 }

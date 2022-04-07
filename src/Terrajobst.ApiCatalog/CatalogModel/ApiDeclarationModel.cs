@@ -103,7 +103,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
     public bool Equals(ApiDeclarationModel other)
     {
-        return ReferenceEquals(_api, other._api) &&
+        return _api == other._api &&
                _offset == other._offset;
     }
 
