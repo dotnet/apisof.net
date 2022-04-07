@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 
 using Terrajobst.ApiCatalog;
-using Terrajobst.ApiCatalog.Cataloging;
+
 using Azure.Core;
 using Azure.Storage.Blobs;
 

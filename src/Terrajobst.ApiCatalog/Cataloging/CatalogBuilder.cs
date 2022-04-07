@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using Dapper;
+
 using Microsoft.Data.Sqlite;
 
-namespace Terrajobst.ApiCatalog.Cataloging;
+namespace Terrajobst.ApiCatalog;
 
 public sealed class CatalogBuilder : IDisposable
 {
