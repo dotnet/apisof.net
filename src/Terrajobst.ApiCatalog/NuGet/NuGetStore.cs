@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using NuGet.Packaging;
+﻿using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 

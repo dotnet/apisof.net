@@ -1,9 +1,7 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using ApisOfDotNet.Services;
+﻿using ApisOfDotNet.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace ApisOfDotNet.Controllers;
 

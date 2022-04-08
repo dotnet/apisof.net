@@ -1,9 +1,7 @@
-﻿using System;
-using System.CodeDom.Compiler;
-using System.IO;
+﻿using System.CodeDom.Compiler;
 using System.Xml.Linq;
+
 using Microsoft.CodeAnalysis;
-using Terrajobst.ApiCatalog;
 
 namespace Terrajobst.ApiCatalog;
 

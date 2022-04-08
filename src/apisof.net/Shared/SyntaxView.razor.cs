@@ -1,8 +1,10 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
+
 using ApisOfDotNet.Services;
+
 using Microsoft.AspNetCore.Components;
+
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Shared;

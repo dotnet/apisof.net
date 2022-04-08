@@ -1,11 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
-using ApisOfDotNet.Services;
+﻿using ApisOfDotNet.Services;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+
 using Terrajobst.ApiCatalog;
+
+using Timer = System.Timers.Timer;
 
 namespace ApisOfDotNet.Shared;
 

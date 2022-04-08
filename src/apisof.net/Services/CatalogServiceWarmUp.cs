@@ -1,8 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-
-namespace ApisOfDotNet.Services;
+﻿namespace ApisOfDotNet.Services;
 
 public sealed class CatalogServiceWarmUp : IHostedService
 {

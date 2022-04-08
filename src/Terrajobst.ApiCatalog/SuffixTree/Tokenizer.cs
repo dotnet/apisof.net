@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public static class Tokenizer
 {

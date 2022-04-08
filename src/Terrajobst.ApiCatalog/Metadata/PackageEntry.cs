@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public sealed class PackageEntry
 {

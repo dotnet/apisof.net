@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml.Linq;
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public sealed class FrameworkEntry
 {

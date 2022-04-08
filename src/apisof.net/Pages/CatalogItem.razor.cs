@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Net;
+
 using ApisOfDotNet.Services;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Pages;

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ApisOfDotNet.Services;
+﻿namespace ApisOfDotNet.Services;
 
 public class CatalogJobInfo
 {

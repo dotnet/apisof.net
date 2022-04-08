@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-using NuGet.Frameworks;
+﻿using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 

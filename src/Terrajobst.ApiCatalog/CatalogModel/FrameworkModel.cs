@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 {

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using NuGet.Frameworks;
+﻿using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 

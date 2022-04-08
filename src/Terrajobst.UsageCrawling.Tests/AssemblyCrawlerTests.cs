@@ -1,12 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
+
 using Microsoft.Cci;
 using Microsoft.Cci.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+
 using Xunit;
 
 namespace Terrajobst.UsageCrawling.Tests;

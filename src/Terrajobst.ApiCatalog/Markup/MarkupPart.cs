@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public sealed class MarkupPart
 {

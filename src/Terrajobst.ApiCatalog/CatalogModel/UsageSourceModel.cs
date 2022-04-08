@@ -1,5 +1,3 @@
-using System;
-
 namespace Terrajobst.ApiCatalog;
 
 public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>

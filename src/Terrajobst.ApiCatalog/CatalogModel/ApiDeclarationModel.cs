@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Terrajobst.ApiCatalog;
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 {
