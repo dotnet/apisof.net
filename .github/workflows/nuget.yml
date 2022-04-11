@@ -25,7 +25,7 @@ jobs:
       - name: dotnet publish
         run: |
           cd src/apisofdotnet
-          dotnet publish -c Release -o '../../artifacts/apisofdotnet' /p:SourceRevisionId=${{ github.sha }}
+          dotnet build -c Release -o '../../artifacts/apisofdotnet' /p:SourceRevisionId=${{ github.sha }}
       
       - name: dotnet nuget push
         run: |
