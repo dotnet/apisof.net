@@ -31,17 +31,32 @@ internal sealed class CheckApisCommand : Command
     {
         var catalog = _catalogService.LoadCatalog();
 
+        if (_inputPaths.Count == 0)
+        {
+            Console.Error.WriteLine($"error: need to specify at least one input path");
+            return;
+        }
+
+        if (_targetFrameworkNames.Count == 0)
+            _targetFrameworkNames.AddRange(Defaults.TargetFrameworks);
+
         foreach (var targetFramework in _targetFrameworkNames)
         {
             var isValid = catalog.Frameworks.Any(fx => string.Equals(fx.Name, targetFramework, StringComparison.OrdinalIgnoreCase));
             if (!isValid)
             {
-                Console.WriteLine($"error: '{targetFramework}' isn't a known target framework.");
+                Console.Error.WriteLine($"error: '{targetFramework}' isn't a known target framework.");
                 return;
             }
         }
 
         var frameworks = _targetFrameworkNames.Select(NuGetFramework.Parse).ToArray();
+
+        if (string.IsNullOrEmpty(_outputPath))
+        {
+            Console.Error.WriteLine($"error: need to specify output path");
+            return;
+        }
 
         var outputDirectory = Path.GetDirectoryName(_outputPath);
         if (outputDirectory is not null)

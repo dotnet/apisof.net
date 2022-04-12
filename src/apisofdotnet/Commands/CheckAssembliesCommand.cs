@@ -27,8 +27,23 @@ internal sealed class CheckAssembliesCommand : Command
 
     public override void Execute()
     {
+        if (_inputPaths.Count == 0)
+        {
+            Console.Error.WriteLine($"error: need to specify at least one input path");
+            return;
+        }
+
+        if (_targetFrameworkNames.Count == 0)
+            _targetFrameworkNames.AddRange(Defaults.TargetFrameworks);
+
         var targetFrameworks = _targetFrameworkNames.Select(NuGetFramework.Parse)
                                                     .ToArray();
+
+        if (string.IsNullOrEmpty(_outputPath))
+        {
+            Console.Error.WriteLine($"error: need to specify output path");
+            return;
+        }
 
         var filePaths =
             AnsiConsole
