@@ -178,13 +178,16 @@ internal static class CatalogExtensions
         if (!attribute.AttributeClass.IsIncludedInCatalog())
             return false;
 
-        if (attribute.AttributeClass.Name == "CompilerGeneratedAttribute")
-            return false;
-
-        if (attribute.AttributeClass.Name == "TargetedPatchingOptOutAttribute")
-            return false;
-
-        return true;
+        switch (attribute.AttributeClass?.Name)
+        {
+            case "CompilerGeneratedAttribute":
+            case "TargetedPatchingOptOutAttribute":
+            case "DynamicAttribute":
+            case "TupleElementNamesAttribute":
+                return false;
+            default:
+                return true;
+        }
     }
 
     public static ImmutableArray<AttributeData> GetCatalogAttributes(this IMethodSymbol method)

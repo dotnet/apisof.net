@@ -1,6 +1,5 @@
 ﻿using System.Collections.Immutable;
-using System.Diagnostics;
-
+using System.Reflection.Metadata;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -251,6 +250,8 @@ internal static class CSharpDeclarationWriter
         WriteParameterList(invokeMethod.Parameters, writer);
 
         WriteConstraints(type.TypeParameters, writer);
+
+        writer.WritePunctuation(";");
     }
 
     private static void WriteEnumDeclaration(INamedTypeSymbol type, SyntaxWriter writer)
@@ -333,20 +334,53 @@ internal static class CSharpDeclarationWriter
         writer.WriteSpace();
         writer.WritePunctuation("=");
         writer.WriteSpace();
-        WriteConstant(field.Type, field.ConstantValue, writer);
+        WriteConstant(field.ContainingType.EnumUnderlyingType!, field.ConstantValue, writer);
     }
 
     private static void WriteMethodDeclaration(IMethodSymbol method, SyntaxWriter writer)
     {
         WriteAttributeList(method.GetAttributes(), writer);
-        WriteAttributeList(method.GetReturnTypeAttributes(), "return", writer);
-        WriteAccessibility(method.DeclaredAccessibility, writer);
-        writer.WriteSpace();
+        WriteAttributeList(method.GetReturnTypeAttributes(), writer, "return");
+
+        if (method.MethodKind != MethodKind.Destructor &&
+            method.ContainingType.TypeKind != TypeKind.Interface)
+        {
+            WriteAccessibility(method.DeclaredAccessibility, writer);
+            writer.WriteSpace();
+        }
 
         if (method.IsStatic)
         {
             writer.WriteKeyword("static");
             writer.WriteSpace();
+        }
+
+        if (method.MethodKind != MethodKind.Destructor)
+        {
+            if (method.IsAbstract)
+            {
+                if (method.ContainingType.TypeKind != TypeKind.Interface)
+                {
+                    writer.WriteKeyword("abstract");
+                    writer.WriteSpace();
+                }
+            }
+            else if (method.IsVirtual)
+            {
+                writer.WriteKeyword("virtual");
+                writer.WriteSpace();
+            }
+            else if (method.IsOverride)
+            {
+                writer.WriteKeyword("override");
+                writer.WriteSpace();
+            }
+
+            if (method.IsSealed)
+            {
+                writer.WriteKeyword("sealed");
+                writer.WriteSpace();
+            }
         }
 
         if (method.MethodKind == MethodKind.Constructor)
@@ -376,6 +410,9 @@ internal static class CSharpDeclarationWriter
         }
         else if (method.MethodKind == MethodKind.UserDefinedOperator)
         {
+            WriteTypeReference(method.ReturnType, writer);
+            writer.WriteSpace();
+
             var operatorKind = SyntaxFacts.GetOperatorKind(method.MetadataName);
             var isKeyword = SyntaxFacts.IsKeywordKind(operatorKind);
             var operatorText = SyntaxFacts.GetText(operatorKind);
@@ -403,12 +440,41 @@ internal static class CSharpDeclarationWriter
     private static void WritePropertyDeclaration(IPropertySymbol property, SyntaxWriter writer)
     {
         WriteAttributeList(property.GetAttributes(), writer);
-        WriteAccessibility(property.DeclaredAccessibility, writer);
-        writer.WriteSpace();
+
+        if (property.ContainingType.TypeKind != TypeKind.Interface)
+        {
+            WriteAccessibility(property.DeclaredAccessibility, writer);
+            writer.WriteSpace();
+        }
 
         if (property.IsStatic)
         {
             writer.WriteKeyword("static");
+            writer.WriteSpace();
+        }
+        
+        if (property.IsAbstract)
+        {
+            if (property.ContainingType.TypeKind != TypeKind.Interface)
+            {
+                writer.WriteKeyword("abstract");
+                writer.WriteSpace();
+            }
+        }
+        else if (property.IsVirtual)
+        {
+            writer.WriteKeyword("virtual");
+            writer.WriteSpace();
+        }
+        else if (property.IsOverride)
+        {
+            writer.WriteKeyword("override");
+            writer.WriteSpace();
+        }
+
+        if (property.IsSealed)
+        {
+            writer.WriteKeyword("sealed");
             writer.WriteSpace();
         }
 
@@ -485,12 +551,41 @@ internal static class CSharpDeclarationWriter
     private static void WriteEventDeclaration(IEventSymbol @event, SyntaxWriter writer)
     {
         WriteAttributeList(@event.GetAttributes(), writer);
-        WriteAccessibility(@event.DeclaredAccessibility, writer);
-        writer.WriteSpace();
+
+        if (@event.ContainingType.TypeKind != TypeKind.Interface)
+        {
+            WriteAccessibility(@event.DeclaredAccessibility, writer);
+            writer.WriteSpace();
+        }
 
         if (@event.IsStatic)
         {
             writer.WriteKeyword("static");
+            writer.WriteSpace();
+        }
+
+        if (@event.IsAbstract)
+        {
+            if (@event.ContainingType.TypeKind != TypeKind.Interface)
+            {
+                writer.WriteKeyword("abstract");
+                writer.WriteSpace();
+            }
+        }
+        else if (@event.IsVirtual)
+        {
+            writer.WriteKeyword("virtual");
+            writer.WriteSpace();
+        }
+        else if (@event.IsOverride)
+        {
+            writer.WriteKeyword("override");
+            writer.WriteSpace();
+        }
+
+        if (@event.IsSealed)
+        {
+            writer.WriteKeyword("sealed");
             writer.WriteSpace();
         }
 
@@ -518,7 +613,7 @@ internal static class CSharpDeclarationWriter
             if (@event.AddMethod != null)
             {
                 WriteAttributeList(adderAttributes, writer);
-                writer.WriteKeyword("get");
+                writer.WriteKeyword("add");
                 writer.WritePunctuation(";");
                 writer.WriteLine();
             }
@@ -526,7 +621,7 @@ internal static class CSharpDeclarationWriter
             if (@event.RemoveMethod != null)
             {
                 WriteAttributeList(removerAttributes, writer);
-                writer.WriteKeyword("set");
+                writer.WriteKeyword("remove");
                 writer.WritePunctuation(";");
                 writer.WriteLine();
             }
@@ -537,20 +632,33 @@ internal static class CSharpDeclarationWriter
         }
     }
 
-    private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, SyntaxWriter writer)
+    private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, SyntaxWriter writer, string target = null, bool compact = false)
     {
-        WriteAttributeList(attributes, null, writer);
-    }
-
-    private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, string target, SyntaxWriter writer)
-    {
+        var attributesWritten = false;
+            
         foreach (var attribute in attributes.Ordered())
         {
             if (!attribute.IsIncludedInCatalog())
                 continue;
 
-            writer.WritePunctuation("[");
-
+            if (!compact)
+            {
+                writer.WritePunctuation("[");
+            }
+            else
+            {
+                if (attributesWritten)
+                {
+                    writer.WritePunctuation(", ");
+                    writer.WriteSpace();
+                }
+                else
+                {
+                    writer.WritePunctuation("[");
+                    attributesWritten = true;
+                }
+            }
+            
             if (target != null)
             {
                 writer.WriteKeyword(target);
@@ -621,8 +729,17 @@ internal static class CSharpDeclarationWriter
             if (hasArguments)
                 writer.WritePunctuation(")");
 
+            if (!compact)
+            {
+                writer.WritePunctuation("]");
+                writer.WriteLine();
+            }
+        }
+        
+        if (compact && attributesWritten)
+        {
             writer.WritePunctuation("]");
-            writer.WriteLine();
+            writer.WriteSpace();
         }
     }
 
@@ -630,7 +747,7 @@ internal static class CSharpDeclarationWriter
     {
         if (constant.IsNull)
         {
-            if (constant.Type.IsValueType)
+            if (constant.Type?.IsValueType == true)
                 writer.WriteKeyword("default");
             else
                 writer.WriteKeyword("null");
@@ -646,16 +763,35 @@ internal static class CSharpDeclarationWriter
                     writer.WritePunctuation(")");
                     break;
                 case TypedConstantKind.Array:
-                    // HACK: Fix this
-                    writer.WritePunctuation(constant.ToCSharpString());
+                    writer.WriteKeyword("new");
+                    writer.WritePunctuation("[");
+                    writer.WritePunctuation("]");
+                    writer.WriteSpace();
+                    writer.WritePunctuation("{");
+                    writer.WriteSpace();
+                    var isFirst = true;
+                    foreach (var value in constant.Values)
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                        }
+                        else
+                        {
+                            writer.WritePunctuation(",");
+                            writer.WriteSpace();
+                        }
+                        
+                        WriteTypedConstant(value, writer);
+                    }
+                    writer.WriteSpace();
+                    writer.WritePunctuation("}");
                     break;
                 case TypedConstantKind.Enum:
-                    // HACK: Fix this
-                    writer.WritePunctuation(constant.ToCSharpString());
-                    break;
                 case TypedConstantKind.Primitive:
                     WriteConstant(constant.Type, constant.Value, writer);
                     break;
+                case TypedConstantKind.Error:
                 default:
                     throw new Exception($"Unexpected constant kind {constant.Kind}");
             }
@@ -673,14 +809,7 @@ internal static class CSharpDeclarationWriter
         }
         else if (type.TypeKind == TypeKind.Enum)
         {
-            // HACK: Fix this
-            writer.WritePunctuation("(");
-            WriteTypeReference(type, writer);
-            writer.WritePunctuation(")");
-            var text = value is ulong
-                ? SyntaxFactory.Literal(Convert.ToUInt64(value)).ToString()
-                : SyntaxFactory.Literal(Convert.ToInt64(value)).ToString();
-            writer.WriteLiteralNumber(text);
+            WriteEnum((INamedTypeSymbol) type, value, writer);
         }
         else if (value is bool valueBool)
         {
@@ -942,64 +1071,124 @@ internal static class CSharpDeclarationWriter
             case TypeKind.Interface:
             case TypeKind.Struct:
                 var namedType = (INamedTypeSymbol)type;
-                switch (namedType.SpecialType)
+                if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
                 {
-                    case SpecialType.System_Object:
-                        writer.WriteKeyword("object");
-                        break;
-                    case SpecialType.System_Void:
-                        writer.WriteKeyword("void");
-                        break;
-                    case SpecialType.System_Boolean:
-                        writer.WriteKeyword("bool");
-                        break;
-                    case SpecialType.System_Char:
-                        writer.WriteKeyword("char");
-                        break;
-                    case SpecialType.System_SByte:
-                        writer.WriteKeyword("sbyte");
-                        break;
-                    case SpecialType.System_Byte:
-                        writer.WriteKeyword("byte");
-                        break;
-                    case SpecialType.System_Int16:
-                        writer.WriteKeyword("short");
-                        break;
-                    case SpecialType.System_UInt16:
-                        writer.WriteKeyword("ushort");
-                        break;
-                    case SpecialType.System_Int32:
-                        writer.WriteKeyword("int");
-                        break;
-                    case SpecialType.System_UInt32:
-                        writer.WriteKeyword("uint");
-                        break;
-                    case SpecialType.System_Int64:
-                        writer.WriteKeyword("long");
-                        break;
-                    case SpecialType.System_UInt64:
-                        writer.WriteKeyword("ulong");
-                        break;
-                    case SpecialType.System_Decimal:
-                        writer.WriteKeyword("decimal");
-                        break;
-                    case SpecialType.System_Single:
-                        writer.WriteKeyword("float");
-                        break;
-                    case SpecialType.System_Double:
-                        writer.WriteKeyword("double");
-                        break;
-                    case SpecialType.System_String:
-                        writer.WriteKeyword("string");
-                        break;
-                    case SpecialType.System_Nullable_T:
-                        WriteTypeReference(namedType.TypeArguments[0], writer);
-                        writer.WritePunctuation("?");
-                        break;
-                    default:
-                        writer.WriteReference(namedType, namedType.Name);
-                        WriteTypeParameterReferences(namedType.TypeArguments, writer);
-                        break;
+                    WriteTypeReference(namedType.TypeArguments[0], writer);
+                    writer.WritePunctuation("?");
+                }
+                else if (namedType.IsTupleType)
+                {
+                    writer.WritePunctuation("(");
+                    var isFirst = true;
+                    foreach (var field in namedType.TupleElements)
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                        }
+                        else
+                        {
+                            writer.WritePunctuation(",");
+                            writer.WriteSpace();
+                        }
+                        
+                        WriteTypeReference(field.Type, writer);
+                        
+                        if (field.IsExplicitlyNamedTupleElement)
+                        {
+                            writer.WriteSpace();
+                            writer.WriteReference(field, field.Name);
+                        }
+                    }
+                    writer.WritePunctuation(")");
+                }
+                else
+                {
+                    switch (namedType.SpecialType)
+                    {
+                        case SpecialType.System_Object:
+                            writer.WriteKeyword("object");
+                            break;
+                        case SpecialType.System_Void:
+                            writer.WriteKeyword("void");
+                            break;
+                        case SpecialType.System_Boolean:
+                            writer.WriteKeyword("bool");
+                            break;
+                        case SpecialType.System_Char:
+                            writer.WriteKeyword("char");
+                            break;
+                        case SpecialType.System_SByte:
+                            writer.WriteKeyword("sbyte");
+                            break;
+                        case SpecialType.System_Byte:
+                            writer.WriteKeyword("byte");
+                            break;
+                        case SpecialType.System_Int16:
+                            writer.WriteKeyword("short");
+                            break;
+                        case SpecialType.System_UInt16:
+                            writer.WriteKeyword("ushort");
+                            break;
+                        case SpecialType.System_Int32:
+                            writer.WriteKeyword("int");
+                            break;
+                        case SpecialType.System_UInt32:
+                            writer.WriteKeyword("uint");
+                            break;
+                        case SpecialType.System_Int64:
+                            writer.WriteKeyword("long");
+                            break;
+                        case SpecialType.System_UInt64:
+                            writer.WriteKeyword("ulong");
+                            break;
+                        case SpecialType.System_Decimal:
+                            writer.WriteKeyword("decimal");
+                            break;
+                        case SpecialType.System_Single:
+                            writer.WriteKeyword("float");
+                            break;
+                        case SpecialType.System_Double:
+                            writer.WriteKeyword("double");
+                            break;
+                        case SpecialType.System_String:
+                            writer.WriteKeyword("string");
+                            break;
+                        case SpecialType.None:
+                        case SpecialType.System_ArgIterator:
+                        case SpecialType.System_Array:
+                        case SpecialType.System_AsyncCallback:
+                        case SpecialType.System_Collections_Generic_ICollection_T:
+                        case SpecialType.System_Collections_Generic_IEnumerable_T:
+                        case SpecialType.System_Collections_Generic_IEnumerator_T:
+                        case SpecialType.System_Collections_Generic_IList_T:
+                        case SpecialType.System_Collections_Generic_IReadOnlyCollection_T:
+                        case SpecialType.System_Collections_Generic_IReadOnlyList_T:
+                        case SpecialType.System_Collections_IEnumerable:
+                        case SpecialType.System_Collections_IEnumerator:
+                        case SpecialType.System_DateTime:
+                        case SpecialType.System_Delegate:
+                        case SpecialType.System_Enum:
+                        case SpecialType.System_IAsyncResult:
+                        case SpecialType.System_IDisposable:
+                        case SpecialType.System_IntPtr:
+                        case SpecialType.System_MulticastDelegate:
+                        case SpecialType.System_Nullable_T:
+                        case SpecialType.System_Runtime_CompilerServices_IsVolatile:
+                        case SpecialType.System_Runtime_CompilerServices_PreserveBaseOverridesAttribute:
+                        case SpecialType.System_Runtime_CompilerServices_RuntimeFeature:
+                        case SpecialType.System_RuntimeArgumentHandle:
+                        case SpecialType.System_RuntimeFieldHandle:
+                        case SpecialType.System_RuntimeMethodHandle:
+                        case SpecialType.System_RuntimeTypeHandle:
+                        case SpecialType.System_TypedReference:
+                        case SpecialType.System_UIntPtr:
+                        case SpecialType.System_ValueType:
+                        default:
+                            writer.WriteReference(namedType, namedType.Name);
+                            WriteTypeParameterReferences(namedType.TypeArguments, writer);
+                            break;
+                    }
                 }
                 break;
             case TypeKind.TypeParameter:
@@ -1010,6 +1199,8 @@ internal static class CSharpDeclarationWriter
                 var array = (IArrayTypeSymbol)type;
                 WriteTypeReference(array.ElementType, writer);
                 writer.WritePunctuation("[");
+                for (var i = 1; i < array.Rank; i++)
+                    writer.WritePunctuation(",");
                 writer.WritePunctuation("]");
                 break;
             case TypeKind.Pointer:
@@ -1018,11 +1209,76 @@ internal static class CSharpDeclarationWriter
                 writer.WritePunctuation("*");
                 break;
             case TypeKind.Dynamic:
-                writer.WriteKeyword("dyanmic");
+                writer.WriteKeyword("dynamic");
                 break;
             case TypeKind.FunctionPointer:
-                Debugger.Break();
+            {
+                var fp = (IFunctionPointerTypeSymbol)type;
+                writer.WriteKeyword("delegate");
+                writer.WritePunctuation("*");
+
+                if (fp.Signature.CallingConvention != SignatureCallingConvention.Default)
+                {
+                    writer.WriteSpace();
+
+                    switch (fp.Signature.CallingConvention)
+                    {
+                        case SignatureCallingConvention.Unmanaged:
+                            writer.WriteKeyword("unmanaged");
+                            break;
+                        case SignatureCallingConvention.CDecl:
+                            WriteCallingConvention("Cdecl", writer);
+                            break;
+                        case SignatureCallingConvention.StdCall:
+                            WriteCallingConvention("Stdcall", writer);
+                            break;
+                        case SignatureCallingConvention.ThisCall:
+                            WriteCallingConvention("Thiscall", writer);
+                            break;
+                        case SignatureCallingConvention.FastCall:
+                            WriteCallingConvention("Fastcall", writer);
+                            break;
+                        default:
+                            throw new Exception($"Unexpected calling convention: {fp.Signature.CallingConvention}");
+                    }
+
+                    static void WriteCallingConvention(string name, SyntaxWriter writer)
+                    {
+                        writer.WriteKeyword("unmanaged");
+                        writer.WritePunctuation("[");
+                        writer.WriteKeyword(name);
+                        writer.WritePunctuation("]");
+                    }
+                }
+
+                writer.WritePunctuation("<");
+
+                var isFirst = true;
+                foreach (var p in fp.Signature.Parameters)
+                {
+                    WriteSeparator(ref isFirst, writer);
+                    WriteTypeReference(p.Type, writer);
+                }
+
+                WriteSeparator(ref isFirst, writer);
+                WriteTypeReference(fp.Signature.ReturnType, writer);
+
+                static void WriteSeparator(ref bool isFirst, SyntaxWriter writer)
+                {
+                    if (isFirst)
+                    {
+                        isFirst = false;
+                    }
+                    else
+                    {
+                        writer.WritePunctuation(",");
+                        writer.WriteSpace();
+                    }
+                }
+
+                writer.WritePunctuation(">");
                 break;
+            }
             case TypeKind.Error:
                 writer.WritePunctuation("?");
                 break;
@@ -1086,7 +1342,7 @@ internal static class CSharpDeclarationWriter
 
             var parameter = parameters[i];
             var method = parameter.ContainingSymbol as IMethodSymbol;
-            WriteAttributeList(parameter.GetAttributes(), writer);
+            WriteAttributeList(parameter.GetAttributes(), writer, compact: true);
 
             if (i == 0 && method?.IsExtensionMethod == true)
             {
@@ -1130,4 +1386,242 @@ internal static class CSharpDeclarationWriter
             }
         }
     }
+    
+    private static void WriteEnum(INamedTypeSymbol enumType, object constantValue, SyntaxWriter writer)
+    {
+        if (IsFlagsEnum(enumType))
+            WriteFlagsEnumConstantValue(enumType, constantValue, writer);
+        else
+            WriteNonFlagsEnumConstantValue(enumType, constantValue, writer);
+    }
+
+    private static bool IsFlagsEnum(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol.TypeKind != TypeKind.Enum)
+            return false;
+
+        foreach (var attribute in typeSymbol.GetAttributes())
+        {
+            if (attribute.AttributeClass is null || attribute.AttributeConstructor == null)
+                continue;
+            
+            if (attribute.AttributeConstructor.Parameters.Any() || attribute.AttributeClass.Name != "FlagsAttribute")
+                continue;
+
+            var containingSymbol = attribute.AttributeClass.ContainingSymbol;
+
+            if (containingSymbol.Kind == SymbolKind.Namespace &&
+                containingSymbol.Name == "System" &&
+                ((INamespaceSymbol)containingSymbol.ContainingSymbol).IsGlobalNamespace)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void WriteFlagsEnumConstantValue(INamedTypeSymbol enumType,
+                                                    object constantValue,
+                                                    SyntaxWriter writer)
+    {
+        var allFieldsAndValues = new List<EnumField>();
+        GetSortedEnumFields(enumType, allFieldsAndValues);
+
+        var usedFieldsAndValues = new List<EnumField>();
+        WriteFlagsEnumConstantValue(enumType, constantValue, allFieldsAndValues, usedFieldsAndValues, writer);
+    }
+
+    private static void WriteFlagsEnumConstantValue(INamedTypeSymbol enumType,
+                                                    object constantValue,
+                                                    List<EnumField> allFieldsAndValues,
+                                                    List<EnumField> usedFieldsAndValues,
+                                                    SyntaxWriter writer)
+    {
+        var underlyingSpecialType = enumType.EnumUnderlyingType!.SpecialType;
+        var constantValueULong = ConvertEnumUnderlyingTypeToUInt64(constantValue, underlyingSpecialType);
+
+        var result = constantValueULong;
+
+        if (result != 0)
+        {
+            foreach (var fieldAndValue in allFieldsAndValues)
+            {
+                var valueAtIndex = fieldAndValue.Value;
+                if (valueAtIndex != 0 && (result & valueAtIndex) == valueAtIndex)
+                {
+                    usedFieldsAndValues.Add(fieldAndValue);
+                    result -= valueAtIndex;
+                    if (result == 0) break;
+                }
+            }
+        }
+
+        if (result == 0 && usedFieldsAndValues.Count > 0)
+        {
+            for (var i = usedFieldsAndValues.Count - 1; i >= 0; i--)
+            {
+                if (i != (usedFieldsAndValues.Count - 1))
+                {
+                    writer.WriteSpace();
+                    writer.WritePunctuation("|");
+                    writer.WriteSpace();
+                }
+
+                WriteEnumFieldReference((IFieldSymbol)usedFieldsAndValues[i].IdentityOpt, writer);
+            }
+        }
+        else
+        {
+            var zeroField = constantValueULong == 0
+                ? EnumField.FindValue(allFieldsAndValues, 0)
+                : default;
+            if (!zeroField.IsDefault)
+                WriteEnumFieldReference((IFieldSymbol)zeroField.IdentityOpt, writer);
+            else
+                WriteExplicitlyCastedLiteralValue(enumType, constantValue, writer);
+        }
+    }
+
+    private static void WriteNonFlagsEnumConstantValue(INamedTypeSymbol enumType, object constantValue, SyntaxWriter writer)
+    {
+        var underlyingSpecialType = enumType.EnumUnderlyingType!.SpecialType;
+        var constantValueULong = ConvertEnumUnderlyingTypeToUInt64(constantValue, underlyingSpecialType);
+
+        var enumFields = new List<EnumField>();
+        GetSortedEnumFields(enumType, enumFields);
+
+        var match = EnumField.FindValue(enumFields, constantValueULong);
+ 
+        if (!match.IsDefault)
+            WriteEnumFieldReference((IFieldSymbol)match.IdentityOpt, writer);
+        else
+            WriteExplicitlyCastedLiteralValue(enumType, constantValue, writer);
+    }
+
+    private static void WriteEnumFieldReference(IFieldSymbol symbol, SyntaxWriter writer)
+    {
+        writer.WriteReference(symbol.ContainingType, symbol.ContainingType.Name);
+        writer.WritePunctuation(".");
+        writer.WriteReference(symbol, symbol.Name);
+    }
+
+    private static void WriteExplicitlyCastedLiteralValue(INamedTypeSymbol enumType,
+                                                          object constantValue,
+                                                          SyntaxWriter writer)
+    {
+        writer.WritePunctuation("(");
+        WriteTypeReference(enumType, writer);
+        writer.WritePunctuation(")");
+        WriteConstant(enumType.EnumUnderlyingType!, constantValue, writer);
+    }
+
+    private static void GetSortedEnumFields(INamedTypeSymbol enumType, List<EnumField> enumFields)
+    {
+        var underlyingSpecialType = enumType.EnumUnderlyingType!.SpecialType;
+        foreach (var member in enumType.GetMembers())
+        {
+            if (member.Kind == SymbolKind.Field)
+            {
+                var field = (IFieldSymbol)member;
+                if (field.HasConstantValue)
+                {
+                    var enumField = new EnumField(field.Name, ConvertEnumUnderlyingTypeToUInt64(field.ConstantValue, underlyingSpecialType), field);
+                    enumFields.Add(enumField);
+                }
+            }
+        }
+
+        enumFields.Sort(EnumField.Comparer);
+    }
+
+    private static ulong ConvertEnumUnderlyingTypeToUInt64(object value, SpecialType specialType)
+    {
+        unchecked
+        {
+            return specialType switch
+            {
+                SpecialType.System_SByte => (ulong)(sbyte)value,
+                SpecialType.System_Int16 => (ulong)(short)value,
+                SpecialType.System_Int32 => (ulong)(int)value,
+                SpecialType.System_Int64 => (ulong)(long)value,
+                SpecialType.System_Byte => (byte)value,
+                SpecialType.System_UInt16 => (ushort)value,
+                SpecialType.System_UInt32 => (uint)value,
+                SpecialType.System_UInt64 => (ulong)value,
+                _ => throw new InvalidOperationException($"{specialType} is not a valid underlying type for an enum"),
+            };
+        }
+    }
+    
+    private readonly struct EnumField
+    {
+        public static readonly IComparer<EnumField> Comparer = new EnumFieldComparer();
+
+        public readonly string Name;
+        public readonly ulong Value;
+        public readonly object IdentityOpt;
+
+        public EnumField(string name, ulong value, object identityOpt = null)
+        {
+            this.Name = name;
+            this.Value = value;
+            this.IdentityOpt = identityOpt;
+        }
+
+        public bool IsDefault
+        {
+            get { return this.Name == null; }
+        }
+
+        public override string ToString()
+        {
+            return $"{this.Name} = {this.Value}";
+        }
+
+        public static EnumField FindValue(List<EnumField> sortedFields, ulong value)
+        {
+            int start = 0;
+            int end = sortedFields.Count;
+
+            while (start < end)
+            {
+                int mid = start + (end - start) / 2;
+
+                long diff = unchecked((long)value - (long)sortedFields[mid].Value); // NOTE: Has to match the comparer below.
+
+                if (diff == 0)
+                {
+                    while (mid >= start && sortedFields[mid].Value == value)
+                    {
+                        mid--;
+                    }
+                    return sortedFields[mid + 1];
+                }
+                else if (diff > 0)
+                {
+                    end = mid; // Exclude mid.
+                }
+                else
+                {
+                    start = mid + 1; // Exclude mid.
+                }
+            }
+
+            return default(EnumField);
+        }
+
+        private sealed class EnumFieldComparer : IComparer<EnumField>
+        {
+            int IComparer<EnumField>.Compare(EnumField field1, EnumField field2)
+            {
+                // Sort order is descending value, then ascending name.
+                int diff = unchecked(((long)field2.Value).CompareTo((long)field1.Value));
+                return diff == 0
+                    ? string.CompareOrdinal(field1.Name, field2.Name)
+                    : diff;
+            }
+        }
+    }
 }
+
