@@ -62,23 +62,16 @@ internal sealed class CheckApisCommand : Command
         if (outputDirectory is not null)
             Directory.CreateDirectory(outputDirectory);
 
-        using var writer = new StreamWriter(_outputPath);
+        using var writer = new CsvWriter(_outputPath);
 
         writer.Write("Assembly");
-        writer.Write('\t');
         writer.Write("Assembly Issue");
-        writer.Write('\t');
         writer.Write("Namespace");
-        writer.Write('\t');
         writer.Write("Type");
-        writer.Write('\t');
         writer.Write("Member");
 
         foreach (var framework in _targetFrameworkNames)
-        {
-            writer.Write('\t');
             writer.Write(framework);
-        }
 
         writer.WriteLine();
 
@@ -105,15 +98,11 @@ internal sealed class CheckApisCommand : Command
                     if (!string.IsNullOrEmpty(result.AssemblyIssues))
                     {
                         writer.Write(result.AssemblyName);
-                        writer.Write('\t');
                         writer.Write(result.AssemblyIssues);
-                        writer.Write('\t');
-                        writer.Write('\t');
-                        writer.Write('\t');
-
-                        foreach (var frameworkResult in frameworks)
-                            writer.Write('\t');
-
+                        
+                        for (var i = 0; i < _targetFrameworkNames.Count; i++)
+                            writer.Write();
+                        
                         writer.WriteLine();
                     }
                     else
@@ -125,19 +114,13 @@ internal sealed class CheckApisCommand : Command
                             var memberName = apiResult.Api.GetMemberName();
 
                             writer.Write(result.AssemblyName);
-                            writer.Write('\t');
-                            writer.Write('\t');
+                            writer.Write();
                             writer.Write(namespaceName);
-                            writer.Write('\t');
                             writer.Write(typeName);
-                            writer.Write('\t');
                             writer.Write(memberName);
 
                             foreach (var frameworkResult in apiResult.FrameworkResults)
-                            {
-                                writer.Write('\t');
                                 writer.Write(frameworkResult);
-                            }
 
                             writer.WriteLine();
                         }

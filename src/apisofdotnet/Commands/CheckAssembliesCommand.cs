@@ -72,7 +72,7 @@ internal sealed class CheckAssembliesCommand : Command
                         var assembly = env.LoadAssemblyFrom(filePath);
                         var assemblyName = assembly is not null
                                             ? assembly.Name.Value
-                                            : Path.GetFileNameWithoutExtension(filePath);
+                                            : Path.GetFileName(filePath);
 
                         if (assembly is null)
                         {
@@ -109,17 +109,14 @@ internal sealed class CheckAssembliesCommand : Command
         if (outputDirectory is not null)
             Directory.CreateDirectory(outputDirectory);
 
-        using var writer = new StreamWriter(_outputPath);
+        using var writer = new CsvWriter(_outputPath);
 
         writer.Write("Assembly");
-        writer.Write('\t');
         writer.Write("Assembly Issue");
-        writer.Write('\t');
         writer.Write("Assembly Framework");
 
         foreach (var tfm in _targetFrameworkNames)
         {
-            writer.Write('\t');
             writer.Write(tfm);
         }
 
@@ -128,16 +125,11 @@ internal sealed class CheckAssembliesCommand : Command
         foreach (var row in reportRows)
         {
             writer.Write(row.AssemblyName);
-            writer.Write('\t');
             writer.Write(row.AssemblyIssue);
-            writer.Write('\t');
             writer.Write(row.AssemblyFramework);
 
             foreach (var tfm in row.FrameworkResults)
-            {
-                writer.Write('\t');
                 writer.Write(tfm);
-            }
 
             writer.WriteLine();
         }

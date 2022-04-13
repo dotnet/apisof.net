@@ -31,7 +31,7 @@ internal static class ApiAvailabilityChecker
             var assembly = env.LoadAssemblyFrom(filePath);
             var assemblyName = assembly is not null
                                 ? assembly.Name.Value
-                                : Path.GetFileNameWithoutExtension(filePath);
+                                : Path.GetFileName(filePath);
             if (assembly is null)
             {
                 var result = new AssemblyAvailabilityResult(assemblyName, "Not a valid .NET assembly", Array.Empty<ApiAvailabilityResult>());
