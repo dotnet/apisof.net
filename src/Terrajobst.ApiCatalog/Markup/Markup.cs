@@ -33,7 +33,7 @@ public class Markup
             {
                 if (sb.Length > 0)
                 {
-                    parts.Add(new MarkupPart(MarkupPartKind.Whitespace, sb.ToString()));
+                    TokenizeWhitespaces(sb, parts);
                     sb.Clear();
                 }
 
@@ -79,6 +79,32 @@ public class Markup
         }
 
         return new Markup(parts);
+
+        static void TokenizeWhitespaces(StringBuilder sb, List<MarkupPart> parts)
+        {
+            var p = 0;
+            while (p < sb.Length)
+            {
+                var c = sb[p];
+                var l = p == sb.Length - 1 ? '\0' : sb[p + 1];
+                var lineBreakWidth = (c == '\r' && l == '\n')
+                                        ? 2
+                                        : c == '\r' || c == '\n'
+                                            ? 1
+                                            : 0;
+
+                if (lineBreakWidth > 0)
+                {
+                    parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
+                    p += lineBreakWidth;
+                }
+                else
+                {
+                    parts.Add(new MarkupPart(MarkupPartKind.Whitespace, sb[p].ToString()));
+                    p += 1;
+                }
+            }
+        }
     }
 
     public override string ToString()

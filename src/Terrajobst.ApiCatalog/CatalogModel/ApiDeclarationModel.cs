@@ -55,7 +55,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
                 if (indent - 1 > 0)
                     parts.Add(new MarkupPart(MarkupPartKind.Whitespace, new string(' ', 4 * (indent - 1))));
                 parts.Add(new MarkupPart(MarkupPartKind.Punctuation, "{"));
-                parts.Add(new MarkupPart(MarkupPartKind.Whitespace, "\n"));
+                parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
             }
 
             var needsIndent = true;
@@ -71,11 +71,11 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
                 parts.Add(part);
 
-                if (part.Kind == MarkupPartKind.Whitespace && part.Text == "\n")
+                if (part.Kind == MarkupPartKind.Whitespace && part.Text == Environment.NewLine)
                     needsIndent = true;
             }
 
-            parts.Add(new MarkupPart(MarkupPartKind.Whitespace, "\n"));
+            parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
 
             indent++;
         }
@@ -85,7 +85,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
             if (i > 0)
                 parts.Add(new MarkupPart(MarkupPartKind.Whitespace, new string(' ', 4 * i)));
             parts.Add(new MarkupPart(MarkupPartKind.Punctuation, "}"));
-            parts.Add(new MarkupPart(MarkupPartKind.Whitespace, "\n"));
+            parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
         }
 
         return new Markup(parts);

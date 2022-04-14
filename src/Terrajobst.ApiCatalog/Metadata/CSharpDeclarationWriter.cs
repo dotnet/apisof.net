@@ -649,7 +649,7 @@ internal static class CSharpDeclarationWriter
             {
                 if (attributesWritten)
                 {
-                    writer.WritePunctuation(", ");
+                    writer.WritePunctuation(",");
                     writer.WriteSpace();
                 }
                 else
