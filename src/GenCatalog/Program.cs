@@ -165,7 +165,7 @@ internal static class Program
         var props = await blobClient.GetPropertiesAsync();
         var lastModified = props.Value.LastModified;
         await blobClient.DownloadToAsync(nugetUsagesPath);
-        File.SetLastAccessTimeUtc(nugetUsagesPath, lastModified.UtcDateTime);
+        File.SetLastWriteTimeUtc(nugetUsagesPath, lastModified.UtcDateTime);
     }
 
     private static async Task DownloadNetFxCompatLabUsages(string netfxCompatLabPath)
@@ -182,7 +182,7 @@ internal static class Program
         var props = await blobClient.GetPropertiesAsync();
         var lastModified = props.Value.LastModified;
         await blobClient.DownloadToAsync(netfxCompatLabPath);
-        File.SetLastAccessTimeUtc(netfxCompatLabPath, lastModified.UtcDateTime);
+        File.SetLastWriteTimeUtc(netfxCompatLabPath, lastModified.UtcDateTime);
     }
 
     private static Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
@@ -471,7 +471,7 @@ internal static class Program
         foreach (var file in files.OrderBy(f => f))
         {
             var name = Path.GetFileNameWithoutExtension(file);
-            var date = DateOnly.FromDateTime(File.GetLastWriteTime(file));
+            var date = DateOnly.FromDateTime(File.GetLastWriteTimeUtc(file));
             var usageFile = new UsageFile(file, name, date);
             result.Add(usageFile);
         }
