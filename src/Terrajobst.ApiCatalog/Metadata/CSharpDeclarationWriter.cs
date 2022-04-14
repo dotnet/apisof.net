@@ -334,7 +334,7 @@ internal static class CSharpDeclarationWriter
         writer.WriteSpace();
         writer.WritePunctuation("=");
         writer.WriteSpace();
-        WriteConstant(field.ContainingType.EnumUnderlyingType!, field.ConstantValue, writer);
+        WriteEnum(field.ContainingType, field.ConstantValue, isForEnumDeclaration: true, writer);
     }
 
     private static void WriteMethodDeclaration(IMethodSymbol method, SyntaxWriter writer)
@@ -809,7 +809,7 @@ internal static class CSharpDeclarationWriter
         }
         else if (type.TypeKind == TypeKind.Enum)
         {
-            WriteEnum((INamedTypeSymbol) type, value, writer);
+            WriteEnum((INamedTypeSymbol)type, value, isForEnumDeclaration: false, writer);
         }
         else if (value is bool valueBool)
         {
@@ -1387,10 +1387,12 @@ internal static class CSharpDeclarationWriter
         }
     }
     
-    private static void WriteEnum(INamedTypeSymbol enumType, object constantValue, SyntaxWriter writer)
+    private static void WriteEnum(INamedTypeSymbol enumType, object constantValue, bool isForEnumDeclaration, SyntaxWriter writer)
     {
         if (IsFlagsEnum(enumType))
-            WriteFlagsEnumConstantValue(enumType, constantValue, writer);
+            WriteFlagsEnumConstantValue(enumType, constantValue, isForEnumDeclaration, writer);
+        else if (isForEnumDeclaration)
+            WriteConstant(enumType.EnumUnderlyingType, constantValue, writer);
         else
             WriteNonFlagsEnumConstantValue(enumType, constantValue, writer);
     }
@@ -1423,17 +1425,19 @@ internal static class CSharpDeclarationWriter
 
     private static void WriteFlagsEnumConstantValue(INamedTypeSymbol enumType,
                                                     object constantValue,
+                                                    bool isForEnumDeclaration,
                                                     SyntaxWriter writer)
     {
         var allFieldsAndValues = new List<EnumField>();
         GetSortedEnumFields(enumType, allFieldsAndValues);
 
         var usedFieldsAndValues = new List<EnumField>();
-        WriteFlagsEnumConstantValue(enumType, constantValue, allFieldsAndValues, usedFieldsAndValues, writer);
+        WriteFlagsEnumConstantValue(enumType, constantValue, isForEnumDeclaration, allFieldsAndValues, usedFieldsAndValues, writer);
     }
 
     private static void WriteFlagsEnumConstantValue(INamedTypeSymbol enumType,
                                                     object constantValue,
+                                                    bool isForEnumDeclaration,
                                                     List<EnumField> allFieldsAndValues,
                                                     List<EnumField> usedFieldsAndValues,
                                                     SyntaxWriter writer)
@@ -1448,6 +1452,10 @@ internal static class CSharpDeclarationWriter
             foreach (var fieldAndValue in allFieldsAndValues)
             {
                 var valueAtIndex = fieldAndValue.Value;
+                
+                if (isForEnumDeclaration && valueAtIndex == constantValueULong)
+                    continue;
+                
                 if (valueAtIndex != 0 && (result & valueAtIndex) == valueAtIndex)
                 {
                     usedFieldsAndValues.Add(fieldAndValue);
@@ -1468,16 +1476,22 @@ internal static class CSharpDeclarationWriter
                     writer.WriteSpace();
                 }
 
-                WriteEnumFieldReference((IFieldSymbol)usedFieldsAndValues[i].IdentityOpt, writer);
+                WriteEnumFieldReference((IFieldSymbol)usedFieldsAndValues[i].IdentityOpt, isForEnumDeclaration, writer);
             }
         }
         else
         {
+            if (isForEnumDeclaration)
+            {
+                WriteConstant(enumType.EnumUnderlyingType, constantValue, writer);
+                return;
+            }
+            
             var zeroField = constantValueULong == 0
                 ? EnumField.FindValue(allFieldsAndValues, 0)
                 : default;
             if (!zeroField.IsDefault)
-                WriteEnumFieldReference((IFieldSymbol)zeroField.IdentityOpt, writer);
+                WriteEnumFieldReference((IFieldSymbol)zeroField.IdentityOpt, isForEnumDeclaration: false, writer);
             else
                 WriteExplicitlyCastedLiteralValue(enumType, constantValue, writer);
         }
@@ -1494,15 +1508,19 @@ internal static class CSharpDeclarationWriter
         var match = EnumField.FindValue(enumFields, constantValueULong);
  
         if (!match.IsDefault)
-            WriteEnumFieldReference((IFieldSymbol)match.IdentityOpt, writer);
+            WriteEnumFieldReference((IFieldSymbol)match.IdentityOpt, isForEnumDeclaration: false, writer);
         else
             WriteExplicitlyCastedLiteralValue(enumType, constantValue, writer);
     }
 
-    private static void WriteEnumFieldReference(IFieldSymbol symbol, SyntaxWriter writer)
+    private static void WriteEnumFieldReference(IFieldSymbol symbol, bool isForEnumDeclaration, SyntaxWriter writer)
     {
-        writer.WriteReference(symbol.ContainingType, symbol.ContainingType.Name);
-        writer.WritePunctuation(".");
+        if (!isForEnumDeclaration)
+        {
+            writer.WriteReference(symbol.ContainingType, symbol.ContainingType.Name);
+            writer.WritePunctuation(".");
+        }
+
         writer.WriteReference(symbol, symbol.Name);
     }
 
