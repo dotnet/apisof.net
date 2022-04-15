@@ -12,8 +12,9 @@ public static class DotnetPackageIndex
         "dotnetframework",
         "EntityFramework",
         "RoslynTeam",
-        "nugetsqltools"
-        //"dotnetfoundation"
+        "nugetsqltools",
+        //"dotnetfoundation",
+        "newtonsoft"
     };
 
     public static async Task CreateAsync(string packageListPath)
