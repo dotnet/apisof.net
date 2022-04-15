@@ -268,16 +268,6 @@ public sealed partial class ApiCatalogModel
         return BinaryPrimitives.ReadSingleLittleEndian(ApiTable.Slice(offset));
     }
 
-    public void Dump(string fileName)
-    {
-        Console.WriteLine($"Size on disk    : {new FileInfo(fileName).Length,12:N0} bytes");
-        Console.WriteLine($"Size in memory  : {_buffer.Length,12:N0} bytes");
-        Console.WriteLine($"String table    : {_stringTableLength,12:N0} bytes");
-        Console.WriteLine($"Framework table : {_frameworkTableLength,12:N0} bytes");
-        Console.WriteLine($"Assembly table  : {_assemblyTableLength,12:N0} bytes");
-        Console.WriteLine($"API table       : {_apiTableLength,12:N0} bytes");
-    }
-
     public ApiCatalogStatistics GetStatistics()
     {
         var allApis = RootApis.SelectMany(a => a.DescendantsAndSelf());
