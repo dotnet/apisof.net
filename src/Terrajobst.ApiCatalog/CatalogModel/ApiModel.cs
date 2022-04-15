@@ -158,7 +158,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
             c = c.Parent;
 
         return c != default
-            ? GetFullName()
+            ? c.GetFullName()
             : string.Empty;
     }
 
