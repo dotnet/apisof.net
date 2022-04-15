@@ -74,6 +74,8 @@ public sealed partial class ApiCatalogModel
     private readonly int _apiTableOffset;
     private readonly int _apiTableLength;
 
+    private Dictionary<int, int> _forwardedApis;
+
     private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
         Debug.Assert(tableSizes.Length == 6);
@@ -292,6 +294,50 @@ public sealed partial class ApiCatalogModel
             numberOfPackageAssemblies: Assemblies.SelectMany(a => a.Packages).Count()
         );
     }
+
+    public ApiModel? GetForwardedApi(ApiModel api)
+    {
+        if (_forwardedApis is null)
+        {
+            var forwardedApis = ComputeForwardedApis();
+            Interlocked.CompareExchange(ref _forwardedApis, forwardedApis, null);
+        }
+
+        if (_forwardedApis.TryGetValue(api.Id, out var forwardedId))
+            return GetApiById(forwardedId);
+
+        return null;
+    }
+
+    private Dictionary<int, int> ComputeForwardedApis()
+    {
+        var result = new Dictionary<int, int>();
+        ForwardTypeInfoApis(result, this);
+        return result;
+
+        static void ForwardTypeInfoApis(Dictionary<int, int> receiver, ApiCatalogModel catalog)
+        {
+            var typeFullName = "System.Type";
+            var typeInfoFullName = "System.Reflection.TypeInfo";
+
+            var typeApi = catalog.GetAllApis().Single(a => a.GetFullName() == typeFullName);
+            var typeInfoApi = catalog.GetAllApis().Single(a => a.GetFullName() == typeInfoFullName);
+
+            var memberByRelativeName = typeApi.Descendants()
+                                              .Select(a => (Name: a.GetFullName()[(typeFullName.Length + 1)..], Api: a))
+                                              .ToDictionary(t => t.Name, t => t.Api);
+
+            var typeInfoMembers = typeInfoApi.Descendants()
+                                             .Select(a => (Name: a.GetFullName()[(typeInfoFullName.Length + 1)..], Api: a));
+
+            foreach (var (name, typeInfoMember) in typeInfoMembers)
+            {
+                if (memberByRelativeName.TryGetValue(name, out var typeMember))
+                    receiver.TryAdd(typeInfoMember.Id, typeMember.Id);
+            }
+        }
+    }
+
 
     public static ApiCatalogModel Load(string path)
     {

@@ -15,6 +15,14 @@ internal static class ApiAvailabilityChecker
                            Action<AssemblyAvailabilityResult> resultReceiver)
     {
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+
+        foreach (var api in catalog.GetAllApis())
+        {
+            var forwardedApi = catalog.GetForwardedApi(api);
+            if (forwardedApi is not null)
+                apiByGuid[api.Guid] = forwardedApi.Value;
+        }
+        
         var apiAvailability = new ConcurrentDictionary<ApiModel, ApiAvailability>();
 
         var resultSink = new BlockingCollection<AssemblyAvailabilityResult>();
