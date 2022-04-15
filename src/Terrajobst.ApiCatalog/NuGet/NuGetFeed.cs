@@ -24,9 +24,9 @@ public sealed class NuGetFeed
 
         var cache = new SourceCacheContext();
         var repository = Repository.Factory.GetCoreV3(FeedUrl);
-        var resource = await repository.GetResourceAsync<FindPackageByIdResource>();
+        var resource = await repository.GetResourceAsync<MetadataResource>(cancellationToken);
 
-        var versions = await resource.GetAllVersionsAsync(packageId, cache, logger, cancellationToken);
+        var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: false, cache, logger,  cancellationToken);;
         return versions.ToArray();
     }
 
