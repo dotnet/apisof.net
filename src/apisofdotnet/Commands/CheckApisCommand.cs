@@ -64,8 +64,8 @@ internal sealed class CheckApisCommand : Command
 
         using var writer = new CsvWriter(_outputPath);
 
-        writer.Write("Assembly");
-        writer.Write("Assembly Issue");
+        writer.Write("Calling Assembly");
+        writer.Write("Note");
         writer.Write("Namespace");
         writer.Write("Type");
         writer.Write("Member");
