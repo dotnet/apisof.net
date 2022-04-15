@@ -79,7 +79,7 @@ public sealed class PackageFilter
                !Excludes.Any(e => e.IsMatch(packageId));
     }
 
-    public static PackageFilter Default = new(
+    public static PackageFilter Default { get; } = new(
         includes: new[]
         {
             PackageFilterExpression.Parse("EntityFramework.*"),

@@ -22,7 +22,6 @@ public sealed class PackageIndexer
     public async Task<PackageEntry> Index(string id, string version)
     {
         var dependencies = new Dictionary<string, PackageArchiveReader>();
-        var apiIdByGuid = new Dictionary<Guid, int>();
         var frameworkEntries = new List<FrameworkEntry>();
         try
         {
@@ -33,7 +32,7 @@ public sealed class PackageIndexer
                 foreach (var item in GetReferenceItems(root))
                     targetNames.Add(item.TargetFramework.GetShortFolderName());
 
-                var targets = targetNames.Select(NuGetFramework.Parse);
+                var targets = targetNames.Select(NuGetFramework.Parse).ToArray();
 
                 if (!targets.Any())
                     return null;

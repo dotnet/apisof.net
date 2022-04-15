@@ -4,7 +4,7 @@ namespace Terrajobst.ApiCatalog;
 
 public static class DotnetPackageIndex
 {
-    private static readonly string[] _dotnetPlatformOwners = new[] {
+    private static readonly string[] DotnetPlatformOwners = new[] {
         "aspnet",
         "dotnetframework",
         "EntityFramework",
@@ -50,7 +50,7 @@ public static class DotnetPackageIndex
         {
             foreach (var owner in owners)
             {
-                foreach (var platformOwner in _dotnetPlatformOwners)
+                foreach (var platformOwner in DotnetPlatformOwners)
                 {
                     if (string.Equals(owner, platformOwner, StringComparison.OrdinalIgnoreCase))
                         return true;

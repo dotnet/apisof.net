@@ -106,7 +106,7 @@ internal static class Program
         }
 
         if (string.IsNullOrEmpty(result))
-            throw new Exception("Cannot retreive connection string for Azure blob storage. You either need to define an environment variable or a user secret.");
+            throw new Exception("Cannot retrieve connection string for Azure blob storage. You either need to define an environment variable or a user secret.");
 
         return result;
     }
@@ -244,10 +244,7 @@ internal static class Program
         Directory.CreateDirectory(packagesPath);
 
         var packages = document.Root!.Elements("package")
-            .Select(e => (Id: e.Attribute("id")!.Value, Version: NuGetVersion.Parse(e.Attribute("version")!.Value)))
-            .Where(t => PackageFilter.Default.IsMatch(t.Id))
-            .GroupBy(t => t.Id)
-            .Select(g => (Id: g.Key, Version: g.OrderBy(t => t.Version).Select(t => t.Version).Last().ToString()))
+            .Select(e => (Id: e.Attribute("id")!.Value, Version: e.Attribute("version")!.Value))
             .ToArray();
 
         foreach (var (id, version) in packages.OrderBy(t => t.Id))
@@ -413,7 +410,7 @@ internal static class Program
 
         if (string.IsNullOrEmpty(url) || string.IsNullOrEmpty(secret))
         {
-            Console.WriteLine("warning: cannot retreive secret for GenCatalog web hook.");
+            Console.WriteLine("warning: cannot retrieve secret for GenCatalog web hook.");
             return;
         }
 

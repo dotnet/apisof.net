@@ -65,8 +65,6 @@ public sealed class NuGetFeed
                     var pageString = await httpClient.GetStringAsync(pageItem.Url);
                     var page = JsonConvert.DeserializeObject<CatalogPage>(pageString);
 
-                    var pageLeafItems = page.Items;
-
                     foreach (var pageLeafItem in page.Items)
                     {
                         if (pageLeafItem.Type == "nuget:PackageDetails")
@@ -112,12 +110,6 @@ public sealed class NuGetFeed
         return versions.ToArray();
     }
 
-    public Task<PackageArchiveReader> GetPackageAsync(string id, string version)
-    {
-        var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
-        return GetPackageAsync(identity);
-    }
-
     public async Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)
     {
         var url = await GetPackageUrlAsync(identity);
@@ -161,7 +153,7 @@ public sealed class NuGetFeed
     public Task<Dictionary<string, string[]>> GetOwnerMappingAsync()
     {
         if (FeedUrl != NuGetFeeds.NuGetOrg)
-            throw new NotSupportedException("We can only retreive owner information for nuget.org");
+            throw new NotSupportedException("We can only retrieve owner information for nuget.org");
 
         var httpClient = new HttpClient();
         var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-014/owners/owners.v2.json";

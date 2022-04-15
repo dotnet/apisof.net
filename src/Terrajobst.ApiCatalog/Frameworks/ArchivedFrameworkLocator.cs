@@ -25,7 +25,7 @@ public sealed class ArchivedFrameworkLocator : FrameworkLocator
         return paths;
     }
 
-    private string GetFolderName(NuGetFramework framework)
+    private static string GetFolderName(NuGetFramework framework)
     {
         // Special case Xamarin platforms
 
