@@ -28,7 +28,7 @@ internal static class Program
 
         var rootPath = args.Length == 1
             ? args[0]
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            : Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Catalog");
 
         var success = true;
 
