@@ -3,7 +3,7 @@ using System.Collections;
 namespace Terrajobst.UsageCrawling;
 
 public sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
-    where T: notnull
+    where T : notnull
 {
     private readonly Dictionary<T, int> _idByValue = new();
     private readonly Dictionary<int, T> _valueById = new();

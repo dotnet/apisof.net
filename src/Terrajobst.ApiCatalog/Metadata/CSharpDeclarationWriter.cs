@@ -452,7 +452,7 @@ internal static class CSharpDeclarationWriter
             writer.WriteKeyword("static");
             writer.WriteSpace();
         }
-        
+
         if (property.IsAbstract)
         {
             if (property.ContainingType.TypeKind != TypeKind.Interface)
@@ -635,7 +635,7 @@ internal static class CSharpDeclarationWriter
     private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, SyntaxWriter writer, string target = null, bool compact = false)
     {
         var attributesWritten = false;
-            
+
         foreach (var attribute in attributes.Ordered())
         {
             if (!attribute.IsIncludedInCatalog())
@@ -658,7 +658,7 @@ internal static class CSharpDeclarationWriter
                     attributesWritten = true;
                 }
             }
-            
+
             if (target != null)
             {
                 writer.WriteKeyword(target);
@@ -735,7 +735,7 @@ internal static class CSharpDeclarationWriter
                 writer.WriteLine();
             }
         }
-        
+
         if (compact && attributesWritten)
         {
             writer.WritePunctuation("]");
@@ -781,7 +781,7 @@ internal static class CSharpDeclarationWriter
                             writer.WritePunctuation(",");
                             writer.WriteSpace();
                         }
-                        
+
                         WriteTypedConstant(value, writer);
                     }
                     writer.WriteSpace();
@@ -1091,9 +1091,9 @@ internal static class CSharpDeclarationWriter
                             writer.WritePunctuation(",");
                             writer.WriteSpace();
                         }
-                        
+
                         WriteTypeReference(field.Type, writer);
-                        
+
                         if (field.IsExplicitlyNamedTupleElement)
                         {
                             writer.WriteSpace();
@@ -1386,7 +1386,7 @@ internal static class CSharpDeclarationWriter
             }
         }
     }
-    
+
     private static void WriteEnum(INamedTypeSymbol enumType, object constantValue, bool isForEnumDeclaration, SyntaxWriter writer)
     {
         if (IsFlagsEnum(enumType))
@@ -1406,7 +1406,7 @@ internal static class CSharpDeclarationWriter
         {
             if (attribute.AttributeClass is null || attribute.AttributeConstructor == null)
                 continue;
-            
+
             if (attribute.AttributeConstructor.Parameters.Any() || attribute.AttributeClass.Name != "FlagsAttribute")
                 continue;
 
@@ -1452,10 +1452,10 @@ internal static class CSharpDeclarationWriter
             foreach (var fieldAndValue in allFieldsAndValues)
             {
                 var valueAtIndex = fieldAndValue.Value;
-                
+
                 if (isForEnumDeclaration && valueAtIndex == constantValueULong)
                     continue;
-                
+
                 if (valueAtIndex != 0 && (result & valueAtIndex) == valueAtIndex)
                 {
                     usedFieldsAndValues.Add(fieldAndValue);
@@ -1486,7 +1486,7 @@ internal static class CSharpDeclarationWriter
                 WriteConstant(enumType.EnumUnderlyingType, constantValue, writer);
                 return;
             }
-            
+
             var zeroField = constantValueULong == 0
                 ? EnumField.FindValue(allFieldsAndValues, 0)
                 : default;
@@ -1506,7 +1506,7 @@ internal static class CSharpDeclarationWriter
         GetSortedEnumFields(enumType, enumFields);
 
         var match = EnumField.FindValue(enumFields, constantValueULong);
- 
+
         if (!match.IsDefault)
             WriteEnumFieldReference((IFieldSymbol)match.IdentityOpt, isForEnumDeclaration: false, writer);
         else
@@ -1571,7 +1571,7 @@ internal static class CSharpDeclarationWriter
             };
         }
     }
-    
+
     private readonly struct EnumField
     {
         public static readonly IComparer<EnumField> Comparer = new EnumFieldComparer();
@@ -1642,4 +1642,3 @@ internal static class CSharpDeclarationWriter
         }
     }
 }
-

@@ -52,7 +52,7 @@ public sealed class BlobStorageCrawlerStore : CrawlerStore
         var blobClient = new BlobClient(_blobStorageConnectionString, UsageContainerName, UsagesName, GetBlobOptions());
         await blobClient.UploadAsync(fileName, overwrite: true);
     }
-    
+
     private static BlobClientOptions GetBlobOptions()
     {
         return new BlobClientOptions

@@ -17,7 +17,7 @@ internal struct AvailabilityResult
         IsAvailable = isAvailable;
         Package = package;
     }
-    
+
     public bool IsAvailable { get; }
 
     public PackageModel? Package { get; }

@@ -374,10 +374,10 @@ public sealed class CatalogBuilder : IDisposable
                 VALUES
                     (@FrameworkId, @FriendlyName)
             ",
-            new  {
+            new {
                 FrameworkId = frameworkId,
                 FriendlyName = frameworkName
-            }, 
+            },
             _transaction
         );
 

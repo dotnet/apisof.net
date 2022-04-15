@@ -330,7 +330,7 @@ internal sealed class Program
         Console.WriteLine($"Aggregating results...");
 
         stopwatch.Restart();
-        
+
         var ancestors = apiCatalog.GetAllApis()
                                   .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
         await usageDatabase.ExportUsagesAsync(apiMap, ancestors, usagesPath);

@@ -50,7 +50,7 @@ internal sealed class CheckAssembliesCommand : Command
                 .Status()
                 .Start("Discovering files", _ => AssemblyFileSet.Create(_inputPaths));
 
-        var report = 
+        var report =
             AnsiConsole
                 .Progress()
                 .Columns(new ProgressColumn[]

@@ -56,32 +56,32 @@ public partial class SyntaxView
                     markupBuilder.Append("<span class=\"keyword\">");
                     break;
                 case MarkupPartKind.Reference:
+                {
+                    var api = part.Reference == null
+                        ? (ApiModel?)null
+                        : CatalogService.GetApiByGuid(part.Reference.Value);
+
+                    var tooltip = api == null ? null : GeneratedTooltip(api.Value);
+
+                    if (api == Current)
                     {
-                        var api = part.Reference == null
-                            ? (ApiModel?)null
-                            : CatalogService.GetApiByGuid(part.Reference.Value);
-
-                        var tooltip = api == null ? null : GeneratedTooltip(api.Value);
-
-                        if (api == Current)
-                        {
-                            markupBuilder.Append("<span class=\"reference-current\">");
-                        }
-                        else if (api != null)
-                        {
-                            var referenceClass = GetReferenceClass(api.Value.Kind);
-                            markupBuilder.Append($"<span class=\"{referenceClass}\"");
-                            if (tooltip != null)
-                                markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
-
-                            markupBuilder.Append(">");
-                        }
-
-                        if (api != null && api != Current)
-                            markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
-
-                        break;
+                        markupBuilder.Append("<span class=\"reference-current\">");
                     }
+                    else if (api != null)
+                    {
+                        var referenceClass = GetReferenceClass(api.Value.Kind);
+                        markupBuilder.Append($"<span class=\"{referenceClass}\"");
+                        if (tooltip != null)
+                            markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
+
+                        markupBuilder.Append(">");
+                    }
+
+                    if (api != null && api != Current)
+                        markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
+
+                    break;
+                }
             }
 
             markupBuilder.Append(HtmlEncoder.Encode(part.Text));

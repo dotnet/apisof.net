@@ -22,7 +22,7 @@ internal static class ApiAvailabilityChecker
             if (forwardedApi is not null)
                 apiByGuid[api.Guid] = forwardedApi.Value;
         }
-        
+
         var apiAvailability = new ConcurrentDictionary<ApiModel, ApiAvailability>();
 
         var resultSink = new BlockingCollection<AssemblyAvailabilityResult>();

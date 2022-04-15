@@ -74,7 +74,7 @@ internal static class XmlEntryFormat
         foreach (var api in assembly.AllApis())
         {
             var fingerprint = api.Fingerprint.ToString("N");
-            
+
             var syntaxElement = new XElement("syntax", new XAttribute("id", fingerprint));
             assemblyElement.Add(syntaxElement);
             syntaxElement.Add(api.Syntax);
@@ -85,7 +85,7 @@ internal static class XmlEntryFormat
     {
         var apiElement = new XElement("api",
             new XAttribute("fingerprint", api.Fingerprint.ToString("N")),
-            new XAttribute("kind", (int) api.Kind),
+            new XAttribute("kind", (int)api.Kind),
             new XAttribute("name", api.Name)
         );
         parent.Add(apiElement);

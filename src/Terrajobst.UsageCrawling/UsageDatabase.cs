@@ -18,7 +18,8 @@ public sealed class UsageDatabase : IDisposable
     {
         var isNew = !File.Exists(fileName);
 
-        var connectionString = new SqliteConnectionStringBuilder {
+        var connectionString = new SqliteConnectionStringBuilder
+        {
             DataSource = fileName,
             Mode = SqliteOpenMode.ReadWriteCreate
         }.ToString();
@@ -96,7 +97,7 @@ public sealed class UsageDatabase : IDisposable
     public async Task<IdMap<PackageIdentity>> ReadPackagesAsync()
     {
         var result = new IdMap<PackageIdentity>();
-        var rows = await _connection.QueryAsync<(int Id, string Name, string Version)> (@"
+        var rows = await _connection.QueryAsync<(int Id, string Name, string Version)>(@"
             SELECT  PackageId,
                     Name,
                     Version
@@ -116,7 +117,7 @@ public sealed class UsageDatabase : IDisposable
     public async Task<IdMap<Guid>> ReadApisAsync()
     {
         var result = new IdMap<Guid>();
-        var rows = await _connection.QueryAsync<(int Id, string GuidText)> (@"
+        var rows = await _connection.QueryAsync<(int Id, string GuidText)>(@"
             SELECT  ApiId,
                     Guid
             FROM    Apis

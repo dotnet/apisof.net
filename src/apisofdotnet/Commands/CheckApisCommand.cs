@@ -99,10 +99,10 @@ internal sealed class CheckApisCommand : Command
                     {
                         writer.Write(result.AssemblyName);
                         writer.Write(result.AssemblyIssues);
-                        
+
                         for (var i = 0; i < _targetFrameworkNames.Count; i++)
                             writer.Write();
-                        
+
                         writer.WriteLine();
                     }
                     else
@@ -112,7 +112,7 @@ internal sealed class CheckApisCommand : Command
                             var allAvailable = apiResult.FrameworkResults.All(fr => fr.IsAvailable);
                             if (allAvailable)
                                 continue;
-                            
+
                             var namespaceName = apiResult.Api.GetNamespaceName();
                             var typeName = apiResult.Api.GetTypeName();
                             var memberName = apiResult.Api.GetMemberName();

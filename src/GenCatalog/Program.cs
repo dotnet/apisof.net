@@ -2,15 +2,11 @@
 using System.IO.Compression;
 using System.Text.Json;
 using System.Xml.Linq;
-
-using Terrajobst.ApiCatalog;
-
 using Azure.Core;
 using Azure.Storage.Blobs;
-
 using Microsoft.Extensions.Configuration.UserSecrets;
-
 using NuGet.Versioning;
+using Terrajobst.ApiCatalog;
 
 namespace GenCatalog;
 

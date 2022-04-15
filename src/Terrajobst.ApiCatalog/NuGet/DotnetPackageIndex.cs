@@ -63,7 +63,7 @@ public static class DotnetPackageIndex
             if (latestPrerelease is not null)
                 filteredPackages.Add(latestPrerelease);
         });
-        
+
         Console.WriteLine($"Found {filteredPackages.Count:N0} platform package versions.");
 
         foreach (var item in filteredPackages.OrderBy(pi => pi.Id)

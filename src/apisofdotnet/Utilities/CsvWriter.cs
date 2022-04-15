@@ -26,7 +26,7 @@ internal sealed class CsvWriter : IDisposable
     {
         Write(string.Empty);
     }
-    
+
     public void Write(object? value)
     {
         if (_valuesSeen)
@@ -46,7 +46,7 @@ internal sealed class CsvWriter : IDisposable
             _textWriter.WriteLine();
         }
     }
-   
+
     private static string EscapeValue(string value)
     {
         var needsEscaping = value.IndexOfAny(CharactersThatNeedEscaping) >= 0;

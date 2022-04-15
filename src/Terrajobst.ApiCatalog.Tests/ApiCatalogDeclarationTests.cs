@@ -1531,7 +1531,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1557,7 +1557,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1584,9 +1584,9 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
-    
+
     [Fact]
     public void Field_Const()
     {
@@ -1611,7 +1611,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1638,7 +1638,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1664,7 +1664,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1691,7 +1691,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1718,7 +1718,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1745,7 +1745,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1772,7 +1772,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1799,7 +1799,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1826,7 +1826,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1856,7 +1856,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1886,7 +1886,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1915,7 +1915,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1941,7 +1941,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1967,7 +1967,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -1994,7 +1994,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2021,7 +2021,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2048,7 +2048,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2075,7 +2075,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2102,7 +2102,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);        
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2130,7 +2130,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2156,7 +2156,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2182,7 +2182,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2208,7 +2208,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2234,7 +2234,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2260,7 +2260,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected, nullableEnabled: true);  
+        Assert(source, expected, nullableEnabled: true);
     }
 
     [Fact]
@@ -2286,7 +2286,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected, nullableEnabled: true);  
+        Assert(source, expected, nullableEnabled: true);
     }
 
     [Fact]
@@ -2313,7 +2313,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected, nullableEnabled: true);  
+        Assert(source, expected, nullableEnabled: true);
     }
 
     [Fact]
@@ -2340,7 +2340,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2367,7 +2367,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2394,7 +2394,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
     [Fact]
     public void Signature_FunctionPointer()
@@ -2420,9 +2420,9 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
-    
+
     [Fact]
     public void Signature_FunctionPointer_NoArgs()
     {
@@ -2447,7 +2447,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2474,7 +2474,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2501,7 +2501,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Theory]
@@ -2532,7 +2532,7 @@ public class ApiCatalogDeclarationTests
             }
         ".Replace("%CC%", callingConvention);
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2559,7 +2559,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2586,7 +2586,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2613,7 +2613,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2640,7 +2640,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2667,7 +2667,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2694,7 +2694,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2721,7 +2721,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2748,7 +2748,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2775,7 +2775,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2802,7 +2802,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2830,7 +2830,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2858,7 +2858,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     [Fact]
@@ -2885,7 +2885,7 @@ public class ApiCatalogDeclarationTests
             }
         ";
 
-        Assert(source, expected);  
+        Assert(source, expected);
     }
 
     private static void Assert(string source, string expected, bool nullableEnabled = false)
@@ -2904,7 +2904,7 @@ public class ApiCatalogDeclarationTests
             new[] { CSharpSyntaxTree.ParseText(source) },
             references,
             options);
-        
+
         var peStream = new MemoryStream();
         var result = compilation.Emit(peStream);
         if (!result.Success)
@@ -2995,8 +2995,8 @@ public class ApiCatalogDeclarationTests
             }
 
             var canHaveChildren = api.Kind == ApiKind.Namespace ||
-                                  api.Kind.IsType() && api.Kind != ApiKind.Delegate; 
-            
+                                  api.Kind.IsType() && api.Kind != ApiKind.Delegate;
+
             if (canHaveChildren)
             {
                 writer.WriteLine("{");
