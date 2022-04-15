@@ -109,6 +109,10 @@ internal sealed class CheckApisCommand : Command
                     {
                         foreach (var apiResult in result.ApiResults)
                         {
+                            var allAvailable = apiResult.FrameworkResults.All(fr => fr.IsAvailable);
+                            if (allAvailable)
+                                continue;
+                            
                             var namespaceName = apiResult.Api.GetNamespaceName();
                             var typeName = apiResult.Api.GetTypeName();
                             var memberName = apiResult.Api.GetMemberName();
