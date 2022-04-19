@@ -1,4 +1,6 @@
-﻿namespace Terrajobst.ApiCatalog;
+﻿using System.Xml.Linq;
+
+namespace Terrajobst.ApiCatalog;
 
 public sealed class PackageEntry
 {
@@ -23,5 +25,13 @@ public sealed class PackageEntry
     public void Write(Stream stream)
     {
         XmlEntryFormat.WritePackageEntry(stream, this);
+    }
+
+    public XDocument ToDocument()
+    {
+        using var stream = new MemoryStream();
+        Write(stream);
+        stream.Position = 0;
+        return XDocument.Load(stream);
     }
 }

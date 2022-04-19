@@ -1,4 +1,6 @@
-﻿namespace Terrajobst.ApiCatalog;
+﻿using System.Xml.Linq;
+
+namespace Terrajobst.ApiCatalog;
 
 public sealed class FrameworkEntry
 {
@@ -19,5 +21,13 @@ public sealed class FrameworkEntry
     public void Write(Stream stream)
     {
         XmlEntryFormat.WriteFrameworkEntry(stream, this);
+    }
+
+    public XDocument ToDocument()
+    {
+        using var stream = new MemoryStream();
+        Write(stream);
+        stream.Position = 0;
+        return XDocument.Load(stream);
     }
 }

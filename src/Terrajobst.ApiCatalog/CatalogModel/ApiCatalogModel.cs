@@ -5,56 +5,6 @@ using System.Text;
 
 namespace Terrajobst.ApiCatalog;
 
-// Missing:
-//   - Store usage
-//
-// The format is organized as follows:
-//
-//   - Magic Header Value ('APICATFB')
-//   - Format version
-//   - Number of tables
-//   - Table sizes
-//   - Tables
-//
-// The tables are written as follows:
-//
-//   - Strings
-//       Length
-//       UTF8 Bytes
-//   - Frameworks
-//       Offsets
-//       Name
-//       Assemblies [patched]
-//   - Packages
-//       Offsets
-//       Id
-//       Version
-//       (Framework, Assembly) [patched]
-//   - Assemblies
-//       Offsets
-//       NameOffset
-//       VersionOffset
-//       PublicKeyTokenOffset
-//       RootApiOffsets [patched]
-//       FrameworkOffsets
-//       PackageOffsets
-//   - Usage Sources
-//       Offsets
-//       NameOffset
-//       Usaget Data Sets
-//          SourceOffset
-//          Date
-//   - Apis
-//       Guid
-//       Kind
-//       NameOffset
-//       ParentOffset
-//       ChildrenOffsets
-//       (AssemblyOffset, SyntaxOffset)*
-//       (UsageDataSetOffset, Percentage)*
-//       GetSyntax(AssemblyModel) -> binary searches by assembly offset
-//       GetPercentage(UsageDataSet) -> binary searches by data set offset
-
 public sealed partial class ApiCatalogModel
 {
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
@@ -327,7 +277,6 @@ public sealed partial class ApiCatalogModel
             }
         }
     }
-
 
     public static ApiCatalogModel Load(string path)
     {

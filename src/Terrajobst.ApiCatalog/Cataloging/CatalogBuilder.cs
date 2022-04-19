@@ -12,84 +12,97 @@ public sealed class CatalogBuilder : IDisposable
     {
         var files = Directory.GetFiles(indexPath, "*.xml");
 
-        static void DefineApis(CatalogBuilder builder, IEnumerable<XElement> apiElements)
-        {
-            foreach (var element in apiElements)
-            {
-                var fingerprint = Guid.Parse(element.Attribute("fingerprint").Value);
-                var kind = (ApiKind)int.Parse(element.Attribute("kind").Value);
-                var parentFingerprint = element.Attribute("parent") == null
-                    ? Guid.Empty
-                    : Guid.Parse(element.Attribute("parent").Value);
-                var name = element.Attribute("name").Value;
-
-                builder.DefineApi(fingerprint, kind, parentFingerprint, name);
-            }
-        }
-
         foreach (var path in files)
         {
             Console.WriteLine($"Processing {path}...");
             var doc = XDocument.Load(path);
-            if (doc.Root.IsEmpty)
-                continue;
+            IndexDocument(doc);
+        }
+    }
 
-            if (doc.Root.Name == "package")
+    public void IndexDocument(XDocument doc)
+    {
+        if (doc.Root is null or { IsEmpty: true })
+            return;
+
+        if (doc.Root.Name == "package")
+            IndexPackage(doc);
+        else if (doc.Root.Name == "framework")
+            IndexFramework(doc);
+        else
+            throw new Exception($"Unexpected element: {doc.Root.Name}");
+    }
+
+    private void IndexFramework(XDocument doc)
+    {
+        var framework = doc.Root.Attribute("name").Value;
+        DefineFramework(framework);
+        DefineApis(doc.Root.Elements("api"));
+
+        foreach (var assemblyElement in doc.Root.Elements("assembly"))
+        {
+            var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint").Value);
+            var name = assemblyElement.Attribute("name").Value;
+            var version = assemblyElement.Attribute("version").Value;
+            var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
+            var assemblyExists = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
+            DefineFrameworkAssembly(framework, assemblyFingerprint);
+
+            if (assemblyExists)
             {
-                var packageFingerprint = Guid.Parse(doc.Root.Attribute("fingerprint").Value);
-                var packageId = doc.Root.Attribute("id").Value;
-                var packageName = doc.Root.Attribute("name").Value;
-                DefinePackage(packageFingerprint, packageId, packageName);
-                DefineApis(this, doc.Root.Elements("api"));
-
-                foreach (var assemblyElement in doc.Root.Elements("assembly"))
+                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                 {
-                    var framework = assemblyElement.Attribute("fx").Value;
-                    var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint").Value);
-                    var name = assemblyElement.Attribute("name").Value;
-                    var version = assemblyElement.Attribute("version").Value;
-                    var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
-                    DefineFramework(framework);
-                    var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
-                    DefinePackageAssembly(packageFingerprint, framework, assemblyFingerprint);
-
-                    if (assemblyCreated)
-                    {
-                        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
-                        {
-                            var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
-                            var syntax = syntaxElement.Value;
-                            DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
-                        }
-                    }
+                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
+                    var syntax = syntaxElement.Value;
+                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
                 }
             }
-            else if (doc.Root.Name == "framework")
+        }
+    }
+
+    private void IndexPackage(XDocument doc)
+    {
+        var packageFingerprint = Guid.Parse(doc.Root.Attribute("fingerprint").Value);
+        var packageId = doc.Root.Attribute("id").Value;
+        var packageName = doc.Root.Attribute("name").Value;
+        DefinePackage(packageFingerprint, packageId, packageName);
+        DefineApis(doc.Root.Elements("api"));
+
+        foreach (var assemblyElement in doc.Root.Elements("assembly"))
+        {
+            var framework = assemblyElement.Attribute("fx").Value;
+            var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint").Value);
+            var name = assemblyElement.Attribute("name").Value;
+            var version = assemblyElement.Attribute("version").Value;
+            var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
+            DefineFramework(framework);
+            var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
+            DefinePackageAssembly(packageFingerprint, framework, assemblyFingerprint);
+
+            if (assemblyCreated)
             {
-                var framework = doc.Root.Attribute("name").Value;
-                DefineFramework(framework);
-                DefineApis(this, doc.Root.Elements("api"));
-
-                foreach (var assemblyElement in doc.Root.Elements("assembly"))
+                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                 {
-                    var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint").Value);
-                    var name = assemblyElement.Attribute("name").Value;
-                    var version = assemblyElement.Attribute("version").Value;
-                    var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
-                    var assemblyExists = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
-                    DefineFrameworkAssembly(framework, assemblyFingerprint);
-
-                    if (assemblyExists)
-                    {
-                        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
-                        {
-                            var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
-                            var syntax = syntaxElement.Value;
-                            DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
-                        }
-                    }
+                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
+                    var syntax = syntaxElement.Value;
+                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
                 }
             }
+        }
+    }
+
+    private void DefineApis(IEnumerable<XElement> apiElements)
+    {
+        foreach (var element in apiElements)
+        {
+            var fingerprint = Guid.Parse(element.Attribute("fingerprint").Value);
+            var kind = (ApiKind)int.Parse(element.Attribute("kind").Value);
+            var parentFingerprint = element.Attribute("parent") == null
+                ? Guid.Empty
+                : Guid.Parse(element.Attribute("parent").Value);
+            var name = element.Attribute("name").Value;
+
+            DefineApi(fingerprint, kind, parentFingerprint, name);
         }
     }
 

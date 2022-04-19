@@ -79,7 +79,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
         }
     }
 
-    public IEnumerable<(PackageModel, FrameworkModel)> Packages
+    public IEnumerable<(PackageModel Package, FrameworkModel Framework)> Packages
     {
         get
         {
