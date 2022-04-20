@@ -14,7 +14,7 @@ namespace Terrajobst.ApiCatalog.Tests;
 internal sealed class FluentCatalogBuilder
 {
     private readonly List<XDocument> _documents = new();
-    private readonly List<(string Name, DateOnly Date, List<(Guid ApiGuid, float Percentage)> Usages)> _usageSources = new ();
+    private readonly List<(string Name, DateOnly Date, List<(Guid ApiGuid, float Percentage)> Usages)> _usageSources = new();
 
     public FluentCatalogBuilder AddFramework(string name, Action<FrameworkBuilder> action)
     {
@@ -52,7 +52,7 @@ internal sealed class FluentCatalogBuilder
         {
             foreach (var doc in _documents)
                 builder.IndexDocument(doc);
-            
+
             foreach (var (name, date, usages) in _usageSources)
                 builder.IndexUsages(name, date, usages);
         }
@@ -152,7 +152,7 @@ internal sealed class FluentCatalogBuilder
     {
         private readonly string _name;
         private readonly DateOnly _date;
-        private readonly List<(Guid ApiGuid, float Percentage)> _usages = new ();
+        private readonly List<(Guid ApiGuid, float Percentage)> _usages = new();
 
         public UsageBuilder(string name, DateOnly date)
         {

@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Collections;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
@@ -63,45 +64,27 @@ public sealed partial class ApiCatalogModel
 
     internal ReadOnlySpan<byte> ApiTable => new(_buffer, _apiTableOffset, _apiTableLength);
 
-    public IEnumerable<FrameworkModel> Frameworks
+    public FrameworkEnumerator Frameworks
     {
         get
         {
-            var count = GetFrameworkTableInt32(0);
-
-            for (var i = 0; i < count; i++)
-            {
-                var offset = GetFrameworkTableInt32(4 + 4 * i);
-                yield return new FrameworkModel(this, offset);
-            }
+            return new FrameworkEnumerator(this);
         }
     }
 
-    public IEnumerable<PackageModel> Packages
+    public PackageEnumerator Packages
     {
         get
         {
-            var count = GetPackageTableInt32(0);
-
-            for (var i = 0; i < count; i++)
-            {
-                var offset = GetPackageTableInt32(4 + 4 * i);
-                yield return new PackageModel(this, offset);
-            }
+            return new PackageEnumerator(this);
         }
     }
 
-    public IEnumerable<AssemblyModel> Assemblies
+    public AssemblyEnumerator Assemblies
     {
         get
         {
-            var count = GetAssemblyTableInt32(0);
-
-            for (var i = 0; i < count; i++)
-            {
-                var offset = GetAssemblyTableInt32(4 + 4 * i);
-                yield return new AssemblyModel(this, offset);
-            }
+            return new AssemblyEnumerator(this);
         }
     }
 
@@ -109,7 +92,7 @@ public sealed partial class ApiCatalogModel
     {
         get
         {
-            var count = GetUsageSourcesTableInt32(0);
+            var count = UsageSourcesTable.ReadInt32(0);
             var offset = 4;
 
             for (var i = 0; i < count; i++, offset += 8)
@@ -117,7 +100,13 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public IEnumerable<ApiModel> RootApis => GetApis(0);
+    public ApiEnumerator RootApis
+    {
+        get
+        {
+            return new ApiEnumerator(this, 0);
+        }
+    }
 
     public IEnumerable<ApiModel> GetAllApis()
     {
@@ -129,41 +118,28 @@ public sealed partial class ApiCatalogModel
         return new ApiModel(this, id);
     }
 
-    internal IEnumerable<ApiModel> GetApis(int offset)
-    {
-        var childCount = GetApiTableInt32(offset);
-
-        for (var i = 0; i < childCount; i++)
-        {
-            var childOffset = GetApiTableInt32(offset + 4 + 4 * i);
-            yield return new ApiModel(this, childOffset);
-        }
-    }
-
     internal string GetString(int offset)
     {
-        var stringSpan = StringTable.Slice(offset);
-        var nameLength = BinaryPrimitives.ReadInt32LittleEndian(stringSpan);
-        var nameSpan = stringSpan.Slice(4, nameLength);
-        var name = Encoding.UTF8.GetString(nameSpan);
-        return name;
+        var stringLength = StringTable.ReadInt32(offset);
+        var stringSpan = StringTable.Slice(offset + 4, stringLength);
+        return Encoding.UTF8.GetString(stringSpan);
     }
 
     internal Markup GetMarkup(int offset)
     {
-        var span = StringTable.Slice(offset);
+        var span = StringTable[offset..];
         var partsCount = BinaryPrimitives.ReadInt32LittleEndian(span);
-        span = span.Slice(4);
+        span = span[4..];
 
         var parts = new List<MarkupPart>(partsCount);
 
         for (var i = 0; i < partsCount; i++)
         {
             var kind = (MarkupPartKind)span[0];
-            span = span.Slice(1);
+            span = span[1..];
             var textOffset = BinaryPrimitives.ReadInt32LittleEndian(span);
             var text = GetString(textOffset);
-            span = span.Slice(4);
+            span = span[4..];
 
             Guid? reference;
 
@@ -174,7 +150,7 @@ public sealed partial class ApiCatalogModel
                     reference = null;
                 else
                     reference = new ApiModel(this, apiOffset).Guid;
-                span = span.Slice(4);
+                span = span[4..];
             }
             else
             {
@@ -186,36 +162,6 @@ public sealed partial class ApiCatalogModel
         }
 
         return new Markup(parts);
-    }
-
-    internal int GetFrameworkTableInt32(int offset)
-    {
-        return BinaryPrimitives.ReadInt32LittleEndian(FrameworkTable.Slice(offset));
-    }
-
-    internal int GetPackageTableInt32(int offset)
-    {
-        return BinaryPrimitives.ReadInt32LittleEndian(PackageTable.Slice(offset));
-    }
-
-    internal int GetAssemblyTableInt32(int offset)
-    {
-        return BinaryPrimitives.ReadInt32LittleEndian(AssemblyTable.Slice(offset));
-    }
-
-    internal int GetUsageSourcesTableInt32(int offset)
-    {
-        return BinaryPrimitives.ReadInt32LittleEndian(UsageSourcesTable.Slice(offset));
-    }
-
-    internal int GetApiTableInt32(int offset)
-    {
-        return BinaryPrimitives.ReadInt32LittleEndian(ApiTable.Slice(offset));
-    }
-
-    internal float GetApiTableSingle(int offset)
-    {
-        return BinaryPrimitives.ReadSingleLittleEndian(ApiTable.Slice(offset));
     }
 
     public ApiCatalogStatistics GetStatistics()
@@ -333,5 +279,251 @@ public sealed partial class ApiCatalogModel
     public static Task ConvertAsync(string sqliteDbPath, Stream stream)
     {
         return Converter.ConvertAsync(sqliteDbPath, stream);
+    }
+
+    public struct FrameworkEnumerator : IEnumerable<FrameworkModel>, IEnumerator<FrameworkModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _count;
+        private int _index;
+
+        public FrameworkEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _index = -1;
+            _count = _catalog.FrameworkTable.ReadInt32(0);
+        }
+
+        IEnumerator<FrameworkModel> IEnumerable<FrameworkModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public FrameworkEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public FrameworkModel Current
+        {
+            get
+            {
+                var offset = _catalog.FrameworkTable.ReadInt32(4 + _index * 4);
+                return new FrameworkModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct PackageEnumerator : IEnumerable<PackageModel>, IEnumerator<PackageModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _count;
+        private int _index;
+
+        public PackageEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _count = catalog.PackageTable.ReadInt32(0);
+            _index = -1;
+        }
+
+        IEnumerator<PackageModel> IEnumerable<PackageModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public PackageEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public PackageModel Current
+        {
+            get
+            {
+                var offset = _catalog.PackageTable.ReadInt32(4 + _index * 4);
+                return new PackageModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct AssemblyEnumerator : IEnumerable<AssemblyModel>, IEnumerator<AssemblyModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _count;
+        private int _index;
+
+        public AssemblyEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _count = catalog.AssemblyTable.ReadInt32(0);
+            _index = -1;
+        }
+
+        IEnumerator<AssemblyModel> IEnumerable<AssemblyModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public AssemblyEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public AssemblyModel Current
+        {
+            get
+            {
+                var offset = _catalog.AssemblyTable.ReadInt32(4 + _index * 4);
+                return new AssemblyModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct ApiEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _offset;
+        private readonly int _count;
+        private int _index;
+
+        public ApiEnumerator(ApiCatalogModel catalog, int offset)
+        {
+            _catalog = catalog;
+            _offset = offset;
+            _count = catalog.ApiTable.ReadInt32(offset);
+            _index = -1;
+        }
+
+        IEnumerator<ApiModel> IEnumerable<ApiModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public ApiEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ApiModel Current
+        {
+            get
+            {
+                var offset = _catalog.ApiTable.ReadInt32(_offset + 4 + 4 * _index);
+                return new ApiModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
     }
 }

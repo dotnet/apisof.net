@@ -17,7 +17,7 @@ public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
     {
         get
         {
-            var stringOffset = _catalog.GetUsageSourcesTableInt32(_offset);
+            var stringOffset = _catalog.UsageSourcesTable.ReadInt32(_offset);
             return _catalog.GetString(stringOffset);
         }
     }
@@ -26,7 +26,7 @@ public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
     {
         get
         {
-            var dayNumber = _catalog.GetUsageSourcesTableInt32(_offset + 4);
+            var dayNumber = _catalog.UsageSourcesTable.ReadInt32(_offset + 4);
             return DateOnly.FromDayNumber(dayNumber);
         }
     }

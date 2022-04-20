@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using Azure.Core;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration.UserSecrets;
-using NuGet.Versioning;
 using Terrajobst.ApiCatalog;
 
 namespace GenCatalog;

@@ -74,14 +74,14 @@ public class ApiCatalogModelTests
 
         var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
         var typeNamespace = type.Parent;
-        
+
         Assert.Equal("TheClass", type.Name);
         Assert.Equal(ApiKind.Class, type.Kind);
         Assert.Equal(Guid.Parse("6f0315b1-0b64-5af1-51f6-8f8dec1c4aac"), type.Guid);
         Assert.Equal(catalog, type.Catalog);
         Assert.Empty(type.Children);
         Assert.Empty(type.Usages);
-        
+
         Assert.Equal("System.TheClass", type.GetFullName());
         Assert.Equal("System", type.GetNamespaceName());
         Assert.Equal("TheClass", type.GetTypeName());
@@ -91,7 +91,7 @@ public class ApiCatalogModelTests
         Assert.Equal(ApiKind.Namespace, typeNamespace.Kind);
         Assert.Equal(type, Assert.Single(typeNamespace.Children));
         Assert.Empty(typeNamespace.Usages);
-    
+
         Assert.Equal(typeNamespace, Assert.Single(catalog.RootApis));
     }
 
@@ -112,14 +112,14 @@ public class ApiCatalogModelTests
 
         var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
         var typeNamespace = type.Parent;
-        
+
         Assert.Equal("TheClass", type.Name);
         Assert.Equal(ApiKind.Class, type.Kind);
         Assert.Equal(Guid.Parse("8b632220-7064-d2e5-60f8-47053a5bcc06"), type.Guid);
         Assert.Equal(catalog, type.Catalog);
         Assert.Empty(type.Children);
         Assert.Empty(type.Usages);
-        
+
         Assert.Equal("<global namespace>.TheClass", type.GetFullName());
         Assert.Equal("<global namespace>", type.GetNamespaceName());
         Assert.Equal("TheClass", type.GetTypeName());
@@ -180,7 +180,7 @@ public class ApiCatalogModelTests
         ";
 
         var catalog = await new FluentCatalogBuilder()
-            .AddPackage("System.Oob", "1.0.0", p => p 
+            .AddPackage("System.Oob", "1.0.0", p => p
                 .AddFramework("netstandard2.0", fx =>
                     fx.AddAssembly("System.Runtime", source)))
             .BuildAsync();
@@ -199,7 +199,7 @@ public class ApiCatalogModelTests
 
         Assert.Equal(assembly, declaration.Assembly);
         Assert.Equal(assembly, packagedAssembly);
-        
+
         Assert.Equal(framework, packagedFramework);
     }
 
@@ -223,11 +223,11 @@ public class ApiCatalogModelTests
 
         var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
         var system = catalog.GetAllApis().Single(a => a.Name == "System");
-        
-        Assert.Equal(system.AncestorsAndSelf(), new [] { system });
+
+        Assert.Equal(system.AncestorsAndSelf(), new[] { system });
         Assert.Equal(system.Ancestors(), Array.Empty<ApiModel>());
-        
-        Assert.Equal(theClass.AncestorsAndSelf(), new [] { theClass, system });
+
+        Assert.Equal(theClass.AncestorsAndSelf(), new[] { theClass, system });
         Assert.Equal(theClass.Ancestors(), new[] { system });
     }
 
@@ -251,11 +251,11 @@ public class ApiCatalogModelTests
 
         var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
         var system = catalog.GetAllApis().Single(a => a.Name == "System");
-        
-        Assert.Equal(system.DescendantsAndSelf(), new [] { system, theClass });
-        Assert.Equal(system.Descendants(), new [] { theClass });
-        
-        Assert.Equal(theClass.DescendantsAndSelf(), new [] { theClass });
+
+        Assert.Equal(system.DescendantsAndSelf(), new[] { system, theClass });
+        Assert.Equal(system.Descendants(), new[] { theClass });
+
+        Assert.Equal(theClass.DescendantsAndSelf(), new[] { theClass });
         Assert.Equal(theClass.Descendants(), Array.Empty<ApiModel>());
     }
 
@@ -281,7 +281,7 @@ public class ApiCatalogModelTests
         var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
         var theMethod = catalog.GetAllApis().Single(a => a.Name == "TheMethod(String)");
         var theNamespace = catalog.GetAllApis().Single(a => a.Name == "TheNamespace");
-        
+
         Assert.Equal("TheMethod(String)", theMethod.Name);
         Assert.Equal(ApiKind.Method, theMethod.Kind);
         Assert.Equal(Guid.Parse("709c195e-e2a5-bb55-81ed-72511f3bb783"), theMethod.Guid);
@@ -342,7 +342,7 @@ public class ApiCatalogModelTests
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
                 fx.AddAssembly("System.Runtime", source))
-            .AddUsage("nuget", new DateOnly(2012, 10, 1), u => 
+            .AddUsage("nuget", new DateOnly(2012, 10, 1), u =>
                 u.Add("T:System.TheClass", 0.55f))
             .BuildAsync();
 
@@ -378,7 +378,7 @@ public class ApiCatalogModelTests
         var assembly = Assert.Single(catalog.Assemblies);
         var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
         var typeNamespace = type.Parent;
-     
+
         Assert.Equal(typeNamespace, Assert.Single(assembly.RootApis));
     }
 

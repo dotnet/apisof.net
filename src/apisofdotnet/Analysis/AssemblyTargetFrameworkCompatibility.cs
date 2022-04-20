@@ -1,7 +1,4 @@
-﻿using Microsoft.Cci;
-using Microsoft.Cci.Extensions;
-
-using NuGet.Frameworks;
+﻿using NuGet.Frameworks;
 
 internal sealed class AssemblyTargetFrameworkCompatibility
 {

@@ -132,14 +132,14 @@ public sealed class CatalogBuilder : IDisposable
                     }
                 }
             }
-            
+
         }
     }
 
     public void IndexUsages(string name, DateOnly date, IEnumerable<(Guid ApiFingerpritn, float Percentage)> usages)
     {
         DefineUsageSource(name, date);
-        
+
         foreach (var (apiFingerprint, percentage) in usages)
             DefineApiUsage(name, apiFingerprint, percentage);
     }

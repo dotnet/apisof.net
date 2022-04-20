@@ -2,23 +2,31 @@ namespace Terrajobst.ApiCatalog;
 
 public readonly struct ApiUsageModel : IEquatable<ApiUsageModel>
 {
-    private readonly ApiCatalogModel _catalog;
+    private readonly ApiModel _api;
     private readonly int _offset;
 
-    internal ApiUsageModel(ApiCatalogModel catalog, int offset)
+    internal ApiUsageModel(ApiModel api, int offset)
     {
-        _catalog = catalog;
+        _api = api;
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
+    public ApiCatalogModel Catalog => Api.Catalog;
+
+    public ApiModel Api
+    {
+        get
+        {
+            return _api;
+        }
+    }
 
     public UsageSourceModel Source
     {
         get
         {
-            var usageSourceOffset = _catalog.GetApiTableInt32(_offset);
-            return new UsageSourceModel(_catalog, usageSourceOffset);
+            var usageSourceOffset = _api.Catalog.ApiTable.ReadInt32(_offset);
+            return new UsageSourceModel(_api.Catalog, usageSourceOffset);
         }
     }
 
@@ -27,7 +35,7 @@ public readonly struct ApiUsageModel : IEquatable<ApiUsageModel>
         get
         {
             var offset = _offset + 4;
-            return _catalog.GetApiTableSingle(offset);
+            return _api.Catalog.ApiTable.ReadSingle(offset);
         }
     }
 
@@ -38,13 +46,13 @@ public readonly struct ApiUsageModel : IEquatable<ApiUsageModel>
 
     public bool Equals(ApiUsageModel other)
     {
-        return ReferenceEquals(_catalog, other._catalog) &&
+        return _api == other._api &&
                _offset == other._offset;
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(_catalog, _offset);
+        return HashCode.Combine(_api, _offset);
     }
 
     public static bool operator ==(ApiUsageModel left, ApiUsageModel right)

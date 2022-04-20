@@ -19,14 +19,14 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
     {
         get
         {
-            var assemblyOffset = _api.Catalog.GetApiTableInt32(_offset);
+            var assemblyOffset = _api.Catalog.ApiTable.ReadInt32(_offset);
             return new AssemblyModel(_api.Catalog, assemblyOffset);
         }
     }
 
     private Markup GetMyMarkup()
     {
-        var markupOffset = _api.Catalog.GetApiTableInt32(_offset + 4);
+        var markupOffset = _api.Catalog.ApiTable.ReadInt32(_offset + 4);
         return _api.Catalog.GetMarkup(markupOffset);
     }
 

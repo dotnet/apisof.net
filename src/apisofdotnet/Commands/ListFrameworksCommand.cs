@@ -1,6 +1,4 @@
-﻿using Mono.Options;
-
-using NuGet.Frameworks;
+﻿using NuGet.Frameworks;
 
 using Terrajobst.ApiCatalog;
 

@@ -1,4 +1,4 @@
-﻿using System.Buffers.Binary;
+﻿using System.Collections;
 using System.Text;
 
 namespace Terrajobst.ApiCatalog;
@@ -22,9 +22,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         get
         {
-            var rowSpan = _catalog.ApiTable.Slice(_offset);
-            var guidSpan = rowSpan.Slice(0, 16);
-            return new Guid(guidSpan);
+            return _catalog.ApiTable.ReadGuid(_offset);
         }
     }
 
@@ -32,8 +30,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         get
         {
-            var rowSpan = _catalog.ApiTable[_offset..];
-            return (ApiKind)rowSpan[16..][0];
+            return (ApiKind)_catalog.ApiTable.ReadByte(_offset + 16);
         }
     }
 
@@ -41,9 +38,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         get
         {
-            var rowSpan = _catalog.ApiTable.Slice(_offset);
-            var parentOffsetSpan = rowSpan.Slice(17);
-            var parentOffset = BinaryPrimitives.ReadInt32LittleEndian(parentOffsetSpan);
+            var parentOffset = _catalog.ApiTable.ReadInt32(_offset + 17);
             if (parentOffset == -1)
                 return default;
 
@@ -55,47 +50,39 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         get
         {
-            var rowSpan = _catalog.ApiTable.Slice(_offset);
-            var stringOffsetSpan = rowSpan.Slice(21);
-            var stringOffset = BinaryPrimitives.ReadInt32LittleEndian(stringOffsetSpan);
+            var stringOffset = _catalog.ApiTable.ReadInt32(_offset + 21);
             return _catalog.GetString(stringOffset);
         }
     }
 
-    public IEnumerable<ApiModel> Children => _catalog.GetApis(_offset + 25);
-
-    public IEnumerable<ApiDeclarationModel> Declarations
+    public ApiCatalogModel.ApiEnumerator Children
     {
         get
         {
-            var childCount = _catalog.GetApiTableInt32(_offset + 25);
-            var declarationTableOffset = _offset + 29 + childCount * 4;
-            var count = _catalog.GetApiTableInt32(declarationTableOffset);
-
-            for (var i = 0; i < count; i++)
-            {
-                var offset = declarationTableOffset + 4 + i * 8;
-                yield return new ApiDeclarationModel(this, offset);
-            }
+            return new ApiCatalogModel.ApiEnumerator(_catalog, _offset + 25);
         }
     }
 
-    public IEnumerable<ApiUsageModel> Usages
+    public DeclarationEnumerator Declarations
     {
         get
         {
-            var childCount = _catalog.GetApiTableInt32(_offset + 25);
+            var childCount = _catalog.ApiTable.ReadInt32(_offset + 25);
+            var declarationTableOffset = _offset + 29 + childCount * 4;
+            return new DeclarationEnumerator(this, declarationTableOffset);
+        }
+    }
+
+    public UsageEnumerator Usages
+    {
+        get
+        {
+            var childCount = _catalog.ApiTable.ReadInt32(_offset + 25);
             var declarationTableOffset = _offset + 29 + childCount * 4;
 
-            var declarationCount = _catalog.GetApiTableInt32(declarationTableOffset);
+            var declarationCount = _catalog.ApiTable.ReadInt32(declarationTableOffset);
             var usagesTableOffset = declarationTableOffset + 4 + declarationCount * 8;
-            var count = _catalog.GetApiTableInt32(usagesTableOffset);
-
-            for (var i = 0; i < count; i++)
-            {
-                var offset = usagesTableOffset + 4 + i * 8;
-                yield return new ApiUsageModel(_catalog, offset);
-            }
+            return new UsageEnumerator(this, usagesTableOffset);
         }
     }
 
@@ -390,6 +377,132 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
                 return name;
 
             return name.Substring(0, dotIndex);
+        }
+    }
+
+    public struct DeclarationEnumerator : IEnumerable<ApiDeclarationModel>, IEnumerator<ApiDeclarationModel>
+    {
+        private readonly ApiModel _apiModel;
+        private readonly int _offset;
+        private readonly int _count;
+        private int _index;
+
+        public DeclarationEnumerator(ApiModel apiModel, int offset)
+        {
+            _apiModel = apiModel;
+            _offset = offset;
+            _count = _apiModel.Catalog.ApiTable.ReadInt32(offset);
+            _index = -1;
+        }
+
+        IEnumerator<ApiDeclarationModel> IEnumerable<ApiDeclarationModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public DeclarationEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ApiDeclarationModel Current
+        {
+            get
+            {
+                var offset = _offset + 4 + 8 * _index;
+                return new ApiDeclarationModel(_apiModel, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct UsageEnumerator : IEnumerable<ApiUsageModel>, IEnumerator<ApiUsageModel>
+    {
+        private readonly ApiModel _apiModel;
+        private readonly int _offset;
+        private readonly int _count;
+        private int _index;
+
+        public UsageEnumerator(ApiModel apiModel, int offset)
+        {
+            _apiModel = apiModel;
+            _offset = offset;
+            _count = _apiModel.Catalog.ApiTable.ReadInt32(offset);
+            _index = -1;
+        }
+
+        IEnumerator<ApiUsageModel> IEnumerable<ApiUsageModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public UsageEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ApiUsageModel Current
+        {
+            get
+            {
+                var offset = _offset + 4 + 8 * _index;
+                return new ApiUsageModel(_apiModel, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
         }
     }
 }
