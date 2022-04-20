@@ -330,6 +330,34 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Type_Usages()
+    {
+        var source = @"
+            namespace System
+            {
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .AddUsage("nuget", new DateOnly(2012, 10, 1), u => 
+                u.Add("T:System.TheClass", 0.55f))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var usageSource = Assert.Single(catalog.UsageSources);
+        Assert.Equal("nuget", usageSource.Name);
+        Assert.Equal(new DateOnly(2012, 10, 1), usageSource.Date);
+
+        var apiUsage = Assert.Single(api.Usages);
+        Assert.Equal(usageSource, apiUsage.Source);
+        Assert.Equal(0.55f, apiUsage.Percentage);
+    }
+
+    [Fact]
     public async Task Assemblies_Unified_Between_Frameworks()
     {
         var source = @"

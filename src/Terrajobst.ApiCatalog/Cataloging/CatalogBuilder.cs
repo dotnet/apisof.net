@@ -108,27 +108,40 @@ public sealed class CatalogBuilder : IDisposable
 
     public void IndexUsages(string path, string name, DateOnly date)
     {
-        using var streamReader = new StreamReader(path);
         Console.WriteLine($"Processing {path}...");
+        var usages = ParseFile(path);
+        IndexUsages(name, date, usages);
 
-        DefineUsageSource(name, date);
-
-        while (streamReader.ReadLine() is { } line)
+        static IEnumerable<(Guid ApiFingerpritn, float Percentage)> ParseFile(string path)
         {
-            var tabIndex = line.IndexOf('\t');
-            var lastTabIndex = line.LastIndexOf('\t');
-            if (tabIndex > 0 && tabIndex == lastTabIndex)
-            {
-                var guidTextSpan = line.AsSpan(0, tabIndex);
-                var percentageSpan = line.AsSpan(tabIndex + 1);
+            using var streamReader = new StreamReader(path);
 
-                if (Guid.TryParse(guidTextSpan, out var apiFingerprint) &&
-                    float.TryParse(percentageSpan, out var percentage))
+            while (streamReader.ReadLine() is { } line)
+            {
+                var tabIndex = line.IndexOf('\t');
+                var lastTabIndex = line.LastIndexOf('\t');
+                if (tabIndex > 0 && tabIndex == lastTabIndex)
                 {
-                    DefineApiUsage(name, apiFingerprint, percentage);
+                    var guidTextSpan = line.AsSpan(0, tabIndex);
+                    var percentageSpan = line.AsSpan(tabIndex + 1);
+
+                    if (Guid.TryParse(guidTextSpan, out var apiFingerprint) &&
+                        float.TryParse(percentageSpan, out var percentage))
+                    {
+                        yield return (apiFingerprint, percentage);
+                    }
                 }
             }
+            
         }
+    }
+
+    public void IndexUsages(string name, DateOnly date, IEnumerable<(Guid ApiFingerpritn, float Percentage)> usages)
+    {
+        DefineUsageSource(name, date);
+        
+        foreach (var (apiFingerprint, percentage) in usages)
+            DefineApiUsage(name, apiFingerprint, percentage);
     }
 
     public static CatalogBuilder Create(string path)
