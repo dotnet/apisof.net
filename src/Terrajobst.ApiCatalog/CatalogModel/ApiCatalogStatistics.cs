@@ -2,7 +2,7 @@
 
 namespace Terrajobst.ApiCatalog;
 
-public class ApiCatalogStatistics
+public sealed class ApiCatalogStatistics
 {
     public ApiCatalogStatistics(int sizeOnDisk,
                                 int sizeInMemory,
