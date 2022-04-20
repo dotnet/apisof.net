@@ -358,6 +358,31 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Assembly_RootApis()
+    {
+        var source = @"
+            namespace System
+            {
+                public class TheClass
+                {
+                    private TheClass() { }
+                }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var assembly = Assert.Single(catalog.Assemblies);
+        var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var typeNamespace = type.Parent;
+     
+        Assert.Equal(typeNamespace, Assert.Single(assembly.RootApis));
+    }
+
+    [Fact]
     public async Task Assemblies_Unified_Between_Frameworks()
     {
         var source = @"
