@@ -9,11 +9,11 @@ using Spectre.Console;
 
 internal sealed class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         try
         {
-            Run(args);
+            await RunAsync(args);
         }
         catch (Exception ex) when (!Debugger.IsAttached)
         {
@@ -22,7 +22,7 @@ internal sealed class Program
         }
     }
 
-    private static void Run(string[] args)
+    private static async Task RunAsync(string[] args)
     {
         var builder = Host.CreateDefaultBuilder(args)
                           .ConfigureServices((_, services) => ConfigureServices(services))
@@ -84,7 +84,7 @@ internal sealed class Program
             return;
         }
 
-        command.Execute();
+        await command.ExecuteAsync();
     }
 
     private static void ConfigureServices(IServiceCollection services)

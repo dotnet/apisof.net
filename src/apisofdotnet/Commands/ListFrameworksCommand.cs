@@ -15,9 +15,9 @@ internal sealed class ListFrameworksCommand : Command
 
     public override string Description => "Lists known frameworks";
 
-    public override void Execute()
+    public override async Task ExecuteAsync()
     {
-        var catalog = _catalogService.LoadCatalog();
+        var catalog = await _catalogService.LoadCatalogAsync();
         var frameworks = catalog.Frameworks.Select(fx => NuGetFramework.Parse(fx.Name))
                                            .Select(fx => (DisplayName: GetDisplayName(fx), Framework: fx))
                                            .Where(t => t.DisplayName is not null)

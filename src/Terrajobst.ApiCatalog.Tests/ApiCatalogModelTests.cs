@@ -10,22 +10,22 @@ namespace Terrajobst.ApiCatalog.Tests;
 public class ApiCatalogModelTests
 {
     [Fact]
-    public void Read_Empty_Throws()
+    public async Task Read_Empty_Throws()
     {
-        using var stream = new MemoryStream();
-        Assert.Throws<InvalidDataException>(() => ApiCatalogModel.Load(stream));
+        await using var stream = new MemoryStream();
+        await Assert.ThrowsAsync<InvalidDataException>(() => ApiCatalogModel.LoadAsync(stream));
     }
 
     [Fact]
-    public void Read_MagicNumber_Invalid_Throws()
+    public async Task Read_MagicNumber_Invalid_Throws()
     {
         var invalidMagicNumber = Encoding.UTF8.GetBytes("APIC_TFB");
-        using var stream = new MemoryStream(invalidMagicNumber);
-        Assert.Throws<InvalidDataException>(() => ApiCatalogModel.Load(stream));
+        await using var stream = new MemoryStream(invalidMagicNumber);
+        await Assert.ThrowsAsync<InvalidDataException>(() => ApiCatalogModel.LoadAsync(stream));
     }
 
     [Fact]
-    public void Read_Version_TooOld_Throws()
+    public async Task Read_Version_TooOld_Throws()
     {
         using var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
@@ -36,14 +36,14 @@ public class ApiCatalogModelTests
 
         stream.Position = 0;
 
-        Assert.Throws<InvalidDataException>(() => ApiCatalogModel.Load(stream));
+        await Assert.ThrowsAsync<InvalidDataException>(() => ApiCatalogModel.LoadAsync(stream));
     }
 
     [Fact]
-    public void Read_Version_TooNew_Throws()
+    public async Task Read_Version_TooNew_Throws()
     {
-        using var stream = new MemoryStream();
-        using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
+        await using var stream = new MemoryStream();
+        await using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
         {
             writer.Write(Encoding.UTF8.GetBytes("APICATFB"));
             writer.Write(999_999_999);
@@ -51,7 +51,7 @@ public class ApiCatalogModelTests
 
         stream.Position = 0;
 
-        Assert.Throws<InvalidDataException>(() => ApiCatalogModel.Load(stream));
+        await Assert.ThrowsAsync<InvalidDataException>(() => ApiCatalogModel.LoadAsync(stream));
     }
 
     [Fact]

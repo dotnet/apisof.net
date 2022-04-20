@@ -232,7 +232,7 @@ internal sealed class Program
 
         Console.WriteLine("Loading API catalog...");
 
-        var apiCatalog = ApiCatalogModel.Load(apiCatalogPath);
+        var apiCatalog = await ApiCatalogModel.LoadAsync(apiCatalogPath);
 
         Console.WriteLine("Downloading previously indexed usages...");
 

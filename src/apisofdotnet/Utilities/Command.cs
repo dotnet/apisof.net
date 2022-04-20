@@ -10,5 +10,13 @@ internal abstract class Command
     {
     }
 
-    public abstract void Execute();
+    public virtual void Execute()
+    {
+    }
+
+    public virtual Task ExecuteAsync()
+    {
+        Execute();
+        return Task.CompletedTask;
+    }
 }

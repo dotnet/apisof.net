@@ -326,20 +326,20 @@ internal static class Program
         Console.WriteLine($"Generating {Path.GetFileName(catalogModelPath)}...");
         await ApiCatalogModel.ConvertAsync(databasePath, catalogModelPath);
 
-        var model = ApiCatalogModel.Load(catalogModelPath);
+        var model = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var stats = model.GetStatistics().ToString();
         Console.WriteLine("Catalog stats:");
         Console.Write(stats);
         await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), stats);
     }
 
-    private static Task GenerateSuffixTreeAsync(string catalogModelPath, string suffixTreePath)
+    private static async Task GenerateSuffixTreeAsync(string catalogModelPath, string suffixTreePath)
     {
         if (File.Exists(suffixTreePath))
-            return Task.CompletedTask;
+            return;
 
         Console.WriteLine($"Generating {Path.GetFileName(suffixTreePath)}...");
-        var catalog = ApiCatalogModel.Load(catalogModelPath);
+        var catalog = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var builder = new SuffixTreeBuilder();
 
         foreach (var api in catalog.GetAllApis())
@@ -350,10 +350,8 @@ internal static class Program
             builder.Add(api.ToString(), api.Id);
         }
 
-        using var stream = File.Create(suffixTreePath);
+        await using var stream = File.Create(suffixTreePath);
         builder.WriteSuffixTree(stream);
-
-        return Task.CompletedTask;
     }
 
     private static async Task UploadCatalogDatabaseAsync(string compressedDatabasePath)

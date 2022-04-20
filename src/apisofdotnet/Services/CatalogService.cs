@@ -5,7 +5,7 @@ using Terrajobst.ApiCatalog;
 
 internal sealed class CatalogService
 {
-    public ApiCatalogModel LoadCatalog()
+    public async Task<ApiCatalogModel> LoadCatalogAsync()
     {
         var catalogPath = GetCatalogPath();
 
@@ -16,7 +16,7 @@ internal sealed class CatalogService
 
         try
         {
-            return ApiCatalogModel.Load(catalogPath);
+            return await ApiCatalogModel.LoadAsync(catalogPath);
         }
         catch (Exception ex)
         {

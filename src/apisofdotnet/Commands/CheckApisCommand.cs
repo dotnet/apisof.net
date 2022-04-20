@@ -27,9 +27,9 @@ internal sealed class CheckApisCommand : Command
         options.Add("<>", null, v => _inputPaths.Add(v));
     }
 
-    public override void Execute()
+    public override async Task ExecuteAsync()
     {
-        var catalog = _catalogService.LoadCatalog();
+        var catalog = await _catalogService.LoadCatalogAsync();
 
         if (_inputPaths.Count == 0)
         {

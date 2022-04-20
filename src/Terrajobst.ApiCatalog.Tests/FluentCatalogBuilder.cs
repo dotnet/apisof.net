@@ -61,7 +61,7 @@ internal sealed class FluentCatalogBuilder
         {
             await ApiCatalogModel.ConvertAsync(fileName, stream);
             stream.Position = 0;
-            return ApiCatalogModel.Load(stream);
+            return await ApiCatalogModel.LoadAsync(stream);
         }
     }
 

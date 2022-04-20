@@ -225,13 +225,13 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public static ApiCatalogModel Load(string path)
+    public static Task<ApiCatalogModel> LoadAsync(string path)
     {
         using var stream = File.OpenRead(path);
-        return Load(stream);
+        return LoadAsync(stream);
     }
 
-    public static ApiCatalogModel Load(Stream stream)
+    public static async Task<ApiCatalogModel> LoadAsync(Stream stream)
     {
         var start = stream.Position;
 
@@ -253,11 +253,15 @@ public sealed partial class ApiCatalogModel
             var bufferSize = tableSizes.Sum();
 
             using (var decompressedStream = new DeflateStream(stream, CompressionMode.Decompress))
-            using (var decompressedReader = new BinaryReader(decompressedStream))
             {
-                var buffer = decompressedReader.ReadBytes(bufferSize);
-                var end = stream.Position;
-                var sizeOnDisk = (int)(end - start);
+                var buffer = new byte[bufferSize];
+                var offset = 0;
+
+                while (offset < buffer.Length)
+                    offset += await decompressedStream.ReadAsync(buffer, offset, buffer.Length - offset);
+
+                var sizeOnDisk = (int)(stream.Position - start);
+
                 return new ApiCatalogModel(sizeOnDisk, buffer, tableSizes);
             }
         }
@@ -265,15 +269,8 @@ public sealed partial class ApiCatalogModel
 
     public static async Task ConvertAsync(string sqliteDbPath, string outputPath)
     {
-        using (var stream = new MemoryStream())
-        {
-            await ConvertAsync(sqliteDbPath, stream);
-
-            stream.Position = 0;
-
-            using (var fileStream = File.Create(outputPath))
-                await stream.CopyToAsync(fileStream);
-        }
+        await using var stream = File.Create(outputPath);
+        await ConvertAsync(sqliteDbPath, stream);
     }
 
     public static Task ConvertAsync(string sqliteDbPath, Stream stream)

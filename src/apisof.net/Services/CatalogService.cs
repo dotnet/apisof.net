@@ -41,7 +41,7 @@ public sealed class CatalogService
             await blobClient.DownloadToAsync(databasePath);
         }
 
-        var catalog = ApiCatalogModel.Load(databasePath);
+        var catalog = await ApiCatalogModel.LoadAsync(databasePath);
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
 
         var suffixTreePath = GetSuffixTreePath();
