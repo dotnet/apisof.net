@@ -5,15 +5,16 @@ namespace Terrajobst.ApiCatalog;
 public class ApiCatalogStatistics
 {
     public ApiCatalogStatistics(int sizeOnDisk,
-        int sizeInMemory,
-        int numberOfApis,
-        int numberOfDeclarations,
-        int numberOfAssemblies,
-        int numberOfFrameworks,
-        int numberOfFrameworkAssemblies,
-        int numberOfPackages,
-        int numberOfPackageVersions,
-        int numberOfPackageAssemblies)
+                                int sizeInMemory,
+                                int numberOfApis,
+                                int numberOfDeclarations,
+                                int numberOfAssemblies,
+                                int numberOfFrameworks,
+                                int numberOfFrameworkAssemblies,
+                                int numberOfPackages,
+                                int numberOfPackageVersions,
+                                int numberOfPackageAssemblies,
+                                int numberOfUsageSources)
     {
         SizeOnDisk = sizeOnDisk;
         SizeInMemory = sizeInMemory;
@@ -25,6 +26,7 @@ public class ApiCatalogStatistics
         NumberOfPackages = numberOfPackages;
         NumberOfPackageVersions = numberOfPackageVersions;
         NumberOfPackageAssemblies = numberOfPackageAssemblies;
+        NumberOfUsageSources = numberOfUsageSources;
     }
 
     public int SizeOnDisk { get; }
@@ -37,6 +39,7 @@ public class ApiCatalogStatistics
     public int NumberOfPackages { get; }
     public int NumberOfPackageVersions { get; }
     public int NumberOfPackageAssemblies { get; }
+    public int NumberOfUsageSources { get; }
 
     public override string ToString()
     {
@@ -51,6 +54,7 @@ public class ApiCatalogStatistics
         sb.AppendLine($"Packages             : {NumberOfPackages,12:N0}");
         sb.AppendLine($"Package versions     : {NumberOfPackageVersions,12:N0}");
         sb.AppendLine($"Package assemblies   : {NumberOfPackageAssemblies,12:N0}");
+        sb.AppendLine($"Usage sources        : {NumberOfUsageSources,12:N0}");
         return sb.ToString();
     }
 }

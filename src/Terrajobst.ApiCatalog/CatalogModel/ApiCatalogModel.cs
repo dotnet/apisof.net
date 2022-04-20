@@ -231,7 +231,8 @@ public sealed partial class ApiCatalogModel
             numberOfFrameworkAssemblies: Assemblies.SelectMany(a => a.Frameworks).Count(),
             numberOfPackages: Packages.Select(p => p.Name).Distinct().Count(),
             numberOfPackageVersions: Packages.Count(),
-            numberOfPackageAssemblies: Assemblies.SelectMany(a => a.Packages).Count()
+            numberOfPackageAssemblies: Assemblies.SelectMany(a => a.Packages).Count(),
+            numberOfUsageSources: UsageSources.Count()
         );
     }
 
