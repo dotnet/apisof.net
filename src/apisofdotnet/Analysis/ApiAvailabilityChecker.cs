@@ -59,7 +59,7 @@ internal static class ApiAvailabilityChecker
                 {
                     if (apiByGuid.TryGetValue(apiKey.Guid, out var api))
                     {
-                        var availability = apiAvailability.GetOrAdd(api, ApiAvailability.Create);
+                        var availability = apiAvailability.GetOrAdd(api, a => a.GetAvailability());
 
                         frameworkResultBuilder.Clear();
 
