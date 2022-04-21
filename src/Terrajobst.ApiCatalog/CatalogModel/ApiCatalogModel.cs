@@ -225,46 +225,44 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public static Task<ApiCatalogModel> LoadAsync(string path)
+    public static async Task<ApiCatalogModel> LoadAsync(string path)
     {
-        using var stream = File.OpenRead(path);
-        return LoadAsync(stream);
+        await using var stream = File.OpenRead(path);
+        return await LoadAsync(stream);
     }
 
     public static async Task<ApiCatalogModel> LoadAsync(Stream stream)
     {
         var start = stream.Position;
 
-        using (var reader = new BinaryReader(stream))
-        {
-            var magicHeader = reader.ReadBytes(8);
-            if (!magicHeader.SequenceEqual(MagicHeader))
-                throw new InvalidDataException();
+        using var reader = new BinaryReader(stream);
 
-            var formatVersion = reader.ReadInt32();
-            if (formatVersion != FormatVersion)
-                throw new InvalidDataException();
+        var magicHeader = reader.ReadBytes(8);
+        if (!magicHeader.SequenceEqual(MagicHeader))
+            throw new InvalidDataException();
 
-            var numberOfTables = reader.ReadInt32();
-            var tableSizes = new int[numberOfTables];
-            for (var i = 0; i < tableSizes.Length; i++)
-                tableSizes[i] = reader.ReadInt32();
+        var formatVersion = reader.ReadInt32();
+        if (formatVersion != FormatVersion)
+            throw new InvalidDataException();
 
-            var bufferSize = tableSizes.Sum();
+        var numberOfTables = reader.ReadInt32();
+        var tableSizes = new int[numberOfTables];
+        for (var i = 0; i < tableSizes.Length; i++)
+            tableSizes[i] = reader.ReadInt32();
 
-            using (var decompressedStream = new DeflateStream(stream, CompressionMode.Decompress))
-            {
-                var buffer = new byte[bufferSize];
-                var offset = 0;
+        var bufferSize = tableSizes.Sum();
 
-                while (offset < buffer.Length)
-                    offset += await decompressedStream.ReadAsync(buffer, offset, buffer.Length - offset);
+        await using var decompressedStream = new DeflateStream(stream, CompressionMode.Decompress);
 
-                var sizeOnDisk = (int)(stream.Position - start);
+        var buffer = new byte[bufferSize];
+        var offset = 0;
 
-                return new ApiCatalogModel(sizeOnDisk, buffer, tableSizes);
-            }
-        }
+        while (offset < buffer.Length)
+            offset += await decompressedStream.ReadAsync(buffer, offset, buffer.Length - offset);
+
+        var sizeOnDisk = (int)(stream.Position - start);
+
+        return new ApiCatalogModel(sizeOnDisk, buffer, tableSizes);
     }
 
     public static async Task ConvertAsync(string sqliteDbPath, string outputPath)
