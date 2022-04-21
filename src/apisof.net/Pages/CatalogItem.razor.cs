@@ -50,29 +50,26 @@ public partial class CatalogItem
     {
         SelectedFramework = NavigationManager.GetQueryParameter("fx");
 
-        // TODO: Handle invalide GUID
+        // TODO: Handle invalid GUID
         // TODO: Handle API not found
 
         Api = CatalogService.GetApiByGuid(System.Guid.Parse(Guid));
         Availability = Api.GetAvailability();
-        SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework);
-        if (SelectedAvailability == null)
-            SelectedAvailability = Availability.Frameworks.FirstOrDefault();
+        SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
+                               Availability.Frameworks.FirstOrDefault();
 
         Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 
-        if (Api.Kind.IsMember())
+        if (Api.Kind.IsMember() && Api.Parent is not null)
         {
-            Parent = Api.Parent;
+            Parent = Api.Parent.Value;
         }
         else
         {
             Parent = Api;
         }
 
-        SelectedMarkup = SelectedAvailability == null
-            ? null
-            : SelectedAvailability.Declaration.GetMarkup();
+        SelectedMarkup = SelectedAvailability?.Declaration.GetMarkup();
 
         var helpLink = Api.GetHelpLink();
         using var httpClient = new HttpClient();

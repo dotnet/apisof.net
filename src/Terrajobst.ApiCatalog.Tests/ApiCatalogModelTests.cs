@@ -73,7 +73,7 @@ public class ApiCatalogModelTests
             .BuildAsync();
 
         var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
-        var typeNamespace = type.Parent;
+        var typeNamespace = type.Parent!.Value;
 
         Assert.Equal("TheClass", type.Name);
         Assert.Equal(ApiKind.Class, type.Kind);
@@ -111,7 +111,7 @@ public class ApiCatalogModelTests
             .BuildAsync();
 
         var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
-        var typeNamespace = type.Parent;
+        var typeNamespace = type.Parent!.Value;
 
         Assert.Equal("TheClass", type.Name);
         Assert.Equal(ApiKind.Class, type.Kind);

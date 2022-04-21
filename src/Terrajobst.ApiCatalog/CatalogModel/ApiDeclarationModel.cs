@@ -32,15 +32,11 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
     public Markup GetMarkup()
     {
-        var markups = new List<Markup>();
-        var current = Api.Parent;
         var assembly = Assembly;
-        while (current != default)
-        {
-            var declaration = current.Declarations.Single(d => d.Assembly == assembly);
-            markups.Add(declaration.GetMyMarkup());
-            current = current.Parent;
-        }
+        var markups = Api.AncestorsAndSelf()
+                         .Select(a => a.Declarations.Single(d => d.Assembly == assembly))
+                         .Select(d => d.GetMyMarkup())
+                         .ToList();
         markups.Reverse();
         markups.Add(GetMyMarkup());
 

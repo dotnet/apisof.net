@@ -34,13 +34,13 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         }
     }
 
-    public ApiModel Parent
+    public ApiModel? Parent
     {
         get
         {
             var parentOffset = _catalog.ApiTable.ReadInt32(_offset + 17);
             if (parentOffset == -1)
-                return default;
+                return null;
 
             return new ApiModel(_catalog, parentOffset);
         }
@@ -89,10 +89,15 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     public IEnumerable<ApiModel> AncestorsAndSelf()
     {
         var current = this;
-        while (current != default)
+
+        while (true)
         {
             yield return current;
-            current = current.Parent;
+
+            if (current.Parent is null)
+                break;
+            
+            current = current.Parent.Value;
         }
     }
 
@@ -125,45 +130,55 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     public string GetFullName()
     {
         var sb = new StringBuilder();
-        var c = this;
-        while (c != default)
+        
+        foreach (var c in AncestorsAndSelf())
         {
             if (sb.Length > 0)
                 sb.Insert(0, '.');
 
             sb.Insert(0, c.Name);
-            c = c.Parent;
         }
 
         return sb.ToString();
     }
 
+    public ApiModel? GetContainingNamespace()
+    {
+        return Ancestors().SkipWhile(a => a.Kind != ApiKind.Namespace)
+                          .Select(a => (ApiModel?)a)
+                          .FirstOrDefault();
+    }
+
+    public ApiModel? GetContainingType()
+    {
+        return Ancestors().SkipWhile(a => !a.Kind.IsType())
+                          .Select(a => (ApiModel?)a)
+                          .FirstOrDefault();
+    }
+
     public string GetNamespaceName()
     {
-        var c = this;
-        while (c != default && c.Kind != ApiKind.Namespace)
-            c = c.Parent;
-
-        return c != default
-            ? c.GetFullName()
+        if (Kind == ApiKind.Namespace)
+            return GetFullName();
+        
+        var containingNamespace = GetContainingNamespace();
+        return containingNamespace is not null
+            ? containingNamespace.Value.GetFullName()
             : string.Empty;
     }
 
     public string GetTypeName()
     {
+        var containingTypes = AncestorsAndSelf().SkipWhile(a => !a.Kind.IsType())
+                                                .TakeWhile(a => a.Kind.IsType());
+
         var sb = new StringBuilder();
-        var c = this;
-        while (c != default)
+        foreach (var containingType in containingTypes)
         {
-            if (c.Kind.IsType())
-            {
-                if (sb.Length > 0)
-                    sb.Insert(0, '.');
+            if (sb.Length > 0)
+                sb.Insert(0, '.');
 
-                sb.Insert(0, c.Name);
-            }
-
-            c = c.Parent;
+            sb.Insert(0, containingType.Name);
         }
 
         return sb.ToString();
