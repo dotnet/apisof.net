@@ -82,7 +82,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
                 parts.Add(part);
 
-                if (part.Kind == MarkupPartKind.Whitespace && part.Text == Environment.NewLine)
+                if (part.Kind == MarkupPartKind.Whitespace && part.Text is "\n" or "\r" or "\r\n")
                     needsIndent = true;
             }
 
