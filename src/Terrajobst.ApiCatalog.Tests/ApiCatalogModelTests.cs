@@ -326,7 +326,7 @@ public class ApiCatalogModelTests
         // via the package.
         var net462 = availability.Frameworks.Single(fx => fx.Framework.GetShortFolderName() == "net462");
         Assert.False(net462.IsInBox);
-        Assert.Equal("System.Oob", net462.Package.Name);
+        Assert.Equal("System.Oob", net462.Package!.Value.Name);
     }
 
     [Fact]

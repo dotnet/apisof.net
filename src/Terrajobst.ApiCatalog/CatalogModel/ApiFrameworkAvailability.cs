@@ -1,10 +1,11 @@
-﻿using NuGet.Frameworks;
+﻿using System.Diagnostics.CodeAnalysis;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
 public sealed class ApiFrameworkAvailability
 {
-    public ApiFrameworkAvailability(NuGetFramework framework, ApiDeclarationModel declaration, PackageModel package, NuGetFramework packageFramework)
+    public ApiFrameworkAvailability(NuGetFramework framework, ApiDeclarationModel declaration, PackageModel? package, NuGetFramework packageFramework)
     {
         Framework = framework;
         Declaration = declaration;
@@ -12,9 +13,10 @@ public sealed class ApiFrameworkAvailability
         PackageFramework = packageFramework;
     }
 
-    public bool IsInBox => Package == default;
+    [MemberNotNullWhen(false, nameof(Package))]
+    public bool IsInBox => Package is null;
     public NuGetFramework Framework { get; }
     public ApiDeclarationModel Declaration { get; }
-    public PackageModel Package { get; }
+    public PackageModel? Package { get; }
     public NuGetFramework PackageFramework { get; }
 }

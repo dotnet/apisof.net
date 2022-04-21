@@ -108,9 +108,9 @@ else
                         </tr>
                     }
 
-                    @if (SelectedAvailability != null && !SelectedAvailability.IsInBox)
+                    @if (SelectedAvailability is { IsInBox: false })
                     {
-                        var package = SelectedAvailability.Package;
+                        var package = SelectedAvailability.Package!.Value;
                         var folder = SelectedAvailability.PackageFramework.GetShortFolderName();
                         <tr>
                             <th>Package</th>

@@ -81,7 +81,7 @@ internal static class ApiAvailabilityChecker
                             }
                             else
                             {
-                                frameworkResultBuilder.Add(AvailabilityResult.AvailableInPackage(info.Package));
+                                frameworkResultBuilder.Add(AvailabilityResult.AvailableInPackage(info.Package.Value));
                             }
                         }
 
