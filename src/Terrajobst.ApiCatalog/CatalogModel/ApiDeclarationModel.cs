@@ -38,7 +38,6 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
                          .Select(d => d.GetMyMarkup())
                          .ToList();
         markups.Reverse();
-        markups.Add(GetMyMarkup());
 
         var parts = new List<MarkupPart>();
 
