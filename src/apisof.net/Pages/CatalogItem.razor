@@ -170,6 +170,77 @@ else
                             </td>
                         </tr>
                     }
+                    @if (Api.Kind == ApiKind.Property)
+                    {
+                        var getter = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.PropertyGetter);
+                        var setter = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.PropertySetter);
+
+                        var getterAvailability = getter == default ? null : GetPlatformAvailability(getter, SelectedFramework);
+                        var setterAvailability = setter == default ? null : GetPlatformAvailability(setter, SelectedFramework);
+                        var availability = getterAvailability ?? setterAvailability;
+                        if (availability is not null)
+                        {
+                            <tr>
+                                <th>OS Platforms</th>
+                                <td>
+                                    @if (availability.Kind == ApiPlatformAvailabilityKind.Unknown)
+                                    {
+                                        WriteAvailability("this API", availability);
+                                    }
+                                    else
+                                    {
+                                        if (getterAvailability is not null)
+                                            WriteAvailability("the property getter", getterAvailability);
+
+                                        if (setterAvailability is not null)
+                                            WriteAvailability("the property setter", setterAvailability);
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else if (Api.Kind == ApiKind.Event)
+                    {
+                        var adder = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.EventAdder);
+                        var remover = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.EventRemover);
+
+                        var adderAvailability = adder == default ? null : GetPlatformAvailability(adder, SelectedFramework);
+                        var removerAvailability = remover == default ? null : GetPlatformAvailability(remover, SelectedFramework);
+                        var availability = adderAvailability ?? removerAvailability;
+                        if (availability is not null)
+                        {
+                            <tr>
+                                <th>OS Platforms</th>
+                                <td>
+                                    @if (availability.Kind == ApiPlatformAvailabilityKind.Unknown)
+                                    {
+                                        WriteAvailability("this API", availability);
+                                    }
+                                    else
+                                    {
+                                        if (adderAvailability is not null)
+                                            WriteAvailability("the event adder", adderAvailability);
+
+                                        if (removerAvailability is not null)
+                                            WriteAvailability("the event remover", removerAvailability);
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        var availability = GetPlatformAvailability(Api, SelectedFramework);
+                        if (availability is not null)
+                        {
+                            <tr>
+                                <th>OS Platforms</th>
+                                <td>
+                                    @{ WriteAvailability("this API", availability); }
+                                </td>
+                            </tr>
+                        }
+                    }
                 </table>
                 <ul class="list-inline small">
                     <li class="list-inline-item">
@@ -182,4 +253,40 @@ else
             </div>
         </div>
     </div>
+}
+
+@{
+    void WriteAvailability(string apiName, ApiPlatformAvailability availability)
+    {
+        if (availability.Kind == ApiPlatformAvailabilityKind.Unknown)
+        {
+            <p class="text-muted">The selected framework does not have platform annotations.</p>
+        }
+        else if (availability.Kind == ApiPlatformAvailabilityKind.Any)
+        {
+            <p>For the selected framework @apiName is supported on all OS platforms.</p>
+        }
+        else if (availability.Kind == ApiPlatformAvailabilityKind.OnlyOn)
+        {
+            <p>For the selected framework @apiName is only supported on the following OS platforms:</p>
+            WriteVersions(availability);
+        }
+        else if (availability.Kind == ApiPlatformAvailabilityKind.AnyExcept)
+        {
+            <p>For the selected framework @apiName is supported on any platform execept for these:</p>
+            WriteVersions(availability);
+        }
+    }
+
+    void WriteVersions(ApiPlatformAvailability availability)
+    {
+        <ul>
+            @foreach (var (platform, versions) in availability.Versions)
+            {
+                <li>
+                    <strong>@platform</strong> @versions
+                </li>
+            }
+        </ul>
+    }
 }

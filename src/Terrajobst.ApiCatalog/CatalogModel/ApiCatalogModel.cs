@@ -198,7 +198,7 @@ public sealed partial class ApiCatalogModel
         Debug.Assert((table.Length - 4) % rowSize == 0);
 
         var low = 0;
-        var high = (table.Length - 4) / rowSize;
+        var high = (table.Length - 4) / rowSize - 1;
 
         while (low <= high)
         {
@@ -208,7 +208,7 @@ public sealed partial class ApiCatalogModel
             var rowApiId = table.ReadInt32(rowStart);
             var rowAssemblyId = table.ReadInt32(rowStart + 4);
 
-            var comparison = (rowApiId, rowAssemblyId).CompareTo((apiId, assemblyId));
+            var comparison = (apiId, assemblyId).CompareTo((rowApiId, rowAssemblyId));
 
             if (comparison == 0)
             {

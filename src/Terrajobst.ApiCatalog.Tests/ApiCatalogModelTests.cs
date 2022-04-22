@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NuGet.Frameworks;
 using Xunit;
 
 namespace Terrajobst.ApiCatalog.Tests;
@@ -532,7 +533,7 @@ public class ApiCatalogModelTests
         var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
         var declaration = Assert.Single(api.Declarations);
 
-        var availability = ApiPlatformAvailability.Create(declaration);
+        var availability = ApiPlatformAvailability.Create(declaration, NuGetFramework.Parse("net461"));
 
         Assert.False(availability.IsSupported("windows"));
         Assert.True(availability.IsSupported("windows10"));
@@ -541,18 +542,6 @@ public class ApiCatalogModelTests
         Assert.False(availability.IsSupported("browser2.0"));
         Assert.True(availability.IsSupported("ios"));
         Assert.True(availability.IsSupported("ios14"));
-
-        var supportedActual = availability.GetSupport()
-                                          .GroupBy(t => t.Name)
-                                          .Select(g => $"{g.Key} {string.Join(", ", g.Select(t => t.Version))}")
-                                          .ToArray();
-
-        var supportedExpected = new[] {
-            "ios 0.0.0.0",
-            "windows 10.0.0.0"
-        };
-
-        Assert.Equal(supportedExpected, supportedActual);
     }
 
     [Fact]
@@ -582,7 +571,7 @@ public class ApiCatalogModelTests
         var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
         var declaration = Assert.Single(api.Declarations);
 
-        var availability = ApiPlatformAvailability.Create(declaration);
+        var availability = ApiPlatformAvailability.Create(declaration, NuGetFramework.Parse("net461"));
 
         Assert.True(availability.IsSupported("windows"));
         Assert.True(availability.IsSupported("android"));
@@ -593,18 +582,6 @@ public class ApiCatalogModelTests
         Assert.True(availability.IsSupported("android11.1"));
         Assert.False(availability.IsSupported("ios"));
         Assert.False(availability.IsSupported("ios14"));
-
-        var supportedActual = availability.GetSupport()
-            .GroupBy(t => t.Name)
-            .Select(g => $"{g.Key} {string.Join(", ", g.Select(t => t.Version))}")
-            .ToArray();
-
-        var supportedExpected = new[] {
-            "android 0.0.0.0, 11.0.0.0",
-            "windows 0.0.0.0"
-        };
-
-        Assert.Equal(supportedExpected, supportedActual);
     }
 
     [Fact]

@@ -4,7 +4,7 @@ using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
-
+using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Pages;
@@ -78,6 +78,29 @@ public partial class CatalogItem
             HelpLink = helpLink;
         else
             HelpLink = null;
+    }
+
+    private static ApiPlatformAvailability GetPlatformAvailability(ApiModel api, string selectedFramework)
+    {
+        var availability = ApiAvailability.Create(api);
+
+        if (selectedFramework is null)
+        {
+            selectedFramework = availability.Frameworks.Where(fx => fx.Framework.Framework == ".NETCoreApp" && fx.Framework.Version.Major >= 5)
+                                                       .OrderByDescending(fx => fx.Framework.Version)
+                                                       .ThenBy(fx => !fx.Framework.HasPlatform)
+                                                       .Select(fx => fx.Framework.GetShortFolderName())
+                                                       .FirstOrDefault();
+
+            if (selectedFramework is null)
+                return null;
+        }
+
+        var frameworkAvailability = availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == selectedFramework);
+        if (frameworkAvailability is null)
+            return null;
+
+        return ApiPlatformAvailability.Create(frameworkAvailability.Declaration, frameworkAvailability.Framework);
     }
 
     private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
