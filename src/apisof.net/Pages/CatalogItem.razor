@@ -119,7 +119,32 @@ else
                             </td>
                         </tr>
                     }
+                    
+                    @if (SelectedAvailability?.Declaration.Obsoletion is not null)
+                    {
+                        var o = SelectedAvailability.Declaration.Obsoletion.Value;
+                        var message = string.IsNullOrEmpty(o.Message)
+                                        ? "This API is obsolete."
+                                        : o.Message;
 
+                        if (!string.IsNullOrEmpty(o.DiagnosticId))
+                            message = $"{o.DiagnosticId}: {message}";
+
+                        <tr>
+                            <th>Obsolete</th>
+                            <td>
+                                @if (o.Url is not null)
+                                {
+                                    <a href="@o.Url">@message</a>
+                                }
+                                else
+                                {
+                                    <text>@message</text>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    
                     @if (!string.IsNullOrEmpty(HelpLink))
                     {
                         <tr>
