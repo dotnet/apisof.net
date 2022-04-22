@@ -48,10 +48,13 @@ public sealed partial class ApiCatalogModel
 
         public static async Task ConvertAsync(string sqliteDbPath, Stream stream)
         {
+            // NOTE: We disable pooling to avoid the database from being locked when we're done. This is critical to
+            //       allow later parts of the catalog generation to delete the file.
             var connectionString = new SqliteConnectionStringBuilder
             {
                 DataSource = sqliteDbPath,
-                Mode = SqliteOpenMode.ReadOnly
+                Mode = SqliteOpenMode.ReadOnly,
+                Pooling = false
             }.ToString();
 
             using (var connection = new SqliteConnection(connectionString))

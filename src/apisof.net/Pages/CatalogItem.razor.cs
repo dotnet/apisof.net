@@ -4,7 +4,6 @@ using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
-using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Pages;

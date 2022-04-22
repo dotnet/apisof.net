@@ -48,20 +48,27 @@ internal sealed class FluentCatalogBuilder
     public async Task<ApiCatalogModel> BuildAsync()
     {
         var fileName = Path.GetTempFileName();
-        using (var builder = CatalogBuilder.Create(fileName))
+        try
         {
-            foreach (var doc in _documents)
-                builder.IndexDocument(doc);
+            using (var builder = CatalogBuilder.Create(fileName))
+            {
+                foreach (var doc in _documents)
+                    builder.IndexDocument(doc);
 
-            foreach (var (name, date, usages) in _usageSources)
-                builder.IndexUsages(name, date, usages);
+                foreach (var (name, date, usages) in _usageSources)
+                    builder.IndexUsages(name, date, usages);
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                await ApiCatalogModel.ConvertAsync(fileName, stream);
+                stream.Position = 0;
+                return await ApiCatalogModel.LoadAsync(stream);
+            }
         }
-
-        using (var stream = new MemoryStream())
+        finally
         {
-            await ApiCatalogModel.ConvertAsync(fileName, stream);
-            stream.Position = 0;
-            return await ApiCatalogModel.LoadAsync(stream);
+            File.Delete(fileName);
         }
     }
 
