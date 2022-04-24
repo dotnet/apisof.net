@@ -40,7 +40,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         }
     }
 
-    private Markup GetMyMarkup()
+    public Markup GetMyMarkup()
     {
         var markupOffset = _api.Catalog.ApiTable.ReadInt32(_offset + 4);
         return _api.Catalog.GetMarkup(markupOffset);

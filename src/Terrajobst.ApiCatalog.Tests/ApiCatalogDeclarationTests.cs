@@ -1,10 +1,8 @@
 using System;
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
@@ -2924,11 +2922,11 @@ public class ApiCatalogDeclarationTests
         foreach (var api in entry.Apis)
             Emit(indentedWriter, api);
 
-        expected = Unindent(expected);
+        expected = expected.Unindent();
         var actual = stringWriter.ToString();
 
-        var expectedLines = GetLines(expected);
-        var actualLines = GetLines(actual);
+        var expectedLines = expected.SplitLines();
+        var actualLines = actual.SplitLines();
 
         var maxLength = Math.Min(expectedLines.Length, actualLines.Length);
         for (var i = 0; i < maxLength; i++)
@@ -2940,51 +2938,11 @@ public class ApiCatalogDeclarationTests
         for (var i = maxLength; i < actualLines.Length; i++)
             Xunit.Assert.Equal(string.Empty, actualLines[i]);
 
-        static string[] GetLines(string text)
-        {
-            var lines = new List<string>();
-
-            using var reader = new StringReader(text);
-            while (reader.ReadLine() is { } line)
-                lines.Add(line);
-
-            return lines.ToArray();
-        }
-
-        static string Unindent(string text)
-        {
-            var minIndent = int.MaxValue;
-
-            var lines = GetLines(text);
-            foreach (var line in lines)
-            {
-                var trimmedStart = line.TrimStart();
-                if (trimmedStart.Length > 0)
-                {
-                    var indent = line.Length - trimmedStart.Length;
-                    minIndent = Math.Min(minIndent, indent);
-                }
-            }
-
-            if (minIndent == 0)
-                return text;
-
-            var sb = new StringBuilder();
-            foreach (var line in lines)
-            {
-                var isBlank = line.TrimStart().Length == 0;
-                var unindentedLine = isBlank ? line : line[minIndent..];
-                sb.AppendLine(unindentedLine);
-            }
-
-            return sb.ToString().Trim();
-        }
-
         static void Emit(IndentedTextWriter writer, ApiEntry api, bool addComma = false)
         {
             var markup = Markup.Parse(api.Syntax);
 
-            var lines = GetLines(markup.ToString());
+            var lines = markup.ToString().SplitLines();
             for (var i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];

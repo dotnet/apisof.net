@@ -200,25 +200,25 @@ else
                         var getter = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.PropertyGetter);
                         var setter = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.PropertySetter);
 
-                        var getterAvailability = getter == default ? null : GetPlatformAvailability(getter, SelectedFramework);
-                        var setterAvailability = setter == default ? null : GetPlatformAvailability(setter, SelectedFramework);
-                        var availability = getterAvailability ?? setterAvailability;
-                        if (availability is not null)
+                        var getterAnnotation = getter == default ? (PlatformAnnotation?) null : PlatformContext.GetPlatformAnnotation(getter);
+                        var setterAnnotation = setter == default ? (PlatformAnnotation?) null : PlatformContext.GetPlatformAnnotation(setter);
+                        var annotation = getterAnnotation ?? setterAnnotation;
+                        if (annotation is not null)
                         {
                             <tr>
                                 <th>OS Platforms</th>
                                 <td>
-                                    @if (availability.Kind == ApiPlatformAvailabilityKind.Unknown)
+                                    @if (annotation.Value.Kind == PlatformAnnotationKind.None)
                                     {
-                                        WriteAvailability("this API", availability);
+                                        WritePlatformAnnotation("this API", annotation.Value);
                                     }
                                     else
                                     {
-                                        if (getterAvailability is not null)
-                                            WriteAvailability("the property getter", getterAvailability);
+                                        if (getterAnnotation is not null)
+                                            WritePlatformAnnotation("the property getter", getterAnnotation.Value);
 
-                                        if (setterAvailability is not null)
-                                            WriteAvailability("the property setter", setterAvailability);
+                                        if (setterAnnotation is not null)
+                                            WritePlatformAnnotation("the property setter", setterAnnotation.Value);
                                     }
                                 </td>
                             </tr>
@@ -229,42 +229,39 @@ else
                         var adder = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.EventAdder);
                         var remover = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.EventRemover);
 
-                        var adderAvailability = adder == default ? null : GetPlatformAvailability(adder, SelectedFramework);
-                        var removerAvailability = remover == default ? null : GetPlatformAvailability(remover, SelectedFramework);
-                        var availability = adderAvailability ?? removerAvailability;
-                        if (availability is not null)
+                        var adderAnnotation = adder == default ? (PlatformAnnotation?) null : PlatformContext.GetPlatformAnnotation(adder);
+                        var removerAnnotation = remover == default ? (PlatformAnnotation?) null : PlatformContext.GetPlatformAnnotation(remover);
+                        var annotation = adderAnnotation ?? removerAnnotation;
+                        if (annotation is not null)
                         {
                             <tr>
                                 <th>OS Platforms</th>
                                 <td>
-                                    @if (availability.Kind == ApiPlatformAvailabilityKind.Unknown)
+                                    @if (annotation.Value.Kind == PlatformAnnotationKind.None)
                                     {
-                                        WriteAvailability("this API", availability);
+                                        WritePlatformAnnotation("this API", annotation.Value);
                                     }
                                     else
                                     {
-                                        if (adderAvailability is not null)
-                                            WriteAvailability("the event adder", adderAvailability);
+                                        if (adderAnnotation is not null)
+                                            WritePlatformAnnotation("the event adder", adderAnnotation.Value);
 
-                                        if (removerAvailability is not null)
-                                            WriteAvailability("the event remover", removerAvailability);
+                                        if (removerAnnotation is not null)
+                                            WritePlatformAnnotation("the event remover", removerAnnotation.Value);
                                     }
                                 </td>
                             </tr>
                         }
                     }
-                    else
+                    else if (Api.Kind != ApiKind.Namespace)
                     {
-                        var availability = GetPlatformAvailability(Api, SelectedFramework);
-                        if (availability is not null)
-                        {
-                            <tr>
-                                <th>OS Platforms</th>
-                                <td>
-                                    @{ WriteAvailability("this API", availability); }
-                                </td>
-                            </tr>
-                        }
+                        var annotation = PlatformContext.GetPlatformAnnotation(Api);
+                        <tr>
+                            <th>OS Platforms</th>
+                            <td>
+                                @{ WritePlatformAnnotation("this API", annotation); }
+                            </td>
+                        </tr>
                     }
                 </table>
                 <ul class="list-inline small">
@@ -281,35 +278,35 @@ else
 }
 
 @{
-    void WriteAvailability(string apiName, ApiPlatformAvailability availability)
+    void WritePlatformAnnotation(string apiName, PlatformAnnotation annotation)
     {
-        if (availability.Kind == ApiPlatformAvailabilityKind.Unknown)
+        if (annotation.Kind == PlatformAnnotationKind.None)
         {
             <p class="text-muted">The selected framework does not have platform annotations.</p>
         }
-        else if (availability.Kind == ApiPlatformAvailabilityKind.Any)
+        else if (annotation.Kind == PlatformAnnotationKind.Unrestricted)
         {
             <p>For the selected framework @apiName is supported on all OS platforms.</p>
         }
-        else if (availability.Kind == ApiPlatformAvailabilityKind.OnlyOn)
+        else if (annotation.Kind == PlatformAnnotationKind.RestrictedTo)
         {
             <p>For the selected framework @apiName is only supported on the following OS platforms:</p>
-            WriteVersions(availability);
+            WritePlatformEntries(annotation);
         }
-        else if (availability.Kind == ApiPlatformAvailabilityKind.AnyExcept)
+        else if (annotation.Kind == PlatformAnnotationKind.UnrestrictedExceptFor)
         {
             <p>For the selected framework @apiName is supported on any platform execept for these:</p>
-            WriteVersions(availability);
+            WritePlatformEntries(annotation);
         }
     }
 
-    void WriteVersions(ApiPlatformAvailability availability)
+    void WritePlatformEntries(PlatformAnnotation annotation)
     {
         <ul>
-            @foreach (var (platform, versions) in availability.Versions)
+            @foreach (var e in annotation.Entries)
             {
                 <li>
-                    <strong>@platform</strong> @versions
+                    @e
                 </li>
             }
         </ul>

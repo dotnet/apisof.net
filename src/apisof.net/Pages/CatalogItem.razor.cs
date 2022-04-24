@@ -31,6 +31,8 @@ public partial class CatalogItem
 
     public ApiFrameworkAvailability SelectedAvailability { get; set; }
 
+    public PlatformContext PlatformContext { get; set; }
+
     public Markup SelectedMarkup { get; set; }
 
     public string HelpLink { get; set; }
@@ -47,15 +49,15 @@ public partial class CatalogItem
 
     private async Task UpdateSyntaxAsync()
     {
-        SelectedFramework = NavigationManager.GetQueryParameter("fx");
-
         // TODO: Handle invalid GUID
         // TODO: Handle API not found
 
         Api = CatalogService.GetApiByGuid(System.Guid.Parse(Guid));
         Availability = Api.GetAvailability();
+        SelectedFramework = SelectFramework(Availability, NavigationManager.GetQueryParameter("fx"));
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
                                Availability.Frameworks.FirstOrDefault();
+        PlatformContext = PlatformContext.Create(CatalogService.Catalog, SelectedFramework);
 
         Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 
@@ -79,27 +81,29 @@ public partial class CatalogItem
             HelpLink = null;
     }
 
-    private static ApiPlatformAvailability GetPlatformAvailability(ApiModel api, string selectedFramework)
+    private static string SelectFramework(ApiAvailability availability, string selectedFramework)
     {
-        var availability = ApiAvailability.Create(api);
+        // Let's first reset the selected framework in case the current API doesn't support it
 
-        if (selectedFramework is null)
-        {
-            selectedFramework = availability.Frameworks.Where(fx => fx.Framework.Framework == ".NETCoreApp" && fx.Framework.Version.Major >= 5)
-                                                       .OrderByDescending(fx => fx.Framework.Version)
-                                                       .ThenBy(fx => !fx.Framework.HasPlatform)
-                                                       .Select(fx => fx.Framework.GetShortFolderName())
-                                                       .FirstOrDefault();
+        if (!availability.Frameworks.Any(fx => string.Equals(fx.Framework.GetShortFolderName(), selectedFramework, StringComparison.OrdinalIgnoreCase)))
+            selectedFramework = null;
 
-            if (selectedFramework is null)
-                return null;
-        }
+        // First we try to pick the highest .NET Core framework
 
-        var frameworkAvailability = availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == selectedFramework);
-        if (frameworkAvailability is null)
-            return null;
+        selectedFramework ??= availability.Frameworks.Where(fx => fx.Framework.Framework == ".NETCoreApp")
+                                                     .OrderByDescending(fx => fx.Framework.Version)
+                                                     .ThenBy(fx => fx.Framework.HasPlatform)
+                                                     .Select(fx => fx.Framework.GetShortFolderName())
+                                                     .FirstOrDefault();
 
-        return ApiPlatformAvailability.Create(frameworkAvailability.Declaration, frameworkAvailability.Framework);
+        // If we couldn't find any, pick the highest version of any framework
+
+        selectedFramework ??= availability.Frameworks.OrderBy(f => f.Framework.Framework)
+                                                     .ThenByDescending(f => f.Framework.Version)
+                                                     .Select(fx => fx.Framework.GetShortFolderName())
+                                                     .FirstOrDefault();
+
+        return selectedFramework;
     }
 
     private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
