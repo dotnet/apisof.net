@@ -37,7 +37,7 @@ internal sealed class CatalogService
     {
         var catalogPath = GetCatalogPath();
 
-        var url = "https://apicatalogblob.blob.core.windows.net/catalog/apicatalog.dat";
+        var url = ApiCatalogModel.Url;
         var blobClient = new BlobClient(new Uri(url));
 
         if (!force && File.Exists(catalogPath))

@@ -8,6 +8,8 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed partial class ApiCatalogModel
 {
+    public static string Url => "https://apicatalogblob.blob.core.windows.net/catalog/apicatalog.dat";
+
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
     private const int FormatVersion = 3;
 
@@ -328,6 +330,16 @@ public sealed partial class ApiCatalogModel
                     receiver.TryAdd(typeInfoMember.Id, typeMember.Id);
             }
         }
+    }
+
+    public static async Task<ApiCatalogModel> LoadFromWebAsync()
+    {
+        using var client = new HttpClient();
+        await using var stream = await client.GetStreamAsync(Url);
+        await using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        memoryStream.Position = 0;
+        return await LoadAsync(memoryStream);
     }
 
     public static async Task<ApiCatalogModel> LoadAsync(string path)
