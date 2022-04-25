@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -25,6 +26,22 @@ public readonly struct PlatformAnnotation
     public PlatformAnnotationKind Kind { get; }
 
     public IReadOnlyList<PlatformAnnotationEntry> Entries { get; }
+
+    public bool IsSupported(string platformName)
+    {
+        if (Kind is PlatformAnnotationKind.None or PlatformAnnotationKind.Unrestricted)
+            return true;
+
+        var (name, version) = PlatformContext.ParsePlatform(platformName);
+
+        foreach (var entry in Entries)
+        {
+            if (string.Equals(entry.Name, name, StringComparison.OrdinalIgnoreCase))
+                return entry.Range.IsSupported(version);
+        }
+
+        return Kind == PlatformAnnotationKind.UnrestrictedExceptFor;
+    }
 
     public override string ToString()
     {

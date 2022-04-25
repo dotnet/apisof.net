@@ -29,12 +29,17 @@ public class PlatformContextTests
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
                 fx.AddAssembly("System.Runtime", GetOperatingSystemWithImpliedPlatform())
-                    .AddAssembly("System.TheAssembly", source))
+                  .AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
         var context = PlatformContext.Create(catalog, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
+
+        Assert.True(annotation.IsSupported("ios"));
+        Assert.True(annotation.IsSupported("tvos"));
+        Assert.True(annotation.IsSupported("maccatalyst"));
+        Assert.False(annotation.IsSupported("windows"));
 
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
@@ -69,6 +74,11 @@ public class PlatformContextTests
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
+        Assert.True(annotation.IsSupported("ios"));
+        Assert.True(annotation.IsSupported("tvos"));
+        Assert.False(annotation.IsSupported("maccatalyst"));
+        Assert.False(annotation.IsSupported("windows"));
+
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
 
@@ -95,12 +105,17 @@ public class PlatformContextTests
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
                 fx.AddAssembly("System.Runtime", GetOperatingSystemWithImpliedPlatform())
-                    .AddAssembly("System.TheAssembly", source))
+                  .AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
         var context = PlatformContext.Create(catalog, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
+
+        Assert.False(annotation.IsSupported("ios"));
+        Assert.False(annotation.IsSupported("tvos"));
+        Assert.False(annotation.IsSupported("maccatalyst"));
+        Assert.True(annotation.IsSupported("windows"));
 
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
@@ -135,6 +150,11 @@ public class PlatformContextTests
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
+        Assert.False(annotation.IsSupported("ios"));
+        Assert.False(annotation.IsSupported("tvos"));
+        Assert.True(annotation.IsSupported("maccatalyst"));
+        Assert.True(annotation.IsSupported("windows"));
+
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
 
@@ -163,6 +183,9 @@ public class PlatformContextTests
         var context = PlatformContext.Create(catalog, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
+
+        Assert.False(annotation.IsSupported("ios"));
+        Assert.True(annotation.IsSupported("windows"));
 
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
@@ -196,6 +219,9 @@ public class PlatformContextTests
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheMethod()"));
         var annotation = context.GetPlatformAnnotation(api);
 
+        Assert.False(annotation.IsSupported("ios"));
+        Assert.True(annotation.IsSupported("windows"));
+
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
 
@@ -227,6 +253,9 @@ public class PlatformContextTests
         var context = PlatformContext.Create(catalog, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheProperty.TheProperty.get"));
         var annotation = context.GetPlatformAnnotation(api);
+
+        Assert.True(annotation.IsSupported("ios"));
+        Assert.False(annotation.IsSupported("windows"));
 
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
@@ -263,6 +292,9 @@ public class PlatformContextTests
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheProperty.TheProperty.get"));
         var annotation = context.GetPlatformAnnotation(api);
 
+        Assert.False(annotation.IsSupported("ios"));
+        Assert.True(annotation.IsSupported("windows"));
+
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
 
@@ -295,6 +327,9 @@ public class PlatformContextTests
         var context = PlatformContext.Create(catalog, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheEvent.TheEvent.add"));
         var annotation = context.GetPlatformAnnotation(api);
+
+        Assert.True(annotation.IsSupported("ios"));
+        Assert.False(annotation.IsSupported("windows"));
 
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }
@@ -332,6 +367,9 @@ public class PlatformContextTests
         var context = PlatformContext.Create(catalog, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheEvent.TheEvent.add"));
         var annotation = context.GetPlatformAnnotation(api);
+
+        Assert.False(annotation.IsSupported("ios"));
+        Assert.True(annotation.IsSupported("windows"));
 
         Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
     }

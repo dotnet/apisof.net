@@ -85,6 +85,39 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
         }
     }
 
+    public bool IsSupported(Version version)
+    {
+        for (var i = 0; i < Count; i++)
+        {
+            var current = this[i];
+            var next = i == Count - 1 ? ((Version Version, bool IsSupported)?)null : this[i + 1];
+
+            if (current.Version > version)
+                break;
+
+            if (next is null || next.Value.Version > version)
+                return current.IsSupported;
+        }
+
+        return !IsAllowList;
+    }
+
+    public (Version Version, bool IsSupported) this[int index]
+    {
+        get
+        {
+            if (IsEmpty || index - 1 >= _tail.Length)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            if (index == 0)
+                return (_head, _headIsSupported);
+
+            return _tail[index - 1];
+        }
+    }
+
+    public int Count => IsEmpty ? 0 : _tail.Length + 1;
+
     public bool Equals(PlatformSupportRange other)
     {
         return Equals(_head, other._head) &&
