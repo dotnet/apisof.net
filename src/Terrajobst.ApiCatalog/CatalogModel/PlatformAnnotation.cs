@@ -1,9 +1,8 @@
 ﻿using System.Text;
-using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
-public readonly struct PlatformAnnotation
+public readonly struct PlatformAnnotation : IEquatable<PlatformAnnotation>
 {
     public static PlatformAnnotation None { get; } = new(PlatformAnnotationKind.None);
 
@@ -48,30 +47,64 @@ public readonly struct PlatformAnnotation
         switch (Kind)
         {
             case PlatformAnnotationKind.None:
-                return $"The selected framework doesn't have platform annotations.";
+                return $"The framework doesn't have platform annotations.";
             case PlatformAnnotationKind.Unrestricted:
-                return $"For the selected framework the API is supported on any platform.";
+                return $"The API is supported on any platform.";
             case PlatformAnnotationKind.UnrestrictedExceptFor:
             {
                 var sb = new StringBuilder();
-                sb.AppendLine($"For the selected framework the API is supported on any platform except for:");
+                sb.AppendLine($"The API is supported on any platform except for:");
 
                 foreach (var e in Entries)
                     sb.AppendLine($"- {e}");
-                return sb.ToString();
+
+                return sb.ToString().TrimEnd();
             }
             case PlatformAnnotationKind.RestrictedTo:
             {
                 var sb = new StringBuilder();
-                sb.AppendLine($"For the selected framework the API is only supported on these platforms:");
+                sb.AppendLine($"The API is only supported on these platforms:");
 
                 foreach (var e in Entries)
                     sb.AppendLine($"- {e}");
 
-                return sb.ToString();
+                return sb.ToString().TrimEnd();
             }
             default:
                 throw new Exception($"Unexpected kind {Kind}");
         }
+    }
+
+    public bool Equals(PlatformAnnotation other)
+    {
+        return Kind == other.Kind &&
+               Entries.SequenceEqual(other.Entries);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is PlatformAnnotation other &&
+               Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        var builder = new HashCode();
+        builder.Add(Kind);
+
+        foreach (var e in Entries)
+            builder.Add(e);
+
+        return builder.ToHashCode();
+    }
+
+    public static bool operator ==(PlatformAnnotation left, PlatformAnnotation right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(PlatformAnnotation left, PlatformAnnotation right)
+    {
+        return !left.Equals(right);
     }
 }

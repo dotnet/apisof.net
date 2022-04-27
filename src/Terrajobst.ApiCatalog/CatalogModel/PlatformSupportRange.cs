@@ -167,10 +167,10 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
                 return "any";
 
             if (startInclusive is null)
-                return $"until {FormatVersion(endExclusive)}";
+                return $"< {FormatVersion(endExclusive)}";
 
             if (endExclusive is null)
-                return $"starting with {FormatVersion(startInclusive)}";
+                return $">= {FormatVersion(startInclusive)}";
 
             return $"{FormatVersion(startInclusive)} - {FormatVersion(endExclusive)}";
         }

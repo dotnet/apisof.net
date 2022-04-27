@@ -1,6 +1,6 @@
 ﻿namespace Terrajobst.ApiCatalog;
 
-public readonly struct PlatformAnnotationEntry
+public readonly struct PlatformAnnotationEntry : IEquatable<PlatformAnnotationEntry>
 {
     public PlatformAnnotationEntry(string name, PlatformSupportRange range)
     {
@@ -17,7 +17,7 @@ public readonly struct PlatformAnnotationEntry
         if (Range.IsEmpty || Range.AllVersions)
             return FormatPlatform(Name);
 
-        return $"{FormatPlatform(Name)}: {Range}";
+        return $"{FormatPlatform(Name)} {Range}";
     }
 
     private static string FormatPlatform(string name)
@@ -38,5 +38,32 @@ public readonly struct PlatformAnnotationEntry
             "windows" => "Windows",
             _ => name
         };
+    }
+
+    public bool Equals(PlatformAnnotationEntry other)
+    {
+        return Name == other.Name &&
+               Range.Equals(other.Range);
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj is PlatformAnnotationEntry other &&
+               Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, Range);
+    }
+
+    public static bool operator ==(PlatformAnnotationEntry left, PlatformAnnotationEntry right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(PlatformAnnotationEntry left, PlatformAnnotationEntry right)
+    {
+        return !left.Equals(right);
     }
 }

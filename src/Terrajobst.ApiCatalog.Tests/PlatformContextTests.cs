@@ -20,7 +20,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is only supported on these platforms:
+            The API is only supported on these platforms:
             - iOS
             - Mac Catalyst
             - tvOS
@@ -60,7 +60,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is only supported on these platforms:
+            The API is only supported on these platforms:
             - iOS
             - tvOS
         ";
@@ -98,7 +98,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is supported on any platform except for:
+            The API is supported on any platform except for:
             - iOS
             - Mac Catalyst
             - tvOS
@@ -138,7 +138,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is supported on any platform except for:
+            The API is supported on any platform except for:
             - iOS
             - tvOS
         ";
@@ -175,7 +175,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is supported on any platform except for:
+            The API is supported on any platform except for:
             - iOS
         ";
 
@@ -211,7 +211,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is supported on any platform except for:
+            The API is supported on any platform except for:
             - iOS
         ";
 
@@ -247,7 +247,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is only supported on these platforms:
+            The API is only supported on these platforms:
             - iOS
         ";
 
@@ -286,7 +286,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is supported on any platform except for:
+            The API is supported on any platform except for:
             - iOS
         ";
 
@@ -323,7 +323,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is only supported on these platforms:
+            The API is only supported on these platforms:
             - iOS
         ";
 
@@ -364,7 +364,7 @@ public class PlatformContextTests
         ";
 
         var expectedPlatforms = @"
-            For the selected framework the API is supported on any platform except for:
+            The API is supported on any platform except for:
             - iOS
         ";
 
