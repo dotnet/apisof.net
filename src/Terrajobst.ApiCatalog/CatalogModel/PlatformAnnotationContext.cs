@@ -200,7 +200,7 @@ public sealed class PlatformAnnotationContext
         return new PlatformAnnotation(allEntries);
     }
 
-    internal static (string Name, Version Version) ParsePlatform(string nameAndVersion)
+    public static (string Name, Version Version) ParsePlatform(string nameAndVersion)
     {
         var framework = NuGetFramework.Parse("net5.0-" + nameAndVersion);
         return (framework.Platform, framework.PlatformVersion);
