@@ -15,6 +15,7 @@ internal static class ApiAvailabilityChecker
                            Action<AssemblyAvailabilityResult> resultReceiver)
     {
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
 
         foreach (var api in catalog.GetAllApis())
         {
@@ -59,7 +60,7 @@ internal static class ApiAvailabilityChecker
                 {
                     if (apiByGuid.TryGetValue(apiKey.Guid, out var api))
                     {
-                        var availability = apiAvailability.GetOrAdd(api, a => a.GetAvailability());
+                        var availability = apiAvailability.GetOrAdd(api, a => availabilityContext.GetAvailability(a));
 
                         frameworkResultBuilder.Clear();
 

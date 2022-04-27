@@ -15,6 +15,8 @@ public readonly struct PackageModel : IEquatable<PackageModel>
 
     public ApiCatalogModel Catalog => _catalog;
 
+    public int Id => _offset;
+
     public string Name
     {
         get

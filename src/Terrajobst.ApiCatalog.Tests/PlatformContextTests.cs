@@ -32,7 +32,8 @@ public class PlatformContextTests
                   .AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -70,7 +71,8 @@ public class PlatformContextTests
                   .AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -108,7 +110,8 @@ public class PlatformContextTests
                   .AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -146,7 +149,8 @@ public class PlatformContextTests
                   .AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -180,7 +184,8 @@ public class PlatformContextTests
                 fx.AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -215,7 +220,8 @@ public class PlatformContextTests
                 fx.AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheMethod()"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -250,7 +256,8 @@ public class PlatformContextTests
                 fx.AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheProperty.TheProperty.get"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -288,7 +295,8 @@ public class PlatformContextTests
                 fx.AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheProperty.TheProperty.get"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -324,7 +332,8 @@ public class PlatformContextTests
                 fx.AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheEvent.TheEvent.add"));
         var annotation = context.GetPlatformAnnotation(api);
 
@@ -364,7 +373,8 @@ public class PlatformContextTests
                 fx.AddAssembly("System.TheAssembly", source))
             .BuildAsync();
 
-        var context = PlatformContext.Create(catalog, "net45");
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var context = PlatformAnnotationContext.Create(availabilityContext, "net45");
         var api = Assert.Single(catalog.GetAllApis().Where(a => a.GetFullName() == "System.TheClass.TheEvent.TheEvent.add"));
         var annotation = context.GetPlatformAnnotation(api);
 

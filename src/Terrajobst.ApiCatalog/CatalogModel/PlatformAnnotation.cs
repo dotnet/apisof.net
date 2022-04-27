@@ -32,7 +32,7 @@ public readonly struct PlatformAnnotation
         if (Kind is PlatformAnnotationKind.None or PlatformAnnotationKind.Unrestricted)
             return true;
 
-        var (name, version) = PlatformContext.ParsePlatform(platformName);
+        var (name, version) = PlatformAnnotationContext.ParsePlatform(platformName);
 
         foreach (var entry in Entries)
         {

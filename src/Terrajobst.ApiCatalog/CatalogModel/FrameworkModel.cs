@@ -15,6 +15,8 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
     public ApiCatalogModel Catalog => _catalog;
 
+    public int Id => _offset;
+
     public string Name
     {
         get

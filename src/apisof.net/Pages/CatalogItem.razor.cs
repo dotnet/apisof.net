@@ -31,7 +31,7 @@ public partial class CatalogItem
 
     public ApiFrameworkAvailability SelectedAvailability { get; set; }
 
-    public PlatformContext PlatformContext { get; set; }
+    public PlatformAnnotationContext PlatformAnnotationContext { get; set; }
 
     public Markup SelectedMarkup { get; set; }
 
@@ -53,11 +53,11 @@ public partial class CatalogItem
         // TODO: Handle API not found
 
         Api = CatalogService.GetApiByGuid(System.Guid.Parse(Guid));
-        Availability = Api.GetAvailability();
+        Availability = CatalogService.AvailabilityContext.GetAvailability(Api);
         SelectedFramework = SelectFramework(Availability, NavigationManager.GetQueryParameter("fx"));
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
                                Availability.Frameworks.FirstOrDefault();
-        PlatformContext = PlatformContext.Create(CatalogService.Catalog, SelectedFramework);
+        PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedFramework);
 
         Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 

@@ -2,34 +2,37 @@
 
 namespace Terrajobst.ApiCatalog;
 
-public sealed class PlatformContext
+public sealed class PlatformAnnotationContext
 {
-    public static PlatformContext Create(ApiCatalogModel catalog, string framework)
+    public static PlatformAnnotationContext Create(ApiAvailabilityContext availabilityContext, string framework)
     {
-        ArgumentNullException.ThrowIfNull(catalog);
+        ArgumentNullException.ThrowIfNull(availabilityContext);
         ArgumentNullException.ThrowIfNull(framework);
 
+        var catalog = availabilityContext.Catalog;
         if (!catalog.Frameworks.Any(fx => string.Equals(fx.Name, framework, StringComparison.OrdinalIgnoreCase)))
             throw new ArgumentException($"invalid framework: '{framework}'", nameof(framework));
 
         var nuGetFramework = NuGetFramework.Parse(framework);
-        return new PlatformContext(catalog, nuGetFramework);
+        return new PlatformAnnotationContext(availabilityContext, nuGetFramework);
     }
 
-    private readonly ApiCatalogModel _catalog;
+    private readonly ApiAvailabilityContext _availabilityContext;
     private readonly NuGetFramework _framework;
     private readonly IReadOnlyList<string> _platforms;
     private readonly IReadOnlyList<(string Platform, string ImpliedPlatform)> _impliedPlatforms;
 
-    private PlatformContext(ApiCatalogModel catalog, NuGetFramework framework)
+    private PlatformAnnotationContext(ApiAvailabilityContext availabilityContext, NuGetFramework framework)
     {
-        _catalog = catalog;
+        _availabilityContext = availabilityContext;
         _framework = framework;
         _platforms = GetKnownPlatforms().OrderBy(p => p).ToArray();
         _impliedPlatforms = GetImpliedPlatforms().OrderBy(t => t.Platform).ToArray();
     }
 
-    public ApiCatalogModel Catalog => _catalog;
+    public ApiCatalogModel Catalog => _availabilityContext.Catalog;
+
+    public ApiAvailabilityContext AvailabilityContext => _availabilityContext;
 
     public NuGetFramework Framework => _framework;
 
@@ -39,7 +42,7 @@ public sealed class PlatformContext
 
     private ApiModel? GetOperatingSystemType()
     {
-        var systemNamespace = _catalog.RootApis.SingleOrDefault(a => a.Kind == ApiKind.Namespace && a.Name == "System");
+        var systemNamespace = Catalog.RootApis.SingleOrDefault(a => a.Kind == ApiKind.Namespace && a.Name == "System");
         if (systemNamespace == default)
             return null;
 
@@ -76,9 +79,9 @@ public sealed class PlatformContext
         // platform yyy is implied.
 
         var frameworkName = _framework.GetShortFolderName();
-        var frameworkAssemblies = _catalog.Frameworks
-                                          .Single(fx => string.Equals(fx.Name, frameworkName, StringComparison.OrdinalIgnoreCase))
-                                          .Assemblies.ToHashSet();
+        var frameworkAssemblies = Catalog.Frameworks
+                                         .Single(fx => string.Equals(fx.Name, frameworkName, StringComparison.OrdinalIgnoreCase))
+                                         .Assemblies.ToHashSet();
 
         var operatingSystemType = GetOperatingSystemType();
         if (operatingSystemType != null)
@@ -139,9 +142,7 @@ public sealed class PlatformContext
 
     public PlatformAnnotation GetPlatformAnnotation(ApiModel api)
     {
-        var availability = ApiAvailability.Create(api);
-        var frameworkAvailability = availability.Frameworks.FirstOrDefault(fx => fx.Framework == _framework);
-
+        var frameworkAvailability = _availabilityContext.GetAvailability(api, _framework);
         if (frameworkAvailability is null)
             throw new ArgumentException($"The API '{api.GetFullName()}' doesn't have a declaration for '{_framework}'.", nameof(api));
 
@@ -160,22 +161,13 @@ public sealed class PlatformContext
 
         foreach (var a in api.AncestorsAndSelf().Where(a => a.Kind != ApiKind.Namespace))
         {
-            var d = a.Declarations.First(d => d.Assembly == assembly);
-            var result = CreatePlatformAnnotation(d);
-            if (result is not null)
-                return result;
+            var declaration = a.Declarations.First(d => d.Assembly == assembly);
+            if (declaration.PlatformSupport.Any())
+                return CreatePlatformAnnotation(declaration.PlatformSupport);
         }
 
         if (assembly.PlatformSupport.Any())
             return CreatePlatformAnnotation(assembly.PlatformSupport);
-
-        return null;
-    }
-
-    private PlatformAnnotation? CreatePlatformAnnotation(ApiDeclarationModel declaration)
-    {
-        if (declaration.PlatformSupport.Any())
-            return CreatePlatformAnnotation(declaration.PlatformSupport);
 
         return null;
     }

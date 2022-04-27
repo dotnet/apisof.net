@@ -14,6 +14,7 @@ public sealed class CatalogService
 
     private CatalogJobInfo _jobInfo;
     private ApiCatalogModel _catalog;
+    private ApiAvailabilityContext _availabilityContext;
     private SuffixTree _suffixTree;
     private Dictionary<Guid, ApiModel> _apiByGuid;
     private ApiCatalogStatistics _statistics;
@@ -42,6 +43,7 @@ public sealed class CatalogService
         }
 
         var catalog = await ApiCatalogModel.LoadAsync(databasePath);
+        var availabilityContext = ApiAvailabilityContext.Create(catalog);
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
 
         var suffixTreePath = GetSuffixTreePath();
@@ -62,6 +64,7 @@ public sealed class CatalogService
         var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream);
 
         _catalog = catalog;
+        _availabilityContext = availabilityContext;
         _statistics = catalog.GetStatistics();
         _apiByGuid = apiByGuid;
         _suffixTree = suffixTree;
@@ -84,6 +87,8 @@ public sealed class CatalogService
     }
 
     public ApiCatalogModel Catalog => _catalog;
+
+    public ApiAvailabilityContext AvailabilityContext => _availabilityContext;
 
     public ApiCatalogStatistics CatalogStatistics => _statistics;
 

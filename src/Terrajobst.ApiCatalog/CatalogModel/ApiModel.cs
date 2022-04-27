@@ -191,11 +191,6 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
                 : string.Empty;
     }
 
-    public ApiAvailability GetAvailability()
-    {
-        return ApiAvailability.Create(this);
-    }
-
     public string GetHelpLink()
     {
         var segments = AncestorsAndSelf().Reverse();
