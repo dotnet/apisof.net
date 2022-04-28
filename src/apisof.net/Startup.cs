@@ -2,6 +2,8 @@ using ApisOfDotNet.Services;
 
 namespace ApisOfDotNet;
 
+// TODO: Use new style and merge Program.cs and Startup.cs
+
 public class Startup
 {
     public Startup(IConfiguration configuration)
