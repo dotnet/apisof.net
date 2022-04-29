@@ -20,6 +20,7 @@
     public bool IsRelevant()
     {
         return !Availability.IsAvailable ||
+               Availability.Package is not null ||
                Obsoletion is not null ||
                Platforms.Any(p => p?.IsSupported == false);
     }
