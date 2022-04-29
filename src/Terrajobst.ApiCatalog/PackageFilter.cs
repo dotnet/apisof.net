@@ -83,6 +83,7 @@ public sealed class PackageFilter
         includes: new[]
         {
             PackageFilterExpression.Parse("EntityFramework.*"),
+            PackageFilterExpression.Parse("FSharp.*"),
             PackageFilterExpression.Parse("Microsoft.AspNet.*"),
             PackageFilterExpression.Parse("Microsoft.AspNetCore.*"),
             PackageFilterExpression.Parse("Microsoft.Bcl.*"),
