@@ -139,15 +139,27 @@ internal sealed class CheckApisCommand : Command
                         writer.Write(result.AssemblyName);
                         writer.Write(result.AssemblyIssues);
 
+                        // Namespace
+                        writer.Write();
+
+                        // Type
+                        writer.Write();
+
+                        // Member
+                        writer.Write();
+
+                        // Frameworks
                         for (var i = 0; i < frameworks.Length; i++)
                             writer.Write();
 
+                        // Obsoletion
                         if (_analyzeObsoletion)
                         {
                             for (var i = 0; i < frameworks.Length; i++)
                                 writer.Write();
                         }
 
+                        // Platforms
                         for (var i = 0; i < frameworks.Length * platforms.Length; i++)
                             writer.Write();
 

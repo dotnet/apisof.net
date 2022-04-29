@@ -6,6 +6,8 @@ internal sealed class CsvWriter : IDisposable
 
     private readonly TextWriter _textWriter;
     private bool _valuesSeen;
+    private int _firstFieldCount = -1;
+    private int _currentFieldCount;
 
     public CsvWriter(TextWriter textWriter)
     {
@@ -36,10 +38,18 @@ internal sealed class CsvWriter : IDisposable
         var text = value?.ToString() ?? string.Empty;
         var escapedText = EscapeValue(text);
         _textWriter.Write(escapedText);
+        _currentFieldCount++;
     }
 
     public void WriteLine()
     {
+        if (_firstFieldCount == -1)
+            _firstFieldCount = _currentFieldCount;
+        else if (_currentFieldCount != _firstFieldCount)
+            throw new InvalidOperationException($"Field mismatch: The first row had {_firstFieldCount} fields, but the current row has {_currentFieldCount} fields.");
+
+        _currentFieldCount = 0;
+        
         if (_valuesSeen)
         {
             _valuesSeen = false;
