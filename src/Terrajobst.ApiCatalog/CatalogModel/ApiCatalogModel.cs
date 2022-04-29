@@ -306,28 +306,26 @@ public sealed partial class ApiCatalogModel
     private Dictionary<int, int> ComputeForwardedApis()
     {
         var result = new Dictionary<int, int>();
-        ForwardTypeInfoApis(result, this);
+        ForwardTypeMembers(result, this, "System.Reflection.TypeInfo", "System.Type");
+        ForwardTypeMembers(result, this, "System.Type", "System.Reflection.MemberInfo");
         return result;
 
-        static void ForwardTypeInfoApis(Dictionary<int, int> receiver, ApiCatalogModel catalog)
+        static void ForwardTypeMembers(Dictionary<int, int> receiver, ApiCatalogModel catalog, string fromTypeFullName, string toTypeFullName)
         {
-            var typeFullName = "System.Type";
-            var typeInfoFullName = "System.Reflection.TypeInfo";
+            var toApi = catalog.GetAllApis().Single(a => a.GetFullName() == toTypeFullName);
+            var fromApi = catalog.GetAllApis().Single(a => a.GetFullName() == fromTypeFullName);
 
-            var typeApi = catalog.GetAllApis().Single(a => a.GetFullName() == typeFullName);
-            var typeInfoApi = catalog.GetAllApis().Single(a => a.GetFullName() == typeInfoFullName);
-
-            var memberByRelativeName = typeApi.Descendants()
-                                              .Select(a => (Name: a.GetFullName()[(typeFullName.Length + 1)..], Api: a))
+            var toMemberByRelativeName = toApi.Descendants()
+                                              .Select(a => (Name: a.GetFullName()[(toTypeFullName.Length + 1)..], Api: a))
                                               .ToDictionary(t => t.Name, t => t.Api);
 
-            var typeInfoMembers = typeInfoApi.Descendants()
-                                             .Select(a => (Name: a.GetFullName()[(typeInfoFullName.Length + 1)..], Api: a));
+            var fromMembers = fromApi.Descendants()
+                                     .Select(a => (Name: a.GetFullName()[(fromTypeFullName.Length + 1)..], Api: a));
 
-            foreach (var (name, typeInfoMember) in typeInfoMembers)
+            foreach (var (name, fromMember) in fromMembers)
             {
-                if (memberByRelativeName.TryGetValue(name, out var typeMember))
-                    receiver.TryAdd(typeInfoMember.Id, typeMember.Id);
+                if (toMemberByRelativeName.TryGetValue(name, out var toMember))
+                    receiver.TryAdd(fromMember.Id, toMember.Id);
             }
         }
     }
