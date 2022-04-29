@@ -25,11 +25,20 @@ internal sealed class CheckApisCommand : Command
 
     public override void AddOptions(OptionSet options)
     {
+        var commandName = Path.GetFileNameWithoutExtension(Environment.ProcessPath);
+        
         options.Add("t|target=", "The {target} framework to check availability for", v => _targetFrameworkNames.Add(v));
         options.Add("obs|obsoletion", "Include information about obsoleted APIs", v => _analyzeObsoletion = true);
         options.Add("p|platform=", "The OS {platform} to check availability for", v => _targetPlatformNames.Add(v));
-        options.Add("o|out=", "The {filename} of the report", v => _outputPath = v);
+        options.Add("o|out=", "The {filename} of the report, in CSV format", v => _outputPath = v);
         options.Add("<>", null, v => _inputPaths.Add(v));
+        options.Add("");
+        options.Add("Examples:");
+        options.Add("");
+        options.Add($"  {commandName} check-apis D:\\myapp C:\\src\\file.dll -t net6.0 -o result.csv");
+        options.Add("");
+        options.Add("  Analyze file.dll and all assemblies in directory D:\\myapp (and its");
+        options.Add("  subdirectories) against .NET 6.0");
     }
 
     public override async Task ExecuteAsync()
