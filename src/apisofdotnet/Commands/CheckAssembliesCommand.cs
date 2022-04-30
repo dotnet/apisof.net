@@ -45,6 +45,8 @@ internal sealed class CheckAssembliesCommand : Command
             return;
         }
 
+        _outputPath = Path.GetFullPath(_outputPath);
+
         var filePaths =
             AnsiConsole
                 .Status()
@@ -105,7 +107,7 @@ internal sealed class CheckAssembliesCommand : Command
                                 ))
                                .OrderBy(t => t.AssemblyName);
 
-        var outputDirectory = Path.GetDirectoryName((string?)_outputPath);
+        var outputDirectory = Path.GetDirectoryName(_outputPath);
         if (outputDirectory is not null)
             Directory.CreateDirectory(outputDirectory);
 

@@ -87,6 +87,8 @@ internal sealed class CheckApisCommand : Command
             return;
         }
 
+        _outputPath = Path.GetFullPath(_outputPath);
+
         var outputDirectory = Path.GetDirectoryName(_outputPath);
         if (outputDirectory is not null)
             Directory.CreateDirectory(outputDirectory);
