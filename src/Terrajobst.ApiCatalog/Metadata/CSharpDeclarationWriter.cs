@@ -671,7 +671,7 @@ internal static class CSharpDeclarationWriter
             if (typeName.EndsWith(AttributeSuffix))
                 typeName = typeName.Substring(0, typeName.Length - AttributeSuffix.Length);
 
-            writer.WriteReference(attribute.AttributeClass, typeName);
+            writer.WriteReference(attribute.AttributeConstructor, typeName);
 
             var hasArguments = attribute.ConstructorArguments.Any() ||
                                attribute.NamedArguments.Any();
