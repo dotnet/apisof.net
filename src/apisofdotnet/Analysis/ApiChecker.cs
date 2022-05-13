@@ -17,10 +17,10 @@ internal static class ApiChecker
     {
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
         var availabilityContext = ApiAvailabilityContext.Create(catalog);
-        
+
         var platformContexts = frameworks.Select(fx => PlatformAnnotationContext.Create(availabilityContext, fx.GetShortFolderName()))
                                          .ToDictionary(pc => pc.Framework);
-        
+
         foreach (var api in catalog.GetAllApis())
         {
             var forwardedApi = catalog.GetForwardedApi(api);
@@ -75,7 +75,7 @@ internal static class ApiChecker
                         foreach (var framework in frameworks)
                         {
                             // Analyze availability
-                            
+
                             AvailabilityResult availabilityResult;
 
                             var infos = availability.Frameworks.Where(fx => fx.Framework == framework).ToArray();
@@ -96,7 +96,7 @@ internal static class ApiChecker
                             {
                                 availabilityResult = AvailabilityResult.AvailableInPackage(info.Package.Value);
                             }
-                            
+
                             // Analyze obsoletion
 
                             ObsoletionResult? obsoletionResult;
@@ -108,7 +108,7 @@ internal static class ApiChecker
                             else
                             {
                                 var compiledAgainstObsoleteApi = false;
-                                
+
                                 if (assemblyFramework is not null)
                                 {
                                     var compiledAvailability = availabilityContext.GetAvailability(api, assemblyFramework);
@@ -128,7 +128,7 @@ internal static class ApiChecker
                             }
 
                             // Analyze platform support
-                            
+
                             platformResultBuilder.Clear();
 
                             if (info is null)
@@ -143,7 +143,7 @@ internal static class ApiChecker
                                 {
                                     var annotation = platformContext.GetPlatformAnnotation(api);
                                     var isSupported = annotation.IsSupported(platform);
-                                    var platformResult = isSupported ? PlatformResult.Supported : PlatformResult.Unsupported; 
+                                    var platformResult = isSupported ? PlatformResult.Supported : PlatformResult.Unsupported;
                                     platformResultBuilder.Add(platformResult);
                                 }
                             }

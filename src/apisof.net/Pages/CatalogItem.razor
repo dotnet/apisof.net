@@ -145,6 +145,33 @@ else
                         </tr>
                     }
                     
+                    @if (PreviewRequirement is not null)
+                    {
+                        <tr>
+                            <th>Preview</th>
+                            <td>
+                                <span class="text-warning oi oi-warning mr-1"></span>
+                                @{
+                                    var message = PreviewRequirement.Value.Message;
+                                    if (string.IsNullOrEmpty(message))
+                                        message = "This API is in preview.";
+
+                                    var url = PreviewRequirement.Value.Url;
+                                    if (string.IsNullOrEmpty(url))
+                                        url = null;
+                                }
+                                @if (url is not null)
+                                {
+                                    <a href="@url">@message</a>
+                                }
+                                else
+                                {
+                                    <text>@message</text>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    
                     @if (!string.IsNullOrEmpty(HelpLink))
                     {
                         <tr>

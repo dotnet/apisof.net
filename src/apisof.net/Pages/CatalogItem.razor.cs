@@ -33,6 +33,8 @@ public partial class CatalogItem
 
     public PlatformAnnotationContext PlatformAnnotationContext { get; set; }
 
+    public PreviewRequirementModel? PreviewRequirement { get; set; }
+
     public Markup SelectedMarkup { get; set; }
 
     public string HelpLink { get; set; }
@@ -58,6 +60,7 @@ public partial class CatalogItem
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
                                Availability.Frameworks.FirstOrDefault();
         PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedFramework);
+        PreviewRequirement = GetPreviewRequirement();
 
         Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 
@@ -104,6 +107,26 @@ public partial class CatalogItem
                                                      .FirstOrDefault();
 
         return selectedFramework;
+    }
+
+    private PreviewRequirementModel? GetPreviewRequirement()
+    {
+        if (SelectedAvailability is null)
+            return null;
+
+        var assembly = SelectedAvailability.Declaration.Assembly;
+
+        foreach (var api in Api.AncestorsAndSelf())
+        {
+            if (api.Kind == ApiKind.Namespace)
+                break;
+
+            var declaration = api.Declarations.First(d => d.Assembly == assembly);
+            if (declaration.PreviewRequirement is not null)
+                return declaration.PreviewRequirement;
+        }
+
+        return assembly.PreviewRequirement;
     }
 
     private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)

@@ -93,6 +93,14 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
         }
     }
 
+    public PreviewRequirementModel? PreviewRequirement
+    {
+        get
+        {
+            return _catalog.GetPreviewRequirement(-1, _offset);
+        }
+    }
+
     public override bool Equals(object obj)
     {
         return obj is AssemblyModel model && Equals(model);

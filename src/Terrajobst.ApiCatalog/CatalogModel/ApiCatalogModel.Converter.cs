@@ -35,6 +35,7 @@ public sealed partial class ApiCatalogModel
         private readonly TableWriter _apiTable = new();
         private readonly TableWriter _obsoletionTable = new();
         private readonly TableWriter _platformSupportTable = new();
+        private readonly TableWriter _previewRequirementTable = new();
 
         private readonly List<int> _frameworkTableAssemblyPatchups = new();
         private readonly List<int> _packagesTableAssemblyPatchups = new();
@@ -78,6 +79,7 @@ public sealed partial class ApiCatalogModel
                 _apiTable,
                 _obsoletionTable,
                 _platformSupportTable,
+                _previewRequirementTable,
             };
 
             await WritePlatformsAsync();
@@ -88,6 +90,7 @@ public sealed partial class ApiCatalogModel
             await WriteApisAsync();
             await WriteObsoletionsAsync();
             await WritePlatformSupportAsync();
+            await WritePreviewRequirementsAsync();
 
             PatchFrameworks();
             PatchPackages();
@@ -559,6 +562,35 @@ public sealed partial class ApiCatalogModel
                 _platformSupportTable.WriteInt32(entry.AssemblyOffset);
                 _platformSupportTable.WriteInt32(entry.PlatformOffset);
                 _platformSupportTable.WriteBoolean(entry.IsSupported);
+            }
+        }
+
+        private async Task WritePreviewRequirementsAsync()
+        {
+            var rows = await _connection.QueryAsync<(int? ApiId, int AssemblyId, string Message, string Url)>($@"
+                SELECT  pr.ApiId,
+                        pr.AssemblyId,
+                        coalesce(pr.Message, '') AS Message,
+                        coalesce(pr.Url, '') AS Url
+                FROM    PreviewRequirements pr
+            ");
+
+            var entries = rows.Select(t => (ApiOffset: t.ApiId is null ? -1 : _apiOffsetById[t.ApiId.Value],
+                                            AssemblyOffset: _assemblyOffsetById[t.AssemblyId],
+                                            MessageOffset: WriteString(t.Message),
+                                            UrlOffset: WriteString(t.Url)))
+                              .OrderBy(t => t.ApiOffset)
+                              .ThenBy(t => t.AssemblyOffset)
+                              .ToArray();
+
+            _previewRequirementTable.WriteInt32(entries.Length);
+
+            foreach (var entry in entries)
+            {
+                _previewRequirementTable.WriteInt32(entry.ApiOffset);
+                _previewRequirementTable.WriteInt32(entry.AssemblyOffset);
+                _previewRequirementTable.WriteInt32(entry.MessageOffset);
+                _previewRequirementTable.WriteInt32(entry.UrlOffset);
             }
         }
 

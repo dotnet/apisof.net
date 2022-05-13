@@ -11,7 +11,7 @@ public sealed partial class ApiCatalogModel
     public static string Url => "https://apicatalogblob.blob.core.windows.net/catalog/apicatalog.dat";
 
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-    private const int FormatVersion = 3;
+    private const int FormatVersion = 4;
 
     private readonly int _sizeOnDisk;
     private readonly byte[] _buffer;
@@ -32,12 +32,14 @@ public sealed partial class ApiCatalogModel
     private readonly int _obsoletionTableLength;
     private readonly int _platformSupportTableOffset;
     private readonly int _platformSupportTableLength;
+    private readonly int _previewRequirementTableOffset;
+    private readonly int _previewRequirementTableLength;
 
     private Dictionary<int, int> _forwardedApis;
 
     private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
-        Debug.Assert(tableSizes.Length == 9);
+        Debug.Assert(tableSizes.Length == 10);
 
         _stringTableLength = tableSizes[0];
 
@@ -65,6 +67,9 @@ public sealed partial class ApiCatalogModel
         _platformSupportTableOffset = _obsoletionTableOffset + _obsoletionTableLength;
         _platformSupportTableLength = tableSizes[8];
 
+        _previewRequirementTableOffset = _platformSupportTableOffset + _platformSupportTableLength;
+        _previewRequirementTableLength = tableSizes[9];
+
         _buffer = buffer;
         _sizeOnDisk = sizeOnDisk;
     }
@@ -86,6 +91,8 @@ public sealed partial class ApiCatalogModel
     internal ReadOnlySpan<byte> ObsoletionTable => new(_buffer, _obsoletionTableOffset, _obsoletionTableLength);
 
     internal ReadOnlySpan<byte> PlatformSupportTable => new(_buffer, _platformSupportTableOffset, _platformSupportTableLength);
+
+    internal ReadOnlySpan<byte> PreviewRequirementTable => new(_buffer, _previewRequirementTableOffset, _previewRequirementTableLength);
 
     public FrameworkEnumerator Frameworks
     {
@@ -269,6 +276,12 @@ public sealed partial class ApiCatalogModel
             yield return new PlatformSupportModel(this, offset);
             offset += rowSize;
         }
+    }
+
+    internal PreviewRequirementModel? GetPreviewRequirement(int apiId, int assemblyId)
+    {
+        var offset = GetDeclarationTableOffset(PreviewRequirementTable, 16, apiId, assemblyId);
+        return offset < 0 ? null : new PreviewRequirementModel(this, offset);
     }
 
     public ApiCatalogStatistics GetStatistics()

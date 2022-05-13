@@ -26,7 +26,7 @@ internal sealed class CheckApisCommand : Command
     public override void AddOptions(OptionSet options)
     {
         var commandName = Path.GetFileNameWithoutExtension(Environment.ProcessPath);
-        
+
         options.Add("t|target=", "The {target} framework to check availability for", v => _targetFrameworkNames.Add(v));
         options.Add("obs|obsoletion", "Include information about obsoleted APIs", v => _analyzeObsoletion = true);
         options.Add("p|platform=", "The OS {platform} to check availability for", v => _targetPlatformNames.Add(v));
@@ -78,7 +78,7 @@ internal sealed class CheckApisCommand : Command
                 return;
             }
         }
-        
+
         var platforms = _targetPlatformNames.ToArray();
 
         if (string.IsNullOrEmpty(_outputPath))
@@ -109,7 +109,7 @@ internal sealed class CheckApisCommand : Command
             foreach (var framework in frameworks)
                 writer.Write($"{framework} obsoletion");
         }
-        
+
         foreach (var framework in frameworks)
             foreach (var platform in platforms)
                 writer.Write($"{framework} on {platform}");

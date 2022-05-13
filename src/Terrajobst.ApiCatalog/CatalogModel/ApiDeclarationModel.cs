@@ -40,6 +40,14 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         }
     }
 
+    public PreviewRequirementModel? PreviewRequirement
+    {
+        get
+        {
+            return _api.Catalog.GetPreviewRequirement(_api.Id, Assembly.Id);
+        }
+    }
+
     public Markup GetMyMarkup()
     {
         var markupOffset = _api.Catalog.ApiTable.ReadInt32(_offset + 4);

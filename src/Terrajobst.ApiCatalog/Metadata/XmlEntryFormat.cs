@@ -73,6 +73,9 @@ internal static class XmlEntryFormat
         if (assembly.PlatformSupportEntry is not null)
             AddPlatformSupport(assemblyElement, assembly.PlatformSupportEntry);
 
+        if (assembly.PreviewRequirementEntry is not null)
+            AddPreviewRequirement(assemblyElement, assembly.PreviewRequirementEntry);
+
         parent.Add(assemblyElement);
 
         foreach (var api in assembly.AllApis())
@@ -88,6 +91,9 @@ internal static class XmlEntryFormat
 
             if (api.PlatformSupportEntry is not null)
                 AddPlatformSupport(assemblyElement, api.PlatformSupportEntry, fingerprint);
+
+            if (api.PreviewRequirementEntry is not null)
+                AddPreviewRequirement(assemblyElement, api.PreviewRequirementEntry, fingerprint);
         }
     }
 
@@ -142,5 +148,20 @@ internal static class XmlEntryFormat
             );
             parent.Add(unsupportedElement);
         }
+    }
+
+    private static void AddPreviewRequirement(XContainer parent, PreviewRequirementEntry previewRequirement, string apiFingerprint = null)
+    {
+        var previewRequirementElement = new XElement("previewRequirement",
+            apiFingerprint is null ? null : new XAttribute("id", apiFingerprint)
+        );
+
+        if (previewRequirement.Message is not null)
+            previewRequirementElement.Add(new XAttribute("message", previewRequirement.Message));
+
+        if (previewRequirement.Url is not null)
+            previewRequirementElement.Add(new XAttribute("url", previewRequirement.Url));
+
+        parent.Add(previewRequirementElement);
     }
 }

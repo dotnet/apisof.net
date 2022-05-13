@@ -28,7 +28,7 @@ public sealed class MetadataContext
     {
         var capturedAssemblies = assemblies.ToImmutableArray();
         var capturedDependencies = dependencies.ToImmutableArray();
-        
+
         // NOTE: The dependencies should come first such that assemblies can "shadow" assemblies that come
         //       from the framework. This is important for packages such as System.Runtim.Experimental or
         //       System.Collections.Immutable that are designed to replace framework provided assemblies.

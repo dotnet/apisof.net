@@ -4,8 +4,14 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class ApiEntry
 {
-    private ApiEntry(Guid guid, ApiKind kind, ApiEntry parent, string name, string syntax,
-                     ObsoletionEntry obsoletionEntry, PlatformSupportEntry platformSupportEntry)
+    private ApiEntry(Guid guid,
+                     ApiKind kind,
+                     ApiEntry parent,
+                     string name,
+                     string syntax,
+                     ObsoletionEntry obsoletionEntry,
+                     PlatformSupportEntry platformSupportEntry,
+                     PreviewRequirementEntry previewRequirementEntry)
     {
         Fingerprint = guid;
         Kind = kind;
@@ -14,6 +20,7 @@ public sealed class ApiEntry
         Syntax = syntax;
         ObsoletionEntry = obsoletionEntry;
         PlatformSupportEntry = platformSupportEntry;
+        PreviewRequirementEntry = previewRequirementEntry;
     }
 
     public static ApiEntry Create(ISymbol symbol, ApiEntry parent = null)
@@ -24,7 +31,8 @@ public sealed class ApiEntry
         var syntax = symbol.GetCatalogSyntaxMarkup();
         var obsoletionEntry = ObsoletionEntry.Create(symbol);
         var platformSupportEntry = PlatformSupportEntry.Create(symbol);
-        return new ApiEntry(guid, kind, parent, name, syntax, obsoletionEntry, platformSupportEntry);
+        var previewRequirementEntry = PreviewRequirementEntry.Create(symbol);
+        return new ApiEntry(guid, kind, parent, name, syntax, obsoletionEntry, platformSupportEntry, previewRequirementEntry);
     }
 
     public Guid Fingerprint { get; }
@@ -34,5 +42,6 @@ public sealed class ApiEntry
     public string Syntax { get; }
     public ObsoletionEntry ObsoletionEntry { get; }
     public PlatformSupportEntry PlatformSupportEntry { get; }
+    public PreviewRequirementEntry PreviewRequirementEntry { get; }
     public List<ApiEntry> Children { get; } = new();
 }

@@ -24,7 +24,7 @@ internal sealed class ListPlatformsCommand : Command
                                          .OrderBy(n => n.Name);
 
         Console.WriteLine("Available platforms:");
-        
+
         foreach (var platform in platforms)
         {
             if (platform.Min == zero && platform.Max == zero)
@@ -37,7 +37,7 @@ internal sealed class ListPlatformsCommand : Command
         {
             if (version is null)
                 return string.Empty;
-            
+
             if (version.Revision == 0)
             {
                 if (version.Build == 0)

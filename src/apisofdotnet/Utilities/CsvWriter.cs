@@ -49,7 +49,7 @@ internal sealed class CsvWriter : IDisposable
             throw new InvalidOperationException($"Field mismatch: The first row had {_firstFieldCount} fields, but the current row has {_currentFieldCount} fields.");
 
         _currentFieldCount = 0;
-        
+
         if (_valuesSeen)
         {
             _valuesSeen = false;

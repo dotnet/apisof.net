@@ -4,7 +4,7 @@
     {
         ArgumentNullException.ThrowIfNull(message);
         ArgumentNullException.ThrowIfNull(url);
-        
+
         Message = message;
         Url = url;
     }
