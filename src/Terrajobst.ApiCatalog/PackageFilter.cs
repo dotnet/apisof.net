@@ -96,6 +96,7 @@ public sealed class PackageFilter
             PackageFilterExpression.Parse("Microsoft.EntityFrameworkCore.*"),
             PackageFilterExpression.Parse("Microsoft.Extensions.*"),
             PackageFilterExpression.Parse("Microsoft.JSInterop.*"),
+            PackageFilterExpression.Parse("Microsoft.Maui.*"),
             PackageFilterExpression.Parse("Microsoft.ML.*"),
             PackageFilterExpression.Parse("Microsoft.Net.Http.*"),
             PackageFilterExpression.Parse("Microsoft.ReverseProxy.*"),

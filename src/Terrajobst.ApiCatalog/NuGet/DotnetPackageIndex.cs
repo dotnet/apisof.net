@@ -14,7 +14,8 @@ public static class DotnetPackageIndex
         "RoslynTeam",
         "nugetsqltools",
         //"dotnetfoundation",
-        "newtonsoft"
+        "newtonsoft",
+        "xamarin"
     };
 
     public static async Task CreateAsync(string packageListPath)
