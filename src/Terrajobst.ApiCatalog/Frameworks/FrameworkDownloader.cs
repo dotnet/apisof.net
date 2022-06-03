@@ -581,8 +581,6 @@ public sealed class FrameworkDownloader
 
     private static async Task Download(string frameworksPath, string packsPath, FrameworkDefinition frameworkDefinition)
     {
-        var frameworkName = NuGetFramework.Parse(frameworkDefinition.FrameworkName);
-        var majorVersion = frameworkName.Version.Major;
         var entries = new List<FrameworkPackIndexEntry>();
         var frameworkPath = Path.Combine(frameworksPath, frameworkDefinition.FrameworkName);
         if (Directory.Exists(frameworkPath))
@@ -594,10 +592,10 @@ public sealed class FrameworkDownloader
         foreach (var frameworkReference in frameworkDefinition.FrameworkReferences)
         {
             var feed = new NuGetFeed(frameworkReference.NuGetFeed);
-            var range = VersionRange.Parse($"(,{frameworkReference.TargetingPackVersion}]");
+            var tpVersion = NuGetVersion.Parse(frameworkReference.TargetingPackVersion); 
 
             var versions = await feed.GetAllVersionsAsync(frameworkReference.TargetingPackName);
-            var latest = versions.Where(v => range.Satisfies(v)).DefaultIfEmpty().Max();
+            var latest = versions.Where(v => v.Major == tpVersion.Major && v.Minor == tpVersion.Minor).DefaultIfEmpty().Max();
             if (latest == null)
                 continue;
 
@@ -625,9 +623,15 @@ public sealed class FrameworkDownloader
                 var relativePath = node.Attribute("Path").Value;
                 if (type is not null && type != "Managed")
                     continue;
-                if (!relativePath.StartsWith("ref/"))
-                    relativePath = $"ref/{frameworkDefinition.FrameworkName}/{relativePath}";
-                var path = Path.GetRelativePath(frameworkPath, Path.Combine(packDirectoryPath, relativePath));
+
+                var qualifiedPath = Path.Combine(packDirectoryPath, relativePath);
+                if (!File.Exists(qualifiedPath))
+                {
+                    Console.WriteLine($"warning: {frameworkReference.TargetingPackName}: can't find '{qualifiedPath}'");
+                    continue;
+                }
+                
+                var path = Path.GetRelativePath(frameworkPath, qualifiedPath);
                 var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
                 var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
                 if (frameworkReference.Profile == null || profiles.Contains(frameworkReference.Profile, StringComparer.OrdinalIgnoreCase))
