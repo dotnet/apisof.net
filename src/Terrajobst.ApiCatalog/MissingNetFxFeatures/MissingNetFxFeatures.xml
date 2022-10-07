@@ -1,905 +1,904 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <features>
 
-	<!-- Core runtime features -->
+    <!-- Core runtime features -->
 
-	<feature name="AppDomains">
-		<description>
-			AppDomains are unsupported on .NET Core. For isolation purposes we recommend
-			to use the new AssemblyLoadContext API.
-		</description>
-		<appliesTo>
-			<type namespace="System" name="_AppDomain" />
-			<type namespace="System" name="AppDomain" />
-			<type namespace="System" name="AppDomainInitializer" />
-			<type namespace="System" name="AppDomainManager" />
-			<type namespace="System" name="AppDomainManagerInitializationOptions" />
-			<type namespace="System" name="AppDomainSetup" />
-			<type namespace="System" name="IAppDomainSetup" />
-			<type namespace="System" name="CrossAppDomainDelegate" />
-			<member namespace="System" type="Activator" name="CreateInstance(AppDomain, String, String)" />
-			<member namespace="System" type="Activator" name="CreateInstance(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[])" />
-			<member namespace="System" type="Activator" name="CreateInstanceFrom(AppDomain, String, String)" />
-			<member namespace="System" type="Activator" name="CreateInstance(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
-			<member namespace="System" type="Activator" name="CreateInstanceFrom(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
-			<member namespace="System" type="Activator" name="CreateInstanceFrom(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[])" />
-		</appliesTo>
-	</feature>
+    <feature name="AppDomains">
+        <description>
+            AppDomains are unsupported on .NET Core. For isolation purposes we recommend
+            to use the new AssemblyLoadContext API.
+        </description>
+        <appliesTo>
+            <type namespace="System" name="_AppDomain" />
+            <type namespace="System" name="AppDomain" />
+            <type namespace="System" name="AppDomainInitializer" />
+            <type namespace="System" name="AppDomainManager" />
+            <type namespace="System" name="AppDomainManagerInitializationOptions" />
+            <type namespace="System" name="AppDomainSetup" />
+            <type namespace="System" name="IAppDomainSetup" />
+            <type namespace="System" name="CrossAppDomainDelegate" />
+            <member namespace="System" type="Activator" name="CreateInstance(AppDomain, String, String)" />
+            <member namespace="System" type="Activator" name="CreateInstance(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[])" />
+            <member namespace="System" type="Activator" name="CreateInstanceFrom(AppDomain, String, String)" />
+            <member namespace="System" type="Activator" name="CreateInstance(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
+            <member namespace="System" type="Activator" name="CreateInstanceFrom(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
+            <member namespace="System" type="Activator" name="CreateInstanceFrom(AppDomain, String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[])" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Code Access Security (CAS)">
-		<description>
-			Code Access Security (CAS) is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<namespace name="System.Security.Policy" />
-			<type namespace="System.Security" name="ReadOnlyPermissionSet" />
-			<type namespace="Microsoft.Win32" name="IntranetZoneCredentialPolicy" />
-			<member namespace="System" type="Activator" name="CreateInstance(String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
-			<member namespace="System" type="Activator" name="CreateInstanceFrom(String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
-			<member namespace="System.CodeDom.Compiler"	type="CompilerResults" name="Evidence" />
-			<member namespace="System.CodeDom.Compiler" type="CompilerParameters" name="Evidence" />
-			<member namespace="System.Data.Common" type="DbProviderFactory" name="CreatePermission(PermissionState)" />
-			<member namespace="System.IO.IsolatedStorage" type="IsolatedStorage" name="GetPermission(PermissionSet)" />
-			<member namespace="System.IO.IsolatedStorage" type="IsolatedStorageFile" name="GetStore(IsolatedStorageScope, Evidence, Type, Evidence, Type)" />
-			<member namespace="System.Reflection" type="Assembly" name="Load(AssemblyName, Evidence)" />
-			<member namespace="System.Reflection" type="Assembly" name="Load(Byte[], Byte[], Evidence)" />
-			<member namespace="System.Reflection" type="Assembly" name="Load(String, Evidence)" />
-			<member namespace="System.Reflection" type="Assembly" name="LoadFile(String, Evidence)" />
-			<member namespace="System.Reflection" type="Assembly" name="LoadFrom(String, Evidence)" />
-			<member namespace="System.Reflection" type="Assembly" name="LoadFrom(String, Evidence, Byte[], AssemblyHashAlgorithm)" />
-			<member namespace="System.Reflection" type="Assembly" name="LoadWithPartialName(String, Evidence)" />
-			<member namespace="System.Reflection" type="Assembly" name="Evidence" />
-			<member namespace="System.Reflection" type="Assembly" name="PermissionSet" />
-			<member namespace="System.Reflection.Emit" type="ConstructorBuilder" name="AddDeclarativeSecurity(SecurityAction, PermissionSet)" />
-			<member namespace="System.Reflection.Emit" type="MethodBuilder" name="AddDeclarativeSecurity(SecurityAction, PermissionSet)" />
-			<member namespace="System.Reflection.Emit" type="TypeBuilder" name="AddDeclarativeSecurity(SecurityAction, PermissionSet)" />
-			<member namespace="System.Runtime.InteropServices" type="_Assembly" name="Evidence" />
-			<member namespace="System.Security" type="SecurityException" name="Action" />
-			<member namespace="System.Security" type="SecurityException" name="FirstPermissionThatFailed" />
-			<member namespace="System.Security" type="SecurityException" name="SecurityException(String, AssemblyName, PermissionSet, PermissionSet, MethodInfo, SecurityAction, Object, IPermission, Evidence)" />
-			<member namespace="System.Security" type="SecurityException" name="SecurityException(String, Object, Object, MethodInfo, Object, IPermission)" />
-			<member namespace="System.Security" type="SecurityException" name="Zone" />
-			<member namespace="System.Xml" type="XmlSecureResolver" name="CreateEvidenceForUrl(String)" />
-			<member namespace="System.Xml" type="XmlSecureResolver" name="XmlSecureResolver(XmlResolver, Evidence)" />
-			<member namespace="System.Xml" type="XmlSecureResolver" name="XmlSecureResolver(XmlResolver, PermissionSet)" />
-			<member namespace="System.Xml.Serialization" type="XmlSerializer" name="FromMappings(XmlMapping[], Evidence)" />
-			<member namespace="System.Xml.Serialization" type="XmlSerializer" name="XmlSerializer(Type, XmlAttributeOverrides, Type[], XmlRootAttribute, String, String, Evidence)" />
-			<member namespace="System.Xml.Serialization" type="XmlSerializerFactory" name="CreateSerializer(Type, XmlAttributeOverrides, Type[], XmlRootAttribute, String, String, Evidence)" />
-			<member namespace="System.Xml.Xsl" type="XslTransform" name="Load(IXPathNavigable, XmlResolver, Evidence)" />
-			<member namespace="System.Xml.Xsl" type="XslTransform" name="Load(XmlReader, XmlResolver, Evidence)" />
-			<member namespace="System.Xml.Xsl" type="XslTransform" name="Load(XPathNavigator, XmlResolver, Evidence)" />
-			<!--
-				Not necessarily CAS, but allows setting quotas for isolated storage, so it's close enough to CAS as it's
-			    another form of managed sandboxing.
-			-->
-			<member namespace="System.IO.IsolatedStorage" type="IsolatedStorage" name="Quota.set" />
-			<type namespace="System.IO.IsolatedStorage" name="IsolatedStorageSecurityOptions" />
-			<type namespace="System.IO.IsolatedStorage" name="IsolatedStorageSecurityState" />
-		</appliesTo>
-	</feature>
+    <feature name="Code Access Security (CAS)">
+        <description>
+            Code Access Security (CAS) is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <namespace name="System.Security.Policy" />
+            <type namespace="System.Security" name="ReadOnlyPermissionSet" />
+            <type namespace="Microsoft.Win32" name="IntranetZoneCredentialPolicy" />
+            <member namespace="System" type="Activator" name="CreateInstance(String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
+            <member namespace="System" type="Activator" name="CreateInstanceFrom(String, String, Boolean, BindingFlags, Binder, Object[], CultureInfo, Object[], Evidence)" />
+            <member namespace="System.CodeDom.Compiler"	type="CompilerResults" name="Evidence" />
+            <member namespace="System.CodeDom.Compiler" type="CompilerParameters" name="Evidence" />
+            <member namespace="System.Data.Common" type="DbProviderFactory" name="CreatePermission(PermissionState)" />
+            <member namespace="System.IO.IsolatedStorage" type="IsolatedStorage" name="GetPermission(PermissionSet)" />
+            <member namespace="System.IO.IsolatedStorage" type="IsolatedStorageFile" name="GetStore(IsolatedStorageScope, Evidence, Type, Evidence, Type)" />
+            <member namespace="System.Reflection" type="Assembly" name="Load(AssemblyName, Evidence)" />
+            <member namespace="System.Reflection" type="Assembly" name="Load(Byte[], Byte[], Evidence)" />
+            <member namespace="System.Reflection" type="Assembly" name="Load(String, Evidence)" />
+            <member namespace="System.Reflection" type="Assembly" name="LoadFile(String, Evidence)" />
+            <member namespace="System.Reflection" type="Assembly" name="LoadFrom(String, Evidence)" />
+            <member namespace="System.Reflection" type="Assembly" name="LoadFrom(String, Evidence, Byte[], AssemblyHashAlgorithm)" />
+            <member namespace="System.Reflection" type="Assembly" name="LoadWithPartialName(String, Evidence)" />
+            <member namespace="System.Reflection" type="Assembly" name="Evidence" />
+            <member namespace="System.Reflection" type="Assembly" name="PermissionSet" />
+            <member namespace="System.Reflection.Emit" type="ConstructorBuilder" name="AddDeclarativeSecurity(SecurityAction, PermissionSet)" />
+            <member namespace="System.Reflection.Emit" type="MethodBuilder" name="AddDeclarativeSecurity(SecurityAction, PermissionSet)" />
+            <member namespace="System.Reflection.Emit" type="TypeBuilder" name="AddDeclarativeSecurity(SecurityAction, PermissionSet)" />
+            <member namespace="System.Runtime.InteropServices" type="_Assembly" name="Evidence" />
+            <member namespace="System.Security" type="SecurityException" name="Action" />
+            <member namespace="System.Security" type="SecurityException" name="FirstPermissionThatFailed" />
+            <member namespace="System.Security" type="SecurityException" name="SecurityException(String, AssemblyName, PermissionSet, PermissionSet, MethodInfo, SecurityAction, Object, IPermission, Evidence)" />
+            <member namespace="System.Security" type="SecurityException" name="SecurityException(String, Object, Object, MethodInfo, Object, IPermission)" />
+            <member namespace="System.Security" type="SecurityException" name="Zone" />
+            <member namespace="System.Xml" type="XmlSecureResolver" name="CreateEvidenceForUrl(String)" />
+            <member namespace="System.Xml" type="XmlSecureResolver" name="XmlSecureResolver(XmlResolver, Evidence)" />
+            <member namespace="System.Xml" type="XmlSecureResolver" name="XmlSecureResolver(XmlResolver, PermissionSet)" />
+            <member namespace="System.Xml.Serialization" type="XmlSerializer" name="FromMappings(XmlMapping[], Evidence)" />
+            <member namespace="System.Xml.Serialization" type="XmlSerializer" name="XmlSerializer(Type, XmlAttributeOverrides, Type[], XmlRootAttribute, String, String, Evidence)" />
+            <member namespace="System.Xml.Serialization" type="XmlSerializerFactory" name="CreateSerializer(Type, XmlAttributeOverrides, Type[], XmlRootAttribute, String, String, Evidence)" />
+            <member namespace="System.Xml.Xsl" type="XslTransform" name="Load(IXPathNavigable, XmlResolver, Evidence)" />
+            <member namespace="System.Xml.Xsl" type="XslTransform" name="Load(XmlReader, XmlResolver, Evidence)" />
+            <member namespace="System.Xml.Xsl" type="XslTransform" name="Load(XPathNavigator, XmlResolver, Evidence)" />
+            <!--
+                Not necessarily CAS, but allows setting quotas for isolated storage, so it's close enough to CAS as it's
+                another form of managed sandboxing.
+            -->
+            <member namespace="System.IO.IsolatedStorage" type="IsolatedStorage" name="Quota.set" />
+            <type namespace="System.IO.IsolatedStorage" name="IsolatedStorageSecurityOptions" />
+            <type namespace="System.IO.IsolatedStorage" name="IsolatedStorageSecurityState" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Remoting">
-		<description>
-			Remoting is not supported on .NET Core. You should look into other means of communication,
-			such as named pipes, GRPC, or REST.
-		</description>
-		<appliesTo>
-			<namespace name="System.Runtime.Remoting.*" />
-			<member namespace="System" type="MarshalByRefObject" name="CreateObjRef(Type)" />
-			<member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="Deserialize(Stream, HeaderHandler)" />
-			<member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="DeserializeMethodResponse(Stream, HeaderHandler, IMethodCallMessage)" />
-			<member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="Serialize(Stream, Object, Header[])" />
-			<member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="UnsafeDeserialize(Stream, HeaderHandler)" />
-			<member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="UnsafeDeserializeMethodResponse(Stream, HeaderHandler, IMethodCallMessage)" />
-			<member namespace="System.Threading" type="Thread" name="CurrentContext" />
-			
-			<!-- I think these are related to remoting (docs called them "SOAP RPC") -->
-			<type namespace="System.Runtime.Serialization.Formatters" name="InternalRM" />
-			<type namespace="System.Runtime.Serialization.Formatters" name="InternalST" />
-			<type namespace="System.Runtime.Serialization.Formatters" name="ISoapMessage" />
-			<type namespace="System.Runtime.Serialization.Formatters" name="ServerFault" />
-			<type namespace="System.Runtime.Serialization.Formatters" name="SoapFault" />
-			<type namespace="System.Runtime.Serialization.Formatters" name="SoapMessage" />
-			<type namespace="System.Runtime.Serialization.Formatters.Soap" name="SoapFormatter" />
-		</appliesTo>
-	</feature>
+    <feature name="Remoting">
+        <description>
+            Remoting is not supported on .NET Core. You should look into other means of communication,
+            such as named pipes, GRPC, or REST.
+        </description>
+        <appliesTo>
+            <namespace name="System.Runtime.Remoting.*" />
+            <member namespace="System" type="MarshalByRefObject" name="CreateObjRef(Type)" />
+            <member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="Deserialize(Stream, HeaderHandler)" />
+            <member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="DeserializeMethodResponse(Stream, HeaderHandler, IMethodCallMessage)" />
+            <member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="Serialize(Stream, Object, Header[])" />
+            <member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="UnsafeDeserialize(Stream, HeaderHandler)" />
+            <member namespace="System.Runtime.Serialization.Formatters.Binary" type="BinaryFormatter" name="UnsafeDeserializeMethodResponse(Stream, HeaderHandler, IMethodCallMessage)" />
+            <member namespace="System.Threading" type="Thread" name="CurrentContext" />
+            <!-- I think these are related to remoting (docs called them "SOAP RPC") -->
+            <type namespace="System.Runtime.Serialization.Formatters" name="InternalRM" />
+            <type namespace="System.Runtime.Serialization.Formatters" name="InternalST" />
+            <type namespace="System.Runtime.Serialization.Formatters" name="ISoapMessage" />
+            <type namespace="System.Runtime.Serialization.Formatters" name="ServerFault" />
+            <type namespace="System.Runtime.Serialization.Formatters" name="SoapFault" />
+            <type namespace="System.Runtime.Serialization.Formatters" name="SoapMessage" />
+            <type namespace="System.Runtime.Serialization.Formatters.Soap" name="SoapFormatter" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Native params (__arglist)">
-		<description>
-			This feature was provided for advanced C++/CLI features which are no longer needed. You should
-			call one of the overloads that don't use __arglist.
-		</description>
-		<appliesTo>
-			<member namespace="System" type="Console" name="WriteLine(String, Object, Object, Object, Object, __arglist)" />
-			<member namespace="System" type="Console" name="Write(String, Object, Object, Object, Object, __arglist)" />
-			<member namespace="System" type="String" name="Concat(Object, Object, Object, Object, __arglist)" />
-		</appliesTo>
-	</feature>
+    <feature name="Native params (__arglist)">
+        <description>
+            This feature was provided for advanced C++/CLI features which are no longer needed. You should
+            call one of the overloads that don't use __arglist.
+        </description>
+        <appliesTo>
+            <member namespace="System" type="Console" name="WriteLine(String, Object, Object, Object, Object, __arglist)" />
+            <member namespace="System" type="Console" name="Write(String, Object, Object, Object, Object, __arglist)" />
+            <member namespace="System" type="String" name="Concat(Object, Object, Object, Object, __arglist)" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Windows Access Control Lists (ACLs)">
-		<description>
-			While .NET Core does support Windows Access Control Lists (ACLs), some of the functionality
-			has moved to extension methods while some of the static methods and constructors have moved to
-			different types.
-		</description>
-		<appliesTo>
-			<member namespace="System.IO" type="Directory" name="GetAccessControl(String)" />
-			<member namespace="System.IO" type="Directory" name="GetAccessControl(String, AccessControlSections)" />
-			<member namespace="System.IO" type="Directory" name="CreateDirectory(String, DirectorySecurity)" />
-			<member namespace="System.IO" type="Directory" name="SetAccessControl(String, DirectorySecurity)" />
-			<member namespace="System.IO" type="DirectoryInfo" name="GetAccessControl()" />
-			<member namespace="System.IO" type="DirectoryInfo" name="GetAccessControl(AccessControlSections)" />
-			<member namespace="System.IO" type="DirectoryInfo" name="Create(DirectorySecurity)" />
-			<member namespace="System.IO" type="DirectoryInfo" name="CreateSubdirectory(String, DirectorySecurity)" />
-			<member namespace="System.IO" type="DirectoryInfo" name="SetAccessControl(DirectorySecurity)" />
-			<member namespace="System.IO" type="File" name="Create(String, Int32, FileOptions, FileSecurity)" />
-			<member namespace="System.IO" type="File" name="GetAccessControl(String)" />
-			<member namespace="System.IO" type="File" name="GetAccessControl(String, AccessControlSections)" />
-			<member namespace="System.IO" type="File" name="SetAccessControl(String, FileSecurity)" />
-			<member namespace="System.IO" type="FileInfo" name="GetAccessControl()" />
-			<member namespace="System.IO" type="FileInfo" name="GetAccessControl(AccessControlSections)" />
-			<member namespace="System.IO" type="FileInfo" name="SetAccessControl(FileSecurity)" />
-			<member namespace="System.IO" type="FileStream" name="FileStream(String, FileMode, FileSystemRights, FileShare, Int32, FileOptions)" />
-			<member namespace="System.IO" type="FileStream" name="FileStream(String, FileMode, FileSystemRights, FileShare, Int32, FileOptions, FileSecurity)" />
-			<member namespace="System.IO" type="FileStream" name="GetAccessControl()" />
-			<member namespace="System.IO" type="FileStream" name="SetAccessControl(FileSecurity)" />
-			<member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="CreateFromFile(FileStream, String, Int64, MemoryMappedFileAccess, MemoryMappedFileSecurity, HandleInheritability, Boolean)" />
-			<member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="CreateNew(String, Int64, MemoryMappedFileAccess, MemoryMappedFileOptions, MemoryMappedFileSecurity, HandleInheritability)" />
-			<member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="CreateOrOpen(String, Int64, MemoryMappedFileAccess, MemoryMappedFileOptions, MemoryMappedFileSecurity, HandleInheritability)" />
-			<member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="GetAccessControl()" />
-			<member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="SetAccessControl(MemoryMappedFileSecurity)" />
-			<type namespace="System.IO.MemoryMappedFiles" name="MemoryMappedFileSecurity" />
-			<member namespace="System.IO.Pipes" type="AnonymousPipeServerStream" name="AnonymousPipeServerStream(PipeDirection, HandleInheritability, Int32, PipeSecurity)" />
-			<member namespace="System.IO.Pipes" type="NamedPipeClientStream" name="NamedPipeClientStream(String, String, PipeAccessRights, PipeOptions, TokenImpersonationLevel, HandleInheritability)" />
-			<member namespace="System.IO.Pipes" type="NamedPipeServerStream" name="NamedPipeServerStream(String, PipeDirection, Int32, PipeTransmissionMode, PipeOptions, Int32, Int32, PipeSecurity)" />
-			<member namespace="System.IO.Pipes" type="NamedPipeServerStream" name="NamedPipeServerStream(String, PipeDirection, Int32, PipeTransmissionMode, PipeOptions, Int32, Int32, PipeSecurity, HandleInheritability)" />
-			<member namespace="System.IO.Pipes" type="NamedPipeServerStream" name="NamedPipeServerStream(String, PipeDirection, Int32, PipeTransmissionMode, PipeOptions, Int32, Int32, PipeSecurity, HandleInheritability, PipeAccessRights)" />
-			<member namespace="System.IO.Pipes" type="PipeStream" name="GetAccessControl()" />
-			<member namespace="System.IO.Pipes" type="PipeStream" name="SetAccessControl(PipeSecurity)" />
-			<member namespace="System.Threading" type="EventWaitHandle" name="EventWaitHandle(Boolean, EventResetMode, String, Boolean, EventWaitHandleSecurity)" />
-			<member namespace="System.Threading" type="EventWaitHandle" name="GetAccessControl()" />
-			<member namespace="System.Threading" type="EventWaitHandle" name="OpenExisting(String, EventWaitHandleRights)" />
-			<member namespace="System.Threading" type="EventWaitHandle" name="SetAccessControl(EventWaitHandleSecurity)" />
-			<member namespace="System.Threading" type="EventWaitHandle" name="TryOpenExisting(String, EventWaitHandleRights, EventWaitHandle)" />
-			<member namespace="System.Threading" type="Mutex" name="GetAccessControl()" />
-			<member namespace="System.Threading" type="Mutex" name="Mutex(Boolean, String, Boolean, MutexSecurity)" />
-			<member namespace="System.Threading" type="Mutex" name="OpenExisting(String, MutexRights)" />
-			<member namespace="System.Threading" type="Mutex" name="SetAccessControl(MutexSecurity)" />
-			<member namespace="System.Threading" type="Mutex" name="TryOpenExisting(String, MutexRights, Mutex)" />
-			<member namespace="System.Threading" type="Semaphore" name="GetAccessControl()" />
-			<member namespace="System.Threading" type="Semaphore" name="OpenExisting(String, SemaphoreRights)" />
-			<member namespace="System.Threading" type="Semaphore" name="Semaphore(Int32, Int32, String, Boolean, SemaphoreSecurity)" />
-			<member namespace="System.Threading" type="Semaphore" name="SetAccessControl(SemaphoreSecurity)" />
-			<member namespace="System.Threading" type="Semaphore" name="TryOpenExisting(String, SemaphoreRights, Semaphore)" />
-		</appliesTo>
-	</feature>
+    <feature name="Windows Access Control Lists (ACLs)">
+        <description>
+            While .NET Core does support Windows Access Control Lists (ACLs), some of the functionality
+            has moved to extension methods while some of the static methods and constructors have moved to
+            different types.
+        </description>
+        <appliesTo>
+            <member namespace="System.IO" type="Directory" name="GetAccessControl(String)" />
+            <member namespace="System.IO" type="Directory" name="GetAccessControl(String, AccessControlSections)" />
+            <member namespace="System.IO" type="Directory" name="CreateDirectory(String, DirectorySecurity)" />
+            <member namespace="System.IO" type="Directory" name="SetAccessControl(String, DirectorySecurity)" />
+            <member namespace="System.IO" type="DirectoryInfo" name="GetAccessControl()" />
+            <member namespace="System.IO" type="DirectoryInfo" name="GetAccessControl(AccessControlSections)" />
+            <member namespace="System.IO" type="DirectoryInfo" name="Create(DirectorySecurity)" />
+            <member namespace="System.IO" type="DirectoryInfo" name="CreateSubdirectory(String, DirectorySecurity)" />
+            <member namespace="System.IO" type="DirectoryInfo" name="SetAccessControl(DirectorySecurity)" />
+            <member namespace="System.IO" type="File" name="Create(String, Int32, FileOptions, FileSecurity)" />
+            <member namespace="System.IO" type="File" name="GetAccessControl(String)" />
+            <member namespace="System.IO" type="File" name="GetAccessControl(String, AccessControlSections)" />
+            <member namespace="System.IO" type="File" name="SetAccessControl(String, FileSecurity)" />
+            <member namespace="System.IO" type="FileInfo" name="GetAccessControl()" />
+            <member namespace="System.IO" type="FileInfo" name="GetAccessControl(AccessControlSections)" />
+            <member namespace="System.IO" type="FileInfo" name="SetAccessControl(FileSecurity)" />
+            <member namespace="System.IO" type="FileStream" name="FileStream(String, FileMode, FileSystemRights, FileShare, Int32, FileOptions)" />
+            <member namespace="System.IO" type="FileStream" name="FileStream(String, FileMode, FileSystemRights, FileShare, Int32, FileOptions, FileSecurity)" />
+            <member namespace="System.IO" type="FileStream" name="GetAccessControl()" />
+            <member namespace="System.IO" type="FileStream" name="SetAccessControl(FileSecurity)" />
+            <member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="CreateFromFile(FileStream, String, Int64, MemoryMappedFileAccess, MemoryMappedFileSecurity, HandleInheritability, Boolean)" />
+            <member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="CreateNew(String, Int64, MemoryMappedFileAccess, MemoryMappedFileOptions, MemoryMappedFileSecurity, HandleInheritability)" />
+            <member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="CreateOrOpen(String, Int64, MemoryMappedFileAccess, MemoryMappedFileOptions, MemoryMappedFileSecurity, HandleInheritability)" />
+            <member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="GetAccessControl()" />
+            <member namespace="System.IO.MemoryMappedFiles" type="MemoryMappedFile" name="SetAccessControl(MemoryMappedFileSecurity)" />
+            <type namespace="System.IO.MemoryMappedFiles" name="MemoryMappedFileSecurity" />
+            <member namespace="System.IO.Pipes" type="AnonymousPipeServerStream" name="AnonymousPipeServerStream(PipeDirection, HandleInheritability, Int32, PipeSecurity)" />
+            <member namespace="System.IO.Pipes" type="NamedPipeClientStream" name="NamedPipeClientStream(String, String, PipeAccessRights, PipeOptions, TokenImpersonationLevel, HandleInheritability)" />
+            <member namespace="System.IO.Pipes" type="NamedPipeServerStream" name="NamedPipeServerStream(String, PipeDirection, Int32, PipeTransmissionMode, PipeOptions, Int32, Int32, PipeSecurity)" />
+            <member namespace="System.IO.Pipes" type="NamedPipeServerStream" name="NamedPipeServerStream(String, PipeDirection, Int32, PipeTransmissionMode, PipeOptions, Int32, Int32, PipeSecurity, HandleInheritability)" />
+            <member namespace="System.IO.Pipes" type="NamedPipeServerStream" name="NamedPipeServerStream(String, PipeDirection, Int32, PipeTransmissionMode, PipeOptions, Int32, Int32, PipeSecurity, HandleInheritability, PipeAccessRights)" />
+            <member namespace="System.IO.Pipes" type="PipeStream" name="GetAccessControl()" />
+            <member namespace="System.IO.Pipes" type="PipeStream" name="SetAccessControl(PipeSecurity)" />
+            <member namespace="System.Threading" type="EventWaitHandle" name="EventWaitHandle(Boolean, EventResetMode, String, Boolean, EventWaitHandleSecurity)" />
+            <member namespace="System.Threading" type="EventWaitHandle" name="GetAccessControl()" />
+            <member namespace="System.Threading" type="EventWaitHandle" name="OpenExisting(String, EventWaitHandleRights)" />
+            <member namespace="System.Threading" type="EventWaitHandle" name="SetAccessControl(EventWaitHandleSecurity)" />
+            <member namespace="System.Threading" type="EventWaitHandle" name="TryOpenExisting(String, EventWaitHandleRights, EventWaitHandle)" />
+            <member namespace="System.Threading" type="Mutex" name="GetAccessControl()" />
+            <member namespace="System.Threading" type="Mutex" name="Mutex(Boolean, String, Boolean, MutexSecurity)" />
+            <member namespace="System.Threading" type="Mutex" name="OpenExisting(String, MutexRights)" />
+            <member namespace="System.Threading" type="Mutex" name="SetAccessControl(MutexSecurity)" />
+            <member namespace="System.Threading" type="Mutex" name="TryOpenExisting(String, MutexRights, Mutex)" />
+            <member namespace="System.Threading" type="Semaphore" name="GetAccessControl()" />
+            <member namespace="System.Threading" type="Semaphore" name="OpenExisting(String, SemaphoreRights)" />
+            <member namespace="System.Threading" type="Semaphore" name="Semaphore(Int32, Int32, String, Boolean, SemaphoreSecurity)" />
+            <member namespace="System.Threading" type="Semaphore" name="SetAccessControl(SemaphoreSecurity)" />
+            <member namespace="System.Threading" type="Semaphore" name="TryOpenExisting(String, SemaphoreRights, Semaphore)" />
+        </appliesTo>
+    </feature>
 
-	<!-- Frameworks and App Models -->
+    <!-- Frameworks and App Models -->
 
-	<feature name="Microsoft.Build (MSBuild)">
-		<description>
-			Microsoft.Build (MSBuild) is only partially availabe for .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="Microsoft.Build.*" />
-			<assembly name="PresentationBuildTasks" />
-			<assembly name="XamlBuildTask" />
-		</appliesTo>
-	</feature>
+    <feature name="Microsoft.Build (MSBuild)">
+        <description>
+            Microsoft.Build (MSBuild) is only partially availabe for .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="Microsoft.Build.*" />
+            <assembly name="PresentationBuildTasks" />
+            <assembly name="XamlBuildTask" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Microsoft.JScript">
-		<description>
-			JScript was a managed implementation of Java Script, which is far behind current versions and
-			thus considered obsolete. There is no built-in alternative, but you could look into hosting V8.
-			Alternatively, if you use Blazor you can also call into the the browser's JavaScript engine.
-		</description>
-		<appliesTo>
-			<namespace name="Microsoft.JScript.*" />
-		</appliesTo>
-	</feature>
+    <feature name="Microsoft.JScript">
+        <description>
+            JScript was a managed implementation of Java Script, which is far behind current versions and
+            thus considered obsolete. There is no built-in alternative, but you could look into hosting V8.
+            Alternatively, if you use Blazor you can also call into the the browser's JavaScript engine.
+        </description>
+        <appliesTo>
+            <namespace name="Microsoft.JScript.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Microsoft.SqlServer.Server">
-		<description>
-			SQL CLR (i.e. the ability to host .NET code inside of a SQL Server) is not available on .NET Core.
-		</description>
-		<appliesTo>
-			<namespace name="Microsoft.SqlServer.Server" />
-		</appliesTo>
-	</feature>
+    <feature name="Microsoft.SqlServer.Server">
+        <description>
+            SQL CLR (i.e. the ability to host .NET code inside of a SQL Server) is not available on .NET Core.
+        </description>
+        <appliesTo>
+            <namespace name="Microsoft.SqlServer.Server" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Microsoft.VisualBasic">
-		<description>
-			Microsoft.VisualBasic is only partially available for .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="Microsoft.VisualBasic.*" />
-		</appliesTo>
-	</feature>
+    <feature name="Microsoft.VisualBasic">
+        <description>
+            Microsoft.VisualBasic is only partially available for .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="Microsoft.VisualBasic.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="Microsoft.VisualC">
-		<description>
-			Microsoft.VisualC is not available for .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="Microsoft.VisualC.*" />
-		</appliesTo>
-	</feature>
+    <feature name="Microsoft.VisualC">
+        <description>
+            Microsoft.VisualC is not available for .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="Microsoft.VisualC.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.AddIn (Managed Add-in Framework, MAF)">
-		<description>
-			The Managed Add-in Framework (MAF) is unsupported on .NET Core and has no replacement.
-		</description>
-		<appliesTo>
-			<namespace name="System.AddIn.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.AddIn (Managed Add-in Framework, MAF)">
+        <description>
+            The Managed Add-in Framework (MAF) is unsupported on .NET Core and has no replacement.
+        </description>
+        <appliesTo>
+            <namespace name="System.AddIn.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Configuration Installation">
-		<description>
-			System.Configuration but the installer component isn't available for .NET Core. You should use an
-			installer of your choice, for example Windows Installer XML (WIX) or InstallShield.
-		</description>
-		<appliesTo>
-			<type namespace="System.Configuration.Install" name="AssemblyInstaller" />
-			<type namespace="System.Configuration.Install" name="ComponentInstaller" />
-			<type namespace="System.Configuration.Install" name="IManagedInstaller" />
-			<type namespace="System.Configuration.Install" name="InstallContext" />
-			<type namespace="System.Configuration.Install" name="Installer" />
-			<type namespace="System.Configuration.Install" name="InstallerCollection" />
-			<type namespace="System.Configuration.Install" name="InstallEventArgs" />
-			<type namespace="System.Configuration.Install" name="InstallEventHandler" />
-			<type namespace="System.Configuration.Install" name="InstallException" />
-			<type namespace="System.Configuration.Install" name="ManagedInstallerClass" />
-			<type namespace="System.Configuration.Install" name="TransactedInstaller" />
-			<type namespace="System.Configuration.Install" name="UninstallAction" />
-			<type namespace="System.Diagnostics" name="EventLogInstaller" />
-			<type namespace="System.Diagnostics" name="PerformanceCounterInstaller" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Configuration Installation">
+        <description>
+            System.Configuration but the installer component isn't available for .NET Core. You should use an
+            installer of your choice, for example Windows Installer XML (WIX) or InstallShield.
+        </description>
+        <appliesTo>
+            <type namespace="System.Configuration.Install" name="AssemblyInstaller" />
+            <type namespace="System.Configuration.Install" name="ComponentInstaller" />
+            <type namespace="System.Configuration.Install" name="IManagedInstaller" />
+            <type namespace="System.Configuration.Install" name="InstallContext" />
+            <type namespace="System.Configuration.Install" name="Installer" />
+            <type namespace="System.Configuration.Install" name="InstallerCollection" />
+            <type namespace="System.Configuration.Install" name="InstallEventArgs" />
+            <type namespace="System.Configuration.Install" name="InstallEventHandler" />
+            <type namespace="System.Configuration.Install" name="InstallException" />
+            <type namespace="System.Configuration.Install" name="ManagedInstallerClass" />
+            <type namespace="System.Configuration.Install" name="TransactedInstaller" />
+            <type namespace="System.Configuration.Install" name="UninstallAction" />
+            <type namespace="System.Diagnostics" name="EventLogInstaller" />
+            <type namespace="System.Diagnostics" name="PerformanceCounterInstaller" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Configuration Handlers">
-		<description>
-			While System.Configuration is available for .NET Core it's considered a legacy API. You can no longer
-			use it to configure the platform itself, which is why all strongly typed app.config section handlers
-			are not available for .NET Core.
-		</description>
-		<appliesTo>
-			<type namespace="System.Configuration" name="ConfigurationBuilder" />
-			<type namespace="System.Configuration" name="ConfigurationBuilderCollection" />
-			<type namespace="System.Configuration" name="ConfigurationBuilderSettings" />
-			<type namespace="System.Configuration" name="ConfigurationBuildersSection" />
-			<type namespace="System.Configuration" name="SectionInformation" />
-			<type namespace="System.Configuration.Internal" name="DelegatingConfigHost" />
-			<type namespace="System.Configuration.Internal" name="IInternalConfigurationBuilderHost" />
-			<type namespace="System.Data.Common" name="DbProviderConfigurationHandler" />
-			<type namespace="System.Data.Common" name="DbProviderFactoriesConfigurationHandler" />
-			<type namespace="System.Data.Services.Configuration" name="DataServicesFeaturesSection" />
-			<type namespace="System.Net.Configuration" name="AuthenticationModuleElement" />
-			<type namespace="System.Net.Configuration" name="AuthenticationModuleElementCollection" />
-			<type namespace="System.Net.Configuration" name="AuthenticationModulesSection" />
-			<type namespace="System.Net.Configuration" name="BypassElement" />
-			<type namespace="System.Net.Configuration" name="BypassElementCollection" />
-			<type namespace="System.Net.Configuration" name="ConnectionManagementElement" />
-			<type namespace="System.Net.Configuration" name="ConnectionManagementElementCollection" />
-			<type namespace="System.Net.Configuration" name="ConnectionManagementSection" />
-			<type namespace="System.Net.Configuration" name="DefaultProxySection" />
-			<type namespace="System.Net.Configuration" name="FtpCachePolicyElement" />
-			<type namespace="System.Net.Configuration" name="HttpCachePolicyElement" />
-			<type namespace="System.Net.Configuration" name="HttpListenerElement" />
-			<type namespace="System.Net.Configuration" name="HttpListenerTimeoutsElement" />
-			<type namespace="System.Net.Configuration" name="HttpWebRequestElement" />
-			<type namespace="System.Net.Configuration" name="Ipv6Element" />
-			<type namespace="System.Net.Configuration" name="MailSettingsSectionGroup" />
-			<type namespace="System.Net.Configuration" name="ModuleElement" />
-			<type namespace="System.Net.Configuration" name="NetSectionGroup" />
-			<type namespace="System.Net.Configuration" name="PerformanceCountersElement" />
-			<type namespace="System.Net.Configuration" name="ProxyElement" />
-			<type namespace="System.Net.Configuration" name="ProxyElement.AutoDetectValues" />
-			<type namespace="System.Net.Configuration" name="ProxyElement.BypassOnLocalValues" />
-			<type namespace="System.Net.Configuration" name="ProxyElement.UseSystemDefaultValues" />
-			<type namespace="System.Net.Configuration" name="RequestCachingSection" />
-			<type namespace="System.Net.Configuration" name="ServicePointManagerElement" />
-			<type namespace="System.Net.Configuration" name="SettingsSection" />
-			<type namespace="System.Net.Configuration" name="SmtpNetworkElement" />
-			<type namespace="System.Net.Configuration" name="SmtpSection" />
-			<type namespace="System.Net.Configuration" name="SmtpSpecifiedPickupDirectoryElement" />
-			<type namespace="System.Net.Configuration" name="SocketElement" />
-			<type namespace="System.Net.Configuration" name="UnicodeDecodingConformance" />
-			<type namespace="System.Net.Configuration" name="UnicodeEncodingConformance" />
-			<type namespace="System.Net.Configuration" name="WebProxyScriptElement" />
-			<type namespace="System.Net.Configuration" name="WebRequestModuleElement" />
-			<type namespace="System.Net.Configuration" name="WebRequestModuleElementCollection" />
-			<type namespace="System.Net.Configuration" name="WebRequestModulesSection" />
-			<type namespace="System.Net.Configuration" name="WebUtilityElement" />
-			<type namespace="System.Net.Configuration" name="WindowsAuthenticationElement" />
-			<type namespace="System.Runtime.Caching.Configuration" name="CachingSectionGroup" />
-			<type namespace="System.Runtime.Caching.Configuration" name="MemoryCacheElement" />
-			<type namespace="System.Runtime.Caching.Configuration" name="MemoryCacheSection" />
-			<type namespace="System.Runtime.Caching.Configuration" name="MemoryCacheSettingsCollection" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="DataContractSerializerSection" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="DeclaredTypeElement" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="DeclaredTypeElementCollection" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="NetDataContractSerializerSection" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="ParameterElement" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="ParameterElementCollection" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="SerializationSectionGroup" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="TypeElement" />
-			<type namespace="System.Runtime.Serialization.Configuration" name="TypeElementCollection" />			
-			<type namespace="System.Transactions.Configuration" name="DefaultSettingsSection" />
-			<type namespace="System.Transactions.Configuration" name="MachineSettingsSection" />
-			<type namespace="System.Transactions.Configuration" name="TransactionsSectionGroup" />
-			<type namespace="System.Xml.Serialization.Configuration" name="DateTimeSerializationSection" />
-			<type namespace="System.Xml.Serialization.Configuration" name="DateTimeSerializationSection.DateTimeSerializationMode" />
-			<type namespace="System.Xml.Serialization.Configuration" name="RootedPathValidator" />
-			<type namespace="System.Xml.Serialization.Configuration" name="SchemaImporterExtensionElement" />
-			<type namespace="System.Xml.Serialization.Configuration" name="SchemaImporterExtensionElementCollection" />
-			<type namespace="System.Xml.Serialization.Configuration" name="SchemaImporterExtensionsSection" />
-			<type namespace="System.Xml.Serialization.Configuration" name="SerializationSectionGroup" />
-			<type namespace="System.Xml.Serialization.Configuration" name="XmlSerializerSection" />
-			<type namespace="System.Xml.XmlConfiguration" name="XmlReaderSection" />
-			<type namespace="System.Xml.XmlConfiguration" name="XsltConfigSection" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Configuration Handlers">
+        <description>
+            While System.Configuration is available for .NET Core it's considered a legacy API. You can no longer
+            use it to configure the platform itself, which is why all strongly typed app.config section handlers
+            are not available for .NET Core.
+        </description>
+        <appliesTo>
+            <type namespace="System.Configuration" name="ConfigurationBuilder" />
+            <type namespace="System.Configuration" name="ConfigurationBuilderCollection" />
+            <type namespace="System.Configuration" name="ConfigurationBuilderSettings" />
+            <type namespace="System.Configuration" name="ConfigurationBuildersSection" />
+            <type namespace="System.Configuration" name="SectionInformation" />
+            <type namespace="System.Configuration.Internal" name="DelegatingConfigHost" />
+            <type namespace="System.Configuration.Internal" name="IInternalConfigurationBuilderHost" />
+            <type namespace="System.Data.Common" name="DbProviderConfigurationHandler" />
+            <type namespace="System.Data.Common" name="DbProviderFactoriesConfigurationHandler" />
+            <type namespace="System.Data.Services.Configuration" name="DataServicesFeaturesSection" />
+            <type namespace="System.Net.Configuration" name="AuthenticationModuleElement" />
+            <type namespace="System.Net.Configuration" name="AuthenticationModuleElementCollection" />
+            <type namespace="System.Net.Configuration" name="AuthenticationModulesSection" />
+            <type namespace="System.Net.Configuration" name="BypassElement" />
+            <type namespace="System.Net.Configuration" name="BypassElementCollection" />
+            <type namespace="System.Net.Configuration" name="ConnectionManagementElement" />
+            <type namespace="System.Net.Configuration" name="ConnectionManagementElementCollection" />
+            <type namespace="System.Net.Configuration" name="ConnectionManagementSection" />
+            <type namespace="System.Net.Configuration" name="DefaultProxySection" />
+            <type namespace="System.Net.Configuration" name="FtpCachePolicyElement" />
+            <type namespace="System.Net.Configuration" name="HttpCachePolicyElement" />
+            <type namespace="System.Net.Configuration" name="HttpListenerElement" />
+            <type namespace="System.Net.Configuration" name="HttpListenerTimeoutsElement" />
+            <type namespace="System.Net.Configuration" name="HttpWebRequestElement" />
+            <type namespace="System.Net.Configuration" name="Ipv6Element" />
+            <type namespace="System.Net.Configuration" name="MailSettingsSectionGroup" />
+            <type namespace="System.Net.Configuration" name="ModuleElement" />
+            <type namespace="System.Net.Configuration" name="NetSectionGroup" />
+            <type namespace="System.Net.Configuration" name="PerformanceCountersElement" />
+            <type namespace="System.Net.Configuration" name="ProxyElement" />
+            <type namespace="System.Net.Configuration" name="ProxyElement.AutoDetectValues" />
+            <type namespace="System.Net.Configuration" name="ProxyElement.BypassOnLocalValues" />
+            <type namespace="System.Net.Configuration" name="ProxyElement.UseSystemDefaultValues" />
+            <type namespace="System.Net.Configuration" name="RequestCachingSection" />
+            <type namespace="System.Net.Configuration" name="ServicePointManagerElement" />
+            <type namespace="System.Net.Configuration" name="SettingsSection" />
+            <type namespace="System.Net.Configuration" name="SmtpNetworkElement" />
+            <type namespace="System.Net.Configuration" name="SmtpSection" />
+            <type namespace="System.Net.Configuration" name="SmtpSpecifiedPickupDirectoryElement" />
+            <type namespace="System.Net.Configuration" name="SocketElement" />
+            <type namespace="System.Net.Configuration" name="UnicodeDecodingConformance" />
+            <type namespace="System.Net.Configuration" name="UnicodeEncodingConformance" />
+            <type namespace="System.Net.Configuration" name="WebProxyScriptElement" />
+            <type namespace="System.Net.Configuration" name="WebRequestModuleElement" />
+            <type namespace="System.Net.Configuration" name="WebRequestModuleElementCollection" />
+            <type namespace="System.Net.Configuration" name="WebRequestModulesSection" />
+            <type namespace="System.Net.Configuration" name="WebUtilityElement" />
+            <type namespace="System.Net.Configuration" name="WindowsAuthenticationElement" />
+            <type namespace="System.Runtime.Caching.Configuration" name="CachingSectionGroup" />
+            <type namespace="System.Runtime.Caching.Configuration" name="MemoryCacheElement" />
+            <type namespace="System.Runtime.Caching.Configuration" name="MemoryCacheSection" />
+            <type namespace="System.Runtime.Caching.Configuration" name="MemoryCacheSettingsCollection" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="DataContractSerializerSection" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="DeclaredTypeElement" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="DeclaredTypeElementCollection" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="NetDataContractSerializerSection" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="ParameterElement" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="ParameterElementCollection" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="SerializationSectionGroup" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="TypeElement" />
+            <type namespace="System.Runtime.Serialization.Configuration" name="TypeElementCollection" />
+            <type namespace="System.Transactions.Configuration" name="DefaultSettingsSection" />
+            <type namespace="System.Transactions.Configuration" name="MachineSettingsSection" />
+            <type namespace="System.Transactions.Configuration" name="TransactionsSectionGroup" />
+            <type namespace="System.Xml.Serialization.Configuration" name="DateTimeSerializationSection" />
+            <type namespace="System.Xml.Serialization.Configuration" name="DateTimeSerializationSection.DateTimeSerializationMode" />
+            <type namespace="System.Xml.Serialization.Configuration" name="RootedPathValidator" />
+            <type namespace="System.Xml.Serialization.Configuration" name="SchemaImporterExtensionElement" />
+            <type namespace="System.Xml.Serialization.Configuration" name="SchemaImporterExtensionElementCollection" />
+            <type namespace="System.Xml.Serialization.Configuration" name="SchemaImporterExtensionsSection" />
+            <type namespace="System.Xml.Serialization.Configuration" name="SerializationSectionGroup" />
+            <type namespace="System.Xml.Serialization.Configuration" name="XmlSerializerSection" />
+            <type namespace="System.Xml.XmlConfiguration" name="XmlReaderSection" />
+            <type namespace="System.Xml.XmlConfiguration" name="XsltConfigSection" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Data.Entity (EF 4)">
-		<description>
-			System.Data.Entity (EF v4) is not supported on .NET Core. Use EFCore or EF6.
-		</description>
-		<appliesTo>
-			<assembly name="System.Data.Entity.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Data.Entity (EF 4)">
+        <description>
+            System.Data.Entity (EF v4) is not supported on .NET Core. Use EFCore or EF6.
+        </description>
+        <appliesTo>
+            <assembly name="System.Data.Entity.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Data.Linq (DLinq)">
-		<description>
-			System.Data.Linq (DLinq) is not supported on .NET Core. Use EFCore instead.
-		</description>
-		<appliesTo>
-			<assembly name="System.Data.Linq" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Data.Linq (DLinq)">
+        <description>
+            System.Data.Linq (DLinq) is not supported on .NET Core. Use EFCore instead.
+        </description>
+        <appliesTo>
+            <assembly name="System.Data.Linq" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Data.OracleClient">
-		<description>
-			System.Data.OracleClient is obsolete and not available for .NET Core. Use the implementation
-			provided by Oracle instead (https://www.nuget.org/profiles/Oracle).
-		</description>
-		<appliesTo>
-			<assembly name="System.Data.OracleClient" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Data.OracleClient">
+        <description>
+            System.Data.OracleClient is obsolete and not available for .NET Core. Use the implementation
+            provided by Oracle instead (https://www.nuget.org/profiles/Oracle).
+        </description>
+        <appliesTo>
+            <assembly name="System.Data.OracleClient" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Data.Services (WCF Data Services)">
-		<description>
-			System.Data.Services (WCF Data Services) is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.Data.Services.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Data.Services (WCF Data Services)">
+        <description>
+            System.Data.Services (WCF Data Services) is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.Data.Services.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Data.SqlClient Column Encryption">
-		<description>
-			SQL Client's column encryption isn't available in .NET Core.
-		</description>
-		<appliesTo>
-			<type namespace="System.Data.SqlClient" name="SqlColumnEncryptionCertificateStoreProvider" />
-			<type namespace="System.Data.SqlClient" name="SqlColumnEncryptionCngProvider" />
-			<type namespace="System.Data.SqlClient" name="SqlColumnEncryptionCspProvider" />
-			<type namespace="System.Data.SqlClient" name="SqlColumnEncryptionEnclaveProvider" />
-			<type namespace="System.Data.SqlClient" name="SqlColumnEncryptionKeyStoreProvider" />
-			<type namespace="System.Data.SqlClient" name="SqlCommandColumnEncryptionSetting" />
-			<type namespace="System.Data.SqlClient" name="SqlConnectionColumnEncryptionSetting" />
-			<member namespace="System.Data.SqlClient" type="SqlBulkCopyOptions" name="AllowEncryptedValueModifications" />
-			<member namespace="System.Data.SqlClient" type="SqlCommand" name="ColumnEncryptionSetting" />
-			<member namespace="System.Data.SqlClient" type="SqlCommand" name="SqlCommand(String, SqlConnection, SqlTransaction, SqlCommandColumnEncryptionSetting)" />
-			<member namespace="System.Data.SqlClient" type="SqlConnection" name="ColumnEncryptionKeyCacheTtl" />
-			<member namespace="System.Data.SqlClient" type="SqlConnection" name="ColumnEncryptionQueryMetadataCacheEnabled" />
-			<member namespace="System.Data.SqlClient" type="SqlConnection" name="ColumnEncryptionTrustedMasterKeyPaths" />
-			<member namespace="System.Data.SqlClient" type="SqlConnection" name="RegisterColumnEncryptionKeyStoreProviders(IDictionary&lt;String, SqlColumnEncryptionKeyStoreProvider>)" />
-			<member namespace="System.Data.SqlClient" type="SqlConnectionStringBuilder" name="ColumnEncryptionSetting" />
-			<member namespace="System.Data.SqlClient" type="SqlParameter" name="ForceColumnEncryption" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Data.SqlClient Column Encryption">
+        <description>
+            SQL Client's column encryption isn't available in .NET Core.
+        </description>
+        <appliesTo>
+            <type namespace="System.Data.SqlClient" name="SqlColumnEncryptionCertificateStoreProvider" />
+            <type namespace="System.Data.SqlClient" name="SqlColumnEncryptionCngProvider" />
+            <type namespace="System.Data.SqlClient" name="SqlColumnEncryptionCspProvider" />
+            <type namespace="System.Data.SqlClient" name="SqlColumnEncryptionEnclaveProvider" />
+            <type namespace="System.Data.SqlClient" name="SqlColumnEncryptionKeyStoreProvider" />
+            <type namespace="System.Data.SqlClient" name="SqlCommandColumnEncryptionSetting" />
+            <type namespace="System.Data.SqlClient" name="SqlConnectionColumnEncryptionSetting" />
+            <member namespace="System.Data.SqlClient" type="SqlBulkCopyOptions" name="AllowEncryptedValueModifications" />
+            <member namespace="System.Data.SqlClient" type="SqlCommand" name="ColumnEncryptionSetting" />
+            <member namespace="System.Data.SqlClient" type="SqlCommand" name="SqlCommand(String, SqlConnection, SqlTransaction, SqlCommandColumnEncryptionSetting)" />
+            <member namespace="System.Data.SqlClient" type="SqlConnection" name="ColumnEncryptionKeyCacheTtl" />
+            <member namespace="System.Data.SqlClient" type="SqlConnection" name="ColumnEncryptionQueryMetadataCacheEnabled" />
+            <member namespace="System.Data.SqlClient" type="SqlConnection" name="ColumnEncryptionTrustedMasterKeyPaths" />
+            <member namespace="System.Data.SqlClient" type="SqlConnection" name="RegisterColumnEncryptionKeyStoreProviders(IDictionary&lt;String, SqlColumnEncryptionKeyStoreProvider>)" />
+            <member namespace="System.Data.SqlClient" type="SqlConnectionStringBuilder" name="ColumnEncryptionSetting" />
+            <member namespace="System.Data.SqlClient" type="SqlParameter" name="ForceColumnEncryption" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Deployment (ClickOnce)">
-		<description>
-			ClickOnce is not available on .NET Core
-		</description>
-		<appliesTo>
-			<assembly name="System.Deployment" />
-			<type namespace="System" name="ActivationContext" />
-			<type namespace="System" name="ActivationContext.ContextForm" />
-			<member namespace="System" type="Activator" name="CreateInstance(ActivationContext)" />
-			<member namespace="System" type="Activator" name="CreateInstance(ActivationContext, String[])" />
-			<namespace name="System.Deployment.Internal" />
-			<type namespace="System.Runtime.Hosting" name="ActivationArguments" />
-			<type namespace="System.Runtime.Hosting" name="ApplicationActivator" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Deployment (ClickOnce)">
+        <description>
+            ClickOnce is not available on .NET Core
+        </description>
+        <appliesTo>
+            <assembly name="System.Deployment" />
+            <type namespace="System" name="ActivationContext" />
+            <type namespace="System" name="ActivationContext.ContextForm" />
+            <member namespace="System" type="Activator" name="CreateInstance(ActivationContext)" />
+            <member namespace="System" type="Activator" name="CreateInstance(ActivationContext, String[])" />
+            <namespace name="System.Deployment.Internal" />
+            <type namespace="System.Runtime.Hosting" name="ActivationArguments" />
+            <type namespace="System.Runtime.Hosting" name="ApplicationActivator" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Device.Location">
-		<description>
-			System.Device.Location is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.Device" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Device.Location">
+        <description>
+            System.Device.Location is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.Device" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Diagnostics.SymbolStore COM-based reader/writer">
-		<description>
-			The COM-based symbol store reader/writer isn't available on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="ISymWrapper" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Diagnostics.SymbolStore COM-based reader/writer">
+        <description>
+            The COM-based symbol store reader/writer isn't available on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="ISymWrapper" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.DirectoryServices">
-		<description>
-			System.DirectoryServices is only partially available for .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.DirectoryServices.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.DirectoryServices">
+        <description>
+            System.DirectoryServices is only partially available for .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.DirectoryServices.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.EnterpriseServices">
-		<description>
-			System.EnterpriseServices are not available for .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.EnterpriseServices" />
-		</appliesTo>
-	</feature>
+    <feature name="System.EnterpriseServices">
+        <description>
+            System.EnterpriseServices are not available for .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.EnterpriseServices" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Globalization Culture Builder">
-		<description>
-			System.Globalization's Culture Builder is not available on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="sysglobl" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Globalization Culture Builder">
+        <description>
+            System.Globalization's Culture Builder is not available on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="sysglobl" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.IdentityModel (Windows Identity Foundation, WIF)">
-		<description>
-			Windows Identity Foundation (WIF) is only partially provided on .NET Core, as
-			part of Windows Communication Foundation (WCF).
-		</description>
-		<appliesTo>
-			<assembly name="System.IdentityModel.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.IdentityModel (Windows Identity Foundation, WIF)">
+        <description>
+            Windows Identity Foundation (WIF) is only partially provided on .NET Core, as
+            part of Windows Communication Foundation (WCF).
+        </description>
+        <appliesTo>
+            <assembly name="System.IdentityModel.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.IO.Log">
-		<description>
-			System.IO.Log is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.IO.Log" />
-		</appliesTo>
-	</feature>
+    <feature name="System.IO.Log">
+        <description>
+            System.IO.Log is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.IO.Log" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Net.Http WebRequestHandler">
-		<description>
-			WebRequestHandler is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<type namespace="System.Net.Http" name="WebRequestHandler" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Net.Http WebRequestHandler">
+        <description>
+            WebRequestHandler is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <type namespace="System.Net.Http" name="WebRequestHandler" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Net.PeerToPeer">
-		<description>
-			System.Net.PeerToPeer is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<namespace name="System.Net.PeerToPeer.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Net.PeerToPeer">
+        <description>
+            System.Net.PeerToPeer is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <namespace name="System.Net.PeerToPeer.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Management.Instrumentation">
-		<description>
-			System.Management.Instrumentation is not available on .NET Core.
-		</description>
-		<appliesTo>
-			<namespace name="System.Management.Instrumentation" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Management.Instrumentation">
+        <description>
+            System.Management.Instrumentation is not available on .NET Core.
+        </description>
+        <appliesTo>
+            <namespace name="System.Management.Instrumentation" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Messaging (MSMQ)">
-		<description>
-			System.Messaging (MSMQ) is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.Messaging.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Messaging (MSMQ)">
+        <description>
+            System.Messaging (MSMQ) is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.Messaging.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Reflection.Emit Persistence">
-		<description>
-			.NET Core doesn't support using System.Reflection.Emit to create assemblies on disk. If you need to generate
-			code that can be loaded later, you should use a compiler, such as Roslyn.
-		</description>
-		<appliesTo>
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="AddResourceFile(String, String)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="AddResourceFile(String, String, ResourceAttributes)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineDynamicModule(String, Boolean)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineDynamicModule(String, String)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineDynamicModule(String, String, Boolean)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineResource(String, String, String)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineResource(String, String, String, ResourceAttributes)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineUnmanagedResource(Byte[])" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineUnmanagedResource(String)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineVersionInfoResource()" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineVersionInfoResource(String, String, String, String, String)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="Save(String)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="Save(String, PortableExecutableKinds, ImageFileMachine)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="SetEntryPoint(MethodInfo)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="SetEntryPoint(MethodInfo, PEFileKinds)" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilderAccess" name="RunAndSave" />
-			<member namespace="System.Reflection.Emit" type="AssemblyBuilderAccess" name="Save" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Reflection.Emit Persistence">
+        <description>
+            .NET Core doesn't support using System.Reflection.Emit to create assemblies on disk. If you need to generate
+            code that can be loaded later, you should use a compiler, such as Roslyn.
+        </description>
+        <appliesTo>
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="AddResourceFile(String, String)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="AddResourceFile(String, String, ResourceAttributes)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineDynamicModule(String, Boolean)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineDynamicModule(String, String)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineDynamicModule(String, String, Boolean)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineResource(String, String, String)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineResource(String, String, String, ResourceAttributes)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineUnmanagedResource(Byte[])" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineUnmanagedResource(String)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineVersionInfoResource()" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="DefineVersionInfoResource(String, String, String, String, String)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="Save(String)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="Save(String, PortableExecutableKinds, ImageFileMachine)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="SetEntryPoint(MethodInfo)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilder" name="SetEntryPoint(MethodInfo, PEFileKinds)" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilderAccess" name="RunAndSave" />
+            <member namespace="System.Reflection.Emit" type="AssemblyBuilderAccess" name="Save" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Reflection.Emit Strongly-Typed tokens">
-		<description>
-			Strongly typed tokens in reflection emit APIs aren't supported on .NET Core.
-		</description>
-		<appliesTo>
-			<type namespace="System.Reflection.Emit" name="EventToken" />
-			<type namespace="System.Reflection.Emit" name="FieldToken" />
-			<type namespace="System.Reflection.Emit" name="MethodToken" />
-			<type namespace="System.Reflection.Emit" name="ParameterToken" />
-			<type namespace="System.Reflection.Emit" name="PropertyToken" />
-			<type namespace="System.Reflection.Emit" name="SignatureToken" />
-			<type namespace="System.Reflection.Emit" name="StringToken" />
-			<type namespace="System.Reflection.Emit" name="TypeToken" />
-			<member namespace="System.Reflection.Emit" type="ConstructorBuilder" name="GetToken()" />
-			<member namespace="System.Reflection.Emit" type="EnumBuilder" name="TypeToken" />
-			<member namespace="System.Reflection.Emit" type="EventBuilder" name="GetEventToken()" />
-			<member namespace="System.Reflection.Emit" type="FieldBuilder" name="GetToken()" />
-			<member namespace="System.Reflection.Emit" type="MethodBuilder" name="GetToken()" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetArrayMethodToken(Type, String, CallingConventions, Type, Type[])" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetConstructorToken(ConstructorInfo)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetConstructorToken(ConstructorInfo, IEnumerable&lt;Type>)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetFieldToken(FieldInfo)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetMethodToken(MethodInfo)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetMethodToken(MethodInfo, IEnumerable&lt;Type>)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetSignatureToken(Byte[], Int32)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetSignatureToken(SignatureHelper)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetStringConstant(String)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetTypeToken(String)" />
-			<member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetTypeToken(Type)" />
-			<member namespace="System.Reflection.Emit" type="ParameterBuilder" name="GetToken()" />
-			<member namespace="System.Reflection.Emit" type="PropertyBuilder" name="PropertyToken" />
-			<member namespace="System.Reflection.Emit" type="TypeBuilder" name="TypeToken" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Reflection.Emit Strongly-Typed tokens">
+        <description>
+            Strongly typed tokens in reflection emit APIs aren't supported on .NET Core.
+        </description>
+        <appliesTo>
+            <type namespace="System.Reflection.Emit" name="EventToken" />
+            <type namespace="System.Reflection.Emit" name="FieldToken" />
+            <type namespace="System.Reflection.Emit" name="MethodToken" />
+            <type namespace="System.Reflection.Emit" name="ParameterToken" />
+            <type namespace="System.Reflection.Emit" name="PropertyToken" />
+            <type namespace="System.Reflection.Emit" name="SignatureToken" />
+            <type namespace="System.Reflection.Emit" name="StringToken" />
+            <type namespace="System.Reflection.Emit" name="TypeToken" />
+            <member namespace="System.Reflection.Emit" type="ConstructorBuilder" name="GetToken()" />
+            <member namespace="System.Reflection.Emit" type="EnumBuilder" name="TypeToken" />
+            <member namespace="System.Reflection.Emit" type="EventBuilder" name="GetEventToken()" />
+            <member namespace="System.Reflection.Emit" type="FieldBuilder" name="GetToken()" />
+            <member namespace="System.Reflection.Emit" type="MethodBuilder" name="GetToken()" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetArrayMethodToken(Type, String, CallingConventions, Type, Type[])" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetConstructorToken(ConstructorInfo)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetConstructorToken(ConstructorInfo, IEnumerable&lt;Type>)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetFieldToken(FieldInfo)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetMethodToken(MethodInfo)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetMethodToken(MethodInfo, IEnumerable&lt;Type>)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetSignatureToken(Byte[], Int32)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetSignatureToken(SignatureHelper)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetStringConstant(String)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetTypeToken(String)" />
+            <member namespace="System.Reflection.Emit" type="ModuleBuilder" name="GetTypeToken(Type)" />
+            <member namespace="System.Reflection.Emit" type="ParameterBuilder" name="GetToken()" />
+            <member namespace="System.Reflection.Emit" type="PropertyBuilder" name="PropertyToken" />
+            <member namespace="System.Reflection.Emit" type="TypeBuilder" name="TypeToken" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Runtime.Caching SQL Monitoring">
-		<description>
-			SQL monitoring in System.Runtime.Caching isn't available on .NET Core.
-		</description>
-		<appliesTo>
-			<type namespace="System.Runtime.Caching" name="SqlChangeMonitor" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Runtime.Caching SQL Monitoring">
+        <description>
+            SQL monitoring in System.Runtime.Caching isn't available on .NET Core.
+        </description>
+        <appliesTo>
+            <type namespace="System.Runtime.Caching" name="SqlChangeMonitor" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Runtime.InteropServices.WindowsRuntime (WinRT) Legacy APIs">
-		<description>
-			The Windows Runtime (WinRT) support has been moved to a code generator, called CsWinRT.
-		</description>
-		<appliesTo>
-			<namespace name="System.Runtime.InteropServices.WindowsRuntime" />
-			<type namespace="System.Runtime.DesignerServices" name="WindowsRuntimeDesignerContext" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Runtime.InteropServices.WindowsRuntime (WinRT) Legacy APIs">
+        <description>
+            The Windows Runtime (WinRT) support has been moved to a code generator, called CsWinRT.
+        </description>
+        <appliesTo>
+            <namespace name="System.Runtime.InteropServices.WindowsRuntime" />
+            <type namespace="System.Runtime.DesignerServices" name="WindowsRuntimeDesignerContext" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Runtime.InteropServices Legacy Helpers">
-		<description>
-			Some types in System.Runtime.InteropServices that only carry shape information are not available in .NET Core.
-			If you need them, you can copy and paste the type from the .NET Framework reference source.
-		</description>
-		<appliesTo>
-			<type namespace="System.Runtime.InteropServices" name="_Activator" />
-			<type namespace="System.Runtime.InteropServices" name="_Assembly" />
-			<type namespace="System.Runtime.InteropServices" name="_AssemblyBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_AssemblyName" />
-			<type namespace="System.Runtime.InteropServices" name="_Attribute" />
-			<type namespace="System.Runtime.InteropServices" name="_ConstructorBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_ConstructorInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_CustomAttributeBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_EnumBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_EventBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_EventInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_Exception" />
-			<type namespace="System.Runtime.InteropServices" name="_FieldBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_FieldInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_ILGenerator" />
-			<type namespace="System.Runtime.InteropServices" name="_LocalBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_MemberInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_MethodBase" />
-			<type namespace="System.Runtime.InteropServices" name="_MethodBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_MethodInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_MethodRental" />
-			<type namespace="System.Runtime.InteropServices" name="_Module" />
-			<type namespace="System.Runtime.InteropServices" name="_ModuleBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_ParameterBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_ParameterInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_PropertyBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="_PropertyInfo" />
-			<type namespace="System.Runtime.InteropServices" name="_SignatureHelper" />
-			<type namespace="System.Runtime.InteropServices" name="_Thread" />
-			<type namespace="System.Runtime.InteropServices" name="_Type" />
-			<type namespace="System.Runtime.InteropServices" name="_TypeBuilder" />
-			<type namespace="System.Runtime.InteropServices" name="AssemblyRegistrationFlags" />
-			<type namespace="System.Runtime.InteropServices" name="BIND_OPTS" />
-			<type namespace="System.Runtime.InteropServices" name="BINDPTR" />
-			<type namespace="System.Runtime.InteropServices" name="CALLCONV" />
-			<type namespace="System.Runtime.InteropServices" name="CONNECTDATA" />
-			<type namespace="System.Runtime.InteropServices" name="DESCKIND" />
-			<type namespace="System.Runtime.InteropServices" name="DISPPARAMS" />
-			<type namespace="System.Runtime.InteropServices" name="ELEMDESC" />
-			<type namespace="System.Runtime.InteropServices" name="ELEMDESC.DESCUNION" />
-			<type namespace="System.Runtime.InteropServices" name="EXCEPINFO" />
-			<type namespace="System.Runtime.InteropServices" name="ExporterEventKind" />
-			<type namespace="System.Runtime.InteropServices" name="ExtensibleClassFactory" />
-			<type namespace="System.Runtime.InteropServices" name="FILETIME" />
-			<type namespace="System.Runtime.InteropServices" name="FUNCDESC" />
-			<type namespace="System.Runtime.InteropServices" name="FUNCFLAGS" />
-			<type namespace="System.Runtime.InteropServices" name="FUNCKIND" />
-			<type namespace="System.Runtime.InteropServices" name="IDispatchImplAttribute" />
-			<type namespace="System.Runtime.InteropServices" name="IDispatchImplType" />
-			<type namespace="System.Runtime.InteropServices" name="IDLDESC" />
-			<type namespace="System.Runtime.InteropServices" name="IDLFLAG" />
-			<type namespace="System.Runtime.InteropServices" name="IMPLTYPEFLAGS" />
-			<type namespace="System.Runtime.InteropServices" name="ImporterEventKind" />
-			<type namespace="System.Runtime.InteropServices" name="INVOKEKIND" />
-			<type namespace="System.Runtime.InteropServices" name="IRegistrationServices" />
-			<type namespace="System.Runtime.InteropServices" name="ITypeLibConverter" />
-			<type namespace="System.Runtime.InteropServices" name="ITypeLibExporterNameProvider" />
-			<type namespace="System.Runtime.InteropServices" name="ITypeLibExporterNotifySink" />
-			<type namespace="System.Runtime.InteropServices" name="ITypeLibImporterNotifySink" />
-			<type namespace="System.Runtime.InteropServices" name="LIBFLAGS" />
-			<type namespace="System.Runtime.InteropServices" name="ObjectCreationDelegate" />
-			<type namespace="System.Runtime.InteropServices" name="PARAMDESC" />
-			<type namespace="System.Runtime.InteropServices" name="PARAMFLAG" />
-			<type namespace="System.Runtime.InteropServices" name="RegistrationClassContext" />
-			<type namespace="System.Runtime.InteropServices" name="RegistrationConnectionType" />
-			<type namespace="System.Runtime.InteropServices" name="RegistrationServices" />
-			<type namespace="System.Runtime.InteropServices" name="SetWin32ContextInIDispatchAttribute" />
-			<type namespace="System.Runtime.InteropServices" name="STATSTG" />
-			<type namespace="System.Runtime.InteropServices" name="SYSKIND" />
-			<type namespace="System.Runtime.InteropServices" name="TYPEATTR" />
-			<type namespace="System.Runtime.InteropServices" name="TYPEDESC" />
-			<type namespace="System.Runtime.InteropServices" name="TYPEFLAGS" />
-			<type namespace="System.Runtime.InteropServices" name="TYPEKIND" />
-			<type namespace="System.Runtime.InteropServices" name="TYPELIBATTR" />
-			<type namespace="System.Runtime.InteropServices" name="TypeLibConverter" />
-			<type namespace="System.Runtime.InteropServices" name="TypeLibExporterFlags" />
-			<type namespace="System.Runtime.InteropServices" name="TypeLibImporterFlags" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIBindCtx" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIConnectionPoint" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIConnectionPointContainer" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIEnumConnectionPoints" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIEnumConnections" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIEnumMoniker" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIEnumString" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIEnumVARIANT" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIMoniker" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIPersistFile" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIRunningObjectTable" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMIStream" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMITypeComp" />
-			<type namespace="System.Runtime.InteropServices" name="UCOMITypeInfo" />
-			<type namespace="System.Runtime.InteropServices" name="VARDESC" />
-			<type namespace="System.Runtime.InteropServices" name="VARDESC.DESCUNION" />
-			<type namespace="System.Runtime.InteropServices" name="VARFLAGS" />
-			<type namespace="System.Runtime.InteropServices.Expando" name="IExpando" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Runtime.InteropServices Legacy Helpers">
+        <description>
+            Some types in System.Runtime.InteropServices that only carry shape information are not available in .NET Core.
+            If you need them, you can copy and paste the type from the .NET Framework reference source.
+        </description>
+        <appliesTo>
+            <type namespace="System.Runtime.InteropServices" name="_Activator" />
+            <type namespace="System.Runtime.InteropServices" name="_Assembly" />
+            <type namespace="System.Runtime.InteropServices" name="_AssemblyBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_AssemblyName" />
+            <type namespace="System.Runtime.InteropServices" name="_Attribute" />
+            <type namespace="System.Runtime.InteropServices" name="_ConstructorBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_ConstructorInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_CustomAttributeBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_EnumBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_EventBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_EventInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_Exception" />
+            <type namespace="System.Runtime.InteropServices" name="_FieldBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_FieldInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_ILGenerator" />
+            <type namespace="System.Runtime.InteropServices" name="_LocalBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_MemberInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_MethodBase" />
+            <type namespace="System.Runtime.InteropServices" name="_MethodBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_MethodInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_MethodRental" />
+            <type namespace="System.Runtime.InteropServices" name="_Module" />
+            <type namespace="System.Runtime.InteropServices" name="_ModuleBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_ParameterBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_ParameterInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_PropertyBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="_PropertyInfo" />
+            <type namespace="System.Runtime.InteropServices" name="_SignatureHelper" />
+            <type namespace="System.Runtime.InteropServices" name="_Thread" />
+            <type namespace="System.Runtime.InteropServices" name="_Type" />
+            <type namespace="System.Runtime.InteropServices" name="_TypeBuilder" />
+            <type namespace="System.Runtime.InteropServices" name="AssemblyRegistrationFlags" />
+            <type namespace="System.Runtime.InteropServices" name="BIND_OPTS" />
+            <type namespace="System.Runtime.InteropServices" name="BINDPTR" />
+            <type namespace="System.Runtime.InteropServices" name="CALLCONV" />
+            <type namespace="System.Runtime.InteropServices" name="CONNECTDATA" />
+            <type namespace="System.Runtime.InteropServices" name="DESCKIND" />
+            <type namespace="System.Runtime.InteropServices" name="DISPPARAMS" />
+            <type namespace="System.Runtime.InteropServices" name="ELEMDESC" />
+            <type namespace="System.Runtime.InteropServices" name="ELEMDESC.DESCUNION" />
+            <type namespace="System.Runtime.InteropServices" name="EXCEPINFO" />
+            <type namespace="System.Runtime.InteropServices" name="ExporterEventKind" />
+            <type namespace="System.Runtime.InteropServices" name="ExtensibleClassFactory" />
+            <type namespace="System.Runtime.InteropServices" name="FILETIME" />
+            <type namespace="System.Runtime.InteropServices" name="FUNCDESC" />
+            <type namespace="System.Runtime.InteropServices" name="FUNCFLAGS" />
+            <type namespace="System.Runtime.InteropServices" name="FUNCKIND" />
+            <type namespace="System.Runtime.InteropServices" name="IDispatchImplAttribute" />
+            <type namespace="System.Runtime.InteropServices" name="IDispatchImplType" />
+            <type namespace="System.Runtime.InteropServices" name="IDLDESC" />
+            <type namespace="System.Runtime.InteropServices" name="IDLFLAG" />
+            <type namespace="System.Runtime.InteropServices" name="IMPLTYPEFLAGS" />
+            <type namespace="System.Runtime.InteropServices" name="ImporterEventKind" />
+            <type namespace="System.Runtime.InteropServices" name="INVOKEKIND" />
+            <type namespace="System.Runtime.InteropServices" name="IRegistrationServices" />
+            <type namespace="System.Runtime.InteropServices" name="ITypeLibConverter" />
+            <type namespace="System.Runtime.InteropServices" name="ITypeLibExporterNameProvider" />
+            <type namespace="System.Runtime.InteropServices" name="ITypeLibExporterNotifySink" />
+            <type namespace="System.Runtime.InteropServices" name="ITypeLibImporterNotifySink" />
+            <type namespace="System.Runtime.InteropServices" name="LIBFLAGS" />
+            <type namespace="System.Runtime.InteropServices" name="ObjectCreationDelegate" />
+            <type namespace="System.Runtime.InteropServices" name="PARAMDESC" />
+            <type namespace="System.Runtime.InteropServices" name="PARAMFLAG" />
+            <type namespace="System.Runtime.InteropServices" name="RegistrationClassContext" />
+            <type namespace="System.Runtime.InteropServices" name="RegistrationConnectionType" />
+            <type namespace="System.Runtime.InteropServices" name="RegistrationServices" />
+            <type namespace="System.Runtime.InteropServices" name="SetWin32ContextInIDispatchAttribute" />
+            <type namespace="System.Runtime.InteropServices" name="STATSTG" />
+            <type namespace="System.Runtime.InteropServices" name="SYSKIND" />
+            <type namespace="System.Runtime.InteropServices" name="TYPEATTR" />
+            <type namespace="System.Runtime.InteropServices" name="TYPEDESC" />
+            <type namespace="System.Runtime.InteropServices" name="TYPEFLAGS" />
+            <type namespace="System.Runtime.InteropServices" name="TYPEKIND" />
+            <type namespace="System.Runtime.InteropServices" name="TYPELIBATTR" />
+            <type namespace="System.Runtime.InteropServices" name="TypeLibConverter" />
+            <type namespace="System.Runtime.InteropServices" name="TypeLibExporterFlags" />
+            <type namespace="System.Runtime.InteropServices" name="TypeLibImporterFlags" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIBindCtx" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIConnectionPoint" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIConnectionPointContainer" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIEnumConnectionPoints" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIEnumConnections" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIEnumMoniker" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIEnumString" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIEnumVARIANT" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIMoniker" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIPersistFile" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIRunningObjectTable" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMIStream" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMITypeComp" />
+            <type namespace="System.Runtime.InteropServices" name="UCOMITypeInfo" />
+            <type namespace="System.Runtime.InteropServices" name="VARDESC" />
+            <type namespace="System.Runtime.InteropServices" name="VARDESC.DESCUNION" />
+            <type namespace="System.Runtime.InteropServices" name="VARFLAGS" />
+            <type namespace="System.Runtime.InteropServices.Expando" name="IExpando" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Runtime.InteropServices.CustomMarshalers">
-		<description>
-			CustomMarshallers isn't available on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="CustomMarshalers" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Runtime.InteropServices.CustomMarshalers">
+        <description>
+            CustomMarshallers isn't available on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="CustomMarshalers" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Runtime.DurableInstancing">
-		<description>
-			System.Runtime.DurableInstancing isn't available on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.Runtime.DurableInstancing" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Runtime.DurableInstancing">
+        <description>
+            System.Runtime.DurableInstancing isn't available on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.Runtime.DurableInstancing" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Runtime.Serialization.IDataContractSurrogate">
-		<description>
-			System.Runtime.Serialization.IDataContractSurrogate is not available on .NET Core. The replacement is
-			ISerializationSurrogateProvider2.
-		</description>
-		<appliesTo>
-			<type namespace="System.Runtime.Serialization" name="IDataContractSurrogate" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate)" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate, DataContractResolver)" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, String, String, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate)" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, String, String, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate, DataContractResolver)" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, XmlDictionaryString, XmlDictionaryString, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate)" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, XmlDictionaryString, XmlDictionaryString, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate, DataContractResolver)" />
-			<member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractJsonSerializer(Type, IEnumerable&lt;Type>, Int32, Boolean, IDataContractSurrogate, Boolean)" />
-			<member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractJsonSerializer(Type, String, IEnumerable&lt;Type>, Int32, Boolean, IDataContractSurrogate, Boolean)" />
-			<member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractJsonSerializer(Type, XmlDictionaryString, IEnumerable&lt;Type>, Int32, Boolean, IDataContractSurrogate, Boolean)" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSurrogate" />
-			<member namespace="System.Runtime.Serialization" type="DataContractSerializerSettings" name="DataContractSurrogate" />
-			<member namespace="System.Runtime.Serialization" type="ExportOptions" name="DataContractSurrogate.set" />
-			<member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractSurrogate" />
-			<member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializerSettings" name="DataContractSurrogate" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Runtime.Serialization.IDataContractSurrogate">
+        <description>
+            System.Runtime.Serialization.IDataContractSurrogate is not available on .NET Core. The replacement is
+            ISerializationSurrogateProvider2.
+        </description>
+        <appliesTo>
+            <type namespace="System.Runtime.Serialization" name="IDataContractSurrogate" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate)" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate, DataContractResolver)" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, String, String, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate)" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, String, String, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate, DataContractResolver)" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, XmlDictionaryString, XmlDictionaryString, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate)" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSerializer(Type, XmlDictionaryString, XmlDictionaryString, IEnumerable&lt;Type>, Int32, Boolean, Boolean, IDataContractSurrogate, DataContractResolver)" />
+            <member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractJsonSerializer(Type, IEnumerable&lt;Type>, Int32, Boolean, IDataContractSurrogate, Boolean)" />
+            <member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractJsonSerializer(Type, String, IEnumerable&lt;Type>, Int32, Boolean, IDataContractSurrogate, Boolean)" />
+            <member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractJsonSerializer(Type, XmlDictionaryString, IEnumerable&lt;Type>, Int32, Boolean, IDataContractSurrogate, Boolean)" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializer" name="DataContractSurrogate" />
+            <member namespace="System.Runtime.Serialization" type="DataContractSerializerSettings" name="DataContractSurrogate" />
+            <member namespace="System.Runtime.Serialization" type="ExportOptions" name="DataContractSurrogate.set" />
+            <member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializer" name="DataContractSurrogate" />
+            <member namespace="System.Runtime.Serialization.Json" type="DataContractJsonSerializerSettings" name="DataContractSurrogate" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Security.Principal Unsafe Windows Impersonation APIs">
-		<description>
-			We didn't bring unsafe impersonation APIs to .NET Core. Instead, use WindowsIdentity.RunImpersonated() or
-			WindowsIdentity.RunImpersonatedAsync().
-		</description>
-		<appliesTo>
-			<type namespace="System.Security.Principal" name="WindowsImpersonationContext" />
-			<member namespace="System.Security.Principal" type="WindowsIdentity" name="Impersonate()" />
-			<member namespace="System.Security.Principal" type="WindowsIdentity" name="Impersonate(IntPtr)" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Security.Principal Unsafe Windows Impersonation APIs">
+        <description>
+            We didn't bring unsafe impersonation APIs to .NET Core. Instead, use WindowsIdentity.RunImpersonated() or
+            WindowsIdentity.RunImpersonatedAsync().
+        </description>
+        <appliesTo>
+            <type namespace="System.Security.Principal" name="WindowsImpersonationContext" />
+            <member namespace="System.Security.Principal" type="WindowsIdentity" name="Impersonate()" />
+            <member namespace="System.Security.Principal" type="WindowsIdentity" name="Impersonate(IntPtr)" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.ServiceModel (Windows Communication Foundation, WCF)">
-		<description>
-			Windows Communication Foundation (WCF) is only partially provided on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.ServiceModel" />
-			<namespace name="System.ServiceModel.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.ServiceModel (Windows Communication Foundation, WCF)">
+        <description>
+            Windows Communication Foundation (WCF) is only partially provided on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.ServiceModel" />
+            <namespace name="System.ServiceModel.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.ServiceProcess Installation">
-		<description>
-			System.ServiceProcess is available such that you can author and interact with Windows services
-			but the installer component isn't available for .NET Core. You should use an installer of your
-			choice, for example Windows Installer XML (WIX) or InstallShield.
-		</description>
-		<appliesTo>
-			<type namespace="System.ServiceProcess" name="ServiceAccount" />
-			<type namespace="System.ServiceProcess" name="ServiceInstaller" />
-			<type namespace="System.ServiceProcess" name="ServiceProcessInstaller" />
-			<type namespace="System.ServiceProcess.Design" name="ServiceInstallerDialog" />
-			<type namespace="System.ServiceProcess.Design" name="ServiceInstallerDialogResult" />
-		</appliesTo>
-	</feature>
+    <feature name="System.ServiceProcess Installation">
+        <description>
+            System.ServiceProcess is available such that you can author and interact with Windows services
+            but the installer component isn't available for .NET Core. You should use an installer of your
+            choice, for example Windows Installer XML (WIX) or InstallShield.
+        </description>
+        <appliesTo>
+            <type namespace="System.ServiceProcess" name="ServiceAccount" />
+            <type namespace="System.ServiceProcess" name="ServiceInstaller" />
+            <type namespace="System.ServiceProcess" name="ServiceProcessInstaller" />
+            <type namespace="System.ServiceProcess.Design" name="ServiceInstallerDialog" />
+            <type namespace="System.ServiceProcess.Design" name="ServiceInstallerDialogResult" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Threading.Interlocked.SpeculationBarrier()">
-		<description>
-			This is a .NET Framework only concept that doesn't apply to .NET Core. Simply remove the usage
-			from your code.
-		</description>
-		<appliesTo>
-			<member namespace="System.Threading" type="Interlocked" name="SpeculationBarrier()" />
-			<member namespace="System.Reflection" type="MethodImplAttributes" name="SecurityMitigations" />
-			<member namespace="System.Runtime.CompilerServices" type="MethodImplOptions" name="SecurityMitigations" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Threading.Interlocked.SpeculationBarrier()">
+        <description>
+            This is a .NET Framework only concept that doesn't apply to .NET Core. Simply remove the usage
+            from your code.
+        </description>
+        <appliesTo>
+            <member namespace="System.Threading" type="Interlocked" name="SpeculationBarrier()" />
+            <member namespace="System.Reflection" type="MethodImplAttributes" name="SecurityMitigations" />
+            <member namespace="System.Runtime.CompilerServices" type="MethodImplOptions" name="SecurityMitigations" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Windows.Forms Legacy Controls">
-		<description>
-			System.Windows.Forms (WinForms) is available on .NET Core, but some controls are no longer available.
-		</description>
-		<appliesTo>
-			<!-- Removed in .NET 5 -->
-			<type namespace="System.Windows.Forms" name="StatusBar" />
-			<type namespace="System.Windows.Forms" name="StatusBar.StatusBarPanelCollection" />
-			<type namespace="System.Windows.Forms" name="StatusBarDrawItemEventArgs" />
-			<type namespace="System.Windows.Forms" name="StatusBarDrawItemEventHandler" />
-			<type namespace="System.Windows.Forms" name="StatusBarPanel" />
-			<type namespace="System.Windows.Forms" name="StatusBarPanelAutoSize" />
-			<type namespace="System.Windows.Forms" name="StatusBarPanelBorderStyle" />
-			<type namespace="System.Windows.Forms" name="StatusBarPanelClickEventArgs" />
-			<type namespace="System.Windows.Forms" name="StatusBarPanelClickEventHandler" />
-			<type namespace="System.Windows.Forms" name="StatusBarPanelStyle" />
+    <feature name="System.Windows.Forms Legacy Controls">
+        <description>
+            System.Windows.Forms (WinForms) is available on .NET Core, but some controls are no longer available.
+        </description>
+        <appliesTo>
+            <!-- Removed in .NET 5 -->
+            <type namespace="System.Windows.Forms" name="StatusBar" />
+            <type namespace="System.Windows.Forms" name="StatusBar.StatusBarPanelCollection" />
+            <type namespace="System.Windows.Forms" name="StatusBarDrawItemEventArgs" />
+            <type namespace="System.Windows.Forms" name="StatusBarDrawItemEventHandler" />
+            <type namespace="System.Windows.Forms" name="StatusBarPanel" />
+            <type namespace="System.Windows.Forms" name="StatusBarPanelAutoSize" />
+            <type namespace="System.Windows.Forms" name="StatusBarPanelBorderStyle" />
+            <type namespace="System.Windows.Forms" name="StatusBarPanelClickEventArgs" />
+            <type namespace="System.Windows.Forms" name="StatusBarPanelClickEventHandler" />
+            <type namespace="System.Windows.Forms" name="StatusBarPanelStyle" />
 
-			<!-- Removed in .NET Core 3.2 -->
-			<type namespace="System.Windows.Forms" name="ContextMenu" />
-			<type namespace="System.Windows.Forms" name="DataGrid" />
-			<type namespace="System.Windows.Forms" name="DataGrid.HitTestInfo" />
-			<type namespace="System.Windows.Forms" name="DataGrid.HitTestType" />
-			<type namespace="System.Windows.Forms" name="DataGridBoolColumn" />
-			<type namespace="System.Windows.Forms" name="DataGridCell" />
-			<type namespace="System.Windows.Forms" name="DataGridColumnStyle" />
-			<type namespace="System.Windows.Forms" name="DataGridColumnStyle.CompModSwitches" />
-			<type namespace="System.Windows.Forms" name="DataGridColumnStyle.DataGridColumnHeaderAccessibleObject" />
-			<type namespace="System.Windows.Forms" name="DataGridLineStyle" />
-			<type namespace="System.Windows.Forms" name="DataGridParentRowsLabelStyle" />
-			<type namespace="System.Windows.Forms" name="DataGridPreferredColumnWidthTypeConverter" />
-			<type namespace="System.Windows.Forms" name="DataGridTableStyle" />
-			<type namespace="System.Windows.Forms" name="DataGridTextBox" />
-			<type namespace="System.Windows.Forms" name="DataGridTextBoxColumn" />
-			<type namespace="System.Windows.Forms" name="GridColumnStylesCollection" />
-			<type namespace="System.Windows.Forms" name="GridTablesFactory" />
-			<type namespace="System.Windows.Forms" name="GridTableStylesCollection" />
-			<type namespace="System.Windows.Forms" name="IDataGridEditingService" />
-			<type namespace="System.Windows.Forms.Design" name="IMenuEditorService" />
-			<type namespace="System.Windows.Forms" name="MainMenu" />
-			<type namespace="System.Windows.Forms" name="Menu" />
-			<type namespace="System.Windows.Forms" name="Menu.MenuItemCollection" />
-			<type namespace="System.Windows.Forms" name="MenuItem" />
-			<type namespace="System.Windows.Forms" name="MenuMerge" />
-			<type namespace="System.Windows.Forms" name="ToolBar" />
-			<type namespace="System.Windows.Forms" name="ToolBar.ToolBarButtonCollection" />
-			<type namespace="System.Windows.Forms" name="ToolBarAppearance" />
-			<type namespace="System.Windows.Forms" name="ToolBarButton" />
-			<type namespace="System.Windows.Forms" name="ToolBarButtonClickEventArgs" />
-			<type namespace="System.Windows.Forms" name="ToolBarButtonClickEventHandler" />
-			<type namespace="System.Windows.Forms" name="ToolBarButtonStyle" />
-			<type namespace="System.Windows.Forms" name="ToolBarTextAlign" />
-			<member namespace="System.Windows.Forms" type="AxHost" name="ContextMenuChanged" />
-			<member namespace="System.Windows.Forms" type="Control" name="ContextMenu" />
-			<member namespace="System.Windows.Forms" type="Control" name="ContextMenuChanged" />
-			<member namespace="System.Windows.Forms" type="Control" name="OnContextMenuChanged(EventArgs)" />
-			<member namespace="System.Windows.Forms" type="DomainUpDown.DomainUpDownAccessibleObject" name="DomainUpDownAccessibleObject(Control)" />
-			<member namespace="System.Windows.Forms" type="Form" name="Menu" />
-			<member namespace="System.Windows.Forms" type="Form" name="MergedMenu" />
-			<member namespace="System.Windows.Forms" type="NotifyIcon" name="ContextMenu" />
-			<member namespace="System.Windows.Forms" type="PrintPreviewDialog" name="ContextMenuChanged" />
-			<member namespace="System.Windows.Forms" type="PrintPreviewDialog" name="Menu" />
-			<member namespace="System.Windows.Forms" type="ToolStripDropDown" name="ContextMenu" />
-			<member namespace="System.Windows.Forms" type="ToolStripDropDown" name="ContextMenuChanged" />
-			<member namespace="System.Windows.Forms" type="TreeNode" name="ContextMenu" />
-		</appliesTo>
-	</feature>
+            <!-- Removed in .NET Core 3.2 -->
+            <type namespace="System.Windows.Forms" name="ContextMenu" />
+            <type namespace="System.Windows.Forms" name="DataGrid" />
+            <type namespace="System.Windows.Forms" name="DataGrid.HitTestInfo" />
+            <type namespace="System.Windows.Forms" name="DataGrid.HitTestType" />
+            <type namespace="System.Windows.Forms" name="DataGridBoolColumn" />
+            <type namespace="System.Windows.Forms" name="DataGridCell" />
+            <type namespace="System.Windows.Forms" name="DataGridColumnStyle" />
+            <type namespace="System.Windows.Forms" name="DataGridColumnStyle.CompModSwitches" />
+            <type namespace="System.Windows.Forms" name="DataGridColumnStyle.DataGridColumnHeaderAccessibleObject" />
+            <type namespace="System.Windows.Forms" name="DataGridLineStyle" />
+            <type namespace="System.Windows.Forms" name="DataGridParentRowsLabelStyle" />
+            <type namespace="System.Windows.Forms" name="DataGridPreferredColumnWidthTypeConverter" />
+            <type namespace="System.Windows.Forms" name="DataGridTableStyle" />
+            <type namespace="System.Windows.Forms" name="DataGridTextBox" />
+            <type namespace="System.Windows.Forms" name="DataGridTextBoxColumn" />
+            <type namespace="System.Windows.Forms" name="GridColumnStylesCollection" />
+            <type namespace="System.Windows.Forms" name="GridTablesFactory" />
+            <type namespace="System.Windows.Forms" name="GridTableStylesCollection" />
+            <type namespace="System.Windows.Forms" name="IDataGridEditingService" />
+            <type namespace="System.Windows.Forms.Design" name="IMenuEditorService" />
+            <type namespace="System.Windows.Forms" name="MainMenu" />
+            <type namespace="System.Windows.Forms" name="Menu" />
+            <type namespace="System.Windows.Forms" name="Menu.MenuItemCollection" />
+            <type namespace="System.Windows.Forms" name="MenuItem" />
+            <type namespace="System.Windows.Forms" name="MenuMerge" />
+            <type namespace="System.Windows.Forms" name="ToolBar" />
+            <type namespace="System.Windows.Forms" name="ToolBar.ToolBarButtonCollection" />
+            <type namespace="System.Windows.Forms" name="ToolBarAppearance" />
+            <type namespace="System.Windows.Forms" name="ToolBarButton" />
+            <type namespace="System.Windows.Forms" name="ToolBarButtonClickEventArgs" />
+            <type namespace="System.Windows.Forms" name="ToolBarButtonClickEventHandler" />
+            <type namespace="System.Windows.Forms" name="ToolBarButtonStyle" />
+            <type namespace="System.Windows.Forms" name="ToolBarTextAlign" />
+            <member namespace="System.Windows.Forms" type="AxHost" name="ContextMenuChanged" />
+            <member namespace="System.Windows.Forms" type="Control" name="ContextMenu" />
+            <member namespace="System.Windows.Forms" type="Control" name="ContextMenuChanged" />
+            <member namespace="System.Windows.Forms" type="Control" name="OnContextMenuChanged(EventArgs)" />
+            <member namespace="System.Windows.Forms" type="DomainUpDown.DomainUpDownAccessibleObject" name="DomainUpDownAccessibleObject(Control)" />
+            <member namespace="System.Windows.Forms" type="Form" name="Menu" />
+            <member namespace="System.Windows.Forms" type="Form" name="MergedMenu" />
+            <member namespace="System.Windows.Forms" type="NotifyIcon" name="ContextMenu" />
+            <member namespace="System.Windows.Forms" type="PrintPreviewDialog" name="ContextMenuChanged" />
+            <member namespace="System.Windows.Forms" type="PrintPreviewDialog" name="Menu" />
+            <member namespace="System.Windows.Forms" type="ToolStripDropDown" name="ContextMenu" />
+            <member namespace="System.Windows.Forms" type="ToolStripDropDown" name="ContextMenuChanged" />
+            <member namespace="System.Windows.Forms" type="TreeNode" name="ContextMenu" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Windows.Forms Designer (WinForms Designer)">
-		<description>
-			In .NET Core, System.Design (WinForms Designer) is part of Visual Studio.
-		</description>
-		<appliesTo>
-			<assembly name="System.Design" />
-			<assembly name="System.Drawing.Design" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Windows.Forms Designer (WinForms Designer)">
+        <description>
+            In .NET Core, System.Design (WinForms Designer) is part of Visual Studio.
+        </description>
+        <appliesTo>
+            <assembly name="System.Design" />
+            <assembly name="System.Drawing.Design" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Web">
-		<description>
-			System.Web has been replaced by ASP.NET Core.
-		</description>
-		<appliesTo>
-			<namespace name="System.Web.*" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Web">
+        <description>
+            System.Web has been replaced by ASP.NET Core.
+        </description>
+        <appliesTo>
+            <namespace name="System.Web.*" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Workflow (Windows Workflow Foundation, WF)">
-		<description>
-			The Windows Workflow Foundation (WF) is unsupported on .NET Core. UiPath have used the
-			.NET Framework reference source to provide an implementation for .NET Core, which you
-			can find in their GitHub organization at https://github.com/UiPath/corewf.
-		</description>
-		<appliesTo>
-			<assembly name="Microsoft.Activities.Build" />
-			<assembly name="System.Activities.*" />
-			<assembly name="System.Workflow.*" />
-			<assembly name="System.WorkflowServices" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Workflow (Windows Workflow Foundation, WF)">
+        <description>
+            The Windows Workflow Foundation (WF) is unsupported on .NET Core. UiPath have used the
+            .NET Framework reference source to provide an implementation for .NET Core, which you
+            can find in their GitHub organization at https://github.com/UiPath/corewf.
+        </description>
+        <appliesTo>
+            <assembly name="Microsoft.Activities.Build" />
+            <assembly name="System.Activities.*" />
+            <assembly name="System.Workflow.*" />
+            <assembly name="System.WorkflowServices" />
+        </appliesTo>
+    </feature>
 
-	<feature name="System.Xml.Xsl.Runtime (SqlXml)">
-		<description>
-			System.Xml.Xsl.Runtime (SqlXml) is not supported on .NET Core.
-		</description>
-		<appliesTo>
-			<assembly name="System.Data.SqlXml" />
-		</appliesTo>
-	</feature>
+    <feature name="System.Xml.Xsl.Runtime (SqlXml)">
+        <description>
+            System.Xml.Xsl.Runtime (SqlXml) is not supported on .NET Core.
+        </description>
+        <appliesTo>
+            <assembly name="System.Data.SqlXml" />
+        </appliesTo>
+    </feature>
 
 </features>
