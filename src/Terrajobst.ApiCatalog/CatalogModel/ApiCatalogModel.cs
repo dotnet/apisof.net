@@ -353,6 +353,14 @@ public sealed partial class ApiCatalogModel
         return await LoadAsync(memoryStream);
     }
 
+    public static async Task DownloadFromWebAsync(string fileName)
+    {
+        using var client = new HttpClient();
+        await using var networkStream = await client.GetStreamAsync(Url);
+        await using var fileStream = File.Create(fileName);
+        await networkStream.CopyToAsync(fileStream);
+    }
+
     public static async Task<ApiCatalogModel> LoadAsync(string path)
     {
         await using var stream = File.OpenRead(path);
