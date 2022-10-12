@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Xml.Linq;
 
 namespace Terrajobst.ApiCatalog;
@@ -63,10 +64,10 @@ public sealed class MissingNetFxFeatureContext
                 switch (element.Name.LocalName)
                 {
                     case "description":
-                        description = element.Value;
+                        description = ParseValueAndCollapseWhitespace(element);
                         break;
                     case "url":
-                        url = element.Value;
+                        url = ParseValueAndCollapseWhitespace(element);
                         break;
                     case "appliesTo":
                         appliesTo = ParseAppliesTo(element);
@@ -143,6 +144,36 @@ public sealed class MissingNetFxFeatureContext
                 throw new Exception($"Element <{element.Name}> is missing attribute '{name}'");
 
             return attribute.Value;
+        }
+
+        static string ParseValueAndCollapseWhitespace(XElement element)
+        {
+            var sb = new StringBuilder();
+            var text = element.Value;
+
+            var lastIsWhitespace = false;
+
+            foreach (var c in text)
+            {
+                var normalizedC = c == '\r' || c == '\n' ? ' ' : c;
+
+                if (!char.IsWhiteSpace(normalizedC))
+                {
+                    lastIsWhitespace = false;
+                }
+                else if (lastIsWhitespace)
+                {
+                    continue;
+                }
+                else
+                {
+                    lastIsWhitespace = true;
+                }
+
+                sb.Append(normalizedC);
+            }
+
+            return sb.ToString().Trim();
         }
     }
 
