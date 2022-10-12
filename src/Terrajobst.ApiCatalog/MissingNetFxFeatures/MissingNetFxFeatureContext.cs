@@ -202,8 +202,8 @@ public sealed class MissingNetFxFeatureContext
     public IReadOnlyList<ApiMatcher> GetUnusedMatchers()
     {
         return Features.SelectMany(t => t.AppliesTo)
-                           .Where(m => !_usedMatchers.Contains(m))
-                           .ToArray();
+                       .Where(m => !_usedMatchers.Contains(m))
+                       .ToArray();
     }
 }
 
