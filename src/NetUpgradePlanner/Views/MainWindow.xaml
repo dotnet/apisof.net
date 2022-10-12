@@ -1,0 +1,244 @@
+﻿<Window x:Class="NetUpgradePlanner.Views.MainWindow"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="{Binding Title}"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True"
+        Width="800"
+        Height="600"
+        Background="{x:Static SystemColors.ControlBrush}"
+        Loaded="Window_Loaded">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl"
+                    Key="N"
+                    Command="{Binding NewCommand}" />
+        <KeyBinding Modifiers="Ctrl"
+                    Key="O"
+                    Command="{Binding OpenCommand}" />
+        <KeyBinding Modifiers="Ctrl"
+                    Key="S"
+                    Command="{Binding SaveCommand}" />
+        <KeyBinding Modifiers="Ctrl+Alt"
+                    Key="S"
+                    Command="{Binding SaveAsCommand}" />
+        <KeyBinding Modifiers="Ctrl+Shift"
+                    Key="E"
+                    Command="{Binding ExportCommand}" />
+        <KeyBinding Modifiers="Ctrl+Shift"
+                    Key="O"
+                    Command="{Binding AddFilesCommand}" />
+        <KeyBinding Modifiers="Ctrl+Shift+Alt"
+                    Key="O"
+                    Command="{Binding AddFolderCommand}" />
+        <KeyBinding Key="F5"
+                    Command="{Binding AnalyzeCommand}" />
+    </Window.InputBindings>
+    <Window.Resources>
+        <Style TargetType="DataGridCell">
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin"
+                         Value="true">
+                    <Setter Property="BorderBrush"
+                            Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+                </Trigger>
+            </Style.Triggers>
+            <Setter Property="FocusVisualStyle">
+                <Setter.Value>
+                    <Style />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <Grid DockPanel.Dock="Top">
+            <Menu>
+                <MenuItem Header="_File">
+                    <MenuItem Header="_New"
+                              InputGestureText="Ctrl+N"
+                              Command="{Binding NewCommand}" />
+                    <MenuItem Header="_Open..."
+                              InputGestureText="Ctrl+O"
+                              Command="{Binding OpenCommand}" />
+                    <Separator />
+                    <MenuItem Header="_Save"
+                              InputGestureText="Ctrl+S"
+                              Command="{Binding SaveCommand}" />
+                    <MenuItem Header="Save _As..."
+                              InputGestureText="Ctrl+Alt+S"
+                              Command="{Binding SaveAsCommand}" />
+                    <MenuItem Header="_Export..."
+                              InputGestureText="Ctrl+Shift+E"
+                              Command="{Binding ExportCommand}" />
+                    <Separator />
+                    <MenuItem Header="Add _Files..."
+                              InputGestureText="Ctrl+Shift+O"
+                              Command="{Binding AddFilesCommand}" />
+                    <MenuItem Header="Add Fol_der..."
+                              InputGestureText="Ctrl+Shift+Alt+O"
+                              Command="{Binding AddFolderCommand}" />
+                    <Separator />
+                    <MenuItem Header="E_xit"
+                              InputGestureText="Alt+F4"
+                              Click="ExitMenuItem_Click" />
+                </MenuItem>
+                <MenuItem Header="_Tools">
+                    <MenuItem Header="_Analyze..."
+                              InputGestureText="F5"
+                              Command="{Binding AnalyzeCommand}" />
+                    <Separator />
+                    <MenuItem Header="Share anonymized API usage"
+                              IsCheckable="True"
+                              IsChecked="{Binding SendTelemetry}" />
+                    <Separator />
+                    <MenuItem Header="Update catalog"
+                              Command="{Binding UpdateCatalogCommand}" />
+                    <Separator />
+                    <MenuItem Header="Check for updates..."
+                              Command="{Binding CheckForApplicationUpdateCommand}" />
+                    <MenuItem Header="About..."
+                              Command="{Binding AboutCommand}" />
+                </MenuItem>
+            </Menu>
+
+            <Button HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Content="Update Application"
+                    Command="{Binding UpdateApplicationCommand}">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Border Background="Green"
+                                CornerRadius="8"
+                                Margin="2"
+                                Padding="8,0,8,0"
+                                Cursor="Hand">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock TextAlignment="Center"
+                                           FontWeight="Bold"
+                                           Text="⬇️"
+                                           Width="16"
+                                           Height="16"
+                                           Foreground="White" />
+                                <TextBlock Text="Update..."
+                                           Foreground="White" />
+                            </StackPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasApplicationUpdate}"
+                                         Value="False">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+        <Grid Margin="4">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="4" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="4" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl x:Name="AssemblyListViewHost"
+                                    Grid.Column="0" />
+                    <GridSplitter Grid.Column="1"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch" />
+                    <ContentControl x:Name="ProblemListViewHost"
+                                    Grid.Column="2" />
+                </Grid>
+                <GridSplitter Grid.Row="1"
+                              HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch" />
+                <ContentControl x:Name="GraphViewHost"
+                                Grid.Row="2" />
+            </Grid>
+            <Grid Background="{x:Static SystemColors.ControlBrush}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsEmpty}"
+                                         Value="False">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <TextBlock Text="Select assemblies to analyze."
+                               Foreground="{x:Static SystemColors.GrayTextBrush}" />
+                    <Button Margin="0,12,0,0"
+                            MinHeight="21"
+                            Width="85"
+                            Content="Open Project"
+                            Command="{Binding OpenCommand}" />
+                    <Button Margin="0,12,0,0"
+                            MinHeight="21"
+                            Width="85"
+                            Content="Select Files"
+                            Command="{Binding AddFilesCommand}" />
+                    <Button Margin="0,12,0,0"
+                            MinHeight="21"
+                            Width="85"
+                            Content="Select Folder"
+                            Command="{Binding AddFolderCommand}" />
+                </StackPanel>
+            </Grid>
+            <Grid Background="{x:Static SystemColors.ControlBrush}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Progress.IsRunning}"
+                                         Value="False">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <StackPanel Orientation="Vertical"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    <ProgressBar Width="200"
+                                 Height="15"
+                                 Value="{Binding Progress.Percentage, Mode=OneWay}"
+                                 Minimum="0"
+                                 Maximum="1.0">
+                        <ProgressBar.Style>
+                            <Style TargetType="ProgressBar">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Progress.HasPercentage}"
+                                                 Value="False">
+                                        <Setter Property="IsIndeterminate"
+                                                Value="True" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ProgressBar.Style>
+                    </ProgressBar>
+                    <TextBlock Text="{Binding Progress.Text}"
+                               Margin="0,10,0,0"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

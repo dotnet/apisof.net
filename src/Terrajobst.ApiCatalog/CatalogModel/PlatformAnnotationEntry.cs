@@ -20,7 +20,7 @@ public readonly struct PlatformAnnotationEntry : IEquatable<PlatformAnnotationEn
         return $"{FormatPlatform(Name)} {Range}";
     }
 
-    private static string FormatPlatform(string name)
+    public static string FormatPlatform(string name)
     {
         return name.ToLowerInvariant() switch
         {
@@ -32,6 +32,7 @@ public readonly struct PlatformAnnotationEntry : IEquatable<PlatformAnnotationEn
             "linux" => "Linux",
             "maccatalyst" => "Mac Catalyst",
             "macos" => "macOS",
+            "osx" => "OS X",
             "solaris" => "Solaris",
             "tvos" => "tvOS",
             "watchos" => "watchOS",

@@ -1,0 +1,65 @@
+﻿<Window x:Class="NetUpgradePlanner.Views.SelectPlatformsDialog"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NetUpgradePlanner.Views"
+        mc:Ignorable="d"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True"
+        Width="500"
+        Height="300"
+        Background="{x:Static SystemColors.ControlBrush}"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="Height"
+        Title="Select Platforms">
+    <StackPanel Margin="8">
+        <StackPanel>
+            <RadioButton Content="_Any"
+                         Margin="8,8,8,0"
+                         IsChecked="{Binding Any}" />
+            <RadioButton x:Name="SpecificPlatformsRadioButton"
+                         Margin="8,8,8,0"
+                         Content="_Specific"
+                         IsChecked="{Binding Specific}" />
+            <ListBox Margin="4,4,4,0"
+                     ItemsSource="{Binding Platforms}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox Content="{Binding DisplayName}"
+                                  IsChecked="{Binding IsChecked}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+                <ListBox.Style>
+                    <Style TargetType="ListBox">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=SpecificPlatformsRadioButton}"
+                                         Value="False">
+                                <Setter Property="IsEnabled"
+                                        Value="False" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.Style>
+            </ListBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="8,8,0,8">
+            <Button x:Name="OkButton"
+                    MinWidth="85"
+                    MinHeight="21"
+                    IsDefault="True"
+                    Content="_OK"
+                    Click="OkButton_Click" />
+            <Button Margin="8,0,0,0"
+                    MinWidth="85"
+                    MinHeight="21"
+                    IsCancel="True"
+                    Content="_Cancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

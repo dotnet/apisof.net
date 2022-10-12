@@ -1,0 +1,36 @@
+name: Deploy Telemetry
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/deploy-telemetry.yml
+      - src/NetUpgradePlannerTelemetry/**
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get code
+      uses: actions/checkout@v2
+
+    - name: Get .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.*'
+
+    - name: dotnet publish
+      run: |
+        cd src/NetUpgradePlannerTelemetry
+        dotnet publish -c Release -o '../../artifacts/NetUpgradePlannerTelemetry'
+
+    - name: Deploy Azure Function
+      uses: Azure/functions-action@v1
+      with:
+        app-name: NetUpgradePlannerTelemetry
+        publish-profile: ${{ secrets.AZURE_FUNCTIONS_PUBLISH_PROFILE  }}
+        package: ./artifacts/NetUpgradePlannerTelemetry

@@ -1,0 +1,75 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+	  <UseWindowsForms>true</UseWindowsForms>
+	  <ApplicationIcon>NetUpgradePlanner.ico</ApplicationIcon>
+    <ApplicationManifest>App.manifest</ApplicationManifest>
+    <Product>.NET Upgrade Planner</Product>
+    <AssemblyTitle>$(Product)</AssemblyTitle>
+    <NoWarn>WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Assembly.png" />
+    <None Remove="Resources\Class.png" />
+    <None Remove="Resources\Constant.png" />
+    <None Remove="Resources\Delegate.png" />
+    <None Remove="Resources\Enum.png" />
+    <None Remove="Resources\EnumItem.png" />
+    <None Remove="Resources\Error.png" />
+    <None Remove="Resources\Event.png" />
+    <None Remove="Resources\Field.png" />
+    <None Remove="Resources\Interface.png" />
+    <None Remove="Resources\Method.png" />
+    <None Remove="Resources\Namespace.png" />
+    <None Remove="Resources\Operator.png" />
+    <None Remove="Resources\Property.png" />
+    <None Remove="Resources\Struct.png" />
+    <None Remove="Resources\Warning.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="NetUpgradePlanner.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Clowd.Squirrel" Version="2.9.42" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
+    <PackageReference Include="Microsoft.Cci.Extensions" Version="7.0.0-beta.22175.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.4.255">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="SharpVectors.Wpf" Version="1.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+	  <ProjectReference Include="..\Terrajobst.UsageCrawling\Terrajobst.UsageCrawling.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Assembly.png" />
+    <Resource Include="Resources\Class.png" />
+    <Resource Include="Resources\Constant.png" />
+    <Resource Include="Resources\Delegate.png" />
+    <Resource Include="Resources\Enum.png" />
+    <Resource Include="Resources\EnumItem.png" />
+    <Resource Include="Resources\Error.png" />
+    <Resource Include="Resources\Event.png" />
+    <Resource Include="Resources\Field.png" />
+    <Resource Include="Resources\Interface.png" />
+    <Resource Include="Resources\Method.png" />
+    <Resource Include="Resources\Namespace.png" />
+    <Resource Include="Resources\Operator.png" />
+    <Resource Include="Resources\Property.png" />
+    <Resource Include="Resources\Struct.png" />
+    <Resource Include="Resources\Warning.png" />
+  </ItemGroup>
+
+</Project>

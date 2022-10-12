@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NetUpgradePlanner": {
+      "commandName": "Project",
+      "commandLineArgs": "P:\\apireviewer.nupproj"
+    }
+  }
+}

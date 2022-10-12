@@ -1,0 +1,73 @@
+name: Deploy Planner
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/deploy-planner.yml
+      - src/NetUpgradePlanner/**
+      - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.UsageCrawling/**
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+
+    - name: Get code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Get .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.*'
+
+    - name: Get GitVersion
+      uses: dotnet/nbgv@master
+      id: nbgv
+      with:
+        path: src/NetUpgradePlanner
+
+    - name: dotnet publish
+      run: |
+        cd src/NetUpgradePlanner
+        dotnet publish -c Release -o '../../artifacts/NetUpgradePlanner'
+
+    - name: squirrel pack
+      shell: pwsh
+      run: |
+        mkdir artifacts/squirrel-release
+        cd artifacts/NetUpgradePlanner
+        Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.9.42\tools\Squirrel.exe");
+        Squirrel http-down --url "https://apicatalogblob.blob.core.windows.net/squirrel/" -r "../squirrel-release"
+        Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SimpleVersion }}" --packAuthors "Immo Landwerth" --packDir "." -r "../squirrel-release"
+
+    - name: Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: squirrel-release
+        path: artifacts/squirrel-release
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Download build
+      uses: actions/download-artifact@v3
+      with:
+        name: squirrel-release
+        path: artifacts/squirrel-release
+
+    - name: Upload release
+      uses: azure/CLI@v1
+      env:
+        AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      with:
+        inlineScript: |
+            az storage blob upload-batch -d squirrel -s artifacts/squirrel-release --overwrite

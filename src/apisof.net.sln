@@ -19,9 +19,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "apisofdotnet", "apisofdotne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.ApiCatalog.Tests", "Terrajobst.ApiCatalog.Tests\Terrajobst.ApiCatalog.Tests.csproj", "{BB19E5F5-E7C0-49F7-A167-1C552FBE48BD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetUpgradePlanner", "NetUpgradePlanner\NetUpgradePlanner.csproj", "{1BD72F4A-A2DA-4118-8426-AFDB9AA7131F}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenUsagePlanner", "GenUsagePlanner\GenUsagePlanner.csproj", "{EDB9C068-C136-4C34-809F-313D4F8D71B7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerateMissingNetFxFeaturesReport", "GenerateMissingNetFxFeaturesReport\GenerateMissingNetFxFeaturesReport.csproj", "{B2AF2985-1666-4388-BC4F-F50BF280BA16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetUpgradePlannerTelemetry", "NetUpgradePlannerTelemetry\NetUpgradePlannerTelemetry.csproj", "{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,10 +69,18 @@ Global
 		{EDB9C068-C136-4C34-809F-313D4F8D71B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDB9C068-C136-4C34-809F-313D4F8D71B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDB9C068-C136-4C34-809F-313D4F8D71B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BD72F4A-A2DA-4118-8426-AFDB9AA7131F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BD72F4A-A2DA-4118-8426-AFDB9AA7131F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BD72F4A-A2DA-4118-8426-AFDB9AA7131F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BD72F4A-A2DA-4118-8426-AFDB9AA7131F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B2AF2985-1666-4388-BC4F-F50BF280BA16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B2AF2985-1666-4388-BC4F-F50BF280BA16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2AF2985-1666-4388-BC4F-F50BF280BA16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2AF2985-1666-4388-BC4F-F50BF280BA16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

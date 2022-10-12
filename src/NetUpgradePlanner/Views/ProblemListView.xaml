@@ -1,0 +1,237 @@
+﻿<UserControl x:Class="NetUpgradePlanner.Views.ProblemListView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:r="clr-namespace:NetUpgradePlanner.Analysis"
+             Background="{x:Static SystemColors.WindowBrush}"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+    <Grid Grid.Column="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="75*" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="25*" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0"
+                BorderBrush="{x:Static SystemColors.ControlLightBrush}"
+                BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <RadioButton Grid.Column="0"
+                             Margin="4,0,0,0"
+                             VerticalAlignment="Center"
+                             Content="All Assemblies"
+                             IsChecked="{Binding AllAssemblies}" />
+                <RadioButton Grid.Column="1"
+                             Margin="8,0,0,0"
+                             VerticalAlignment="Center"
+                             Content="Selected Assembly"
+                             IsChecked="{Binding SelectedAssemblies}" />
+                <Menu Grid.Column="2"
+                      Margin="6,0,0,0"
+                      VerticalAlignment="Center"
+                      Background="{x:Static SystemColors.WindowBrush}">
+                    <MenuItem Header="_Filter">
+                        <MenuItem Header="Missing Functionality"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IncludeMissingFunctionality}" />
+                        <MenuItem Header="Obsoletions"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IncludeObsoletions}" />
+                        <MenuItem Header="Cross Platform"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IncludeCrossPlatform}" />
+                        <MenuItem Header="Consistency"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IncludeConsistency}" />
+                        <Separator />
+                        <MenuItem Header="Errors"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IncludeErrors}" />
+                        <MenuItem Header="Warnings"
+                                  IsCheckable="True"
+                                  IsChecked="{Binding IncludeWarnings}" />
+                    </MenuItem>
+                </Menu>
+                <Grid Grid.Column="3"
+                      Margin="8,2,0,2"
+                      HorizontalAlignment="Stretch">
+                    <TextBox x:Name="FilterTextBox"
+                             Padding="1"
+                             Height="18"
+                             VerticalAlignment="Center"
+                             BorderBrush="{x:Static SystemColors.ControlLightBrush}"
+                             Text="{Binding Filter, UpdateSourceTrigger=Explicit}"
+                             KeyDown="FilterTextBox_KeyDown" />
+                    <TextBlock IsHitTestVisible="False"
+                               Text="Search problems"
+                               FontStyle="Italic"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               Margin="4,0,0,0"
+                               Foreground="{x:Static SystemColors.GrayTextBrush}">
+                        <TextBlock.Style>
+                            <Style TargetType="{x:Type TextBlock}">
+                                <Setter Property="Visibility"
+                                        Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=FilterTextBox}"
+                                                 Value="">
+                                        <Setter Property="Visibility"
+                                                Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsFocused, ElementName=FilterTextBox}"
+                                                 Value="True">
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Grid>
+        </Border>
+        <TreeView x:Name="TreeView"
+                  Grid.Row="1"
+                  BorderThickness="0"
+                  ItemsSource="{Binding Items}">
+            <TreeView.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                                 Color="Transparent" />
+                <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"
+                                 Color="Transparent" />
+            </TreeView.Resources>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Stretch="None"
+                               Source="{Binding Path=Icon}" />
+                        <Border x:Name="PART_Text"
+                                Margin="3,0,0,0"
+                                Padding="2,1,2,2">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TreeViewItem}}}"
+                                                           Value="True" />
+                                                <Condition Binding="{Binding Path=IsKeyboardFocusWithin, RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TreeView}}}"
+                                                           Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Background"
+                                                    Value="{x:Static SystemColors.HighlightBrush}" />
+                                            <Setter Property="TextBlock.Foreground"
+                                                    Value="{x:Static SystemColors.HighlightTextBrush}" />
+                                        </MultiDataTrigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Path=IsSelected, RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TreeViewItem}}}"
+                                                           Value="True" />
+                                                <Condition Binding="{Binding Path=IsKeyboardFocusWithin, RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type TreeView}}}"
+                                                           Value="False" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Background"
+                                                    Value="{x:Static SystemColors.ControlBrush}" />
+                                            <Setter Property="TextBlock.Foreground"
+                                                    Value="{x:Static SystemColors.ControlTextBrush}" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding Path=Text}" />
+                        </Border>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <GridSplitter Grid.Row="2"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch" />
+        <ContentControl Grid.Row="3"
+                        Content="{Binding ElementName=TreeView, Path=SelectedValue.Data}">
+            <ContentControl.Resources>
+                <DataTemplate DataType="{x:Type r:ProblemId}">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBox Grid.Row="0"
+                                 Margin="0,0,0,10"
+                                 BorderThickness="0"
+                                 Text="{Binding Text, Mode=OneWay}"
+                                 FontWeight="Bold"
+                                 IsReadOnly="True" />
+                        <TextBlock Grid.Row="1">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Url}"
+                                                     Value="">
+                                            <Setter Property="Visibility"
+                                                    Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Hyperlink NavigateUri="{Binding Url}"
+                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                <Run Text="More Details" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type r:Problem}">
+                    <Grid Margin="5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <TextBox Grid.Row="0"
+                                 Margin="0,0,0,10"
+                                 BorderThickness="0"
+                                 Text="{Binding ProblemId.Text, Mode=OneWay}"
+                                 FontWeight="Bold"
+                                 IsReadOnly="True" />
+                        <TextBlock Grid.Row="1">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ProblemId.Url}"
+                                                     Value="">
+                                            <Setter Property="Visibility"
+                                                    Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Hyperlink NavigateUri="{Binding ProblemId.Url}"
+                                       RequestNavigate="Hyperlink_RequestNavigate">
+                                <Run Text="More Details" />
+                            </Hyperlink>
+                        </TextBlock>
+                        <TextBox Grid.Row="2"
+                                 BorderThickness="0"
+                                 Text="{Binding Details, Mode=OneWay}"
+                                 TextWrapping="Wrap"
+                                 IsReadOnly="True" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type r:AssemblySetEntry}" />
+            </ContentControl.Resources>
+        </ContentControl>
+    </Grid>
+</UserControl>

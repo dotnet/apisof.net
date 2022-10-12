@@ -1,0 +1,51 @@
+﻿<Window x:Class="NetUpgradePlanner.Views.SelectFrameworkDialog"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NetUpgradePlanner.Views"
+        mc:Ignorable="d"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True"
+        Width="500"
+        Height="300"
+        Background="{x:Static SystemColors.ControlBrush}"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="Height"
+        Title="Select Framework">
+    <StackPanel Margin="8">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Margin="0,0,8,0"
+                   Content="_Framework:"
+                   Target="{Binding ElementName=FrameworkComboBox}" />
+            <ComboBox x:Name="FrameworkComboBox"
+                      Grid.Column="1"
+                      VerticalAlignment="Center"
+                      SelectedValue="{Binding Framework}"
+                      ItemsSource="{Binding Frameworks}" />
+        </Grid>
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="8,8,0,8">
+            <Button x:Name="OkButton"
+                    MinWidth="85"
+                    MinHeight="21"
+                    IsDefault="True"
+                    Content="_OK"
+                    Click="OkButton_Click" />
+            <Button Margin="8,0,0,0"
+                    MinWidth="85"
+                    MinHeight="21"
+                    IsCancel="True"
+                    Content="_Cancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

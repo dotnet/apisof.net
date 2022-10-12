@@ -1,0 +1,39 @@
+<Project>
+
+  <PropertyGroup>
+    <GraphVizVersion>6.0.2</GraphVizVersion>
+  </PropertyGroup>
+
+  <Target Name="DownloadGraphViz"
+          AfterTargets="Build"
+          Condition="!Exists('$(IntermediateOutputPath)\Graphviz')">
+    <DownloadFile SourceUrl="https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/$(GraphVizVersion)/windows_10_msbuild_Release_graphviz-$(GraphVizVersion)-win32.zip"
+                  DestinationFolder="$(IntermediateOutputPath)"
+                  DestinationFileName="GraphViz.zip" />
+    <Unzip SourceFiles="$(IntermediateOutputPath)\GraphViz.zip"
+           DestinationFolder="$(IntermediateOutputPath)" />
+  </Target>
+
+  <Target Name="GetGraphVizFiles">
+    <ItemGroup>
+      <GraphVizFile Include="$(IntermediateOutputPath)\Graphviz\**\*.*" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyGraphVizAfterBuild"
+          DependsOnTargets="DownloadGraphViz;GetGraphVizFiles"
+          AfterTargets="Build"
+          Condition="!Exists('$(OutDir)\Graphviz')">
+    <Message Importance="high" Text="GraphViz -> $(OutDir)\GraphViz" />
+    <Copy SourceFiles="@(GraphVizFile)" DestinationFolder="$(OutDir)\GraphViz" />
+  </Target>
+
+  <Target Name="CopyGraphVizAfterPublish"
+          DependsOnTargets="DownloadGraphViz;GetGraphVizFiles"
+          AfterTargets="Publish"
+          Condition="!Exists('$(PublishDir)\Graphviz')">
+    <Message Importance="high" Text="GraphViz -> $(PublishDir)\GraphViz" />
+    <Copy SourceFiles="@(GraphVizFile)" DestinationFolder="$(PublishDir)\GraphViz" />
+  </Target>
+
+</Project>
