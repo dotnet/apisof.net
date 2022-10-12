@@ -110,6 +110,34 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         return new Markup(parts);
     }
 
+    public bool IsOverride()
+    {
+        var api = Api;
+
+        // Finalizers are overrides
+
+        if (api.Kind == ApiKind.Destructor)
+            return true;
+
+        var canBeOverriden = api.Kind is ApiKind.Property or
+                                         ApiKind.PropertyGetter or
+                                         ApiKind.PropertySetter or
+                                         ApiKind.Method or
+                                         ApiKind.Event or
+                                         ApiKind.EventAdder or
+                                         ApiKind.EventRemover or
+                                         ApiKind.EventRaiser;
+
+        if (canBeOverriden)
+        {
+            var markup = GetMyMarkup();
+            return markup.Parts.Any(p => p.Kind == MarkupPartKind.Keyword &&
+                                         p.Text == "override");
+        }
+
+        return false;
+    }
+
     public override bool Equals(object obj)
     {
         return obj is ApiDeclarationModel model && Equals(model);
