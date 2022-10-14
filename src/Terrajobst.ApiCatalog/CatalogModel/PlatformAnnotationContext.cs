@@ -150,9 +150,57 @@ public sealed class PlatformAnnotationContext
         if (result is not null)
             return result.Value;
 
-        return _framework.Framework == ".NETCoreApp" && _framework.Version.Major >= 5
-            ? PlatformAnnotation.Unrestricted
-            : PlatformAnnotation.None;
+        // If the API isn't annotated, we check if the framework itself is considered
+        // platform-specific.
+        //
+        // However, we only want to consider .NET 5+ TFMs because they are the only ones
+        // that can have the optional platform suffix. To see if the API is considered
+        // platform specific by framework, we check if the API only appears in .NET 5
+        // TFMs with a platform suffix. If it also occurs in the neutral one we consider
+        // it unrestricted, otherwise we consider it only supported in the platforms it
+        // occurs in.
+        //
+        // Please note that there is minor glitch here: the TFMs as recorded in the
+        // catalog don't specify which platform versions they map to; we have
+        // specifically exlcuded this knowledge from NuGet. The only party that knows
+        // that, for instance, `net5.0-windows` really means `net5.0-windows7.0` is the
+        // SDK. We could, however, decide to hardcode this knowledge in the catalog
+        // because these mappings are considered static. Another option is to see if we
+        // can extract that information from the indexed ref packs.
+
+        if (_framework.Framework == ".NETCoreApp" && _framework.Version.Major >= 5)
+        {
+            var fullAvailability = _availabilityContext.GetAvailability(api);
+            var platformSpecific = true;
+            var platforms = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var otherAvailability in fullAvailability.Frameworks)
+            {
+                var otherFramework = otherAvailability.Framework;
+
+                if (otherFramework.Framework == ".NETCoreApp" && otherFramework.Version.Major >= 5)
+                {
+                    if (otherFramework.HasPlatform)
+                        platforms.Add(otherFramework.Platform);
+                    else
+                        platformSpecific = false;
+                }
+            }
+
+            if (platformSpecific)
+            {
+                var zero = new[] { (new Version(0, 0, 0, 0), true) };
+                var allVersions = new PlatformSupportRange(zero);
+                var entries = platforms.Select(p => new PlatformAnnotationEntry(p, allVersions)).ToArray();
+                return new PlatformAnnotation(entries);
+            }
+
+            return PlatformAnnotation.Unrestricted;
+        }
+        else
+        {
+            return PlatformAnnotation.None;
+        }
     }
 
     private PlatformAnnotation? CreatePlatformAnnotation(ApiModel api, ApiFrameworkAvailability frameworkAvailability)
