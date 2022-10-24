@@ -105,7 +105,8 @@ public sealed class PackageFilter
             PackageFilterExpression.Parse("Microsoft.Win32.*"),
             PackageFilterExpression.Parse("System.*"),
             PackageFilterExpression.Parse("Iot.*"),
-            PackageFilterExpression.Parse("Newtonsoft.Json.*")
+            PackageFilterExpression.Parse("Newtonsoft.Json.*"),
+            PackageFilterExpression.Parse("CoreWCF.*")
         },
         excludes: new[]
         {

@@ -15,7 +15,8 @@ public static class DotnetPackageIndex
         "nugetsqltools",
         //"dotnetfoundation",
         "newtonsoft",
-        "xamarin"
+        "xamarin",
+        "corewcf"
     };
 
     public static async Task CreateAsync(string packageListPath)
