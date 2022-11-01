@@ -10,6 +10,7 @@ public static class DotnetPackageIndex
     private static readonly string[] DotnetPlatformOwners = new[] {
         "aspnet",
         "dotnetframework",
+        "dotnetiot",
         "EntityFramework",
         "RoslynTeam",
         "nugetsqltools",
