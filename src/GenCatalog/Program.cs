@@ -64,6 +64,7 @@ internal static class Program
         var packsPath = Path.Combine(rootPath, "packs");
         var apiUsagesPath = Path.Combine(rootPath, "api-usages");
         var nugetUsagesPath = Path.Combine(apiUsagesPath, "nuget.org.tsv");
+        var plannerUsagesPath = Path.Combine(apiUsagesPath, "Upgrade Planner.tsv");
         var netfxCompatLabPath = Path.Combine(apiUsagesPath, "NetFx Compat Lab.tsv");
         var databasePath = Path.Combine(rootPath, "apicatalog.db");
         var compressedDatabasePath = Path.Combine(rootPath, "apicatalog.db.deflate");
@@ -76,6 +77,7 @@ internal static class Program
         await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
         await DownloadDotnetPackageListAsync(packageListPath);
         await DownloadNuGetUsages(nugetUsagesPath);
+        await DownloadPlannerUsages(plannerUsagesPath);
         await DownloadNetFxCompatLabUsages(netfxCompatLabPath);
         await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
         await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
@@ -161,6 +163,23 @@ internal static class Program
         var lastModified = props.Value.LastModified;
         await blobClient.DownloadToAsync(nugetUsagesPath);
         File.SetLastWriteTimeUtc(nugetUsagesPath, lastModified.UtcDateTime);
+    }
+
+    private static async Task DownloadPlannerUsages(string plannerUsagesPath)
+    {
+        if (File.Exists(plannerUsagesPath))
+            return;
+
+        Directory.CreateDirectory(Path.GetDirectoryName(plannerUsagesPath)!);
+
+        Console.WriteLine("Downloading Planner usages...");
+
+        var connectionString = GetAzureStorageConnectionString();
+        var blobClient = new BlobClient(connectionString, "usage", "usages-planner.tsv", options: GetBlobOptions());
+        var props = await blobClient.GetPropertiesAsync();
+        var lastModified = props.Value.LastModified;
+        await blobClient.DownloadToAsync(plannerUsagesPath);
+        File.SetLastWriteTimeUtc(plannerUsagesPath, lastModified.UtcDateTime);
     }
 
     private static async Task DownloadNetFxCompatLabUsages(string netfxCompatLabPath)
