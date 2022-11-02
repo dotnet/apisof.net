@@ -36,9 +36,6 @@ internal class Program
         var databasePath = GetScratchFilePath("usage-planner.db");
         var usagesPath = GetScratchFilePath("usages-planner.tsv");
 
-        File.Delete(databasePath);
-        File.Delete(usagesPath);
-
         Console.WriteLine("Downloading API catalog...");
 
         await store.DownloadApiCatalogAsync(apiCatalogPath);
@@ -63,9 +60,9 @@ internal class Program
 
         Console.WriteLine("Discovering latest planner fingerprints...");
 
-        var lastIndexed = await usageDatabase.GetReferenceDateAsync();
         var stopwatch = Stopwatch.StartNew();
 
+        var lastIndexed = await usageDatabase.GetAndUpdateReferenceDateAsync();
         var plannerFingerprints = await store.GetPlannerFingerprintsAsync(lastIndexed);
 
         Console.WriteLine($"Finished planner fingerprint discovery. Took {stopwatch.Elapsed}");
@@ -92,7 +89,7 @@ internal class Program
         {
             foreach (var identifier in plannerFingerprints)
             {
-                var referenceUnitId = referenceUnitIdMap.Add(identifier);
+                var referenceUnitId = referenceUnitIdMap.GetOrAdd(identifier);
                 await referenceUnitWriter.WriteAsync(referenceUnitId, identifier);
             }
 

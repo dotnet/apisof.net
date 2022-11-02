@@ -84,10 +84,14 @@ public sealed class UsageDatabase : IDisposable
 
     public async Task<DateTimeOffset?> GetReferenceDateAsync()
     {
-        return await _connection.ExecuteScalarAsync<DateTimeOffset?>(@"
+        var dateTimeOffsetText = await _connection.ExecuteScalarAsync<string?>(@"
             SELECT ReferenceDateTime
             FROM   Metadata
         ");
+
+        return dateTimeOffsetText is null
+            ? null
+            : DateTimeOffset.Parse(dateTimeOffsetText);
     }
 
     public async Task SetReferenceDateAsync(DateTimeOffset referenceDate)
@@ -97,6 +101,13 @@ public sealed class UsageDatabase : IDisposable
             SET    ReferenceDateTime = @ReferenceDate
         ", new { ReferenceDate = referenceDate });
     }
+
+    public async Task<DateTimeOffset?> GetAndUpdateReferenceDateAsync()
+    {
+        var result = await GetReferenceDateAsync();
+        await SetReferenceDateAsync(DateTimeOffset.Now);
+        return result;
+;    }
 
     public void Dispose()
     {

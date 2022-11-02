@@ -65,7 +65,7 @@ public sealed class PlannerStore
 
         await foreach (var blob in containerClient.GetBlobsAsync())
         {
-            if (since is not null && blob.Properties.CreatedOn < since)
+            if (since is not null && blob.Properties.LastModified < since)
                 continue;
 
             var fingerprint = blob.Name;
