@@ -66,8 +66,18 @@ internal sealed class AssemblyContextMenuService
             Header = "Set Desired Platforms...",
             IsEnabled = GetSelectedAssemblies().Any()
         };
-        setDesiredPlatformsMenuItem.Click += SetDesiredPlatformsMenuItem_Click; ;
+        setDesiredPlatformsMenuItem.Click += SetDesiredPlatformsMenuItem_Click;
         target.Add(setDesiredPlatformsMenuItem);
+
+        target.Add(new Separator());
+
+        var removeMenuItem = new MenuItem
+        {
+            Header = "Remove",
+            IsEnabled = GetSelectedAssemblies().Any()
+        };
+        removeMenuItem.Click += RemoveMenuItem_Click;
+        target.Add(removeMenuItem);
     }
 
     private async void SetDesiredFrameworkMenuItem_Click(object sender, RoutedEventArgs e)
@@ -101,6 +111,12 @@ internal sealed class AssemblyContextMenuService
         var selectedPlatforms = await _selectPlatformsDialogService.SelectPlatformsAsync(platforms);
         if (selectedPlatforms is not null)
             await _workspaceService.SetDesiredPlatformsAsync(selectedEntries, selectedPlatforms.Value);
+    }
+
+    private async void RemoveMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        var selectedEntries = GetSelectedAssemblies();
+        await _workspaceService.RemoveAssembliesAsync(selectedEntries);
     }
 
     private bool AnyHavePlatformSpecificFramework(IEnumerable<AssemblySetEntry> selectedAssemblies)
