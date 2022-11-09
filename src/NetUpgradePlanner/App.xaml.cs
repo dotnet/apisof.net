@@ -14,11 +14,8 @@ using Squirrel;
 
 namespace NetUpgradePlanner;
 
-// TODO: Allow assembly specific context in graph view as well
-// TODO: Add menu item to report bugs via GitHub
 // TODO: Looks like we need to improve perf; analyzing VS is extremely slow.
-//
-// TODO: Support multi-selection of assemblies in ProblemListView and GraphView
+// TODO: Support multi-selection in GraphView
 // TODO: Can we be smarter about NuGet packages?
 
 internal sealed partial class App : Application

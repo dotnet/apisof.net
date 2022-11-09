@@ -1,32 +1,27 @@
-﻿using NetUpgradePlanner.Mvvm;
-using NetUpgradePlanner.Analysis;
-using NetUpgradePlanner.Services;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+
+using NetUpgradePlanner.Analysis;
+using NetUpgradePlanner.Mvvm;
+using NetUpgradePlanner.Services;
 
 namespace NetUpgradePlanner.ViewModels.AssemblyListView;
 
 internal sealed class AssemblyListViewModel : ViewModel
 {
     private readonly WorkspaceService _workspaceService;
-    private readonly AssemblySelectionService _assemblySelectionService;
     private readonly IconService _iconService;
     private IReadOnlyList<AssemblyViewModel> _assemblies = Array.Empty<AssemblyViewModel>();
     private AssemblyViewModel? _selectedAssembly;
 
     public AssemblyListViewModel(WorkspaceService workspaceService,                            
-                                 AssemblySelectionService assemblySelectionService,
                                  IconService iconService)
     {
         _workspaceService = workspaceService;
         _workspaceService.Changed += WorkspaceService_Changed;
-
-        _assemblySelectionService = assemblySelectionService;
         _iconService = iconService;
-        _assemblySelectionService.Changed += AssemblySelectionService_Changed;
     }
 
     public AssemblyViewModel? SelectedAssembly
@@ -37,8 +32,6 @@ internal sealed class AssemblyListViewModel : ViewModel
             if (_selectedAssembly != value)
             {
                 _selectedAssembly = value;
-                if (value is not null)
-                    _assemblySelectionService.Selection = value.Entry;
                 OnPropertyChanged();
             }
         }
@@ -76,17 +69,6 @@ internal sealed class AssemblyListViewModel : ViewModel
             var desiredFramework = assemblyConfiguration.GetDesiredFramework(entry);
             var desiredPlatforms = assemblyConfiguration.GetDesiredPlatforms(entry);
             return new AssemblyViewModel(icon, entry, desiredFramework, desiredPlatforms, reportData);
-        }
-    }
-
-    private void AssemblySelectionService_Changed(object? sender, EventArgs e)
-    {
-        var selected = _assemblySelectionService.Selection;
-        if (selected is not null)
-        {
-            var selectedViewModel = _assemblies.FirstOrDefault(a => a.Entry == selected);
-            if (selectedViewModel is not null)
-                SelectedAssembly = selectedViewModel;
         }
     }
 }

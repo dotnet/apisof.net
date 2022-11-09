@@ -7,8 +7,6 @@ using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 
 using NetUpgradePlanner.Analysis;
-using NetUpgradePlanner.ViewModels.AssemblyListView;
-using NetUpgradePlanner.Views;
 
 using NuGet.Frameworks;
 
@@ -17,19 +15,16 @@ namespace NetUpgradePlanner.Services;
 internal sealed class AssemblyContextMenuService
 {
     private readonly WorkspaceService _workspaceService;
-    private readonly AssemblySelectionService _assemblySelectionService;
     private readonly SelectFrameworkDialogService _selectFrameworkDialogService;
     private readonly SelectPlatformsDialogService _selectPlatformsDialogService;
     private readonly IServiceProvider _serviceProvider;
 
     public AssemblyContextMenuService(WorkspaceService workspaceService,
-                                      AssemblySelectionService assemblySelectionService,
                                       SelectFrameworkDialogService selectFrameworkDialogService,
                                       SelectPlatformsDialogService selectPlatformsDialogService,
                                       IServiceProvider serviceProvider)
     {
         _workspaceService = workspaceService;
-        _assemblySelectionService = assemblySelectionService;
         _selectFrameworkDialogService = selectFrameworkDialogService;
         _selectPlatformsDialogService = selectPlatformsDialogService;       
         _serviceProvider = serviceProvider;
@@ -37,16 +32,8 @@ internal sealed class AssemblyContextMenuService
 
     private IEnumerable<AssemblySetEntry> GetSelectedAssemblies()
     {
-        var assemblyListView = _serviceProvider.GetRequiredService<AssemblyListView>();
-        if (assemblyListView.IsKeyboardFocusWithin)
-            return assemblyListView.AssembliesDataGrid
-                                    .SelectedItems
-                                    .OfType<AssemblyViewModel>()
-                                    .Select(vm => vm.Entry);
-
-        return _assemblySelectionService.Selection is null
-            ? Enumerable.Empty<AssemblySetEntry>()
-            : new[] { _assemblySelectionService.Selection };
+        var selectionService = _serviceProvider.GetRequiredService<AssemblySelectionService>();
+        return selectionService.GetSelectedAssemblies();
     }
 
     public void Fill(ItemCollection target)

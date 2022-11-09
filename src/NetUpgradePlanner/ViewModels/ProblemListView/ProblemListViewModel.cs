@@ -255,21 +255,30 @@ internal sealed class ProblemListViewModel : ViewModel
         if (report is null)
             return Array.Empty<ProblemListViewItem>();
 
+        IReadOnlyList<AnalyzedAssembly> analyzedAssemblies;
+
         if (_allAssemblies)
         {
-            return report.AnalyzedAssemblies.SelectMany(ap => ap.Problems, (ap, p) => (Assembly: ap, Problem: p))
-                                            .GroupBy(t => t.Problem.ProblemId)
-                                            .OrderBy(g => g.Key.Text)
-                                            .Select(g => CreateProblemIdItemForAll(g.Key, g))
-                                            .ToArray();
+            analyzedAssemblies = report.AnalyzedAssemblies;
         }
         else
         {
-            var selectedAssembly = report.AnalyzedAssemblies.FirstOrDefault(a => a.Entry == _assemblySelectionService.Selection);
-            if (selectedAssembly is null)
-                return Array.Empty<ProblemListViewItem>();
+            var selectedAssemblies = _assemblySelectionService.GetSelectedAssemblies().ToHashSet();
+            analyzedAssemblies = report.AnalyzedAssemblies.Where(a => selectedAssemblies.Contains(a.Entry)).ToArray();
+        }
 
-            return selectedAssembly.Problems
+        if (analyzedAssemblies.Count != 1)
+        {
+            return analyzedAssemblies.SelectMany(ap => ap.Problems, (ap, p) => (Assembly: ap, Problem: p))
+                                     .GroupBy(t => t.Problem.ProblemId)
+                                     .OrderBy(g => g.Key.Text)
+                                     .Select(g => CreateProblemIdItemForAll(g.Key, g))
+                                     .ToArray();
+        }
+        else
+        {
+            var analyzedAssembly = analyzedAssemblies.Single();
+            return analyzedAssembly.Problems
                                    .GroupBy(a => a.ProblemId)
                                    .OrderBy(g => g.Key.Text)
                                    .Select(CreateProblemIdItemForCurrent)

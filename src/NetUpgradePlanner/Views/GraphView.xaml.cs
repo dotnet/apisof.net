@@ -19,7 +19,6 @@ namespace NetUpgradePlanner.Views;
 internal sealed partial class GraphView : UserControl
 {
     private readonly WorkspaceService _workspaceService;
-    private readonly AssemblySelectionService _assemblySelectionService;
     private readonly AssemblyContextMenuService _assemblyContextMenuService;
     private bool _isPanning;
     private Point _origContentMouseDownPoint;
@@ -32,16 +31,12 @@ internal sealed partial class GraphView : UserControl
     private NodeEmphasizer _nodeEmphasizer = new NodeEmphasizer();
 
     public GraphView(WorkspaceService workspaceService,
-                     AssemblySelectionService assemblySelectionService,
                      AssemblyContextMenuService assemblyContextMenuService)
     {
         InitializeComponent();
 
         _workspaceService = workspaceService;
         _workspaceService.Changed += WorkspaceService_Changed;
-
-        _assemblySelectionService = assemblySelectionService;
-        _assemblySelectionService.Changed += AssemblySelectionService_Changed;
 
         _assemblyContextMenuService = assemblyContextMenuService;
     }
@@ -54,8 +49,9 @@ internal sealed partial class GraphView : UserControl
             if (_selectedEntry != value)
             {
                 _selectedEntry = value;
-                _assemblySelectionService.Selection = value;
                 UpdateSelectedEntryState();
+
+                SelectionChanged?.Invoke(this, EventArgs.Empty);
             }
         }
     }
@@ -73,6 +69,8 @@ internal sealed partial class GraphView : UserControl
         }
     }
 
+    public event EventHandler? SelectionChanged;
+
     private void WorkspaceService_Changed(object? sender, EventArgs e)
     {
         if (_selectedEntry is not null && !_workspaceService.Current.AssemblySet.Entries.Contains(_selectedEntry))
@@ -82,13 +80,6 @@ internal sealed partial class GraphView : UserControl
             _butterflyEntry = null;
 
         GraphChanged();
-    }
-
-    private void AssemblySelectionService_Changed(object? sender, EventArgs e)
-    {
-        var selected = _assemblySelectionService.Selection;
-        if (selected is not null)
-            SelectedEntry = selected;
     }
 
     private void OnZoomPanMouseDown(object sender, MouseButtonEventArgs e)
