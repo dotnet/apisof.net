@@ -31,7 +31,9 @@ internal static class WorkspacePersistenceExcel
             AddStylesheet(spreadsheet.WorkbookPart);
 
             AddAssembliesSheet(spreadsheet, workspace);
+            AddDependenciesSheet(spreadsheet, workspace);
             AddProblemsSheet(spreadsheet, workspace);
+            AddUsedApis(spreadsheet, workspace);
         }
 
         memoryStream.Position = 0;
@@ -81,7 +83,15 @@ internal static class WorkspacePersistenceExcel
     {
         var assembliesSheet = spreadsheet.AddWorksheet("Assemblies");
 
-        var headers = new[] { "Assembly", "Target Framework", "Desired Framework", "Desired Platforms", "Score" };
+        var headers = new[]
+        {
+            "Assembly",
+            "Target Framework",
+            "Desired Framework",
+            "Desired Platforms",
+            "Score"
+        };
+
         assembliesSheet.AddRow(headers);
 
         var analyzedAssemblies = workspace.Report is null
@@ -103,7 +113,52 @@ internal static class WorkspacePersistenceExcel
 
         assembliesSheet.FormatAsTable(1, workspace.AssemblySet.Entries.Count + 1, 1, headers);
         assembliesSheet.ApplyConditionalFormatting(2, workspace.AssemblySet.Entries.Count, 5, 1);
-        assembliesSheet.SetColumnWidths(70, 20, 20, 20);
+        assembliesSheet.SetColumnWidths(
+            70, // Assembly
+            20, // Target Framework
+            20, // Desired Framework
+            20, // Desired Platforms
+            10  // Score
+        );
+    }
+
+    private static void AddDependenciesSheet(SpreadsheetDocument spreadsheet, Workspace workspace)
+    {
+        if (workspace.Report is null)
+            return;
+
+        var problemsSheet = spreadsheet.AddWorksheet("Dependencies");
+
+        var headers = new[]
+        {
+            "Assembly",
+            "Dependency"
+        };
+
+        problemsSheet.AddRow(headers);
+
+        var rowCount = 1;
+
+        foreach (var assembly in workspace.AssemblySet.Entries)
+        {
+            foreach (var dependency in assembly.Dependencies)
+            {
+                var assemblyName = assembly.Name;
+
+                problemsSheet.AddRow(
+                    assemblyName,
+                    dependency
+                );
+
+                rowCount++;
+            }
+        }
+
+        problemsSheet.FormatAsTable(1, rowCount, 1, headers);
+        problemsSheet.SetColumnWidths(
+            70,  // Assembly
+            70   // Dependency
+        );
     }
 
     private static void AddProblemsSheet(SpreadsheetDocument spreadsheet, Workspace workspace)
@@ -169,6 +224,64 @@ internal static class WorkspacePersistenceExcel
             20,  // Category
             100, // Text
             100, // Details
+            35,  // Namespace
+            30,  // Type
+            100  // Member
+        );
+    }
+
+    private static void AddUsedApis(SpreadsheetDocument spreadsheet, Workspace workspace)
+    {
+        if (workspace.Report is null)
+            return;
+
+        var problemsSheet = spreadsheet.AddWorksheet("Used APIs");
+
+        var headers = new[]
+        {
+            "Assembly",
+            "Kind",
+            "Namespace",
+            "Type",
+            "Member",
+        };
+
+        problemsSheet.AddRow(headers);
+
+        var rowCount = 1;
+
+        var catalog = workspace.Report.Catalog;
+        var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+
+        foreach (var assembly in workspace.AssemblySet.Entries)
+        {
+            foreach (var apiGuid in assembly.UsedApis)
+            {
+                if (!apiByGuid.TryGetValue(apiGuid, out var api))
+                    continue;
+
+                var assemblyName = assembly.Name;
+                var kind = api.Kind.ToString();
+                var namespaceName = api.GetNamespaceName();
+                var typeName = api.GetTypeName();
+                var memberName = api.GetMemberName();
+
+                problemsSheet.AddRow(
+                    assemblyName,
+                    kind,
+                    namespaceName,
+                    typeName,
+                    memberName
+                );
+
+                rowCount++;
+            }
+        }
+
+        problemsSheet.FormatAsTable(1, rowCount, 1, headers);
+        problemsSheet.SetColumnWidths(
+            70,  // Assembly
+            15,  // Kind
             35,  // Namespace
             30,  // Type
             100  // Member
