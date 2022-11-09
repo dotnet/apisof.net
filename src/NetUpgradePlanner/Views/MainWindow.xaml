@@ -97,6 +97,8 @@
                     <MenuItem Header="Update _catalog"
                               Command="{Binding UpdateCatalogCommand}" />
                     <Separator />
+                    <MenuItem Header="Send _feedback..."
+                              Command="{Binding SendFeedbackCommand}" />
                     <MenuItem Header="Check for _updates..."
                               Command="{Binding CheckForApplicationUpdateCommand}" />
                     <MenuItem Header="_About..."

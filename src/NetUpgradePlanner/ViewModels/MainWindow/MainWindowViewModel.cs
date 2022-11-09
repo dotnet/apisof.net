@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows;
 using System.Windows.Input;
 
@@ -56,6 +57,7 @@ internal sealed class MainWindowViewModel : ViewModel
         AddFolderCommand = new Command(async () => await AddFolderAsync(), () => !_progressService.IsRunning);
         AnalyzeCommand = new Command(async () => await AnalyzeAsync(), () => !_workspaceService.Current.AssemblySet.IsEmpty && !_progressService.IsRunning);
         UpdateCatalogCommand = new Command(async () => await UpdateCatalogAsync(), () => !_progressService.IsRunning);
+        SendFeedbackCommand = new Command(() => SendFeedback());
         CheckForApplicationUpdateCommand = new Command(async () => await CheckForApplicationUpdateAsync(), () => !_progressService.IsRunning);
         UpdateApplicationCommand = new Command(async () => await UpdateApplicationAsync(), () => !_progressService.IsRunning);
         AboutCommand = new Command(() => About());
@@ -80,6 +82,8 @@ internal sealed class MainWindowViewModel : ViewModel
     public ICommand AnalyzeCommand { get; }
 
     public ICommand UpdateCatalogCommand { get; }
+
+    public ICommand SendFeedbackCommand { get; }
 
     public ICommand CheckForApplicationUpdateCommand { get; }
     
@@ -263,6 +267,26 @@ internal sealed class MainWindowViewModel : ViewModel
     private async Task UpdateCatalogAsync()
     {
         await _catalogService.UpdateAsync();
+    }
+
+    private void SendFeedback()
+    {
+        var version = ThisAssembly.AssemblyInformationalVersion;
+        var semVer = version.Contains('+')
+                        ? version.Substring(0, version.IndexOf('+'))
+                        : version;
+
+        var title = "";
+        var body = new StringBuilder()
+            .AppendLine("<!-- Describe the feature request or bug -->")
+            .AppendLine("")
+            .AppendLine("### Version")
+            .AppendLine()
+            .AppendLine($"{semVer} ({ThisAssembly.GitCommitId})")
+            .ToString();
+
+        var uri = new Uri($"https://github.com/terrajobst/apisof.net/issues/new?title={HttpUtility.UrlEncode(title)}&body={HttpUtility.UrlEncode(body)}&labels=area-upgrade-planner");
+        BrowserService.NavigateTo(uri);
     }
 
     private async Task CheckForApplicationUpdateAsync()
