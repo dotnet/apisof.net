@@ -90,16 +90,16 @@
                               InputGestureText="F5"
                               Command="{Binding AnalyzeCommand}" />
                     <Separator />
-                    <MenuItem Header="Share anonymized API usage"
+                    <MenuItem Header="Share anonymized API _usage"
                               IsCheckable="True"
                               IsChecked="{Binding SendTelemetry}" />
                     <Separator />
-                    <MenuItem Header="Update catalog"
+                    <MenuItem Header="Update _catalog"
                               Command="{Binding UpdateCatalogCommand}" />
                     <Separator />
-                    <MenuItem Header="Check for updates..."
+                    <MenuItem Header="Check for _updates..."
                               Command="{Binding CheckForApplicationUpdateCommand}" />
-                    <MenuItem Header="About..."
+                    <MenuItem Header="_About..."
                               Command="{Binding AboutCommand}" />
                 </MenuItem>
             </Menu>
