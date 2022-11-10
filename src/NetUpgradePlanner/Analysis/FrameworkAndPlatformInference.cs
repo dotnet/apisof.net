@@ -48,8 +48,13 @@ internal sealed class FrameworkAndPlatformInference
             }
         }
 
+        var seenAssemblies = new HashSet<AssemblySetEntry>();
+
         foreach (var assembly in newAssemblies)
-            SetInferredFramework(assembly);
+        {
+            seenAssemblies.Clear();
+            SetInferredFramework(assembly, seenAssemblies);
+        }
     }
 
     private IEnumerable<AssemblySetEntry> GetDependencies(AssemblySetEntry assembly)
@@ -58,13 +63,16 @@ internal sealed class FrameworkAndPlatformInference
                                     .Select(n => _assemblyByName[n]);
     }
 
-    private void SetInferredFramework(AssemblySetEntry assembly)
+    private void SetInferredFramework(AssemblySetEntry assembly, HashSet<AssemblySetEntry> seenAssemblies)
     {
+        if (!seenAssemblies.Add(assembly))
+            return;
+
         if (_inferredFramework.ContainsKey(assembly))
             return;
 
         foreach (var dependency in GetDependencies(assembly))
-            SetInferredFramework(dependency);
+            SetInferredFramework(dependency, seenAssemblies);
 
         _inferredFramework[assembly] = InferFramework(assembly);
     }
