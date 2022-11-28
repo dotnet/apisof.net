@@ -16,11 +16,13 @@ internal sealed class TelemetryService : BackgroundService
 {
     private const string SendTelemetrySettingName = "SendTelemetry";
 
+    private readonly OfflineDetectionService _offlineDetectionService;
     private readonly WorkspaceService _workspaceService;
     private readonly Worker _worker = new Worker();
 
-    public TelemetryService(WorkspaceService workspaceService)
+    public TelemetryService(OfflineDetectionService offlineDetectionService, WorkspaceService workspaceService)
     {
+        _offlineDetectionService = offlineDetectionService;
         _workspaceService = workspaceService;
         _workspaceService.Changed += WorkspaceService_Changed;
         _worker.IsEnabled = GetTelemetrySetting();
@@ -28,15 +30,19 @@ internal sealed class TelemetryService : BackgroundService
 
     public bool IsConfigured()
     {
-        return SettingsService.IsConfigured(SendTelemetrySettingName);
+        return _offlineDetectionService.IsOfflineInstallation ||
+               SettingsService.IsConfigured(SendTelemetrySettingName);
     }
 
-    private static bool GetTelemetrySetting()
+    private bool GetTelemetrySetting()
     {
 #if DEBUG
         // Let's not pollute the telemetry when debugging stuff.
         return false;
 #else
+        if (_offlineDetectionService.IsOfflineInstallation)
+            return false;
+
         return SettingsService.LoadValue(SendTelemetrySettingName, true);
 #endif
     }

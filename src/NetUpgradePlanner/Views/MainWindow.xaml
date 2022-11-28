@@ -52,6 +52,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
     <DockPanel>
         <Grid DockPanel.Dock="Top">
@@ -89,18 +90,32 @@
                     <MenuItem Header="_Analyze..."
                               InputGestureText="F5"
                               Command="{Binding AnalyzeCommand}" />
-                    <Separator />
+                    <Separator Visibility="{Binding IsOnline, 
+                               Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <MenuItem Header="Share anonymized API _usage"
                               IsCheckable="True"
-                              IsChecked="{Binding SendTelemetry}" />
-                    <Separator />
+                              IsChecked="{Binding SendTelemetry}"
+                              Visibility="{Binding IsOnline, 
+                              Converter={StaticResource BooleanToVisibilityConverter}}"  />
+                    <Separator Visibility="{Binding IsOnline, 
+                               Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <MenuItem Header="Create offline copy..."
+                              Command="{Binding CreateOfflineCopyCommand}"
+                              Visibility="{Binding IsOnline, 
+                              Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <MenuItem Header="Update _catalog"
-                              Command="{Binding UpdateCatalogCommand}" />
+                              Command="{Binding UpdateCatalogCommand}" 
+                              Visibility="{Binding IsOnline, 
+                              Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <Separator />
                     <MenuItem Header="Send _feedback..."
-                              Command="{Binding SendFeedbackCommand}" />
+                              Command="{Binding SendFeedbackCommand}"
+                              Visibility="{Binding IsOnline, 
+                              Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <MenuItem Header="Check for _updates..."
-                              Command="{Binding CheckForApplicationUpdateCommand}" />
+                              Command="{Binding CheckForApplicationUpdateCommand}"
+                              Visibility="{Binding IsOnline, 
+                              Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <MenuItem Header="_About..."
                               Command="{Binding AboutCommand}" />
                 </MenuItem>

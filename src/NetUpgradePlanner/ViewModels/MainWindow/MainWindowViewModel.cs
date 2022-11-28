@@ -7,13 +7,18 @@ using NetUpgradePlanner.Services;
 using System;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
+using SharpCompress.Archives.Zip;
+using ZipArchive = SharpCompress.Archives.Zip.ZipArchive;
+using ZipArchiveEntry = SharpCompress.Archives.Zip.ZipArchiveEntry;
 
 namespace NetUpgradePlanner.ViewModels.MainWindow;
 
@@ -25,8 +30,9 @@ internal sealed class MainWindowViewModel : ViewModel
     private readonly CatalogService _catalogService;
     private readonly TelemetryService _telemetryService;
     private readonly UpdateService _updateService;
+    private readonly OfflineDetectionService _offlineDetectionService;
     private bool _isEmpty = true;
-    private string _title = ThisAssembly.AssemblyTitle;
+    private string _title;
     private bool _hasApplicationUpdate;
 
     public MainWindowViewModel(ProgressViewModel progress,
@@ -35,7 +41,8 @@ internal sealed class MainWindowViewModel : ViewModel
                                WorkspaceDocumentService workspaceDocumentService,
                                CatalogService catalogService,
                                TelemetryService telemetryService,
-                               UpdateService updateService)
+                               UpdateService updateService,
+                               OfflineDetectionService offlineDetectionService)
     {
         _workspaceService = workspaceService;
         _workspaceService.Changed += WorkspaceService_Changed;
@@ -48,6 +55,7 @@ internal sealed class MainWindowViewModel : ViewModel
         _updateService.Changed += UpdateService_Changed;
         Progress = progress;
         _progressService = progressService;
+        _offlineDetectionService = offlineDetectionService;
         NewCommand = new Command(async () => await NewAsync(), () => !_progressService.IsRunning);
         OpenCommand = new Command(async () => await OpenAsync(), () => !_progressService.IsRunning);
         SaveCommand = new Command(async () => await SaveAsync(), () => !_progressService.IsRunning);
@@ -56,11 +64,14 @@ internal sealed class MainWindowViewModel : ViewModel
         AddFilesCommand = new Command(async () => await AddFilesAsync(), () => !_progressService.IsRunning);
         AddFolderCommand = new Command(async () => await AddFolderAsync(), () => !_progressService.IsRunning);
         AnalyzeCommand = new Command(async () => await AnalyzeAsync(), () => !_workspaceService.Current.AssemblySet.IsEmpty && !_progressService.IsRunning);
-        UpdateCatalogCommand = new Command(async () => await UpdateCatalogAsync(), () => !_progressService.IsRunning);
-        SendFeedbackCommand = new Command(() => SendFeedback());
-        CheckForApplicationUpdateCommand = new Command(async () => await CheckForApplicationUpdateAsync(), () => !_progressService.IsRunning);
-        UpdateApplicationCommand = new Command(async () => await UpdateApplicationAsync(), () => !_progressService.IsRunning);
+        CreateOfflineCopyCommand = new Command(async () => await CreateOfflineCopyAsync(), () => !_progressService.IsRunning && !_offlineDetectionService.IsOfflineInstallation);
+        UpdateCatalogCommand = new Command(async () => await UpdateCatalogAsync(), () => !_progressService.IsRunning && !_offlineDetectionService.IsOfflineInstallation);
+        SendFeedbackCommand = new Command(() => SendFeedback(), () => !_offlineDetectionService.IsOfflineInstallation);
+        CheckForApplicationUpdateCommand = new Command(async () => await CheckForApplicationUpdateAsync(), () => !_progressService.IsRunning &&  !_offlineDetectionService.IsOfflineInstallation);
+        UpdateApplicationCommand = new Command(async () => await UpdateApplicationAsync(), () => !_progressService.IsRunning && !_offlineDetectionService.IsOfflineInstallation);
         AboutCommand = new Command(() => About());
+        
+        UpdateTitle();
     }
 
     public ProgressViewModel Progress { get; }
@@ -81,6 +92,8 @@ internal sealed class MainWindowViewModel : ViewModel
 
     public ICommand AnalyzeCommand { get; }
 
+    public ICommand CreateOfflineCopyCommand { get; }
+
     public ICommand UpdateCatalogCommand { get; }
 
     public ICommand SendFeedbackCommand { get; }
@@ -91,6 +104,11 @@ internal sealed class MainWindowViewModel : ViewModel
 
     public ICommand AboutCommand { get; }
 
+    public bool IsOnline
+    {
+        get => !_offlineDetectionService.IsOfflineInstallation;
+    }
+    
     public bool HasApplicationUpdate
     {
         get => _hasApplicationUpdate;
@@ -133,6 +151,7 @@ internal sealed class MainWindowViewModel : ViewModel
     public string Title
     {
         get => _title;
+        [MemberNotNull(nameof(_title))]
         set
         {
             if (_title != value)
@@ -140,6 +159,28 @@ internal sealed class MainWindowViewModel : ViewModel
                 _title = value;
                 OnPropertyChanged();
             }
+        }
+    }
+
+    [MemberNotNull(nameof(_title))]
+    private void UpdateTitle()
+    {
+        var baseTitle =
+            _offlineDetectionService.IsOfflineInstallation
+                ? $"{ThisAssembly.AssemblyTitle} [Offline]"
+                : ThisAssembly.AssemblyTitle;
+
+        var isDefault = _workspaceService.Current == Workspace.Default;
+        if (isDefault)
+        {
+            Title = baseTitle;
+        }
+        else
+        {
+            var isDirty = _workspaceDocumentService.IsDirty;
+            var fileName = _workspaceDocumentService.FileName ?? "Untitled";
+            var dirtyMarker = isDirty ? "*" : string.Empty;
+            Title = $"{baseTitle} - {fileName}{dirtyMarker}";
         }
     }
 
@@ -264,6 +305,32 @@ internal sealed class MainWindowViewModel : ViewModel
         await _workspaceService.AnalyzeAsync();
     }
 
+    private async Task CreateOfflineCopyAsync()
+    {
+        var processDirectory = Path.GetDirectoryName(Environment.ProcessPath);
+        if (processDirectory is null)
+            return;
+        
+        var dialog = new SaveFileDialog();
+        dialog.Filter = $"ZIP Archives (*.zip)|*.zip";
+        dialog.FileName = "NetUpgradePlanner_Offline.zip";
+
+        if (dialog.ShowDialog() != true)
+            return;
+
+        var zipFileName = dialog.FileName;
+
+        await UpdateCatalogAsync();
+        await _progressService.Run(_ =>
+        {
+            if (File.Exists(zipFileName))
+                File.Delete(zipFileName);
+            ZipFile.CreateFromDirectory(processDirectory, zipFileName, CompressionLevel.Optimal, includeBaseDirectory: false);
+            using var archive = ZipFile.Open(zipFileName, ZipArchiveMode.Update);
+            archive.CreateEntry("Offline.txt");
+        }, "Creating ZIP file...");
+    }
+    
     private async Task UpdateCatalogAsync()
     {
         await _catalogService.UpdateAsync();
@@ -341,18 +408,7 @@ internal sealed class MainWindowViewModel : ViewModel
 
     private void WorkspaceDocumentService_Changed(object? sender, EventArgs e)
     {
-        var isDefault = _workspaceService.Current == Workspace.Default;
-        if (isDefault)
-        {
-            Title = ThisAssembly.AssemblyTitle;
-        }
-        else
-        {
-            var isDirty = _workspaceDocumentService.IsDirty;
-            var fileName = _workspaceDocumentService.FileName ?? "Untitled";
-            var dirtyMarker = isDirty ? "*" : string.Empty;
-            Title = $"{ThisAssembly.AssemblyTitle} - {fileName}{dirtyMarker}";
-        }
+        UpdateTitle();
     }
 
     private void UpdateService_Changed(object? sender, EventArgs e)

@@ -98,6 +98,7 @@ internal sealed partial class App : Application
         services.AddSingleton<SelectFrameworkDialogService>();
         services.AddSingleton<SelectPlatformsDialogService>();
         services.AddSingleton<UpdateService>();
+        services.AddSingleton<OfflineDetectionService>();
 
         // Main Window
 
