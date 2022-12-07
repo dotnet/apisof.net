@@ -179,6 +179,12 @@ internal sealed class AnalysisReport
             if (float.IsNaN(score))
                 score = 1.0f;
 
+            // We don't want portability scores to ever be rounded up to 100%, so let's
+            // make sure we round down, keeping one decimal place (which means we need
+            // to pass in three because percentage is stored as a float between 0 and 1)
+
+            score = (float)Math.Round(score, 3, MidpointRounding.ToZero);
+
             // Dependencies
 
             foreach (var referenceName in entry.Dependencies)
