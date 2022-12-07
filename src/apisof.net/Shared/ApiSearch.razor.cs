@@ -60,6 +60,13 @@ public partial class ApiSearch
 
         if (firstRender)
         {
+            var searchText = NavigationManager.GetQueryParameter("q");
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                Open();
+                SearchText = searchText;
+            }
+
             var helper = new NextAndPreviousHelper(Open, SelectedPrevious, SelectedNext, Accept);
             var helperReference = DotNetObjectReference.Create(helper);
             await JSRuntime.InvokeVoidAsync("registerSearchInputKeyDown", _inputElement, helperReference);
