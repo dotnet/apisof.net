@@ -60,7 +60,7 @@ internal sealed class MainWindowViewModel : ViewModel
         OpenCommand = new Command(async () => await OpenAsync(), () => !_progressService.IsRunning);
         SaveCommand = new Command(async () => await SaveAsync(), () => !_progressService.IsRunning);
         SaveAsCommand = new Command(async () => await SaveAsAsync(), () => !_progressService.IsRunning);
-        ExportCommand = new Command(async () => await ExportAsync(), () => !_progressService.IsRunning);
+        SaveReportCommand = new Command(async () => await SaveReportAsync(), () => !_progressService.IsRunning);
         AddFilesCommand = new Command(async () => await AddFilesAsync(), () => !_progressService.IsRunning);
         AddFolderCommand = new Command(async () => await AddFolderAsync(), () => !_progressService.IsRunning);
         AnalyzeCommand = new Command(async () => await AnalyzeAsync(), () => !_workspaceService.Current.AssemblySet.IsEmpty && !_progressService.IsRunning);
@@ -84,7 +84,7 @@ internal sealed class MainWindowViewModel : ViewModel
 
     public ICommand SaveAsCommand { get; }
 
-    public ICommand ExportCommand { get; }
+    public ICommand SaveReportCommand { get; }
 
     public ICommand AddFilesCommand { get; }
 
@@ -252,9 +252,10 @@ internal sealed class MainWindowViewModel : ViewModel
         return true;
     }
 
-    private async Task ExportAsync()
+    private async Task SaveReportAsync()
     {
         var dialog = new SaveFileDialog();
+        dialog.Title = "Save Report";
         dialog.Filter = "Excel Workbooks (*.xlsx)|*.xlsx";
         dialog.FileName = _workspaceDocumentService.FileName is not null
             ? Path.GetFileNameWithoutExtension(_workspaceDocumentService.FileName)
@@ -264,7 +265,7 @@ internal sealed class MainWindowViewModel : ViewModel
             return;
 
         await _progressService.Run(async _ => await WorkspacePersistenceExcel.SaveAsync(_workspaceService.Current, dialog.FileName),
-                                   "Exporting as Excel Workbook");
+                                   "Saving as Excel Workbook");
 
         var fileTypeIsRegistered = Registry.ClassesRoot.OpenSubKey(".xlsx", false) is not null;
         if (fileTypeIsRegistered)

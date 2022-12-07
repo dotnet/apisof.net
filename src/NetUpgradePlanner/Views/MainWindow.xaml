@@ -27,7 +27,7 @@
                     Command="{Binding SaveAsCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift"
                     Key="E"
-                    Command="{Binding ExportCommand}" />
+                    Command="{Binding SaveReportCommand}" />
         <KeyBinding Modifiers="Ctrl+Shift"
                     Key="O"
                     Command="{Binding AddFilesCommand}" />
@@ -71,9 +71,9 @@
                     <MenuItem Header="Save _As..."
                               InputGestureText="Ctrl+Alt+S"
                               Command="{Binding SaveAsCommand}" />
-                    <MenuItem Header="_Export..."
+                    <MenuItem Header="Save _Report..."
                               InputGestureText="Ctrl+Shift+E"
-                              Command="{Binding ExportCommand}" />
+                              Command="{Binding SaveReportCommand}" />
                     <Separator />
                     <MenuItem Header="Add _Files..."
                               InputGestureText="Ctrl+Shift+O"
