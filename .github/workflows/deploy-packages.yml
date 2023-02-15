@@ -1,0 +1,57 @@
+name: Deploy Packages
+
+on:
+  push:
+    branches: [ release/nuget ]
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Get code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # We need the full history in order to use Git versioning
+
+    - name: Get .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.*'
+
+    - name: Run tests
+      run: |
+        cd src/
+        dotnet test
+
+    - name: Build packages
+      run: |
+        cd src/
+        dotnet build -c Release -o '../artifacts/bin' /p:SourceRevisionId=${{ github.sha }}
+
+    - name: Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: bin
+        path: artifacts/bin
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.*'
+
+    - name: Download build
+      uses: actions/download-artifact@v3
+      with:
+        name: bin
+        path: artifacts/bin
+
+    - name: dotnet nuget push
+      run: |
+        dotnet nuget push ./artifacts/bin/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_TOKEN }} --skip-duplicate
