@@ -7,6 +7,8 @@ on:
       - .github/workflows/deploy-planner.yml
       - src/NetUpgradePlanner/**
       - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.NetUpgradePlanner/**
+      - src/Terrajobst.NetUpgradePlanner.Excel/**
       - src/Terrajobst.UsageCrawling/**
 
 env:

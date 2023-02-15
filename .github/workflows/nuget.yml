@@ -1,8 +1,8 @@
-name: Push apisofdotnet to NuGet
+name: Push to NuGet
 
 on:
   push:
-    branches: [ release/apisofdotnet ]
+    branches: [ release/nuget ]
 
 env:
   DOTNET_NOLOGO: true
@@ -22,11 +22,11 @@ jobs:
         with:
           dotnet-version: '6.0.*'
       
-      - name: dotnet publish
+      - name: Build packages
         run: |
-          cd src/apisofdotnet
-          dotnet build -c Release -o '../../artifacts/apisofdotnet' /p:SourceRevisionId=${{ github.sha }}
-      
+          cd src/
+          dotnet build -c Release -o '../../artifacts/bin' /p:SourceRevisionId=${{ github.sha }}
+
       - name: dotnet nuget push
         run: |
-          dotnet nuget push ./artifacts/apisofdotnet/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_TOKEN }} --skip-duplicate
+          dotnet nuget push ./artifacts/bin/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_TOKEN }} --skip-duplicate
