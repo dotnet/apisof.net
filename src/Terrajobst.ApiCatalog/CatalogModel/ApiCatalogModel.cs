@@ -302,6 +302,16 @@ public sealed partial class ApiCatalogModel
         );
     }
 
+    public HashSet<string> GetAssemblyNames()
+    {
+        var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var assembly in Assemblies)
+            result.Add(assembly.Name);
+
+        return result;
+    }
+    
     public ApiModel? GetForwardedApi(ApiModel api)
     {
         if (_forwardedApis is null)
@@ -411,7 +421,7 @@ public sealed partial class ApiCatalogModel
     {
         return Converter.ConvertAsync(sqliteDbPath, stream);
     }
-
+    
     public struct FrameworkEnumerator : IEnumerable<FrameworkModel>, IEnumerator<FrameworkModel>
     {
         private readonly ApiCatalogModel _catalog;

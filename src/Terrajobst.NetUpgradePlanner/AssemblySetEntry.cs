@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿namespace Terrajobst.NetUpgradePlanner;
 
-namespace NetUpgradePlanner.Analysis;
-
-internal sealed class AssemblySetEntry
+public sealed class AssemblySetEntry
 {
     public AssemblySetEntry(string name,
                             string? targetFramework,
                             IEnumerable<string> dependencies,
                             IEnumerable<Guid> usedApis)
     {
-        Fingerprint = Analysis.Fingerprint.Create(name);
+        Fingerprint = NetUpgradePlanner.Fingerprint.Create(name);
         Name = name;
         TargetFramework = targetFramework;
         Dependencies = dependencies.ToArray();

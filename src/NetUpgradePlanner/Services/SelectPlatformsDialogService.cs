@@ -1,8 +1,7 @@
 ﻿using System.Threading.Tasks;
 using System.Windows;
-
-using NetUpgradePlanner.Analysis;
 using NetUpgradePlanner.Views;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Services;
 

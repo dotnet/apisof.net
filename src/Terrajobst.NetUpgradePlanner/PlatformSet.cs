@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Linq;
-using Terrajobst.ApiCatalog;
+﻿using Terrajobst.ApiCatalog;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal readonly struct PlatformSet : IComparable, IComparable<PlatformSet>
+public readonly struct PlatformSet : IComparable, IComparable<PlatformSet>
 {
     public static PlatformSet Any { get; } = new PlatformSet(null);
 

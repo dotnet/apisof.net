@@ -1,9 +1,8 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
 internal static class Fingerprint
 {

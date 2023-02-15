@@ -50,6 +50,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+    <ProjectReference Include="..\Terrajobst.NetUpgradePlanner.Excel\Terrajobst.NetUpgradePlanner.Excel.csproj" />
+    <ProjectReference Include="..\Terrajobst.NetUpgradePlanner\Terrajobst.NetUpgradePlanner.csproj" />
 	  <ProjectReference Include="..\Terrajobst.UsageCrawling\Terrajobst.UsageCrawling.csproj" />
   </ItemGroup>
 

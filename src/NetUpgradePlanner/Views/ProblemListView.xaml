@@ -4,7 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:r="clr-namespace:NetUpgradePlanner.Analysis"
+             xmlns:netUpgradePlanner="clr-namespace:Terrajobst.NetUpgradePlanner;assembly=Terrajobst.NetUpgradePlanner"
              Background="{x:Static SystemColors.WindowBrush}"
              mc:Ignorable="d"
              d:DesignHeight="450"
@@ -161,7 +161,7 @@
         <ContentControl Grid.Row="3"
                         Content="{Binding ElementName=TreeView, Path=SelectedValue.Data}">
             <ContentControl.Resources>
-                <DataTemplate DataType="{x:Type r:ProblemId}">
+                <DataTemplate DataType="{x:Type netUpgradePlanner:ProblemId}">
                     <Grid Margin="5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -193,7 +193,7 @@
                         </TextBlock>
                     </Grid>
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type r:Problem}">
+                <DataTemplate DataType="{x:Type netUpgradePlanner:Problem}">
                     <Grid Margin="5">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -230,7 +230,7 @@
                                  IsReadOnly="True" />
                     </Grid>
                 </DataTemplate>
-                <DataTemplate DataType="{x:Type r:AssemblySetEntry}" />
+                <DataTemplate DataType="{x:Type netUpgradePlanner:AssemblySetEntry}" />
             </ContentControl.Resources>
         </ContentControl>
     </Grid>

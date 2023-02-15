@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-
-using NetUpgradePlanner.Analysis;
 using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.ViewModels.AssemblyListView;
 

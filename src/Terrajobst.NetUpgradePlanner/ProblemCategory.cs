@@ -1,6 +1,6 @@
-﻿namespace NetUpgradePlanner.Analysis;
+﻿namespace Terrajobst.NetUpgradePlanner;
 
-internal enum ProblemCategory
+public enum ProblemCategory
 {
     MissingFunctionality,
     Obsoletion,

@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using NetUpgradePlanner.Analysis;
-
-using NuGet.Frameworks;
-
+﻿using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
-namespace NetUpgradePlanner.Services;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal sealed class FrameworkAndPlatformInference
+public sealed class FrameworkAndPlatformInference
 {
     private readonly Dictionary<string, AssemblySetEntry> _assemblyByName;
     private readonly Dictionary<AssemblySetEntry, string> _inferredFramework = new();

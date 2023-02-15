@@ -5,10 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 
 using Microsoft.Extensions.DependencyInjection;
-
-using NetUpgradePlanner.Analysis;
-
 using NuGet.Frameworks;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Services;
 

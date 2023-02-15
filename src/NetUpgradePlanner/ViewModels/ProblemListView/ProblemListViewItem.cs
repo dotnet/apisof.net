@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows.Media;
-
-using NetUpgradePlanner.Analysis;
-
 using Terrajobst.ApiCatalog;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.ViewModels.MainWindow;
 

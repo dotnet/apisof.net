@@ -1,6 +1,6 @@
-﻿namespace NetUpgradePlanner.Analysis;
+﻿namespace Terrajobst.NetUpgradePlanner;
 
-internal interface IProgressMonitor
+public interface IProgressMonitor
 {
     static IProgressMonitor Empty { get; } = EmptyProgressMonitor.Instance;
 

@@ -1,6 +1,6 @@
-﻿namespace NetUpgradePlanner.Analysis;
+﻿namespace Terrajobst.NetUpgradePlanner;
 
-internal sealed class Workspace
+public sealed class Workspace
 {
     public static Workspace Default { get; } = new Workspace();
 

@@ -27,6 +27,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenerateMissingNetFxFeature
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetUpgradePlannerTelemetry", "NetUpgradePlannerTelemetry\NetUpgradePlannerTelemetry.csproj", "{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.NetUpgradePlanner", "Terrajobst.NetUpgradePlanner\Terrajobst.NetUpgradePlanner.csproj", "{79AD0F8D-72C1-44C2-A21D-779BDD5B7483}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.NetUpgradePlanner.Excel", "Terrajobst.NetUpgradePlanner.Excel\Terrajobst.NetUpgradePlanner.Excel.csproj", "{EC6D9959-842C-4810-BD66-176ECD820273}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +85,14 @@ Global
 		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15CA1AF5-E8AA-4923-847F-75E12E5BBB15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79AD0F8D-72C1-44C2-A21D-779BDD5B7483}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79AD0F8D-72C1-44C2-A21D-779BDD5B7483}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79AD0F8D-72C1-44C2-A21D-779BDD5B7483}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79AD0F8D-72C1-44C2-A21D-779BDD5B7483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC6D9959-842C-4810-BD66-176ECD820273}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC6D9959-842C-4810-BD66-176ECD820273}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC6D9959-842C-4810-BD66-176ECD820273}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC6D9959-842C-4810-BD66-176ECD820273}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

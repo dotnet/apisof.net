@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using NetUpgradePlanner.Analysis;
-
 using NuGet.Frameworks;
 
 using Terrajobst.ApiCatalog;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Services;
 
@@ -57,7 +55,7 @@ internal sealed class WorkspaceService
         var pathSet = await _progressService.Run(pm => AssemblySet.Create(paths, pm), "Reading assemblies...");
 
         // Let's remove known framework assemblies and resource files.
-        var frameworkAssemblyNames = catalog.GetKnownFrameworkAssemblies();
+        var frameworkAssemblyNames = catalog.GetAssemblyNames();
         var frameworkAssemblies = pathSet.Entries.Where(e => frameworkAssemblyNames.Contains(e.Name) ||
                                                              e.Name.EndsWith(".resources"))
                                                  .ToArray();

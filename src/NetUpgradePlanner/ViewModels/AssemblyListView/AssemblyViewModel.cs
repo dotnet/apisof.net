@@ -1,6 +1,6 @@
 ﻿using NetUpgradePlanner.Mvvm;
-using NetUpgradePlanner.Analysis;
 using System.Windows.Media;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.ViewModels.AssemblyListView;
 

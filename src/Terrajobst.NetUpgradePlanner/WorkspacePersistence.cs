@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal static class WorkspacePersistence
+public static class WorkspacePersistence
 {
     public static async Task<Workspace> LoadAsync(string path)
     {

@@ -1,8 +1,8 @@
 ﻿using Terrajobst.ApiCatalog;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal sealed class Problem
+public sealed class Problem
 {
     public Problem(ProblemId problemId,
                    ApiModel api,

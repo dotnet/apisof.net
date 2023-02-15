@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal sealed class AssemblyConfiguration
+public sealed class AssemblyConfiguration
 {
     public static AssemblyConfiguration Empty { get; } = new();
 

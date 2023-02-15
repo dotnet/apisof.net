@@ -1,6 +1,4 @@
 ﻿using Microsoft.Win32;
-
-using NetUpgradePlanner.Analysis;
 using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
 
@@ -17,6 +15,7 @@ using System.Web;
 using System.Windows;
 using System.Windows.Input;
 using SharpCompress.Archives.Zip;
+using Terrajobst.NetUpgradePlanner;
 using ZipArchive = SharpCompress.Archives.Zip.ZipArchive;
 using ZipArchiveEntry = SharpCompress.Archives.Zip.ZipArchiveEntry;
 

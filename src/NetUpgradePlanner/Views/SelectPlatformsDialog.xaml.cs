@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-
-using NetUpgradePlanner.Analysis;
 using NetUpgradePlanner.Mvvm;
 
 using Terrajobst.ApiCatalog;
+using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Views;
 

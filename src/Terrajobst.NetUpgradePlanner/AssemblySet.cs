@@ -1,16 +1,10 @@
 ﻿using Microsoft.Cci.Extensions;
-
 using NuGet.Frameworks;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
 using Terrajobst.UsageCrawling;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal sealed class AssemblySet
+public sealed class AssemblySet
 {
     public static AssemblySet Empty { get; } = new AssemblySet(Array.Empty<AssemblySetEntry>());
 

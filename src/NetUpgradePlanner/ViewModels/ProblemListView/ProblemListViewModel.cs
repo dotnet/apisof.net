@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using NetUpgradePlanner.Mvvm;
-using NetUpgradePlanner.Analysis;
 using NetUpgradePlanner.Services;
 
 using Terrajobst.ApiCatalog;
+using Terrajobst.NetUpgradePlanner;
+using AnalyzedAssembly = Terrajobst.NetUpgradePlanner.AnalyzedAssembly;
+using ProblemId = Terrajobst.NetUpgradePlanner.ProblemId;
 
 namespace NetUpgradePlanner.ViewModels.MainWindow;
 
@@ -286,7 +288,7 @@ internal sealed class ProblemListViewModel : ViewModel
         }
     }
 
-    private ProblemListViewItem CreateProblemIdItemForCurrent(IGrouping<ProblemId, Problem> problemGroup)
+    private ProblemListViewItem CreateProblemIdItemForCurrent(IGrouping<ProblemId, Terrajobst.NetUpgradePlanner.Problem> problemGroup)
     {
         var problemId = problemGroup.Key;
         var children = problemGroup.DistinctBy(p => p.Api)
@@ -298,7 +300,7 @@ internal sealed class ProblemListViewModel : ViewModel
         return new ProblemListViewItem(problemId, icon, text, children);
     }
 
-    private ProblemListViewItem CreateProblemIdItemForAll(ProblemId problemId, IEnumerable<(AnalyzedAssembly Assembly, Problem Problem)> problems)
+    private ProblemListViewItem CreateProblemIdItemForAll(ProblemId problemId, IEnumerable<(AnalyzedAssembly Assembly, Terrajobst.NetUpgradePlanner.Problem Problem)> problems)
     {
         var children = problems.GroupBy(t => t.Assembly, t => t.Problem)
                                .OrderBy(g => g.Key.Entry.Name)

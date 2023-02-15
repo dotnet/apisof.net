@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿namespace Terrajobst.NetUpgradePlanner;
 
-namespace NetUpgradePlanner.Analysis;
-
-internal sealed class AnalyzedAssembly
+public sealed class AnalyzedAssembly
 {
     public AnalyzedAssembly(AssemblySetEntry entry,
                             float score,

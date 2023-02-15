@@ -1,16 +1,10 @@
-﻿using NuGet.Frameworks;
-
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
+﻿using System.Collections.Concurrent;
+using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
-namespace NetUpgradePlanner.Analysis;
+namespace Terrajobst.NetUpgradePlanner;
 
-internal sealed class AnalysisReport
+public sealed class AnalysisReport
 {
     public AnalysisReport(ApiCatalogModel catalog,
                           AssemblySet assemblySet,
@@ -39,7 +33,7 @@ internal sealed class AnalysisReport
                                          AssemblyConfiguration assemblyConfiguration,
                                          IProgressMonitor progressMonitor)
     {
-        var knownFrameworkAssemblies = catalog.GetKnownFrameworkAssemblies();
+        var knownFrameworkAssemblies = catalog.GetAssemblyNames();
         var latestNetFramework = catalog.GetLatestNetFramework();
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
 
