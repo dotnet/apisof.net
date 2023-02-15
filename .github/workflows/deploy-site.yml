@@ -1,10 +1,10 @@
-name: CD
+name: Deploy Site
 
 on:
   push:
     branches: [ main ]
     paths:
-      - .github/workflows/cd.yml
+      - .github/workflows/deploy-site.yml
       - src/apisof.net/**
       - src/Terrajobst.ApiCatalog/**
 
@@ -12,7 +12,7 @@ env:
   DOTNET_NOLOGO: true
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,19 +26,32 @@ jobs:
       with:
         dotnet-version: '6.0.*'
 
-    # Publishing
-
     - name: dotnet publish
       run: |
         cd src/apisof.net
-        dotnet publish -c Release -o '../../artifacts/apisof.net' /p:SourceRevisionId=${{ github.sha }}
+        dotnet publish -c Release -o '../../artifacts/site' /p:SourceRevisionId=${{ github.sha }}
         cd ../..
 
-    # Deploy to Azure
+    - name: Upload build
+      uses: actions/upload-artifact@v3
+      with:
+        name: site
+        path: artifacts/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Download build
+      uses: actions/download-artifact@v3
+      with:
+        name: site
+        path: artifacts/site
 
     - name: webapps-deploy
       uses: azure/webapps-deploy@v2
       with:
         app-name: apisof
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }}
-        package: ./artifacts/apisof.net
+        package: ./artifacts/site
