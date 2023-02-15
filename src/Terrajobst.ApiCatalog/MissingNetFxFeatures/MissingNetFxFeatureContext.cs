@@ -184,7 +184,7 @@ public sealed class MissingNetFxFeatureContext
         if (!_mappings.TryGetValue(apiId, out var result))
         {
             result = GetNoCache(declaration);
-            _mappings.Add(apiId, result);
+            _mappings.TryAdd(apiId, result);
         }
 
         return result;
