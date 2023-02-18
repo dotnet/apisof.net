@@ -859,6 +859,17 @@
         </appliesTo>
     </feature>
 
+    <feature name="System.Windows.Forms.DataVisualization">
+        <description>
+            While System.Windows.Forms.DataVisualization is available to .NET Core via a NuGet package,
+            it's marked as preview and is unsupported. You should replace it with a third party control
+            library.
+        </description>
+        <appliesTo>
+            <assembly name="System.Windows.Forms.DataVisualization" />
+        </appliesTo>
+    </feature>
+
     <feature name="System.Windows.Forms Designer (WinForms Designer)">
         <description>
             In .NET Core, System.Design (WinForms Designer) is part of Visual Studio.
