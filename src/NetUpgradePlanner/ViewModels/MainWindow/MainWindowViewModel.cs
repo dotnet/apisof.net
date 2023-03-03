@@ -352,7 +352,7 @@ internal sealed class MainWindowViewModel : ViewModel
             .AppendLine($"{semVer} ({ThisAssembly.GitCommitId})")
             .ToString();
 
-        var uri = new Uri($"https://github.com/terrajobst/apisof.net/issues/new?title={HttpUtility.UrlEncode(title)}&body={HttpUtility.UrlEncode(body)}&labels=area-upgrade-planner");
+        var uri = new Uri($"https://github.com/dotnet/apisof.net/issues/new?title={HttpUtility.UrlEncode(title)}&body={HttpUtility.UrlEncode(body)}&labels=area-upgrade-planner");
         BrowserService.NavigateTo(uri);
     }
 

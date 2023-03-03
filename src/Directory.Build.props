@@ -8,7 +8,7 @@
 
     <PropertyGroup>
         <Authors>$(Company)</Authors>
-        <RepositoryUrl>https://github.com/terrajobst/apisof.net</RepositoryUrl>
+        <RepositoryUrl>https://github.com/dotnet/apisof.net</RepositoryUrl>
         <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>

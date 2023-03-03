@@ -38,7 +38,7 @@
                 </TextBlock>
             </CheckBox>
             <TextBlock Margin="0,15,0,0">
-                <Hyperlink NavigateUri="https://github.com/terrajobst/apisof.net/blob/main/docs/upgrade-planner/privacy-statement.md"><Run Text="Privacy Statement" /></Hyperlink>
+                <Hyperlink NavigateUri="https://github.com/dotnet/apisof.net/blob/main/docs/upgrade-planner/privacy-statement.md"><Run Text="Privacy Statement" /></Hyperlink>
             </TextBlock>
         </StackPanel>
         <StackPanel Orientation="Horizontal"
