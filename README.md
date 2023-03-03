@@ -1,6 +1,6 @@
 # API Catalog
 
-The site <apisof.net> is exposing which .NET platform APIs exist, which packages
+The site [apisof.net] is exposing which .NET platform APIs exist, which packages
 are needed to use them, whether they are obsolete, and which operating system
 they are supported for.
 
@@ -14,3 +14,5 @@ they are supported for.
 * Index extension methods
 * Figure out how we an efficiently lookup qualified URLs
 * Review package indexing errors, it seems we're not resolving packages correctly
+
+[apisof.net]: https://apisof.net
