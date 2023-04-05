@@ -100,6 +100,17 @@
     color: blue;
 }
 
+.syntax-view .annotation {
+    border-radius: 0.25rem;
+    margin-left: 0.4rem;
+    margin-right: 0.4rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    font-size: smaller;
+    background-color: lightgray;
+    color: black;
+}
+
 .syntax-view .punctuation {
     color: black;
 }
@@ -151,6 +162,11 @@
 
         .syntax-view .keyword {
             color: rgb(86, 156, 214);
+        }
+
+        .syntax-view .annotation {
+            background-color: rgb(75, 75, 75);
+            color: rgb(220, 220, 220);
         }
 
         .syntax-view .punctuation {

@@ -39,6 +39,8 @@ public partial class SyntaxView
 
         foreach (var part in Markup.Parts)
         {
+            var includeText = true;
+
             switch (part.Kind)
             {
                 case MarkupPartKind.Whitespace:
@@ -48,6 +50,10 @@ public partial class SyntaxView
                     break;
                 case MarkupPartKind.LiteralString:
                     markupBuilder.Append("<span class=\"string\">");
+                    break;
+                case MarkupPartKind.Punctuation when part.Text == "!":
+                    markupBuilder.Append("<span class=\"annotation\">not null");
+                    includeText = false;
                     break;
                 case MarkupPartKind.Punctuation:
                     markupBuilder.Append("<span class=\"punctuation\">");
@@ -84,7 +90,8 @@ public partial class SyntaxView
                 }
             }
 
-            markupBuilder.Append(HtmlEncoder.Encode(part.Text));
+            if (includeText)
+                markupBuilder.Append(HtmlEncoder.Encode(part.Text));
 
             if (part.Kind == MarkupPartKind.Reference)
                 markupBuilder.Append("</a>");
