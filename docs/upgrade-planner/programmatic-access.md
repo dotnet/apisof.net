@@ -4,7 +4,11 @@ I highly recommend that you start with the UI application, which you can find
 [here]. However, you can also use the NuGet packages in order to query the
 API catalog and the analysis engine programmatically.
 
-In order to use it, you'll need to reference
+In order to use it, you'll need to:
+
+Add `dotnet-eng` NuGet feed, `https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json`.
+
+Then reference:
 
 * [Terrajobst.NetUpgradePlanner](https://nuget.org/packages/Terrajobst.NetUpgradePlanner)
 * [Terrajobst.NetUpgradePlanner.Excel](https://nuget.org/packages/Terrajobst.NetUpgradePlanner.Excel)
