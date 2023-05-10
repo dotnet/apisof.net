@@ -76,7 +76,7 @@ else
                     @foreach (var usage in Api.Usages)
                     {
                         var value = usage.Percentage * 100;
-                        var title = $"Usage on {usage.Source.Name} is {usage.Percentage:P1} (as of {usage.Source.Date})";
+                        var title = $"Usage on {usage.Source.Name} is {usage.Percentage:P5} (as of {usage.Source.Date})";
 
                         <tr title="@title">
                             <th>
