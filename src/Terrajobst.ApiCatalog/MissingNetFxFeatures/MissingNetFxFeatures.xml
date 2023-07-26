@@ -883,6 +883,9 @@
     <feature name="System.Web">
         <description>
             System.Web has been replaced by ASP.NET Core.
+
+            You can fix many of the differences by adding a reference to System.Web.Adapters. If you are using
+            .NET Upgrade Assistant to upgrade your project, this will be done automatically.
         </description>
         <appliesTo>
             <namespace name="System.Web.*" />
