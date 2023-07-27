@@ -426,6 +426,12 @@ internal static class CSharpDeclarationWriter
         }
         else
         {
+            if (method.RefKind == RefKind.Ref)
+            {
+                writer.WriteKeyword("ref");
+                writer.WriteSpace();
+            }
+
             WriteTypeReference(method.ReturnType, writer);
             writer.WriteSpace();
             writer.WriteReference(method, method.Name);

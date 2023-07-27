@@ -1774,6 +1774,33 @@ public class ApiCatalogDeclarationTests
     }
 
     [Fact]
+    public void Method_RefReturn()
+    {
+        var source = @"
+            namespace Test
+            {
+                public class TheClass
+                {
+                    private TheClass() { }
+                    public ref int TheMethod() => throw null;
+                }
+            }
+        ";
+
+        var expected = @"
+            namespace Test
+            {
+                public class TheClass
+                {
+                    public ref int TheMethod();
+                }
+            }
+        ";
+
+        Assert(source, expected);
+    }
+
+    [Fact]
     public void Method_WithArg()
     {
         var source = @"
@@ -2607,6 +2634,84 @@ public class ApiCatalogDeclarationTests
                 public static class TheClass
                 {
                     public static dynamic M(dynamic p1, IEnumerable<dynamic> p2);
+                }
+            }
+        ";
+
+        Assert(source, expected);
+    }
+
+    [Fact]
+    public void Signature_Parameter_Ref()
+    {
+        var source = @"
+            namespace Test
+            {
+                public static class TheClass
+                {
+                    public static void M(ref int p0) => throw null;
+                }
+            }
+        ";
+
+        var expected = @"
+            namespace Test
+            {
+                public static class TheClass
+                {
+                    public static void M(ref int p0);
+                }
+            }
+        ";
+
+        Assert(source, expected);
+    }
+
+    [Fact]
+    public void Signature_Parameter_Out()
+    {
+        var source = @"
+            namespace Test
+            {
+                public static class TheClass
+                {
+                    public static void M(out int p0) => throw null;
+                }
+            }
+        ";
+
+        var expected = @"
+            namespace Test
+            {
+                public static class TheClass
+                {
+                    public static void M(out int p0);
+                }
+            }
+        ";
+
+        Assert(source, expected);
+    }
+
+    [Fact]
+    public void Signature_Parameter_In()
+    {
+        var source = @"
+            namespace Test
+            {
+                public static class TheClass
+                {
+                    public static void M(in int p0) => throw null;
+                }
+            }
+        ";
+
+        var expected = @"
+            namespace Test
+            {
+                public static class TheClass
+                {
+                    public static void M(in int p0);
                 }
             }
         ";
