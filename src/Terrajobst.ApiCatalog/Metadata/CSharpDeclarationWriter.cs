@@ -1344,6 +1344,12 @@ internal static class CSharpDeclarationWriter
             var method = parameter.ContainingSymbol as IMethodSymbol;
             WriteAttributeList(parameter.GetAttributes(), writer, compact: true);
 
+            if (parameter.IsParams)
+            {
+                writer.WriteKeyword("params");
+                writer.WriteSpace();
+            }
+
             if (i == 0 && method?.IsExtensionMethod == true)
             {
                 writer.WriteKeyword("this");

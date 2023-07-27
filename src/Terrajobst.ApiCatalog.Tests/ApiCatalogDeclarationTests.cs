@@ -1828,6 +1828,60 @@ public class ApiCatalogDeclarationTests
     }
 
     [Fact]
+    public void Method_WithoutParams()
+    {
+        var source = @"
+            namespace Test
+            {
+                public class TheClass
+                {
+                    private TheClass() { }
+                    public void TheMethod(object[] args) { }
+                }
+            }
+        ";
+
+        var expected = @"
+            namespace Test
+            {
+                public class TheClass
+                {
+                    public void TheMethod(object[] args);
+                }
+            }
+        ";
+
+        Assert(source, expected);
+    }
+
+    [Fact]
+    public void Method_WithParams()
+    {
+        var source = @"
+            namespace Test
+            {
+                public class TheClass
+                {
+                    private TheClass() { }
+                    public void TheMethod(params object[] args) { }
+                }
+            }
+        ";
+
+        var expected = @"
+            namespace Test
+            {
+                public class TheClass
+                {
+                    public void TheMethod(params object[] args);
+                }
+            }
+        ";
+
+        Assert(source, expected);
+    }
+
+    [Fact]
     public void Method_Attribute()
     {
         var source = @"
