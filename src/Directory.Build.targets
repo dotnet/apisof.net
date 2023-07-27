@@ -1,0 +1,8 @@
+<Project>
+    
+    <ItemGroup Label="Testing"
+               Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+        <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>
