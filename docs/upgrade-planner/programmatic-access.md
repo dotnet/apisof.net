@@ -1,8 +1,8 @@
 # .NET Upgrade Planner Programmatic Access
 
 I highly recommend that you start with the UI application, which you can find
-[here]. However, you can also use the NuGet packages in order to query the
-API catalog and the analysis engine programmatically.
+[here][planner-app]. However, you can also use the NuGet packages in order to
+query the API catalog and the analysis engine programmatically.
 
 In order to use it, you'll need to:
 
