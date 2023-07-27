@@ -24,7 +24,7 @@ The catalog knows about specific APIs (mostly platform APIs but in some cases
 also widely used community maintained NuGet packages) and uses their API id
 to compute the percentage of documents that they occur in.
 
-The indent is to understand what the most used APIs are that people depend on
+The intent is to understand what the most used APIs are that people depend on
 when planning their porting efforts.
 
 Please note [apisof.net] won't see any of your assembly or API names -- merely
