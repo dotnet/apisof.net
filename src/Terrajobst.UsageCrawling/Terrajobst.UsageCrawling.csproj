@@ -17,7 +17,7 @@
         <PackageReference Include="Microsoft.Cci.Extensions" Version="7.0.0-beta.22175.2" />
         <PackageReference Include="Microsoft.Composition" Version="1.0.31" />
         <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="6.0.3" />
-        <PackageReference Include="NuGet.Protocol" version="6.4.0" />
+        <PackageReference Include="NuGet.Protocol" version="6.6.1" />
     </ItemGroup>
 
 </Project>

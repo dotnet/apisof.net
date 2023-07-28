@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NuGet.Protocol" version="6.4.0" />
+    <PackageReference Include="NuGet.Protocol" version="6.6.1" />
   </ItemGroup>
 
 </Project>
