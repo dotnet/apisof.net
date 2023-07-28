@@ -1,5 +1,9 @@
 <Project>
-    
+
+    <PropertyGroup Label="We're adults here">
+        <SuppressNETCoreSdkPreviewMessage>True</SuppressNETCoreSdkPreviewMessage>
+    </PropertyGroup>
+
     <PropertyGroup Label="Package Info">
         <Copyright>Copyright (c) Immo Landwerth</Copyright>
         <Company>Immo Landwerth</Company>
