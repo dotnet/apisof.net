@@ -184,6 +184,8 @@ internal static class CatalogExtensions
             case "TargetedPatchingOptOutAttribute":
             case "DynamicAttribute":
             case "TupleElementNamesAttribute":
+            case "NullableAttribute":
+            case "NullableContextAttribute":
                 return false;
             default:
                 return true;
