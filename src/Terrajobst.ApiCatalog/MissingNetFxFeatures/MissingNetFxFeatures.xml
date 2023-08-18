@@ -177,7 +177,7 @@
 
     <feature name="Microsoft.Build (MSBuild)">
         <description>
-            Microsoft.Build (MSBuild) is only partially availabe for .NET Core.
+            Microsoft.Build (MSBuild) is only partially available for .NET Core.
         </description>
         <appliesTo>
             <assembly name="Microsoft.Build.*" />
