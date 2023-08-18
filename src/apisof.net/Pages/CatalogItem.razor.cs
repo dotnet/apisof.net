@@ -35,6 +35,8 @@ public partial class CatalogItem
 
     public PreviewRequirementModel? PreviewRequirement { get; set; }
 
+    public ExperimentalModel? Experimental { get; set; }
+
     public Markup SelectedMarkup { get; set; }
 
     public string HelpLink { get; set; }
@@ -61,6 +63,7 @@ public partial class CatalogItem
                                Availability.Frameworks.FirstOrDefault();
         PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedFramework);
         PreviewRequirement = GetPreviewRequirement();
+        Experimental = GetExperimental();
 
         Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 
@@ -127,6 +130,26 @@ public partial class CatalogItem
         }
 
         return assembly.PreviewRequirement;
+    }
+
+    private ExperimentalModel? GetExperimental()
+    {
+        if (SelectedAvailability is null)
+            return null;
+
+        var assembly = SelectedAvailability.Declaration.Assembly;
+
+        foreach (var api in Api.AncestorsAndSelf())
+        {
+            if (api.Kind == ApiKind.Namespace)
+                break;
+
+            var declaration = api.Declarations.First(d => d.Assembly == assembly);
+            if (declaration.Experimental is not null)
+                return declaration.Experimental;
+        }
+
+        return assembly.Experimental;
     }
 
     private async void NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)

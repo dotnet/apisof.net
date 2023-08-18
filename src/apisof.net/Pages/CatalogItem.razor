@@ -171,7 +171,31 @@ else
                             </td>
                         </tr>
                     }
-                    
+
+                    @if (Experimental is not null)
+                    {
+                        <tr>
+                            <th>Experimental</th>
+                            <td>
+                                <span class="text-warning oi oi-warning mr-1"></span>
+                                @{
+                                    var message = Experimental.Value.DiagnosticId + " This API is for evaluation purposes only and is subject to change or removal in future updates.";
+                                    var url = Experimental.Value.Url;
+                                    if (string.IsNullOrEmpty(url))
+                                        url = null;
+                                }
+                                @if (url is not null)
+                                {
+                                    <a href="@url">@message</a>
+                                }
+                                else
+                                {
+                                    <text>@message</text>
+                                }
+                            </td>
+                        </tr>
+                    }
+
                     @if (!string.IsNullOrEmpty(HelpLink))
                     {
                         <tr>
