@@ -296,6 +296,58 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Type_RequiresPreviewFeature()
+    {
+        var source = @"
+            using System.Runtime.Versioning;
+            namespace System
+            {
+                [RequiresPreviewFeatures(""This API is in preview"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net6.0", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.PreviewRequirement);
+        Assert.Equal("This API is in preview", declaration.PreviewRequirement!.Value.Message);
+        Assert.Equal("", declaration.PreviewRequirement!.Value.Url);
+    }
+
+    [Fact]
+    public async Task Type_RequiresPreviewFeature_Url()
+    {
+        var source = @"
+            using System.Runtime.Versioning;
+            namespace System
+            {
+                [RequiresPreviewFeatures(""This API is in preview"", Url=""https://aka.ms/test"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net6.0", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.PreviewRequirement);
+        Assert.Equal("This API is in preview", declaration.PreviewRequirement!.Value.Message);
+        Assert.Equal("https://aka.ms/test", declaration.PreviewRequirement!.Value.Url);
+    }
+
+    [Fact]
     public async Task Type_Obsoletion()
     {
         var source = @"
