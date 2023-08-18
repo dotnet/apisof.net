@@ -348,6 +348,107 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Type_Experimental()
+    {
+        var source = @"
+            using System;
+            using System.Diagnostics.CodeAnalysis;
+
+            namespace System.Diagnostics.CodeAnalysis
+            {
+                [AttributeUsage(AttributeTargets.Assembly |
+                                AttributeTargets.Module |
+                                AttributeTargets.Class |
+                                AttributeTargets.Struct |
+                                AttributeTargets.Enum |
+                                AttributeTargets.Constructor |
+                                AttributeTargets.Method |
+                                AttributeTargets.Property |
+                                AttributeTargets.Field |
+                                AttributeTargets.Event |
+                                AttributeTargets.Interface |
+                                AttributeTargets.Delegate, Inherited = false)]
+                public sealed class ExperimentalAttribute : Attribute
+                {
+                    public ExperimentalAttribute(string diagnosticId) { }
+                    public string DiagnosticId { get; }
+                    public string? UrlFormat { get; set; }
+                }
+            }
+
+            namespace System
+            {
+                [Experimental(""SYSLIB0042"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net6.0", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Experimental);
+        Assert.Equal("SYSLIB0042", declaration.Experimental!.Value.DiagnosticId);
+        Assert.Equal("", declaration.Experimental!.Value.Url);
+    }
+
+    [Fact]
+    public async Task Type_Experimental_Url()
+    {
+        var source = @"
+            using System;
+            using System.Diagnostics.CodeAnalysis;
+
+            namespace System.Diagnostics.CodeAnalysis
+            {
+                [AttributeUsage(AttributeTargets.Assembly |
+                                AttributeTargets.Module |
+                                AttributeTargets.Class |
+                                AttributeTargets.Struct |
+                                AttributeTargets.Enum |
+                                AttributeTargets.Constructor |
+                                AttributeTargets.Method |
+                                AttributeTargets.Property |
+                                AttributeTargets.Field |
+                                AttributeTargets.Event |
+                                AttributeTargets.Interface |
+                                AttributeTargets.Delegate, Inherited = false)]
+                public sealed class ExperimentalAttribute : Attribute
+                {
+                    public ExperimentalAttribute(string diagnosticId) { }
+                    public string DiagnosticId { get; }
+                    public string? UrlFormat { get; set; }
+                }
+            }
+
+            namespace System
+            {
+                [Experimental(""SYSLIB0042"", UrlFormat=""https://aka.ms/syslib/{0}"")]
+                public class TheClass { }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net6.0", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+
+        var declaration = Assert.Single(api.Declarations);
+
+        Assert.NotNull(declaration.Experimental);
+        Assert.Equal("SYSLIB0042", declaration.Experimental!.Value.DiagnosticId);
+        Assert.Equal("https://aka.ms/syslib/{0}", declaration.Experimental!.Value.UrlFormat);
+        Assert.Equal("https://aka.ms/syslib/SYSLIB0042", declaration.Experimental!.Value.Url);
+    }
+
+    [Fact]
     public async Task Type_Obsoletion()
     {
         var source = @"

@@ -48,6 +48,14 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         }
     }
 
+    public ExperimentalModel? Experimental
+    {
+        get
+        {
+            return _api.Catalog.GetExperimental(_api.Id, Assembly.Id);
+        }
+    }
+
     public Markup GetMyMarkup()
     {
         var markupOffset = _api.Catalog.ApiTable.ReadInt32(_offset + 4);

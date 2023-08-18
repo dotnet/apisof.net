@@ -11,7 +11,7 @@ public sealed partial class ApiCatalogModel
     public static string Url => "https://apicatalogblob.blob.core.windows.net/catalog/apicatalog.dat";
 
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-    private const int FormatVersion = 4;
+    private const int FormatVersion = 5;
 
     private readonly int _sizeOnDisk;
     private readonly byte[] _buffer;
@@ -34,12 +34,14 @@ public sealed partial class ApiCatalogModel
     private readonly int _platformSupportTableLength;
     private readonly int _previewRequirementTableOffset;
     private readonly int _previewRequirementTableLength;
+    private readonly int _experimentalTableOffset;
+    private readonly int _experimentalTableLength;
 
     private Dictionary<int, int> _forwardedApis;
 
     private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
-        Debug.Assert(tableSizes.Length == 10);
+        Debug.Assert(tableSizes.Length == 11);
 
         _stringTableLength = tableSizes[0];
 
@@ -70,6 +72,9 @@ public sealed partial class ApiCatalogModel
         _previewRequirementTableOffset = _platformSupportTableOffset + _platformSupportTableLength;
         _previewRequirementTableLength = tableSizes[9];
 
+        _experimentalTableOffset = _previewRequirementTableOffset + _previewRequirementTableLength;
+        _experimentalTableLength = tableSizes[10];
+
         _buffer = buffer;
         _sizeOnDisk = sizeOnDisk;
     }
@@ -93,6 +98,8 @@ public sealed partial class ApiCatalogModel
     internal ReadOnlySpan<byte> PlatformSupportTable => new(_buffer, _platformSupportTableOffset, _platformSupportTableLength);
 
     internal ReadOnlySpan<byte> PreviewRequirementTable => new(_buffer, _previewRequirementTableOffset, _previewRequirementTableLength);
+
+    internal ReadOnlySpan<byte> ExperimentalTable => new(_buffer, _experimentalTableOffset, _experimentalTableLength);
 
     public FrameworkEnumerator Frameworks
     {
@@ -282,6 +289,12 @@ public sealed partial class ApiCatalogModel
     {
         var offset = GetDeclarationTableOffset(PreviewRequirementTable, 16, apiId, assemblyId);
         return offset < 0 ? null : new PreviewRequirementModel(this, offset);
+    }
+
+    internal ExperimentalModel? GetExperimental(int apiId, int assemblyId)
+    {
+        var offset = GetDeclarationTableOffset(ExperimentalTable, 16, apiId, assemblyId);
+        return offset < 0 ? null : new ExperimentalModel(this, offset);
     }
 
     public ApiCatalogStatistics GetStatistics()

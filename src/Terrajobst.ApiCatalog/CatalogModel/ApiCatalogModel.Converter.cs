@@ -36,6 +36,7 @@ public sealed partial class ApiCatalogModel
         private readonly TableWriter _obsoletionTable = new();
         private readonly TableWriter _platformSupportTable = new();
         private readonly TableWriter _previewRequirementTable = new();
+        private readonly TableWriter _experimentalTable = new();
 
         private readonly List<int> _frameworkTableAssemblyPatchups = new();
         private readonly List<int> _packagesTableAssemblyPatchups = new();
@@ -80,6 +81,7 @@ public sealed partial class ApiCatalogModel
                 _obsoletionTable,
                 _platformSupportTable,
                 _previewRequirementTable,
+                _experimentalTable
             };
 
             await WritePlatformsAsync();
@@ -91,6 +93,7 @@ public sealed partial class ApiCatalogModel
             await WriteObsoletionsAsync();
             await WritePlatformSupportAsync();
             await WritePreviewRequirementsAsync();
+            await WriteExperimentalsAsync();
 
             PatchFrameworks();
             PatchPackages();
@@ -591,6 +594,35 @@ public sealed partial class ApiCatalogModel
                 _previewRequirementTable.WriteInt32(entry.AssemblyOffset);
                 _previewRequirementTable.WriteInt32(entry.MessageOffset);
                 _previewRequirementTable.WriteInt32(entry.UrlOffset);
+            }
+        }
+
+        private async Task WriteExperimentalsAsync()
+        {
+            var rows = await _connection.QueryAsync<(int? ApiId, int AssemblyId, string DiagnosticId, string UrlFormat)>($@"
+                SELECT  e.ApiId,
+                        e.AssemblyId,
+                        e.DiagnosticId,
+                        coalesce(e.UrlFormat, '') AS UrlFormat
+                FROM    Experimentals e
+            ");
+
+            var entries = rows.Select(t => (ApiOffset: t.ApiId is null ? -1 : _apiOffsetById[t.ApiId.Value],
+                                            AssemblyOffset: _assemblyOffsetById[t.AssemblyId],
+                                            DiagnosticIdOffset: WriteString(t.DiagnosticId),
+                                            UrlFormatOffset: WriteString(t.UrlFormat)))
+                              .OrderBy(t => t.ApiOffset)
+                              .ThenBy(t => t.AssemblyOffset)
+                              .ToArray();
+
+            _experimentalTable.WriteInt32(entries.Length);
+
+            foreach (var entry in entries)
+            {
+                _experimentalTable.WriteInt32(entry.ApiOffset);
+                _experimentalTable.WriteInt32(entry.AssemblyOffset);
+                _experimentalTable.WriteInt32(entry.DiagnosticIdOffset);
+                _experimentalTable.WriteInt32(entry.UrlFormatOffset);
             }
         }
 

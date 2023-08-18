@@ -76,6 +76,9 @@ internal static class XmlEntryFormat
         if (assembly.PreviewRequirementEntry is not null)
             AddPreviewRequirement(assemblyElement, assembly.PreviewRequirementEntry);
 
+        if (assembly.ExperimentalEntry is not null)
+            AddExperimental(assemblyElement, assembly.ExperimentalEntry);
+
         parent.Add(assemblyElement);
 
         foreach (var api in assembly.AllApis())
@@ -94,6 +97,9 @@ internal static class XmlEntryFormat
 
             if (api.PreviewRequirementEntry is not null)
                 AddPreviewRequirement(assemblyElement, api.PreviewRequirementEntry, fingerprint);
+
+            if (api.ExperimentalEntry is not null)
+                AddExperimental(assemblyElement, api.ExperimentalEntry, fingerprint);
         }
     }
 
@@ -163,5 +169,19 @@ internal static class XmlEntryFormat
             previewRequirementElement.Add(new XAttribute("url", previewRequirement.Url));
 
         parent.Add(previewRequirementElement);
+    }
+
+    private static void AddExperimental(XContainer parent, ExperimentalEntry experimentalEntry, string apiFingerprint = null)
+    {
+        var experimentalElement = new XElement("experimental",
+            apiFingerprint is null ? null : new XAttribute("id", apiFingerprint)
+        );
+
+        experimentalElement.Add(new XAttribute("diagnosticId", experimentalEntry.DiagnosticId));
+
+        if (experimentalEntry.UrlFormat is not null)
+            experimentalElement.Add(new XAttribute("urlFormat", experimentalEntry.UrlFormat));
+
+        parent.Add(experimentalElement);
     }
 }

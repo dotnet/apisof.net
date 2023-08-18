@@ -11,7 +11,8 @@ public sealed class ApiEntry
                      string syntax,
                      ObsoletionEntry obsoletionEntry,
                      PlatformSupportEntry platformSupportEntry,
-                     PreviewRequirementEntry previewRequirementEntry)
+                     PreviewRequirementEntry previewRequirementEntry,
+                     ExperimentalEntry experimentalEntry)
     {
         Fingerprint = guid;
         Kind = kind;
@@ -21,6 +22,7 @@ public sealed class ApiEntry
         ObsoletionEntry = obsoletionEntry;
         PlatformSupportEntry = platformSupportEntry;
         PreviewRequirementEntry = previewRequirementEntry;
+        ExperimentalEntry = experimentalEntry;
     }
 
     public static ApiEntry Create(ISymbol symbol, ApiEntry parent = null)
@@ -32,7 +34,8 @@ public sealed class ApiEntry
         var obsoletionEntry = ObsoletionEntry.Create(symbol);
         var platformSupportEntry = PlatformSupportEntry.Create(symbol);
         var previewRequirementEntry = PreviewRequirementEntry.Create(symbol);
-        return new ApiEntry(guid, kind, parent, name, syntax, obsoletionEntry, platformSupportEntry, previewRequirementEntry);
+        var experimentalEntry = ExperimentalEntry.Create(symbol);
+        return new ApiEntry(guid, kind, parent, name, syntax, obsoletionEntry, platformSupportEntry, previewRequirementEntry, experimentalEntry);
     }
 
     public Guid Fingerprint { get; }
@@ -43,5 +46,6 @@ public sealed class ApiEntry
     public ObsoletionEntry ObsoletionEntry { get; }
     public PlatformSupportEntry PlatformSupportEntry { get; }
     public PreviewRequirementEntry PreviewRequirementEntry { get; }
+    public ExperimentalEntry ExperimentalEntry { get; }
     public List<ApiEntry> Children { get; } = new();
 }

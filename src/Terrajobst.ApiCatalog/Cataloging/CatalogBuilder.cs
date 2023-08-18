@@ -53,6 +53,7 @@ public sealed class CatalogBuilder : IDisposable
                 DefinePlatformSupport(assemblyFingerprint, assemblyElement);
                 DefineObsoletions(assemblyFingerprint, assemblyElement);
                 DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
+                DefineExperimentals(assemblyFingerprint, assemblyElement);
 
                 foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                 {
@@ -88,6 +89,7 @@ public sealed class CatalogBuilder : IDisposable
                 DefinePlatformSupport(assemblyFingerprint, assemblyElement);
                 DefineObsoletions(assemblyFingerprint, assemblyElement);
                 DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
+                DefineExperimentals(assemblyFingerprint, assemblyElement);
 
                 foreach (var syntaxElement in assemblyElement.Elements("syntax"))
                 {
@@ -265,6 +267,16 @@ public sealed class CatalogBuilder : IDisposable
             );
             CREATE INDEX IX_PreviewRequirements_ApiId ON PreviewRequirements (ApiId);
             CREATE INDEX IX_PreviewRequirements_AssemblyId ON PreviewRequirements (AssemblyId);
+
+            CREATE TABLE Experimentals
+            (
+                ApiId        INTEGER REFERENCES Apis,
+                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
+                DiagnosticId TEXT,
+                UrlFormat    TEXT
+            );
+            CREATE INDEX IX_Experimentals_ApiId ON Experimentals (ApiId);
+            CREATE INDEX IX_Experimentals_AssemblyId ON Experimentals (AssemblyId);
 
             CREATE TABLE Packages
             (
@@ -547,6 +559,41 @@ public sealed class CatalogBuilder : IDisposable
                 AssemblyId = assemblyId,
                 Message = message,
                 Url = url
+            },
+            _transaction
+        );
+    }
+
+    private void DefineExperimentals(Guid assemblyFingerprint, XElement element)
+    {
+        foreach (var experimentalElement in element.Elements("experimental"))
+        {
+            var id = experimentalElement.Attribute("id")?.Value;
+            var apiFingerprint = id is null ? (Guid?)null : Guid.Parse(id);
+            var diagnosticId = experimentalElement.Attribute("diagnosticId")?.Value;
+            var urlFormat = experimentalElement.Attribute("urlFormat")?.Value;
+
+            DefineExperimentals(apiFingerprint, assemblyFingerprint, diagnosticId, urlFormat);
+        }
+    }
+
+    private void DefineExperimentals(Guid? apiFingerprint, Guid assemblyFingerprint, string diagnosticId, string urlFormat)
+    {
+        var apiId = apiFingerprint is null ? (int?)null : _apiIdByFingerprint[apiFingerprint.Value];
+        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+
+        _connection.Execute(
+            @"
+                INSERT INTO Experimentals
+                    (ApiId, AssemblyId, DiagnosticId, UrlFormat)
+                VALUES
+                    (@ApiId, @AssemblyId, @DiagnosticId, @UrlFormat)
+            ",
+            new {
+                ApiId = apiId,
+                AssemblyId = assemblyId,
+                DiagnosticId = diagnosticId,
+                UrlFormat = urlFormat
             },
             _transaction
         );

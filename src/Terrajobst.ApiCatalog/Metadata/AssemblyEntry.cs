@@ -9,12 +9,14 @@ public sealed class AssemblyEntry
     private AssemblyEntry(AssemblyIdentity identity,
                           PlatformSupportEntry platformSupportEntry,
                           PreviewRequirementEntry previewRequirementEntry,
+                          ExperimentalEntry experimentalEntry,
                           List<ApiEntry> apis)
     {
         Fingerprint = ComputeFingerprint(identity, apis);
         Identity = identity;
         PlatformSupportEntry = platformSupportEntry;
         PreviewRequirementEntry = previewRequirementEntry;
+        ExperimentalEntry = experimentalEntry;
         Apis = apis;
     }
 
@@ -22,6 +24,7 @@ public sealed class AssemblyEntry
     public AssemblyIdentity Identity { get; }
     public PlatformSupportEntry PlatformSupportEntry { get; }
     public PreviewRequirementEntry PreviewRequirementEntry { get; }
+    public ExperimentalEntry ExperimentalEntry { get; }
     public List<ApiEntry> Apis { get; }
 
     public static AssemblyEntry Create(IAssemblySymbol assembly)
@@ -29,8 +32,9 @@ public sealed class AssemblyEntry
         var identity = assembly.Identity;
         var platformSupportEntry = PlatformSupportEntry.Create(assembly.Modules.First()) ?? PlatformSupportEntry.Create(assembly);
         var previewRequirementEntry = PreviewRequirementEntry.Create(assembly.Modules.First()) ?? PreviewRequirementEntry.Create(assembly);
+        var experimentalEntry = ExperimentalEntry.Create(assembly.Modules.First()) ?? ExperimentalEntry.Create(assembly);
         var apis = GetApis(assembly);
-        return new AssemblyEntry(identity, platformSupportEntry, previewRequirementEntry, apis);
+        return new AssemblyEntry(identity, platformSupportEntry, previewRequirementEntry, experimentalEntry, apis);
     }
 
     private static List<ApiEntry> GetApis(IAssemblySymbol symbol)
