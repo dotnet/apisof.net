@@ -56,6 +56,52 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task GetApiById()
+    {
+        var source = @"
+            namespace System
+            {
+                public class TheClass
+                {
+                    public TheClass() { }
+                }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var ctor = catalog.GetAllApis().Single(a => a.Kind == ApiKind.Constructor);
+        var result = catalog.GetApiById(ctor.Id);
+        Assert.Equal(ctor, result);
+    }
+
+    [Fact]
+    public async Task GetApiByGuid()
+    {
+        var source = @"
+            namespace System
+            {
+                public class TheClass
+                {
+                    public TheClass() { }
+                }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var ctor = catalog.GetAllApis().Single(a => a.Kind == ApiKind.Constructor);
+        var result = catalog.GetApiByGuid(ctor.Guid);
+        Assert.Equal(ctor, result);
+    }
+
+    [Fact]
     public async Task Type()
     {
         var source = @"

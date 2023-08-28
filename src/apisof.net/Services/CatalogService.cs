@@ -16,7 +16,6 @@ public sealed class CatalogService
     private ApiCatalogModel _catalog;
     private ApiAvailabilityContext _availabilityContext;
     private SuffixTree _suffixTree;
-    private Dictionary<Guid, ApiModel> _apiByGuid;
     private ApiCatalogStatistics _statistics;
 
     public CatalogService(IConfiguration configuration, IWebHostEnvironment environment)
@@ -44,7 +43,6 @@ public sealed class CatalogService
 
         var catalog = await ApiCatalogModel.LoadAsync(databasePath);
         var availabilityContext = ApiAvailabilityContext.Create(catalog);
-        var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
 
         var suffixTreePath = GetSuffixTreePath();
         if (!File.Exists(suffixTreePath))
@@ -66,7 +64,6 @@ public sealed class CatalogService
         _catalog = catalog;
         _availabilityContext = availabilityContext;
         _statistics = catalog.GetStatistics();
-        _apiByGuid = apiByGuid;
         _suffixTree = suffixTree;
         _jobInfo = jobInfo;
     }
@@ -93,12 +90,6 @@ public sealed class CatalogService
     public ApiCatalogStatistics CatalogStatistics => _statistics;
 
     public CatalogJobInfo JobInfo => _jobInfo;
-
-    public ApiModel GetApiByGuid(Guid guid)
-    {
-        _apiByGuid.TryGetValue(guid, out var result);
-        return result;
-    }
 
     public IEnumerable<ApiModel> Search(string query)
     {

@@ -56,7 +56,7 @@ public partial class CatalogItem
         // TODO: Handle invalid GUID
         // TODO: Handle API not found
 
-        Api = CatalogService.GetApiByGuid(System.Guid.Parse(Guid));
+        Api = CatalogService.Catalog.GetApiByGuid(System.Guid.Parse(Guid));
         Availability = CatalogService.AvailabilityContext.GetAvailability(Api);
         SelectedFramework = SelectFramework(Availability, NavigationManager.GetQueryParameter("fx"));
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??

@@ -37,6 +37,7 @@ public sealed partial class ApiCatalogModel
     private readonly int _experimentalTableOffset;
     private readonly int _experimentalTableLength;
 
+    private Dictionary<Guid, int> _apiOffsetByGuid;
     private Dictionary<int, int> _forwardedApis;
 
     private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
@@ -161,6 +162,18 @@ public sealed partial class ApiCatalogModel
     public ApiModel GetApiById(int id)
     {
         return new ApiModel(this, id);
+    }
+
+    public ApiModel GetApiByGuid(Guid guid)
+    {
+        if (_apiOffsetByGuid is null)
+        {
+            var apiByGuid = GetAllApis().ToDictionary(a => a.Guid, a => a.Id);
+            Interlocked.CompareExchange(ref _apiOffsetByGuid, apiByGuid, null);
+        }
+        
+        var offset = _apiOffsetByGuid[guid];
+        return new ApiModel(this, offset);
     }
 
     internal string GetString(int offset)

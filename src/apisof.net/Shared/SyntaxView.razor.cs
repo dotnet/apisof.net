@@ -65,7 +65,7 @@ public partial class SyntaxView
                 {
                     var api = part.Reference == null
                         ? (ApiModel?)null
-                        : CatalogService.GetApiByGuid(part.Reference.Value);
+                        : CatalogService.Catalog.GetApiByGuid(part.Reference.Value);
 
                     var tooltip = api == null ? null : GeneratedTooltip(api.Value);
 
