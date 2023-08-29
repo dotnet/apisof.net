@@ -134,15 +134,11 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public IEnumerable<UsageSourceModel> UsageSources
+    public UsageSourceEnumerator UsageSources
     {
         get
         {
-            var count = UsageSourcesTable.ReadInt32(0);
-            var offset = 4;
-
-            for (var i = 0; i < count; i++, offset += 8)
-                yield return new UsageSourceModel(this, offset);
+            return new UsageSourceEnumerator(this);
         }
     }
 
@@ -692,6 +688,67 @@ public sealed partial class ApiCatalogModel
         }
     }
 
+    public struct UsageSourceEnumerator : IEnumerable<UsageSourceModel>, IEnumerator<UsageSourceModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _count;
+        private int _index;
+
+        public UsageSourceEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _index = -1;
+            _count = _catalog.UsageSourcesTable.ReadInt32(0);
+        }
+
+        IEnumerator<UsageSourceModel> IEnumerable<UsageSourceModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public UsageSourceEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public UsageSourceModel Current
+        {
+            get
+            {
+                var offset = 4 + _index * 8;
+                return new UsageSourceModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+    
     public struct ApiEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
     {
         private readonly ApiCatalogModel _catalog;
