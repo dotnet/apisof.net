@@ -736,6 +736,88 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Method_Extension()
+    {
+        var source = @"
+            using System.Collections.Generic;
+
+            namespace System
+            {
+                public class TheClass { }
+
+                public static class TheExtension
+                {
+                    public static void TheMethod(this TheClass c, int x) { }
+                }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var theMethod = catalog.GetAllApis().Single(a => a.Name == "TheMethod(TheClass, Int32)");
+
+        var extensionMethod = Assert.Single(catalog.ExtensionMethods);
+        Assert.Equal(theClass, extensionMethod.ExtendedType);
+        Assert.Equal(theMethod, extensionMethod.ExtensionMethod);
+        Assert.Equal(extensionMethod, Assert.Single(theClass.ExtensionMethods));
+
+        var extensionMethodByGuid = catalog.GetExtensionMethodByGuid(extensionMethod.Guid);
+        Assert.Equal(extensionMethod, extensionMethodByGuid);
+    }
+
+    [Fact]
+    public async Task Method_Extension_Multiple()
+    {
+        var source = @"
+            using System.Collections.Generic;
+
+            namespace System
+            {
+                public class TheClass1 { }
+
+                public class TheClass2 { }
+
+                public static class TheExtension1
+                {
+                    public static void M1_1(this TheClass1 c) { }
+                    public static void M1_2(this TheClass2 c) { }
+                    public static void M1_3(this TheClass1 c) { }
+                    public static void M1_4(this TheClass2 c) { }
+                }
+
+                public static class TheExtension2
+                {
+                    public static void M2_1(this TheClass1 c) { }
+                    public static void M2_2(this TheClass2 c) { }
+                    public static void M2_3(this TheClass1 c) { }
+                    public static void M2_4(this TheClass2 c) { }
+                }
+            }
+        ";
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var theClass1 = catalog.GetAllApis().Single(a => a.Name == "TheClass1");
+        var theClass2 = catalog.GetAllApis().Single(a => a.Name == "TheClass2");
+
+        var theClass1Extensions = theClass1.ExtensionMethods.Select(m => m.ExtensionMethod.Name).OrderBy(x => x).ToArray();
+        var theClass2Extensions = theClass2.ExtensionMethods.Select(m => m.ExtensionMethod.Name).OrderBy(x => x).ToArray();
+
+        var theClass1ExtensionsExpected = new[] { "M1_1(TheClass1)", "M1_3(TheClass1)", "M2_1(TheClass1)", "M2_3(TheClass1)" };
+        var theClass2ExtensionsExpected = new[] { "M1_2(TheClass2)", "M1_4(TheClass2)", "M2_2(TheClass2)", "M2_4(TheClass2)" };
+
+        Assert.Equal(theClass1ExtensionsExpected, theClass1Extensions);
+        Assert.Equal(theClass2ExtensionsExpected, theClass2Extensions);
+    }
+
+    [Fact]
     public async Task Assembly_RootApis()
     {
         var source = @"

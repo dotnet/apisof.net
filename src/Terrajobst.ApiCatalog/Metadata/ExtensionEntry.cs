@@ -1,15 +1,19 @@
-﻿namespace Terrajobst.ApiCatalog
+﻿namespace Terrajobst.ApiCatalog;
+
+public sealed class ExtensionEntry
 {
-    public sealed class ExtensionEntry
+    public ExtensionEntry(Guid fingerprint,
+                          Guid extendedTypeGuid,
+                          Guid extensionMethodGuid)
     {
-        public ExtensionEntry(Guid extendedTypeGuid, Guid extensionMethodGuid)
-        {
-            ExtendedTypeGuid = extendedTypeGuid;
-            ExtensionMethodGuid = extensionMethodGuid;
-        }
-
-        public Guid ExtendedTypeGuid { get; }
-
-        public Guid ExtensionMethodGuid { get; }
+        Fingerprint = fingerprint;
+        ExtendedTypeGuid = extendedTypeGuid;
+        ExtensionMethodGuid = extensionMethodGuid;
     }
+
+    public Guid Fingerprint { get; }
+
+    public Guid ExtendedTypeGuid { get; }
+
+    public Guid ExtensionMethodGuid { get; }
 }

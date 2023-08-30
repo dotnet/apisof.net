@@ -23,6 +23,8 @@ public partial class CatalogItem
 
     public ApiModel Api { get; set; }
 
+    public ExtensionMethodModel? ExtensionMethod { get; set; }
+
     public IEnumerable<ApiModel> Breadcrumbs { get; set; }
 
     public ApiModel Parent { get; set; }
@@ -56,7 +58,19 @@ public partial class CatalogItem
         // TODO: Handle invalid GUID
         // TODO: Handle API not found
 
-        Api = CatalogService.Catalog.GetApiByGuid(System.Guid.Parse(Guid));
+        var g = System.Guid.Parse(Guid);
+
+        try
+        {
+            Api = CatalogService.Catalog.GetApiByGuid(g);
+            ExtensionMethod = null;
+        }
+        catch (KeyNotFoundException)
+        {
+            ExtensionMethod = CatalogService.Catalog.GetExtensionMethodByGuid(g);
+            Api = ExtensionMethod.Value.ExtensionMethod;
+        }
+
         Availability = CatalogService.AvailabilityContext.GetAvailability(Api);
         SelectedFramework = SelectFramework(Availability, NavigationManager.GetQueryParameter("fx"));
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
@@ -65,15 +79,25 @@ public partial class CatalogItem
         PreviewRequirement = GetPreviewRequirement();
         Experimental = GetExperimental();
 
-        Breadcrumbs = Api.AncestorsAndSelf().Reverse();
+        if (ExtensionMethod is not null)
+            Breadcrumbs = ExtensionMethod.Value.ExtendedType.AncestorsAndSelf().Reverse().Append(ExtensionMethod.Value.ExtensionMethod);
+        else
+            Breadcrumbs = Api.AncestorsAndSelf().Reverse();
 
-        if (Api.Kind.IsMember() && Api.Parent is not null)
+        if (ExtensionMethod is not null)
         {
-            Parent = Api.Parent.Value;
+            Parent = ExtensionMethod.Value.ExtendedType;
         }
         else
         {
-            Parent = Api;
+            if (Api.Kind.IsMember() && Api.Parent is not null)
+            {
+                Parent = Api.Parent.Value;
+            }
+            else
+            {
+                Parent = Api;
+            }
         }
 
         SelectedMarkup = SelectedAvailability?.Declaration.GetMarkup();

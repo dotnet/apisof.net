@@ -7,6 +7,7 @@ public sealed class ApiCatalogStatistics
     public ApiCatalogStatistics(int sizeOnDisk,
                                 int sizeInMemory,
                                 int numberOfApis,
+                                int numberOfExtensionMethods,
                                 int numberOfDeclarations,
                                 int numberOfAssemblies,
                                 int numberOfFrameworks,
@@ -19,6 +20,7 @@ public sealed class ApiCatalogStatistics
         SizeOnDisk = sizeOnDisk;
         SizeInMemory = sizeInMemory;
         NumberOfApis = numberOfApis;
+        NumberOfExtensionMethods = numberOfExtensionMethods;
         NumberOfDeclarations = numberOfDeclarations;
         NumberOfAssemblies = numberOfAssemblies;
         NumberOfFrameworks = numberOfFrameworks;
@@ -32,6 +34,7 @@ public sealed class ApiCatalogStatistics
     public int SizeOnDisk { get; }
     public int SizeInMemory { get; }
     public int NumberOfApis { get; }
+    public int NumberOfExtensionMethods { get; }
     public int NumberOfDeclarations { get; }
     public int NumberOfAssemblies { get; }
     public int NumberOfFrameworks { get; }
@@ -47,6 +50,7 @@ public sealed class ApiCatalogStatistics
         sb.AppendLine($"Size on disk         : {SizeOnDisk,12:N0} bytes");
         sb.AppendLine($"Size in memory       : {SizeInMemory,12:N0} bytes");
         sb.AppendLine($"APIs                 : {NumberOfApis,12:N0}");
+        sb.AppendLine($"Extension methods    : {NumberOfExtensionMethods,12:N0}");
         sb.AppendLine($"Declarations         : {NumberOfDeclarations,12:N0}");
         sb.AppendLine($"Assemblies           : {NumberOfAssemblies,12:N0}");
         sb.AppendLine($"Frameworks           : {NumberOfFrameworks,12:N0}");

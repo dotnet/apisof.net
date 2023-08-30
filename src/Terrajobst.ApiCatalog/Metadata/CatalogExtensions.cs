@@ -16,17 +16,23 @@ internal static class CatalogExtensions
 
     public static Guid GetCatalogGuid(this ISymbol symbol)
     {
+        var id = symbol.GetCatalogDocumentationCommentId();
+        return id is null ? Guid.Empty : GetCatalogGuid(id);
+    }
+
+    public static string GetCatalogDocumentationCommentId(this ISymbol symbol)
+    {
         if (symbol is ITypeParameterSymbol)
-            return Guid.Empty;
+            return null;
 
         if (symbol is INamespaceSymbol ns && ns.IsGlobalNamespace)
-            return GetCatalogGuid("N:<global>");
+            return "N:<global>";
 
-        var id = symbol.OriginalDefinition.GetDocumentationCommentId();
-        if (id == null)
-            return Guid.Empty;
+        var result = symbol.OriginalDefinition.GetDocumentationCommentId();
+        if (result is not null && result.StartsWith("!:"))
+            result = "T:" + result[2..];
 
-        return GetCatalogGuid(id);
+        return result;
     }
 
     public static Guid GetCatalogGuid(string packageId, string packageVersion)

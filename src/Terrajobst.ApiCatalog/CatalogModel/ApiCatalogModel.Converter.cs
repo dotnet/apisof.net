@@ -37,6 +37,7 @@ public sealed partial class ApiCatalogModel
         private readonly TableWriter _platformSupportTable = new();
         private readonly TableWriter _previewRequirementTable = new();
         private readonly TableWriter _experimentalTable = new();
+        private readonly TableWriter _extensionMethodsTable = new();
 
         private readonly List<int> _frameworkTableAssemblyPatchups = new();
         private readonly List<int> _packagesTableAssemblyPatchups = new();
@@ -81,7 +82,8 @@ public sealed partial class ApiCatalogModel
                 _obsoletionTable,
                 _platformSupportTable,
                 _previewRequirementTable,
-                _experimentalTable
+                _experimentalTable,
+                _extensionMethodsTable,
             };
 
             await WritePlatformsAsync();
@@ -94,6 +96,7 @@ public sealed partial class ApiCatalogModel
             await WritePlatformSupportAsync();
             await WritePreviewRequirementsAsync();
             await WriteExperimentalsAsync();
+            await WriteExtensionMethods();
 
             PatchFrameworks();
             PatchPackages();
@@ -623,6 +626,33 @@ public sealed partial class ApiCatalogModel
                 _experimentalTable.WriteInt32(entry.AssemblyOffset);
                 _experimentalTable.WriteInt32(entry.DiagnosticIdOffset);
                 _experimentalTable.WriteInt32(entry.UrlFormatOffset);
+            }
+        }
+
+        private async Task WriteExtensionMethods()
+        {
+            var rows = await _connection.QueryAsync<(string ExtensionMethodGuid, int ExtendedTypeId, int ExtensionMethodId)>($@"
+                SELECT  e.ExtensionMethodGuid,
+                        e.ExtendedTypeId,
+                        e.ExtensionMethodId
+                FROM    ExtensionMethods e
+            ");
+
+            var entries = rows.Select(t => (
+                    t.ExtensionMethodGuid,
+                    ExtendedTypeOffset: _apiOffsetById[t.ExtendedTypeId],
+                    ExtensionMethodOffset: _apiOffsetById[t.ExtensionMethodId]))
+                .OrderBy(t => t.ExtendedTypeOffset)
+                .ThenBy(t => t.ExtensionMethodOffset)
+                .ToArray();
+
+            _extensionMethodsTable.WriteInt32(entries.Length);
+
+            foreach (var entry in entries)
+            {
+                _extensionMethodsTable.WriteGuid(entry.ExtensionMethodGuid);
+                _extensionMethodsTable.WriteInt32(entry.ExtendedTypeOffset);
+                _extensionMethodsTable.WriteInt32(entry.ExtensionMethodOffset);
             }
         }
 

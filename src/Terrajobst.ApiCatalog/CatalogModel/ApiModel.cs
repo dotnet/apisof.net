@@ -86,6 +86,14 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         }
     }
 
+    public ExtensionMethodEnumerator ExtensionMethods
+    {
+        get
+        {
+            return new ExtensionMethodEnumerator(this);
+        }
+    }
+
     public IEnumerable<ApiModel> AncestorsAndSelf()
     {
         var current = this;
@@ -503,6 +511,72 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
             {
                 var offset = _offset + 4 + 8 * _index;
                 return new ApiUsageModel(_apiModel, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct ExtensionMethodEnumerator : IEnumerable<ExtensionMethodModel>, IEnumerator<ExtensionMethodModel>
+    {
+        private readonly ApiModel _apiModel;
+        private readonly int _offset;
+        private int _index;
+
+        public ExtensionMethodEnumerator(ApiModel apiModel)
+        {
+            _apiModel = apiModel;
+            _offset = _apiModel.Catalog.GetExtensionMethodOffset(_apiModel.Id);
+            _index = -1;
+        }
+
+        IEnumerator<ExtensionMethodModel> IEnumerable<ExtensionMethodModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public ExtensionMethodEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            var offset = _offset + (_index + 1) * (16 + 4 + 4);
+            if (_offset < 0 || offset >= _apiModel.Catalog.ExtensionMethodTable.Length)
+                return false;
+
+            var extendedTypeId = _apiModel.Catalog.ExtensionMethodTable.ReadInt32(offset + 16);
+            if (extendedTypeId != _apiModel.Id)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ExtensionMethodModel Current
+        {
+            get
+            {
+                var offset = _offset + _index * (16 + 4 + 4);
+                return new ExtensionMethodModel(_apiModel.Catalog, offset);
             }
         }
 

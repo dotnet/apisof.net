@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 using Dapper;
@@ -38,6 +40,7 @@ public sealed class CatalogBuilder : IDisposable
         var framework = doc.Root.Attribute("name").Value;
         DefineFramework(framework);
         DefineApis(doc.Root.Elements("api"));
+        DefineExtensions(doc.Root.Elements("extension"));
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
@@ -72,6 +75,7 @@ public sealed class CatalogBuilder : IDisposable
         var packageName = doc.Root.Attribute("name").Value;
         DefinePackage(packageFingerprint, packageId, packageName);
         DefineApis(doc.Root.Elements("api"));
+        DefineExtensions(doc.Root.Elements("extension"));
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
@@ -187,6 +191,8 @@ public sealed class CatalogBuilder : IDisposable
 
     public void Dispose()
     {
+        CommitExtensions();
+
         _transaction.Commit();
         _transaction.Dispose();
         _connection.Dispose();
@@ -305,6 +311,13 @@ public sealed class CatalogBuilder : IDisposable
                 Syntax   TEXT NOT NULL
             );
 
+            CREATE TABLE ExtensionMethods
+            (
+                ExtensionMethodGuid TEXT  NOT NULL,
+                ExtendedTypeId      INTEGER NOT NULL REFERENCES Apis,
+                ExtensionMethodId   INTEGER NOT NULL REFERENCES Apis
+            );
+
             CREATE TABLE Declarations
             (
                 ApiId      INTEGER NOT NULL REFERENCES Apis,
@@ -338,6 +351,7 @@ public sealed class CatalogBuilder : IDisposable
     private readonly Dictionary<string, int> _frameworkIdByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _osPlatformIdByName = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, int> _usageSourceIdByName = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<Guid, (Guid, Guid)> _extensions = new();
 
     private int DefineSyntax(string syntax)
     {
@@ -597,6 +611,58 @@ public sealed class CatalogBuilder : IDisposable
             },
             _transaction
         );
+    }
+
+    private void DefineExtensions(IEnumerable<XElement> extensionElements)
+    {
+        foreach (var experimentalElement in extensionElements)
+        {
+            var guid = Guid.Parse(experimentalElement.Attribute("fingerprint").Value);
+            var typeGuid = Guid.Parse(experimentalElement.Attribute("type").Value);
+            var methodGuid = Guid.Parse(experimentalElement.Attribute("method").Value);
+            DefineExtension(guid, typeGuid, methodGuid);
+        }
+    }
+
+    private void DefineExtension(Guid extensionGuid, Guid typeGuid, Guid methodGuid)
+    {
+        if (extensionGuid == Guid.Empty || typeGuid == Guid.Empty || methodGuid == Guid.Empty)
+            return;
+
+        _extensions.TryAdd(extensionGuid, (typeGuid, methodGuid));
+    }
+
+    private void CommitExtensions()
+    {
+        foreach (var (extensionMethodGuid, (typeGuid, methodGuid)) in _extensions)
+        {
+            if (!_apiIdByFingerprint.TryGetValue(typeGuid, out var typeId))
+            {
+                Console.WriteLine($"error: can't resolve extension type {typeGuid}");
+                continue;
+            }
+
+            if (!_apiIdByFingerprint.TryGetValue(methodGuid, out var methodId))
+            {
+                Console.WriteLine($"error: can't resolve extension method {methodId}");
+                continue;
+            }
+
+            _connection.Execute(
+                @"
+                    INSERT INTO ExtensionMethods
+                        (ExtensionMethodGuid, ExtendedTypeId, ExtensionMethodId)
+                    VALUES
+                        (@ExtensionMethodGuid, @TypeId, @MethodId)
+                ",
+                new {
+                    ExtensionMethodGuid = extensionMethodGuid.ToString("N"),
+                    TypeId = typeId,
+                    MethodId = methodId
+                },
+                _transaction
+            );
+        }
     }
 
     private void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax)

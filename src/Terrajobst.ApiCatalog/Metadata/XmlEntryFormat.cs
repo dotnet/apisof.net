@@ -10,14 +10,30 @@ internal static class XmlEntryFormat
         var root = new XElement("framework", new XAttribute("name", frameworkEntry.FrameworkName));
         document.Add(root);
 
-        var dictionary = new HashSet<Guid>();
+        var guidSet = new HashSet<Guid>();
 
         foreach (var assembly in frameworkEntry.Assemblies)
         {
             foreach (var api in assembly.AllApis())
             {
-                if (dictionary.Add(api.Fingerprint))
-                    AddApi(root, api);
+                if (!guidSet.Add(api.Fingerprint))
+                    continue;
+
+                AddApi(root, api);
+            }
+
+            foreach (var extension in assembly.Extensions)
+            {
+                if (!guidSet.Add(extension.Fingerprint))
+                    continue;
+
+                var extensionElement = new XElement("extension",
+                    new XAttribute("fingerprint", extension.Fingerprint.ToString("N")),
+                    new XAttribute("type", extension.ExtendedTypeGuid.ToString("N")),
+                    new XAttribute("method", extension.ExtensionMethodGuid.ToString("N"))
+                );
+
+                root.Add(extensionElement);
             }
         }
 

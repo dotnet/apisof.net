@@ -11,7 +11,7 @@ public sealed partial class ApiCatalogModel
     public static string Url => "https://apicatalogblob.blob.core.windows.net/catalog/apicatalog.dat";
 
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-    private const int FormatVersion = 5;
+    private const int FormatVersion = 6;
 
     private readonly int _sizeOnDisk;
     private readonly byte[] _buffer;
@@ -36,13 +36,16 @@ public sealed partial class ApiCatalogModel
     private readonly int _previewRequirementTableLength;
     private readonly int _experimentalTableOffset;
     private readonly int _experimentalTableLength;
+    private readonly int _extensionMethodTableOffset;
+    private readonly int _extensionMethodTableLength;
 
     private Dictionary<Guid, int> _apiOffsetByGuid;
+    private Dictionary<Guid, int> _extensionMethodOffsetByGuid;
     private Dictionary<int, int> _forwardedApis;
 
     private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
-        Debug.Assert(tableSizes.Length == 11);
+        Debug.Assert(tableSizes.Length == 12);
 
         _stringTableLength = tableSizes[0];
 
@@ -76,6 +79,9 @@ public sealed partial class ApiCatalogModel
         _experimentalTableOffset = _previewRequirementTableOffset + _previewRequirementTableLength;
         _experimentalTableLength = tableSizes[10];
 
+        _extensionMethodTableOffset = _experimentalTableOffset + _experimentalTableLength;
+        _extensionMethodTableLength = tableSizes[11];
+
         _buffer = buffer;
         _sizeOnDisk = sizeOnDisk;
     }
@@ -101,6 +107,8 @@ public sealed partial class ApiCatalogModel
     internal ReadOnlySpan<byte> PreviewRequirementTable => new(_buffer, _previewRequirementTableOffset, _previewRequirementTableLength);
 
     internal ReadOnlySpan<byte> ExperimentalTable => new(_buffer, _experimentalTableOffset, _experimentalTableLength);
+
+    internal ReadOnlySpan<byte> ExtensionMethodTable => new(_buffer, _extensionMethodTableOffset, _extensionMethodTableLength);
 
     public FrameworkEnumerator Frameworks
     {
@@ -150,6 +158,14 @@ public sealed partial class ApiCatalogModel
         }
     }
 
+    public ExtensionMethodEnumerator ExtensionMethods
+    {
+        get
+        {
+            return new ExtensionMethodEnumerator(this);
+        }
+    }
+
     public IEnumerable<ApiModel> GetAllApis()
     {
         return RootApis.SelectMany(r => r.DescendantsAndSelf());
@@ -167,9 +183,21 @@ public sealed partial class ApiCatalogModel
             var apiByGuid = GetAllApis().ToDictionary(a => a.Guid, a => a.Id);
             Interlocked.CompareExchange(ref _apiOffsetByGuid, apiByGuid, null);
         }
-        
+
         var offset = _apiOffsetByGuid[guid];
         return new ApiModel(this, offset);
+    }
+
+    public ExtensionMethodModel GetExtensionMethodByGuid(Guid guid)
+    {
+        if (_extensionMethodOffsetByGuid is null)
+        {
+            var extensionMethodOffsetByGuid = ExtensionMethods.ToDictionary(a => a.Guid, a => a.Id);
+            Interlocked.CompareExchange(ref _extensionMethodOffsetByGuid, extensionMethodOffsetByGuid, null);
+        }
+
+        var offset = _extensionMethodOffsetByGuid[guid];
+        return new ExtensionMethodModel(this, offset);
     }
 
     internal string GetString(int offset)
@@ -216,6 +244,49 @@ public sealed partial class ApiCatalogModel
         }
 
         return new Markup(parts);
+    }
+
+    internal int GetExtensionMethodOffset(int extensionTypeId)
+    {
+        const int rowSize = 16 + 4 + 4;
+        Debug.Assert((ExtensionMethodTable.Length - 4) % rowSize == 0);
+
+        var low = 0;
+        var high = (ExtensionMethodTable.Length - 4) / rowSize - 1;
+
+        while (low <= high)
+        {
+            var middle = low + ((high - low) >> 1);
+            var rowStart = 4 + middle * rowSize;
+
+            var rowExtensionTypeId = ExtensionMethodTable.ReadInt32(rowStart + 16);
+            var comparison = extensionTypeId.CompareTo(rowExtensionTypeId);
+
+            if (comparison == 0)
+            {
+                // The table is allowed to contain multiple entries. Just look backwards and adjust the row offset
+                // until we find a row with different values.
+                var previousRowStart = rowStart - rowSize;
+                while (previousRowStart > 0)
+                {
+                    var previousRowExtensionTypeId = ExtensionMethodTable.ReadInt32(previousRowStart + 16);
+                    if (previousRowExtensionTypeId != rowExtensionTypeId)
+                        break;
+
+                    rowStart = previousRowStart;
+                    previousRowStart -= rowSize;
+                }
+
+                return rowStart;
+            }
+
+            if (comparison < 0)
+                high = middle - 1;
+            else
+                low = middle + 1;
+        }
+
+        return -1;
     }
 
     private static int GetDeclarationTableOffset(ReadOnlySpan<byte> table, int rowSize, int apiId, int assemblyId)
@@ -313,6 +384,7 @@ public sealed partial class ApiCatalogModel
             sizeOnDisk: _sizeOnDisk,
             sizeInMemory: _buffer.Length,
             numberOfApis: allApis.Count(),
+            numberOfExtensionMethods: ExtensionMethods.Count(),
             numberOfDeclarations: allApis.SelectMany(a => a.Declarations).Count(),
             numberOfAssemblies: Assemblies.Count(),
             numberOfFrameworks: Frameworks.Count(),
@@ -799,6 +871,67 @@ public sealed partial class ApiCatalogModel
             {
                 var offset = _catalog.ApiTable.ReadInt32(_offset + 4 + 4 * _index);
                 return new ApiModel(_catalog, offset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct ExtensionMethodEnumerator : IEnumerable<ExtensionMethodModel>, IEnumerator<ExtensionMethodModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private readonly int _count;
+        private int _index;
+
+        public ExtensionMethodEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _index = -1;
+            _count = _catalog.ExtensionMethodTable.ReadInt32(0);
+        }
+
+        IEnumerator<ExtensionMethodModel> IEnumerable<ExtensionMethodModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public ExtensionMethodEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (_index >= _count - 1)
+                return false;
+
+            _index++;
+            return true;
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ExtensionMethodModel Current
+        {
+            get
+            {
+                var offset = 4 + _index * (16 + 4 + 4);
+                return new ExtensionMethodModel(_catalog, offset);
             }
         }
 

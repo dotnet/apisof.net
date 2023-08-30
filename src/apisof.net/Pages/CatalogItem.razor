@@ -61,6 +61,23 @@ else
                                 }
                             </li>
                         }
+
+                        @foreach (var extensionMethod in Parent.ExtensionMethods.OrderBy(em => em.ExtensionMethod))
+                        {
+                            var child = extensionMethod.ExtensionMethod;
+                            var childUnsupportedClass = ""; // TODO: child.IsUnsupported ? "text-muted" : "";
+
+                            <li>
+                                @if (extensionMethod == ExtensionMethod)
+                                {
+                                    <img height="16" width="16" src="/img/ExtensionMethod.svg" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                                }
+                                else
+                                {
+                                    <img height="16" width="16" src="/img/ExtensionMethod.svg" /> <a class="@childUnsupportedClass" href="/catalog/@extensionMethod.Guid">@child.Name</a>
+                                }
+                            </li>
+                        }
                     </ul>
                 </li>
             </ul>

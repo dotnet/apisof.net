@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+  <defs>
+    <style>.canvas{fill: none; opacity: 0;}.light-defaultgrey{fill: #212121; opacity: 1;}.light-purple-10{fill: #6936aa; opacity: 0.1;}.light-purple{fill: #6936aa; opacity: 1;}.cls-1{opacity:0.75;}</style>
+  </defs>
+  <title>IconLightExtensionMethod</title>
+  <g id="canvas" class="canvas">
+    <path class="canvas" d="M16,16H0V0H16Z" />
+  </g>
+  <g id="level-1">
+    <path class="light-defaultgrey" d="M15.84,12.854l-3,3h-.707l-3-3,.707-.707,2.147,2.146V11.854h1v2.439l2.146-2.146ZM13,10H12v1h1Zm0-2H12V9h1Z" />
+    <g class="cls-1">
+      <path class="light-purple-10" d="M6,2.461,10.54,4.943v5.409L6,12.95l-4.456-2.6V4.943Z" />
+      <path class="light-purple" d="M10.75,4.363l-4.5-2.6h-.5l-4.5,2.6L1,4.8v5.409l.25.433,4.5,2.6h.5l4.5-2.6.25-.433V4.8ZM9.976,9.916l-3.5,2.021V7.59h-1v4.347l-3.5-2.021V5.085L6,2.774l3.98,2.311Z" />
+    </g>
+    <path class="light-purple-10" d="M6,2.313l4.5,2.506L6,7.452,1.46,4.8Z" />
+    <path class="light-purple" d="M6.261,7.884H5.755l-4.5-2.656v-.87l4.5-2.592h.5l4.5,2.6V5.25ZM2.481,4.811,5.994,6.873l3.5-2.044-3.5-1.944Z" />
+  </g>
+</svg>
