@@ -76,7 +76,7 @@ public sealed class NuGetFeed
             throw new NotSupportedException("We can only retrieve owner information for nuget.org");
 
         var httpClient = new HttpClient();
-        var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-014/owners/owners.v2.json";
+        var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-017/owners/owners.v2.json";
         return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
     }
 }
