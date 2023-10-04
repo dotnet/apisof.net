@@ -15,6 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Since we're both using WPF and WinForms, let's remove the implicit usings for WinForms,
+         otherwise we'll get a lot of ambiguities. -->
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <None Remove="Resources\Assembly.png" />
     <None Remove="Resources\Class.png" />
     <None Remove="Resources\Constant.png" />
