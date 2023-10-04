@@ -128,7 +128,7 @@ internal static class XmlEntryFormat
         );
         parent.Add(apiElement);
 
-        if (api.Parent != null)
+        if (api.Parent is not null)
             apiElement.Add(new XAttribute("parent", api.Parent.Fingerprint.ToString("N")));
     }
 

@@ -27,7 +27,7 @@ public static class NuGetFrameworkExtensions
 
         if (!string.IsNullOrEmpty(framework.Platform))
         {
-            if (framework.PlatformVersion != null && framework.PlatformVersion > new Version(0, 0, 0, 0))
+            if (framework.PlatformVersion is not null && framework.PlatformVersion > new Version(0, 0, 0, 0))
                 return $"{framework.Version.GetVersionDisplayString()}-{framework.Platform}{framework.PlatformVersion}";
 
             return $"{framework.Version.GetVersionDisplayString()}-{framework.Platform}";

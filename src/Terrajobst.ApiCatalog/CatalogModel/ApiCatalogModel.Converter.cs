@@ -162,7 +162,7 @@ public sealed partial class ApiCatalogModel
 
                     if (part.Kind == MarkupPartKind.Reference)
                     {
-                        if (part.Reference != null)
+                        if (part.Reference is not null)
                             _stringTableApiPatchups.Add((_stringTable.Offset, part.Reference.Value));
 
                         _stringTable.WriteInt32(-1);

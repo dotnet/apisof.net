@@ -40,7 +40,7 @@ public sealed class PackageIndexer
                 {
                     var referenceGroup = GetReferenceItems(root, target);
 
-                    Debug.Assert(referenceGroup != null);
+                    Debug.Assert(referenceGroup is not null);
 
                     await GetDependenciesAsync(dependencies, root, target);
 
@@ -61,7 +61,7 @@ public sealed class PackageIndexer
                     foreach (var dependency in dependencies.Values)
                     {
                         var dependencyReferences = GetReferenceItems(dependency, target);
-                        if (dependencyReferences != null)
+                        if (dependencyReferences is not null)
                         {
                             foreach (var path in dependencyReferences.Items)
                             {
@@ -75,7 +75,7 @@ public sealed class PackageIndexer
 
                     var platformPaths = GetPlatformSet(target);
 
-                    if (platformPaths == null)
+                    if (platformPaths is null)
                     {
                         if (!IsKnownUnsupportedPlatform(target))
                             Console.WriteLine($"error: can't resolve platform references for {target}");
@@ -170,7 +170,7 @@ public sealed class PackageIndexer
     {
         var dependencies = root.GetPackageDependencies();
         var dependencyGroup = NuGetFrameworkUtility.GetNearest(dependencies, target);
-        if (dependencyGroup != null)
+        if (dependencyGroup is not null)
         {
             foreach (var d in dependencyGroup.Packages)
             {
@@ -184,7 +184,7 @@ public sealed class PackageIndexer
                     }
                 }
 
-                if (existingPackage != null)
+                if (existingPackage is not null)
                     continue;
 
                 var requestedVersion = d.VersionRange.MinVersion?.ToNormalizedString() ?? "0.0.0";
@@ -200,7 +200,7 @@ public sealed class PackageIndexer
         foreach (var l in _frameworkLocators)
         {
             var paths = l.Locate(framework);
-            if (paths != null)
+            if (paths is not null)
                 return paths;
         }
 

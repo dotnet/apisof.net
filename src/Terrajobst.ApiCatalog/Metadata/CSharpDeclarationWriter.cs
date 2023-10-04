@@ -41,7 +41,7 @@ internal static class CSharpDeclarationWriter
 
         var parents = new Stack<INamespaceSymbol>();
         var c = @namespace;
-        while (c != null && !c.IsGlobalNamespace)
+        while (c is not null && !c.IsGlobalNamespace)
         {
             parents.Push(c);
             c = c.ContainingNamespace;
@@ -121,8 +121,8 @@ internal static class CSharpDeclarationWriter
 
         WriteTypeParameterList(type.TypeParameters, writer);
 
-        var hasBaseType = type.BaseType != null &&
-                          type.BaseType.SpecialType != SpecialType.System_Object;
+        var hasBaseType = type.BaseType is not null &&
+                              type.BaseType.SpecialType != SpecialType.System_Object;
 
         var implementsInterfaces = type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any();
 
@@ -265,7 +265,7 @@ internal static class CSharpDeclarationWriter
 
         writer.WriteReference(type, type.Name);
 
-        if (type.EnumUnderlyingType != null && type.EnumUnderlyingType.SpecialType != SpecialType.System_Int32)
+        if (type.EnumUnderlyingType is not null && type.EnumUnderlyingType.SpecialType != SpecialType.System_Int32)
         {
             writer.WriteSpace();
             writer.WritePunctuation(":");
@@ -508,14 +508,14 @@ internal static class CSharpDeclarationWriter
             writer.WriteSpace();
             writer.WritePunctuation("{");
 
-            if (property.GetMethod != null)
+            if (property.GetMethod is not null)
             {
                 writer.WriteSpace();
                 writer.WriteKeyword("get");
                 writer.WritePunctuation(";");
             }
 
-            if (property.SetMethod != null)
+            if (property.SetMethod is not null)
             {
                 writer.WriteSpace();
                 writer.WriteKeyword("set");
@@ -532,7 +532,7 @@ internal static class CSharpDeclarationWriter
             writer.WriteLine();
             writer.Indent++;
 
-            if (property.GetMethod != null)
+            if (property.GetMethod is not null)
             {
                 WriteAttributeList(getterAttributes, writer);
                 writer.WriteKeyword("get");
@@ -540,7 +540,7 @@ internal static class CSharpDeclarationWriter
                 writer.WriteLine();
             }
 
-            if (property.SetMethod != null)
+            if (property.SetMethod is not null)
             {
                 WriteAttributeList(setterAttributes, writer);
                 writer.WriteKeyword("set");
@@ -616,7 +616,7 @@ internal static class CSharpDeclarationWriter
             writer.WriteLine();
             writer.Indent++;
 
-            if (@event.AddMethod != null)
+            if (@event.AddMethod is not null)
             {
                 WriteAttributeList(adderAttributes, writer);
                 writer.WriteKeyword("add");
@@ -624,7 +624,7 @@ internal static class CSharpDeclarationWriter
                 writer.WriteLine();
             }
 
-            if (@event.RemoveMethod != null)
+            if (@event.RemoveMethod is not null)
             {
                 WriteAttributeList(removerAttributes, writer);
                 writer.WriteKeyword("remove");
@@ -665,7 +665,7 @@ internal static class CSharpDeclarationWriter
                 }
             }
 
-            if (target != null)
+            if (target is not null)
             {
                 writer.WriteKeyword(target);
                 writer.WritePunctuation(":");
@@ -806,7 +806,7 @@ internal static class CSharpDeclarationWriter
 
     private static void WriteConstant(ITypeSymbol type, object value, SyntaxWriter writer)
     {
-        if (value == null)
+        if (value is null)
         {
             if (type.IsValueType)
                 writer.WriteKeyword("default");
@@ -1416,7 +1416,7 @@ internal static class CSharpDeclarationWriter
 
         foreach (var attribute in typeSymbol.GetAttributes())
         {
-            if (attribute.AttributeClass is null || attribute.AttributeConstructor == null)
+            if (attribute.AttributeClass is null || attribute.AttributeConstructor is null)
                 continue;
 
             if (attribute.AttributeConstructor.Parameters.Any() || attribute.AttributeClass.Name != "FlagsAttribute")
@@ -1601,7 +1601,7 @@ internal static class CSharpDeclarationWriter
 
         public bool IsDefault
         {
-            get { return this.Name == null; }
+            get { return this.Name is null; }
         }
 
         public override string ToString()

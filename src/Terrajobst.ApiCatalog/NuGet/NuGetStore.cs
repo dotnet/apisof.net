@@ -18,12 +18,12 @@ public class NuGetStore
     public async Task<PackageArchiveReader> GetPackageAsync(string id, string version)
     {
         var path = GetPackagePath(id, version);
-        if (path != null && File.Exists(path))
+        if (path is not null && File.Exists(path))
             return new PackageArchiveReader(path);
 
         var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
 
-        if (path == null)
+        if (path is null)
             return await _feed.GetPackageAsync(identity);
 
         using (var fileStream = File.Create(path))
@@ -35,13 +35,13 @@ public class NuGetStore
     public void DeleteFromCache(string id, string version)
     {
         var path = GetPackagePath(id, version);
-        if (path != null)
+        if (path is not null)
             File.Delete(path);
     }
 
     private string GetPackagePath(string id, string version)
     {
-        if (_packagesCachePath == null)
+        if (_packagesCachePath is null)
             return null;
 
         return Path.Combine(_packagesCachePath, $"{id}.{version}.nupkg");

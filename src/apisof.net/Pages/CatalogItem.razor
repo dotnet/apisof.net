@@ -84,7 +84,7 @@ else
 
             <div class="col-md-9">
 
-                @if (SelectedMarkup != null)
+                @if (SelectedMarkup is not null)
                 {
                     <SyntaxView Markup="@SelectedMarkup" Current="@Api" />
                 }
@@ -114,7 +114,7 @@ else
                         </tr>
                     }
 
-                    @if (SelectedAvailability != null)
+                    @if (SelectedAvailability is not null)
                     {
                         var assembly = SelectedAvailability.Declaration.Assembly;
                         <tr>

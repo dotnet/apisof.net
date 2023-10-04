@@ -56,14 +56,14 @@ public class Markup
                 else if (reader.LocalName == "r")
                 {
                     var id = reader.GetAttribute("i");
-                    if (id != null)
+                    if (id is not null)
                         reference = Guid.Parse(id);
                     kind = MarkupPartKind.Reference;
                 }
             }
             else if (reader.NodeType == XmlNodeType.EndElement)
             {
-                if (kind != null)
+                if (kind is not null)
                     parts.Add(new MarkupPart(kind.Value, sb.ToString(), reference));
 
                 kind = null;

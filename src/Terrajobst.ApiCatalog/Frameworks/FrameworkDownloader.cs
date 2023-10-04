@@ -700,7 +700,7 @@ public sealed class FrameworkDownloader
 
             var versions = await feed.GetAllVersionsAsync(frameworkReference.TargetingPackName);
             var latest = versions.Where(v => v.Major == tpVersion.Major && v.Minor == tpVersion.Minor).DefaultIfEmpty().Max();
-            if (latest == null)
+            if (latest is null)
                 continue;
 
             var identity = new PackageIdentity(frameworkReference.TargetingPackName, latest);
@@ -738,11 +738,11 @@ public sealed class FrameworkDownloader
                 var path = Path.GetRelativePath(frameworkPath, qualifiedPath);
                 var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
                 var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
-                if (frameworkReference.Profile == null || profiles.Contains(frameworkReference.Profile, StringComparer.OrdinalIgnoreCase))
+                if (frameworkReference.Profile is null || profiles.Contains(frameworkReference.Profile, StringComparer.OrdinalIgnoreCase))
                     paths.Add(path);
             }
 
-            var tfms = frameworkReference.Platforms == null
+            var tfms = frameworkReference.Platforms is null
                 ? new[] { frameworkDefinition.FrameworkName }
                 : frameworkReference.Platforms.Select(p => string.IsNullOrEmpty(p) ? frameworkDefinition.FrameworkName : $"{frameworkDefinition.FrameworkName}-{p}").ToArray();
 

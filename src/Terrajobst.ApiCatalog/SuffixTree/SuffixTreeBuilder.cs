@@ -204,7 +204,7 @@ public sealed class SuffixTreeBuilder
 
         public void InsertChild(int index, Node node)
         {
-            if (_children == null)
+            if (_children is null)
                 _children = new List<Node>();
 
             _children.Insert(index, node);
@@ -212,7 +212,7 @@ public sealed class SuffixTreeBuilder
 
         public void AddValue(int offset, int value)
         {
-            if (_values == null)
+            if (_values is null)
                 _values = new List<(int, int)>();
 
             _values.Add((offset, value));
@@ -220,7 +220,7 @@ public sealed class SuffixTreeBuilder
 
         public int GetChildIndex(string text)
         {
-            if (_children == null)
+            if (_children is null)
                 return -1;
 
             var lo = 0;

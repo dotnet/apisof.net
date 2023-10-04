@@ -285,7 +285,7 @@ public static class WorkspacePersistenceExcel
     public static Worksheet AddWorksheet(this SpreadsheetDocument spreadsheet, string name)
     {
         var sheets = spreadsheet.WorkbookPart.Workbook.GetFirstChild<Sheets>();
-        if (sheets == null)
+        if (sheets is null)
         {
             sheets = new Sheets();
             spreadsheet.WorkbookPart.Workbook.AppendChild(sheets);
@@ -314,7 +314,7 @@ public static class WorkspacePersistenceExcel
         var range = ComputeRange(rowStart, rowCount, columnStart, headers.Length);
 
         var sheetViews = worksheet.GetFirstChild<SheetViews>();
-        if (sheetViews == null)
+        if (sheetViews is null)
             sheetViews = worksheet.InsertAt(new SheetViews(), 0);
 
         var sheetView = sheetViews.AppendChild(new SheetView());
@@ -328,7 +328,7 @@ public static class WorkspacePersistenceExcel
         };
 
         var tableParts = worksheet.GetFirstChild<TableParts>();
-        if (tableParts == null)
+        if (tableParts is null)
             tableParts = worksheet.AppendChild(new TableParts());
 
         tableParts.AppendChild(tablePart);
@@ -419,7 +419,7 @@ public static class WorkspacePersistenceExcel
     public static void AddRow(this Worksheet ws, IEnumerable<object?> data)
     {
         var sd = ws.GetFirstChild<SheetData>();
-        if (sd == null)
+        if (sd is null)
         {
             sd = ws.AppendChild(new SheetData());
         }
@@ -520,7 +520,7 @@ public static class WorkspacePersistenceExcel
 
         var sd = ws.GetFirstChild<SheetData>();
 
-        if (sd != null)
+        if (sd is not null)
         {
             ws.InsertBefore<Columns>(columns, sd);
         }
@@ -574,7 +574,7 @@ public static class WorkspacePersistenceExcel
             {
                 var value = part.Table?.Id;
 
-                if (value != null && value.HasValue)
+                if (value is not null && value.HasValue)
                     result = Math.Max(result, value.Value);
             }
         }

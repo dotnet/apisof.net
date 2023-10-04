@@ -28,7 +28,7 @@ public sealed class NuGetFeed
         var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
         var catalogIndexUrl = serviceIndex.GetServiceEntryUri("Catalog/3.0.0")?.ToString();
 
-        if (catalogIndexUrl == null)
+        if (catalogIndexUrl is null)
             throw new InvalidOperationException("This feed doesn't support enumeration");
 
         const int MaxDegreeOfParallelism = 64;
@@ -54,7 +54,7 @@ public sealed class NuGetFeed
         {
             while (pageItems.TryTake(out var pageItem))
             {
-                if (since != null && pageItem.CommitTimeStamp < since.Value)
+                if (since is not null && pageItem.CommitTimeStamp < since.Value)
                     continue;
 
                 var retryCount = 3;

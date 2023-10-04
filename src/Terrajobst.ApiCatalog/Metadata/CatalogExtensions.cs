@@ -200,7 +200,7 @@ internal static class CatalogExtensions
 
     public static ImmutableArray<AttributeData> GetCatalogAttributes(this IMethodSymbol method)
     {
-        if (method == null)
+        if (method is null)
             return ImmutableArray<AttributeData>.Empty;
 
         return method.GetAttributes().Where(IsIncludedInCatalog).ToImmutableArray();

@@ -15,7 +15,7 @@ public sealed class MarkupPart
 
     public override string ToString()
     {
-        if (Reference == null)
+        if (Reference is null)
             return $"{Kind}: {Text}";
         else
             return $"{Kind}: {Text} --> {Reference}";

@@ -285,7 +285,7 @@ internal static class Program
                 try
                 {
                     var packageEntry = await packageIndexer.Index(id, version);
-                    if (packageEntry == null)
+                    if (packageEntry is null)
                     {
                         Console.WriteLine($"Not a library package.");
                         File.WriteAllText(disabledPath, string.Empty);

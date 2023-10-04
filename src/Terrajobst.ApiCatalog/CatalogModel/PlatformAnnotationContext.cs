@@ -62,7 +62,7 @@ public sealed class PlatformAnnotationContext
         //       all catalog APIs we always use the latest set of known platforms.
 
         var operatingSystemType = GetOperatingSystemType();
-        if (operatingSystemType != null)
+        if (operatingSystemType is not null)
         {
             foreach (var member in operatingSystemType.Value.Children)
             {
@@ -84,7 +84,7 @@ public sealed class PlatformAnnotationContext
                                          .Assemblies.ToHashSet();
 
         var operatingSystemType = GetOperatingSystemType();
-        if (operatingSystemType != null)
+        if (operatingSystemType is not null)
         {
             foreach (var member in operatingSystemType.Value.Children)
             {

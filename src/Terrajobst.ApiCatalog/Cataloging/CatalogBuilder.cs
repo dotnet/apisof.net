@@ -111,7 +111,7 @@ public sealed class CatalogBuilder : IDisposable
         {
             var fingerprint = Guid.Parse(element.Attribute("fingerprint").Value);
             var kind = (ApiKind)int.Parse(element.Attribute("kind").Value);
-            var parentFingerprint = element.Attribute("parent") == null
+            var parentFingerprint = element.Attribute("parent") is null
                 ? Guid.Empty
                 : Guid.Parse(element.Attribute("parent").Value);
             var name = element.Attribute("name").Value;

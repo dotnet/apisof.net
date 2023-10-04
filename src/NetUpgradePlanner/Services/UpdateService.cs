@@ -45,7 +45,7 @@ internal sealed class UpdateService : BackgroundService
         {
             using var mgr = new UpdateManager(_storageUrl);
             var newVersion = await mgr.UpdateApp(p => pm.Report(p, 100));
-            if (newVersion != null)
+            if (newVersion is not null)
                 UpdateManager.RestartApp();
         }, "Updating application");
     }

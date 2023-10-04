@@ -63,27 +63,27 @@ public partial class SyntaxView
                     break;
                 case MarkupPartKind.Reference:
                 {
-                    var api = part.Reference == null
+                    var api = part.Reference is null
                         ? (ApiModel?)null
                         : CatalogService.Catalog.GetApiByGuid(part.Reference.Value);
 
-                    var tooltip = api == null ? null : GeneratedTooltip(api.Value);
+                    var tooltip = api is null ? null : GeneratedTooltip(api.Value);
 
                     if (api == Current)
                     {
                         markupBuilder.Append("<span class=\"reference-current\">");
                     }
-                    else if (api != null)
+                    else if (api is not null)
                     {
                         var referenceClass = GetReferenceClass(api.Value.Kind);
                         markupBuilder.Append($"<span class=\"{referenceClass}\"");
-                        if (tooltip != null)
+                        if (tooltip is not null)
                             markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
 
                         markupBuilder.Append(">");
                     }
 
-                    if (api != null && api != Current)
+                    if (api is not null && api != Current)
                         markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
 
                     break;

@@ -14,7 +14,7 @@ public sealed class PackBasedFrameworkLocator : FrameworkLocator
 
     public override string[] Locate(NuGetFramework framework)
     {
-        if (_mappings == null)
+        if (_mappings is null)
         {
             _mappings = new Dictionary<string, string[]>();
             var provider = new PackBasedFrameworkProvider(_frameworksPath);
