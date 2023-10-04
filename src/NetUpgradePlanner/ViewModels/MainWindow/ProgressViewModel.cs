@@ -1,6 +1,4 @@
-﻿using System;
-
-using NetUpgradePlanner.Mvvm;
+﻿using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
 
 namespace NetUpgradePlanner.ViewModels.MainWindow;

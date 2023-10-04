@@ -1,23 +1,19 @@
 ﻿using Microsoft.Win32;
+
 using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
 
-using System;
 using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
-using SharpCompress.Archives.Zip;
+
 using Terrajobst.NetUpgradePlanner;
-using ZipArchive = SharpCompress.Archives.Zip.ZipArchive;
-using ZipArchiveEntry = SharpCompress.Archives.Zip.ZipArchiveEntry;
 
 namespace NetUpgradePlanner.ViewModels.MainWindow;
 

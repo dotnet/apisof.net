@@ -1,10 +1,9 @@
-using System;
 using System.CodeDom.Compiler;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+
 using Xunit;
 
 namespace Terrajobst.ApiCatalog.Tests;

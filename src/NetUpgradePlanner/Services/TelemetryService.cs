@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
+
 using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Services;

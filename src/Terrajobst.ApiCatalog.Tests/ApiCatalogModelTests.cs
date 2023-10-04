@@ -1,9 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NuGet.Frameworks;
+﻿using System.Text;
+
 using Xunit;
 
 namespace Terrajobst.ApiCatalog.Tests;

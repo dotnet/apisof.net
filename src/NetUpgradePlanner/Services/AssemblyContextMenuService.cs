@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 
 using Microsoft.Extensions.DependencyInjection;
+
 using NuGet.Frameworks;
+
 using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Services;

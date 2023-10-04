@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
+
 using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.Services;

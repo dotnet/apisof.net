@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using NetUpgradePlanner.Mvvm;
+﻿using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
 
 using Terrajobst.ApiCatalog;
 using Terrajobst.NetUpgradePlanner;
+
 using AnalyzedAssembly = Terrajobst.NetUpgradePlanner.AnalyzedAssembly;
 using ProblemId = Terrajobst.NetUpgradePlanner.ProblemId;
 

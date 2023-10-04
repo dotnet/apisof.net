@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
+﻿using System.Data;
+
 using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
+
 using Terrajobst.NetUpgradePlanner;
 
 namespace NetUpgradePlanner.ViewModels.AssemblyListView;

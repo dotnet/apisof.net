@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using NuGet.Frameworks;
+﻿using NuGet.Frameworks;
 
 using Terrajobst.ApiCatalog;
 using Terrajobst.NetUpgradePlanner;
