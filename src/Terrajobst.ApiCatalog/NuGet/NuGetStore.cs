@@ -19,17 +19,17 @@ public class NuGetStore
     {
         var path = GetPackagePath(id, version);
         if (path != null && File.Exists(path))
-            return new PackageArchiveReader(File.OpenRead(path));
+            return new PackageArchiveReader(path);
 
         var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
 
         if (path == null)
             return await _feed.GetPackageAsync(identity);
 
-        var fileStream = File.Create(path);
-        await _feed.CopyPackageStreamAsync(identity, fileStream);
-        fileStream.Position = 0;
-        return new PackageArchiveReader(fileStream);
+        using (var fileStream = File.Create(path))
+            await _feed.CopyPackageStreamAsync(identity, fileStream);
+    
+        return new PackageArchiveReader(path);
     }
 
     public void DeleteFromCache(string id, string version)
