@@ -35,9 +35,7 @@ public partial class CatalogItem
 
     public PlatformAnnotationContext PlatformAnnotationContext { get; set; }
 
-    public PreviewRequirementModel? PreviewRequirement { get; set; }
-
-    public ExperimentalModel? Experimental { get; set; }
+    public PreviewDescription? SelectedPreviewDescription { get; set; }
 
     public Markup SelectedMarkup { get; set; }
 
@@ -76,8 +74,7 @@ public partial class CatalogItem
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
                                Availability.Frameworks.FirstOrDefault();
         PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedFramework);
-        PreviewRequirement = GetPreviewRequirement();
-        Experimental = GetExperimental();
+        SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(SelectedAvailability);
 
         if (ExtensionMethod is not null)
             Breadcrumbs = ExtensionMethod.Value.ExtendedType.AncestorsAndSelf().Reverse().Append(ExtensionMethod.Value.ExtensionMethod);

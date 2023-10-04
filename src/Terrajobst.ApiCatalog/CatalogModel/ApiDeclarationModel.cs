@@ -146,6 +146,40 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         return false;
     }
 
+    public PreviewRequirementModel? GetEffectivePreviewRequirement()
+    {
+        var assembly = Assembly;
+
+        foreach (var api in Api.AncestorsAndSelf())
+        {
+            if (api.Kind == ApiKind.Namespace)
+                break;
+
+            var declaration = api.Declarations.First(d => d.Assembly == assembly);
+            if (declaration.PreviewRequirement is not null)
+                return declaration.PreviewRequirement;
+        }
+
+        return assembly.PreviewRequirement;
+    }
+
+    public ExperimentalModel? GetEffectiveExperimental()
+    {
+        var assembly = Assembly;
+
+        foreach (var ancestor in Api.AncestorsAndSelf())
+        {
+            if (ancestor.Kind == ApiKind.Namespace)
+                break;
+
+            var declaration = ancestor.Declarations.First(d => d.Assembly == assembly);
+            if (declaration.Experimental is not null)
+                return declaration.Experimental;
+        }
+
+        return assembly.Experimental;
+    }
+
     public override bool Equals(object obj)
     {
         return obj is ApiDeclarationModel model && Equals(model);
