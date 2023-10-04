@@ -1,35 +1,32 @@
 <Project>
-
-    <PropertyGroup Label="Centralized Package Versions">
-        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageVersion Include="Azure.Storage.Blobs" Version="12.13.0" />
-        <PackageVersion Include="Clowd.Squirrel" Version="2.9.42" />
-        <PackageVersion Include="coverlet.collector" Version="3.1.0" />
-        <PackageVersion Include="Dapper" Version="2.0.123" />
-        <PackageVersion Include="DocumentFormat.OpenXml" Version="2.11.3" />
-        <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
-        <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
-        <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" />
-        <PackageVersion Include="Microsoft.Cci.Extensions" Version="7.0.0-beta.22175.2" />
-        <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" />
-        <PackageVersion Include="Microsoft.Composition" Version="1.0.31" />
-        <PackageVersion Include="Microsoft.Data.Sqlite" Version="6.0.3" />
-        <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="6.0.3" />
-        <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
-        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-        <PackageVersion Include="Mono.Options" Version="6.12.0.148" />
-        <PackageVersion Include="Nerdbank.GitVersioning" Version="3.4.255" />
-        <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
-        <PackageVersion Include="NuGet.Protocol" version="6.6.1" />
-        <PackageVersion Include="SharpVectors.Wpf" Version="1.8.0" />
-        <PackageVersion Include="Spectre.Console" Version="0.44.1-preview.0.4" />
-        <PackageVersion Include="xunit" Version="2.4.1" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.3" />
-    </ItemGroup>
-
+  <PropertyGroup Label="Centralized Package Versions">
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.13.0" />
+    <PackageVersion Include="Clowd.Squirrel" Version="2.9.42" />
+    <PackageVersion Include="coverlet.collector" Version="3.1.0" />
+    <PackageVersion Include="Dapper" Version="2.0.123" />
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="2.11.3" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="1.10.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.7.0" />
+    <PackageVersion Include="Microsoft.Cci.Extensions" Version="7.0.0-beta.22175.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" />
+    <PackageVersion Include="Microsoft.Composition" Version="1.0.31" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="6.0.3" />
+    <PackageVersion Include="Microsoft.Data.Sqlite.Core" Version="6.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageVersion Include="Mono.Options" Version="6.12.0.148" />
+    <PackageVersion Include="Nerdbank.GitVersioning" Version="3.4.255" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageVersion Include="NuGet.Protocol" version="6.6.1" />
+    <PackageVersion Include="SharpVectors.Wpf" Version="1.8.0" />
+    <PackageVersion Include="Spectre.Console" Version="0.44.1-preview.0.4" />
+    <PackageVersion Include="xunit" Version="2.4.1" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.4.3" />
+  </ItemGroup>
 </Project>
