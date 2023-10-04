@@ -21,6 +21,7 @@ public static class WorkspacePersistenceExcel
         using (var spreadsheet = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook))
         {
             spreadsheet.AddWorkbookPart();
+            Debug.Assert(spreadsheet.WorkbookPart is not null);
             spreadsheet.WorkbookPart.Workbook = new Workbook();
             AddStylesheet(spreadsheet.WorkbookPart);
 
@@ -70,6 +71,7 @@ public static class WorkspacePersistenceExcel
         };
 
         workbookPart.AddNewPart<WorkbookStylesPart>();
+        Debug.Assert(workbookPart.WorkbookStylesPart is not null);
         workbookPart.WorkbookStylesPart.Stylesheet = stylesheet;
     }
 
@@ -284,6 +286,8 @@ public static class WorkspacePersistenceExcel
 
     public static Worksheet AddWorksheet(this SpreadsheetDocument spreadsheet, string name)
     {
+        Debug.Assert(spreadsheet.WorkbookPart is not null);
+
         var sheets = spreadsheet.WorkbookPart.Workbook.GetFirstChild<Sheets>();
         if (sheets is null)
         {
@@ -320,6 +324,7 @@ public static class WorkspacePersistenceExcel
         var sheetView = sheetViews.AppendChild(new SheetView());
         sheetView.WorkbookViewId = 0;
 
+        Debug.Assert(worksheet.WorksheetPart is not null);
         var tableDefinitionPart = worksheet.WorksheetPart.AddNewPart<TableDefinitionPart>();
 
         var tablePart = new TablePart
@@ -443,6 +448,7 @@ public static class WorkspacePersistenceExcel
 
                 row.AppendChild(cell);
 
+                Debug.Assert(ws.WorksheetPart is not null);
                 var hlRelationship = ws.WorksheetPart.AddHyperlinkRelationship(hyperlinkCell.Url, true);
 
                 var hyperlink = new Hyperlink
@@ -566,8 +572,11 @@ public static class WorkspacePersistenceExcel
     private static uint GetNextTableId(Worksheet w)
     {
         var result = 0L;
+
+        Debug.Assert(w.WorksheetPart is not null);
         var spreadsheet = (SpreadsheetDocument)w.WorksheetPart.OpenXmlPackage;
 
+        Debug.Assert(spreadsheet.WorkbookPart is not null);
         foreach (var wp in spreadsheet.WorkbookPart.WorksheetParts)
         {
             foreach (var part in wp.GetPartsOfType<TableDefinitionPart>())
