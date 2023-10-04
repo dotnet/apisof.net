@@ -187,8 +187,13 @@ public sealed class PackageIndexer
                 if (existingPackage is not null)
                     continue;
 
-                var requestedVersion = d.VersionRange.MinVersion?.ToNormalizedString() ?? "0.0.0";
-                var dependency = await _store.GetPackageAsync(d.Id, requestedVersion);
+                var dependency = await _store.ResolvePackageAsync(d.Id, d.VersionRange);
+                if (dependency is null)
+                {
+                    Console.WriteLine($"error: can't resolve dependency {d.Id} {d.VersionRange}");
+                    continue;
+                }
+
                 packages.Add(d.Id, dependency);
                 await GetDependenciesAsync(packages, dependency, target);
             }

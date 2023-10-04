@@ -17,17 +17,34 @@ public sealed class NuGetFeed
 
     public string FeedUrl { get; }
 
-    public async Task<IReadOnlyList<NuGetVersion>> GetAllVersionsAsync(string packageId)
+    public async Task<IReadOnlyList<NuGetVersion>> GetAllVersionsAsync(string packageId, bool includeUnlisted = false)
     {
+        var cache = NullSourceCacheContext.Instance;
         var logger = NullLogger.Instance;
         var cancellationToken = CancellationToken.None;
 
-        var cache = new SourceCacheContext();
         var repository = Repository.Factory.GetCoreV3(FeedUrl);
         var resource = await repository.GetResourceAsync<MetadataResource>(cancellationToken);
+        var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: includeUnlisted, cache, logger, cancellationToken);
 
-        var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: false, cache, logger, cancellationToken);
         return versions.ToArray();
+    }
+
+    public async Task<PackageIdentity> ResolvePackageAsync(string packageId, VersionRange range)
+    {
+        var cache = NullSourceCacheContext.Instance;
+        var logger = NullLogger.Instance;
+        var cancellationToken = CancellationToken.None;
+
+        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var resource = await repository.GetResourceAsync<MetadataResource>(cancellationToken);
+        var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: true, cache, logger, cancellationToken);
+        var bestMatch = versions.FindBestMatch(range, x => x);
+
+        if (bestMatch is null)
+            return null;
+
+        return new PackageIdentity(packageId, bestMatch);
     }
 
     public async Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)

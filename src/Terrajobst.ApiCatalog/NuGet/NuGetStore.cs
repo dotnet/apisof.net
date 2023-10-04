@@ -8,6 +8,7 @@ public class NuGetStore
 {
     private readonly NuGetFeed _feed;
     private readonly string _packagesCachePath;
+    private readonly Dictionary<string, IReadOnlyList<NuGetVersion>> _packageVersionCache = new();
 
     public NuGetStore(NuGetFeed feed, string packagesCachePath)
     {
@@ -30,6 +31,24 @@ public class NuGetStore
             await _feed.CopyPackageStreamAsync(identity, fileStream);
     
         return new PackageArchiveReader(path);
+    }
+
+    public async Task<PackageArchiveReader> ResolvePackageAsync(string id, VersionRange range)
+    {
+        if (!_packageVersionCache.TryGetValue(id, out var versions))
+        {
+            versions = await _feed.GetAllVersionsAsync(id, includeUnlisted: true);
+            _packageVersionCache.Add(id, versions);
+        }
+
+        var resolvedVersion = versions.FindBestMatch(range, x => x);
+        if (resolvedVersion is null)
+            return null;
+
+        if (resolvedVersion != range.MinVersion)
+            Console.WriteLine($"Resolved {id} {range} -> {resolvedVersion}");
+
+        return await GetPackageAsync(id, resolvedVersion.ToNormalizedString());
     }
 
     public void DeleteFromCache(string id, string version)
