@@ -236,6 +236,14 @@ internal static class Program
 
     private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string indexPackagesPath, string frameworksPath)
     {
+        // TODO: Support resolution across multiple feeds.
+        //
+        //       We're indexing packages across two feeds: nuget.org and our latest nightlies.
+        //       We're currently only resolving packages in a single feed. For our nightlies,
+        //       likely want to implement a fallback, just like how restor works with multiple
+        //       feeds. However, most of our nightlies are self contained, so it's not a huge
+        //       issue so we're gonna solve that later.
+
         var frameworkLocators = new FrameworkLocator[]
         {
             new ArchivedFrameworkLocator(frameworksPath),
@@ -246,66 +254,74 @@ internal static class Program
         Directory.CreateDirectory(packagesPath);
         Directory.CreateDirectory(indexPackagesPath);
 
-        var nugetFeed = new NuGetFeed(NuGetFeeds.NuGetOrg);
-        var nugetStore = new NuGetStore(nugetFeed, packagesPath);
-        var packageIndexer = new PackageIndexer(nugetStore, frameworkLocators);
-
-        var retryIndexed = false;
-        var retryDisabled = false;
-        var retryFailed = false;
-
         var document = XDocument.Load(packageListPath);
         Directory.CreateDirectory(packagesPath);
 
         var packages = document.Root!.Elements("package")
-            .Select(e => (Id: e.Attribute("id")!.Value, Version: e.Attribute("version")!.Value))
+            .Select(e => (
+                Id: e.Attribute("id")!.Value,
+                Version: e.Attribute("version")!.Value,
+                FeedUrl: e.Attribute("feed")!.Value))
             .ToArray();
 
-        foreach (var (id, version) in packages.OrderBy(t => t.Id))
+        foreach (var feedGroup in packages.GroupBy(e => e.FeedUrl))
         {
-            var path = Path.Join(indexPackagesPath, $"{id}-{version}.xml");
-            var disabledPath = Path.Join(indexPackagesPath, $"{id}-all.disabled");
-            var failedVersionPath = Path.Join(indexPackagesPath, $"{id}-{version}.failed");
+            var feedUrl = feedGroup.Key;
 
-            var alreadyIndexed = !retryIndexed && File.Exists(path) ||
-                                 !retryDisabled && File.Exists(disabledPath) ||
-                                 !retryFailed && File.Exists(failedVersionPath);
+            var nugetFeed = new NuGetFeed(feedUrl);
+            var nugetStore = new NuGetStore(nugetFeed, packagesPath);
+            var packageIndexer = new PackageIndexer(nugetStore, frameworkLocators);
 
-            if (alreadyIndexed)
+            var retryIndexed = false;
+            var retryDisabled = false;
+            var retryFailed = false;
+
+            foreach (var (id, version, _) in feedGroup)
             {
-                if (File.Exists(path))
-                    Console.WriteLine($"Package {id} {version} already indexed.");
+                var path = Path.Join(indexPackagesPath, $"{id}-{version}.xml");
+                var disabledPath = Path.Join(indexPackagesPath, $"{id}-all.disabled");
+                var failedVersionPath = Path.Join(indexPackagesPath, $"{id}-{version}.failed");
 
-                if (File.Exists(disabledPath))
-                    nugetStore.DeleteFromCache(id, version);
-            }
-            else
-            {
-                Console.WriteLine($"Indexing {id} {version}...");
-                try
+                var alreadyIndexed = !retryIndexed && File.Exists(path) ||
+                                     !retryDisabled && File.Exists(disabledPath) ||
+                                     !retryFailed && File.Exists(failedVersionPath);
+
+                if (alreadyIndexed)
                 {
-                    var packageEntry = await packageIndexer.Index(id, version);
-                    if (packageEntry is null)
-                    {
-                        Console.WriteLine($"Not a library package.");
-                        File.WriteAllText(disabledPath, string.Empty);
+                    if (File.Exists(path))
+                        Console.WriteLine($"Package {id} {version} already indexed.");
+
+                    if (File.Exists(disabledPath))
                         nugetStore.DeleteFromCache(id, version);
-                    }
-                    else
-                    {
-                        using (var stream = File.Create(path))
-                            packageEntry.Write(stream);
-
-                        File.Delete(disabledPath);
-                        File.Delete(failedVersionPath);
-                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"Failed: " + ex.Message);
-                    File.Delete(disabledPath);
-                    File.Delete(path);
-                    File.WriteAllText(failedVersionPath, ex.ToString());
+                    Console.WriteLine($"Indexing {id} {version}...");
+                    try
+                    {
+                        var packageEntry = await packageIndexer.Index(id, version);
+                        if (packageEntry is null)
+                        {
+                            Console.WriteLine($"Not a library package.");
+                            File.WriteAllText(disabledPath, string.Empty);
+                            nugetStore.DeleteFromCache(id, version);
+                        }
+                        else
+                        {
+                            using (var stream = File.Create(path))
+                                packageEntry.Write(stream);
+
+                            File.Delete(disabledPath);
+                            File.Delete(failedVersionPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed: " + ex.Message);
+                        File.Delete(disabledPath);
+                        File.Delete(path);
+                        File.WriteAllText(failedVersionPath, ex.ToString());
+                    }
                 }
             }
         }

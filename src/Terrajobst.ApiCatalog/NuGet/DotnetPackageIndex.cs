@@ -22,59 +22,18 @@ public static class DotnetPackageIndex
 
     public static async Task CreateAsync(string packageListPath)
     {
-        var feed = new NuGetFeed(NuGetFeeds.NuGetOrg);
-
-        Console.WriteLine($"Fetching owner information...");
-        var ownerInformation = await feed.GetOwnerMappingAsync();
+        var packages = await GetPackagesAsync(NuGetFeeds.NuGetOrg, NuGetFeeds.NightlyLatest);
 
         var packageDocument = new XDocument();
         var root = new XElement("packages");
         packageDocument.Add(root);
 
-        var packageIds = ownerInformation.Keys
-                                         .ToHashSet(StringComparer.OrdinalIgnoreCase)
-                                         .Where(id => IsOwnedByDotNet(ownerInformation, id) &&
-                                                      PackageFilter.Default.IsMatch(id))
-                                         .ToArray();
-
-        Console.WriteLine($"Found {packageIds.Length:N0} relevant platform package IDs.");
-
-        Console.WriteLine($"Filtering to latest versions...");
-
-        var filteredPackages = new ConcurrentBag<PackageIdentity>();
-
-        await Parallel.ForEachAsync(packageIds, async (packageId, _) =>
-        {
-            var versions = await feed.GetAllVersionsAsync(packageId);
-            var identities = versions.Select(v => new PackageIdentity(packageId, v))
-                                     .OrderByDescending(v => v.Version, VersionComparer.VersionReleaseMetadata)
-                                     .ToArray();
-
-            var latestStable = identities.FirstOrDefault(i => !i.Version.IsPrerelease);
-            var latestPrerelease = identities.FirstOrDefault(i => i.Version.IsPrerelease);
-
-            if (latestStable is not null && latestPrerelease is not null)
-            {
-                var stableIsNewer = VersionComparer.VersionReleaseMetadata.Compare(latestPrerelease.Version, latestStable.Version) <= 0;
-                if (stableIsNewer)
-                    latestPrerelease = null;
-            }
-
-            if (latestStable is not null)
-                filteredPackages.Add(latestStable);
-
-            if (latestPrerelease is not null)
-                filteredPackages.Add(latestPrerelease);
-        });
-
-        Console.WriteLine($"Found {filteredPackages.Count:N0} platform package versions.");
-
-        foreach (var item in filteredPackages.OrderBy(pi => pi.Id)
-                                             .ThenBy(pi => pi.Version, VersionComparer.VersionReleaseMetadata))
+        foreach (var item in packages)
         {
             var e = new XElement("package",
-                new XAttribute("id", item.Id),
-                new XAttribute("version", item.Version)
+                new XAttribute("id", item.Identity.Id),
+                new XAttribute("version", item.Identity.Version),
+                new XAttribute("feed", item.Feed.FeedUrl)
             );
 
             root.Add(e);
@@ -82,6 +41,113 @@ public static class DotnetPackageIndex
 
         Directory.CreateDirectory(Path.GetDirectoryName(packageListPath));
         packageDocument.Save(packageListPath);
+    }
+
+    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesAsync(params string[] feedUrls)
+    {
+        var packages = new List<PackageIdentityWithFeed>();
+
+        foreach (var feedUrl in feedUrls)
+        {
+            var feed = new NuGetFeed(feedUrl);
+            var feedPackages = await GetPackagesAsync(feed);
+            packages.AddRange(feedPackages);
+        }
+
+        Console.WriteLine($"Found {packages.Count:N0} package versions across {feedUrls.Length} feeds.");
+
+        var latestVersions = GetLatestVersions(packages);
+
+        Console.WriteLine($"Found {latestVersions.Count:N0} latest package versions.");
+
+        return latestVersions;
+    }
+
+    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesAsync(NuGetFeed feed)
+    {
+        Console.WriteLine($"Getting packages from {feed.FeedUrl}...");
+
+        if (feed.FeedUrl == NuGetFeeds.NuGetOrg)
+            return await GetPackagesFromNuGetOrgAsync(feed);
+        else
+            return await GetPackagesFromOtherGalleryAsync(feed);
+    }
+
+    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesFromNuGetOrgAsync(NuGetFeed feed)
+    {
+        Console.WriteLine($"Fetching owner information...");
+        var ownerInformation = await feed.GetOwnerMappingAsync();
+
+        var packageIds = ownerInformation.Keys
+                                         .ToHashSet(StringComparer.OrdinalIgnoreCase)
+                                         .Where(id => IsOwnedByDotNet(ownerInformation, id) &&
+                                                      PackageFilter.Default.IsMatch(id))
+                                         .ToArray();
+
+        Console.WriteLine($"Found {packageIds.Length:N0} relevant package IDs.");
+
+        Console.WriteLine($"Getting versions...");
+
+        ConcurrentBag<PackageIdentity> identities = new ConcurrentBag<PackageIdentity>();
+
+        await Parallel.ForEachAsync(packageIds, async (packageId, _) =>
+        {
+            var versions = await feed.GetAllVersionsAsync(packageId);
+
+            foreach (var version in versions)
+            {
+                var identity = new PackageIdentity(packageId, version);
+                identities.Add(identity);
+            }
+        });
+
+        Console.WriteLine($"Found {identities.Count:N0} package versions.");
+
+        return identities.Select(i => new PackageIdentityWithFeed(i, feed)).ToArray();
+    }
+
+    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesFromOtherGalleryAsync(NuGetFeed feed)
+    {
+        Console.WriteLine($"Enumerating feed...");
+
+        var identities = await feed.GetAllPackagesAsync();
+
+        identities = identities.Where(i => PackageFilter.Default.IsMatch(i.Id)).ToArray();
+
+        Console.WriteLine($"Found {identities.Count:N0} package versions.");
+
+        return identities.Select(i => new PackageIdentityWithFeed(i, feed)).ToArray();
+    }
+
+    private static IReadOnlyList<PackageIdentityWithFeed> GetLatestVersions(IReadOnlyList<PackageIdentityWithFeed> identities)
+    {
+        var result = new List<PackageIdentityWithFeed>();
+
+        var groups = identities.GroupBy(i => i.Identity.Id);
+
+        foreach (var group in groups.OrderBy(g => g.Key))
+        {
+            var packageId = group.Key;
+            var versions = group.OrderByDescending(p => p.Identity.Version, VersionComparer.VersionReleaseMetadata);
+
+            var latestStable = versions.FirstOrDefault(i => !i.Identity.Version.IsPrerelease);
+            var latestPrerelease = versions.FirstOrDefault(i => i.Identity.Version.IsPrerelease);
+
+            if (latestStable != default && latestPrerelease != default)
+            {
+                var stableIsNewer = VersionComparer.VersionReleaseMetadata.Compare(latestPrerelease.Identity.Version, latestStable.Identity.Version) <= 0;
+                if (stableIsNewer)
+                    latestPrerelease = default;
+            }
+
+            if (latestStable != default)
+                result.Add(latestStable);
+
+            if (latestPrerelease != default)
+                result.Add(latestPrerelease);
+        }
+
+        return result;
     }
 
     private static bool IsOwnedByDotNet(Dictionary<string, string[]> ownerInformation, string id)
@@ -100,4 +166,6 @@ public static class DotnetPackageIndex
 
         return false;
     }
+
+    private record struct PackageIdentityWithFeed(PackageIdentity Identity, NuGetFeed Feed);
 }
