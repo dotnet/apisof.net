@@ -79,13 +79,13 @@ public sealed class AnalysisReport
                 if (netFrameworkAvailability is null || netFrameworkAvailability.Package is not null)
                     continue;
 
-                // For the purposes of the score, we only care about framework APIs, not any user
-                // APIs or references to packages.
-                numberOfUsedPlatformApis++;
-
                 // But we don't care about APIs that are merely overrides.
                 if (netFrameworkAvailability.Declaration.IsOverride())
                     continue;
+
+                // For the purposes of the score, we only care about framework APIs, not any user
+                // APIs or references to packages.
+                numberOfUsedPlatformApis++;
 
                 var netCoreAvailability = availabilityContext.GetAvailability(api, desiredFramework);
                 if (netCoreAvailability is null)
