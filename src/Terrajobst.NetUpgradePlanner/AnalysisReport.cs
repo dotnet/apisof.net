@@ -75,8 +75,8 @@ public sealed class AnalysisReport
 
                 var netFrameworkAvailability = availabilityContext.GetAvailability(api, assemblyFramework);
 
-                // We only care about in-box .NET Framework APIs
-                if (netFrameworkAvailability is null || netFrameworkAvailability.Package is not null)
+                // We only care about .NET Framework APIs
+                if (netFrameworkAvailability is null)
                     continue;
 
                 // But we don't care about APIs that are merely overrides.
