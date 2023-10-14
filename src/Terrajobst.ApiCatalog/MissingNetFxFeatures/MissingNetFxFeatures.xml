@@ -587,6 +587,29 @@
         </appliesTo>
     </feature>
 
+    <feature name="System.Runtime.InteropServices Marshal.GetActiveObject()">
+        <description>
+          The Marshal.GetActiveObject() API is a wrapper over the Running Object Table (ROT, see
+          https://docs.microsoft.com/windows/win32/com/registering-objects-in-the-rot) and relies
+          on specific Win32 APIs that can be called via a P/Invoke.
+        </description>
+        <appliesTo>
+            <member namespace="System.Runtime.InteropServices" type="Marshal" name="GetActiveObject()" />
+        </appliesTo>
+    </feature>
+
+    <feature name="System.Runtime.InteropServices Type Library Support">
+        <description>
+            Dynamic generation and interaction with type libraries for .NET
+            assemblies isn't available on .NET Core.
+        </description>
+        <appliesTo>
+            <member namespace="System.Runtime.InteropServices" type="Marshal" name="GetTypeForITypeInfo(IntPtr)" />
+            <member namespace="System.Runtime.InteropServices" type="Marshal" name="GetTypeLibName(ITypeLib)" />
+            <member namespace="System.Runtime.InteropServices" type="Marshal" name="GetTypeLibName(UCOMITypeLib)" />
+        </appliesTo>
+    </feature>
+
     <feature name="System.Runtime.InteropServices.WindowsRuntime (WinRT) Legacy APIs">
         <description>
             The Windows Runtime (WinRT) support has been moved to a code generator, called CsWinRT.
