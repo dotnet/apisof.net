@@ -6,6 +6,7 @@ on:
 
 env:
   DOTNET_NOLOGO: true
+  EnableWindowsTargeting: true
 
 jobs:
   build:
@@ -30,4 +31,4 @@ jobs:
     - name: dotnet test
       run: |
         cd src
-        dotnet test --nologo --no-build
+        dotnet test --nologo
