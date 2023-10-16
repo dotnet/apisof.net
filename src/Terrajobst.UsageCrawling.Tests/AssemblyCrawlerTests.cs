@@ -316,9 +316,10 @@ public class AssemblyCrawlerTests
 
         var usages = new Dictionary<string, int>
         {
-            { "T:System.Object", 2 }, // Base, event handler sender
+            { "T:System.Object", 4 }, // Base, event handler sender
             { "T:System.Void", 2 },
             { "M:System.AppDomain.get_CurrentDomain", 1 },
+            { "T:System.UnhandledExceptionEventHandler", 2 },
             { "M:System.UnhandledExceptionEventHandler.#ctor(System.Object,System.IntPtr)", 1 },
             { "M:System.AppDomain.add_UnhandledException(System.UnhandledExceptionEventHandler)", 1 },
             { "T:System.UnhandledExceptionEventArgs", 1 }
@@ -342,9 +343,10 @@ public class AssemblyCrawlerTests
 
         var usages = new Dictionary<string, int>
         {
-            { "T:System.Object", 2 }, // Base, event handler sender
+            { "T:System.Object", 4 }, // Base, event handler sender
             { "T:System.Void", 2 },
             { "M:System.AppDomain.get_CurrentDomain", 1 },
+            { "T:System.UnhandledExceptionEventHandler", 2 },
             { "M:System.UnhandledExceptionEventHandler.#ctor(System.Object,System.IntPtr)", 1 },
             { "M:System.AppDomain.remove_UnhandledException(System.UnhandledExceptionEventHandler)", 1 },
             { "T:System.UnhandledExceptionEventArgs", 1 }
