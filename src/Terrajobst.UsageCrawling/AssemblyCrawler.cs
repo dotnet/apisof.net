@@ -44,6 +44,9 @@ public sealed class AssemblyCrawler
 
     private void CrawlType(ITypeDefinition type)
     {
+        if (IsIgnored(type))
+            return;
+
         CrawlAttributes(type.Attributes);
 
         foreach (var b in type.BaseClasses)
@@ -124,6 +127,14 @@ public sealed class AssemblyCrawler
     {
         CrawlAttributes(e.Attributes);
         Record(e.Type);
+    }
+
+    private static bool IsIgnored(ITypeDefinition type)
+    {
+        if (type.Attributes.Any(a => a.Type.FullName() == "Microsoft.CodeAnalysis.EmbeddedAttribute"))
+            return true;
+
+        return false;
     }
 
     private void Record(ITypeReference type)
