@@ -1,5 +1,7 @@
 using System.Text;
 
+using Basic.Reference.Assemblies;
+
 using Microsoft.Cci;
 using Microsoft.Cci.Extensions;
 using Microsoft.CodeAnalysis;
@@ -493,7 +495,7 @@ public class AssemblyCrawlerTests
                                                    optimizationLevel: OptimizationLevel.Release);
         var compilation = CSharpCompilation.Create("dummy",
                                                    new[] { CSharpSyntaxTree.ParseText(source) },
-                                                   new[] { corlibReference },
+                                                   Net70.References.All,
                                                    options);
         var peStream = new MemoryStream();
         var result = compilation.Emit(peStream);

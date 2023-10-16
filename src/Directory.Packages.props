@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.18.0" />
+    <PackageVersion Include="Basic.Reference.Assemblies.Net70" Version="1.4.5" />
     <PackageVersion Include="Clowd.Squirrel" Version="2.9.42" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="Dapper" Version="2.1.11" />
