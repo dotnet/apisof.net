@@ -86,5 +86,10 @@ namespace Terrajobst.UsageCrawling
         {
             return !(left == right);
         }
+
+        public override string ToString()
+        {
+            return DocumentationId;
+        }
     }
 }
