@@ -11,6 +11,7 @@ public sealed class CatalogService
 {
     private readonly IConfiguration _configuration;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<CatalogService> _logger;
 
     private CatalogJobInfo _jobInfo;
     private ApiCatalogModel _catalog;
@@ -18,10 +19,13 @@ public sealed class CatalogService
     private SuffixTree _suffixTree;
     private ApiCatalogStatistics _statistics;
 
-    public CatalogService(IConfiguration configuration, IWebHostEnvironment environment)
+    public CatalogService(IConfiguration configuration,
+                          IWebHostEnvironment environment,
+                          ILogger<CatalogService> logger)
     {
         _configuration = configuration;
         _environment = environment;
+        _logger = logger;
     }
 
     public async Task InvalidateAsync()
@@ -35,27 +39,51 @@ public sealed class CatalogService
         var azureConnectionString = _configuration["AzureStorageConnectionString"];
 
         var databasePath = GetDatabasePath();
-        if (!File.Exists(databasePath))
+        if (File.Exists(databasePath))
         {
+            _logger.LogInformation("Found catalog on disk. Skipping download.");
+        }
+        else
+        {
+            _logger.LogInformation("Downloading catalog...");
+
             var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
             await blobClient.DownloadToAsync(databasePath);
+
+            _logger.LogInformation("Downloading catalog complete.");
         }
+
+        _logger.LogInformation("Loading catalog...");
 
         var catalog = await ApiCatalogModel.LoadAsync(databasePath);
         var availabilityContext = ApiAvailabilityContext.Create(catalog);
 
+        _logger.LogInformation("Loading catalog complete.");
+
         var suffixTreePath = GetSuffixTreePath();
-        if (!File.Exists(suffixTreePath))
+        if (File.Exists(suffixTreePath))
         {
+            _logger.LogInformation("Found suffix tree on disk. Skipping download.");
+        }
+        else
+        {
+            _logger.LogInformation("Downloading suffix tree...");
+
             // TODO: Ideally the underlying file format uses compression. This seems weird.
             var blobClient = new BlobClient(azureConnectionString, "catalog", "suffixtree.dat.deflate");
             using var blobStream = await blobClient.OpenReadAsync();
             using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
             using var fileStream = File.Create(suffixTreePath);
             await deflateStream.CopyToAsync(fileStream);
+
+            _logger.LogInformation("Download suffix tree complete.");
         }
 
+        _logger.LogInformation("Loading suffix tree...");
+
         var suffixTree = SuffixTree.Load(suffixTreePath);
+
+        _logger.LogInformation("Loading suffix tree complete.");
 
         var jobBlobClient = new BlobClient(azureConnectionString, "catalog", "job.json");
         using var jobStream = await jobBlobClient.OpenReadAsync();
