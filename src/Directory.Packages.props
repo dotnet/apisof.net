@@ -9,6 +9,7 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="Dapper" Version="2.1.11" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="2.20.0" />
+    <PackageVersion Include="Meziantou.Xunit.ParallelTestFramework" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="1.19.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.15.1" />
