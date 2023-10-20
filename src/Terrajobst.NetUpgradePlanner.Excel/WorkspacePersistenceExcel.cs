@@ -343,8 +343,8 @@ public static class WorkspacePersistenceExcel
         var table = new Table()
         {
             Id = tableId,
-            Name = tableId.ToString(CultureInfo.CurrentCulture),
-            DisplayName = "Table" + tableId.ToString(CultureInfo.CurrentCulture),
+            Name = tableId.ToString(CultureInfo.InvariantCulture),
+            DisplayName = "Table" + tableId.ToString(CultureInfo.InvariantCulture),
             Reference = range
         };
 
@@ -464,7 +464,12 @@ public static class WorkspacePersistenceExcel
             }
             else if (item is double number)
             {
-                row.AppendChild(CreateNumberCell(number.ToString()));
+                row.AppendChild(CreateNumberCell(number.ToString(CultureInfo.InvariantCulture)));
+            }
+            else if (item is IFormattable f)
+            {
+                var text = f.ToString(null, CultureInfo.InvariantCulture);
+                row.AppendChild(CreateTextCell(text));
             }
             else
             {
@@ -481,7 +486,7 @@ public static class WorkspacePersistenceExcel
         // Column needs to be 0-based for the GetColumnName method
         var columnCount = row.Descendants<Cell>().Count() - 1;
 
-        return string.Format(CultureInfo.CurrentCulture, "{0}{1}", GetColumnName(columnCount), rowCount);
+        return string.Format(CultureInfo.InvariantCulture, "{0}{1}", GetColumnName(columnCount), rowCount);
     }
 
     private static string GetColumnName(int index)
@@ -567,7 +572,7 @@ public static class WorkspacePersistenceExcel
         if (columnStart + columnCount > 26)
             throw new NotSupportedException("Too many columns");
 
-        return string.Format(CultureInfo.CurrentCulture, "{0}{1}:{2}{3}", (char)(((uint)'A') + columnStart - 1), rowStart, (char)(((uint)'A') + columnStart + columnCount - 2), rowStart + rowCount - 1);
+        return string.Format(CultureInfo.InvariantCulture, "{0}{1}:{2}{3}", (char)(((uint)'A') + columnStart - 1), rowStart, (char)(((uint)'A') + columnStart + columnCount - 2), rowStart + rowCount - 1);
     }
 
     private static uint GetNextTableId(Worksheet w)
