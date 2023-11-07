@@ -125,6 +125,8 @@ public partial class ApiSearch
 
     public void Open()
     {
+        if (IsOpen) return;
+
         _modalDisplay = "block;";
         _modalClass = "Show";
         SearchText = "";

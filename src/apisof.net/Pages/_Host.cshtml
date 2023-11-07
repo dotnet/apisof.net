@@ -55,6 +55,12 @@
             childList: true,
             attributes: true
         });
+        document.addEventListener("keydown", e => {
+            if (e.ctrlKey && e.key === 'k') {
+                window.showSearch();
+                e.preventDefault();
+            }
+        })
         window.registerSearchInputKeyDown = (element, helper) => {
             window.showSearch = () => {
                 helper.invokeMethodAsync('ShowSearch');
