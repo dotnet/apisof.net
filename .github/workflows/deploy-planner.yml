@@ -46,7 +46,7 @@ jobs:
         mkdir artifacts/squirrel-release
         cd artifacts/NetUpgradePlanner
         Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.9.42\tools\Squirrel.exe");
-        Squirrel http-down --url "https://apicatalogblob.blob.core.windows.net/squirrel/" -r "../squirrel-release"
+        Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "../squirrel-release"
         Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../squirrel-release"
 
     - name: Upload build
