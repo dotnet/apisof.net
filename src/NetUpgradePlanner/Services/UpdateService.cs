@@ -6,7 +6,7 @@ namespace NetUpgradePlanner.Services;
 
 internal sealed class UpdateService : BackgroundService
 {
-    private const string _storageUrl = "https://apicatalogblob.blob.core.windows.net/squirrel";
+    private const string _storageUrl = "https://apisofdotnet.blob.core.windows.net/squirrel";
     private readonly ProgressService _progressService;
 
     public bool HasUpdate { get; private set; }
