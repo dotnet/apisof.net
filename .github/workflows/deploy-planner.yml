@@ -20,12 +20,12 @@ jobs:
     steps:
 
     - name: Get code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0 # We need the full history in order to use Git versioning
 
     - name: Get .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '7.0.*'
 
@@ -50,7 +50,7 @@ jobs:
         Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../squirrel-release"
 
     - name: Upload build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: squirrel-release
         path: artifacts/squirrel-release
@@ -61,7 +61,7 @@ jobs:
     steps:
 
     - name: Download build
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: squirrel-release
         path: artifacts/squirrel-release
