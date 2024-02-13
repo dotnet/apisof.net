@@ -480,7 +480,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.Android.Ref",
                     TargetingPackVersion = "11",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "android" }
                 },
                 //
@@ -490,7 +490,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.iOS.Ref",
                     TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "ios" }
                 },
                 //
@@ -500,7 +500,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.macOS.Ref",
                     TargetingPackVersion = "15",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "macos" }
                 },
                 //
@@ -510,7 +510,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.tvOS.Ref",
                     TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "tvos" }
                 },
                 //
@@ -520,7 +520,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.watchOS.Ref",
                     TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "tvos" }
                 },
             }
@@ -584,7 +584,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.Android.Ref",
                     TargetingPackVersion = "11",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "android" }
                 },
                 //
@@ -594,7 +594,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.iOS.Ref",
                     TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "ios" }
                 },
                 //
@@ -604,7 +604,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.macOS.Ref",
                     TargetingPackVersion = "15",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "macos" }
                 },
                 //
@@ -614,7 +614,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.tvOS.Ref",
                     TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "tvos" }
                 },
                 //
@@ -624,7 +624,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.watchOS.Ref",
                     TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "tvos" }
                 },
             }
