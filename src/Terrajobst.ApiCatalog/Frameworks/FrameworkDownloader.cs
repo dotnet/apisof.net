@@ -430,7 +430,7 @@ public sealed class FrameworkDefinition
                 {
                     TargetingPackName = "Microsoft.NETCore.App.Ref",
                     TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet7,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
                 },
                 new FrameworkReferenceDefinition
@@ -438,7 +438,7 @@ public sealed class FrameworkDefinition
                     Name = "Microsoft.AspNetCore.App",
                     TargetingPackName = "Microsoft.AspNetCore.App.Ref",
                     TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet7,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "", "windows" },
                     ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
                 },
@@ -450,7 +450,7 @@ public sealed class FrameworkDefinition
                     Name = "Microsoft.WindowsDesktop.App",
                     TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                     TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet7,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "windows" },
                 },
                 new FrameworkReferenceDefinition
@@ -458,7 +458,7 @@ public sealed class FrameworkDefinition
                     Name = "Microsoft.WindowsDesktop.App.WPF",
                     TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                     TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet7,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "windows" },
                     Profile = "WPF",
                     ImplicitViaProperty = "UseWPF"
@@ -468,7 +468,7 @@ public sealed class FrameworkDefinition
                     Name = "Microsoft.WindowsDesktop.App.WindowsForms",
                     TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
                     TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet7,
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "windows" },
                     Profile = "WindowsForms",
                     ImplicitViaProperty = "UseWindowsForms"
