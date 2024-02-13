@@ -628,6 +628,110 @@ public sealed class FrameworkDefinition
                     Platforms = { "tvos" }
                 },
             }
+        },
+        new()
+        {
+            FrameworkName = "net9.0",
+            FrameworkReferences =
+            {
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.NETCore.App.Ref",
+                    TargetingPackVersion = "9.0",
+                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
+                    Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
+                },
+                new FrameworkReferenceDefinition
+                {
+                    Name = "Microsoft.AspNetCore.App",
+                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
+                    TargetingPackVersion = "9.0",
+                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
+                    Platforms = { "", "windows" },
+                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
+                },
+                //
+                // Windows
+                //
+                new FrameworkReferenceDefinition
+                {
+                    Name = "Microsoft.WindowsDesktop.App",
+                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
+                    TargetingPackVersion = "9.0",
+                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
+                    Platforms = { "windows" },
+                },
+                new FrameworkReferenceDefinition
+                {
+                    Name = "Microsoft.WindowsDesktop.App.WPF",
+                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
+                    TargetingPackVersion = "9.0",
+                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
+                    Platforms = { "windows" },
+                    Profile = "WPF",
+                    ImplicitViaProperty = "UseWPF"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
+                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
+                    TargetingPackVersion = "9.0",
+                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
+                    Platforms = { "windows" },
+                    Profile = "WindowsForms",
+                    ImplicitViaProperty = "UseWindowsForms"
+                },
+                //
+                // Android
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Android.Ref",
+                    TargetingPackVersion = "11",
+                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    Platforms = { "android" }
+                },
+                //
+                // iOS
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.iOS.Ref",
+                    TargetingPackVersion = "14",
+                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    Platforms = { "ios" }
+                },
+                //
+                // macOS
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.macOS.Ref",
+                    TargetingPackVersion = "15",
+                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    Platforms = { "macos" }
+                },
+                //
+                // tvOS
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.tvOS.Ref",
+                    TargetingPackVersion = "14",
+                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    Platforms = { "tvos" }
+                },
+                //
+                // watchOS
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.watchOS.Ref",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NightlyXamarin,
+                    Platforms = { "tvos" }
+                },
+            }
         }
     };
 
