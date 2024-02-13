@@ -523,6 +523,150 @@ public sealed class FrameworkDefinition
                     NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "tvos" }
                 },
+                //
+                // MAUI Core
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.any",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.android",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "android" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.ios",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "ios" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.maccatalyst",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "maccatalyst" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.win",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "windows" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                //
+                // Maui Essentials
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.any",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.android",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "android" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.ios",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "ios" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.maccatalyst",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "maccatalyst" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.win",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "windows" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                //
+                // MAUI Controls
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.any",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.android",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "android" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.ios",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "ios" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.maccatalyst",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "maccatalyst" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.win",
+                    TargetingPackVersion = "7",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "windows" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
             }
         },
         new()
@@ -626,6 +770,150 @@ public sealed class FrameworkDefinition
                     TargetingPackVersion = "8",
                     NuGetFeed = NuGetFeeds.NuGetOrg,
                     Platforms = { "tvos" }
+                },
+                //
+                // MAUI Core
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.any",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.android",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "android" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.ios",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "ios" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.maccatalyst",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "maccatalyst" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Core.Ref.win",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "windows" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Core"
+                },
+                //
+                // Maui Essentials
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.any",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.android",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "android" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.ios",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "ios" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.maccatalyst",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "maccatalyst" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.win",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "windows" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
+                },
+                //
+                // MAUI Controls
+                //
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.any",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.android",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "android" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.ios",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "ios" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.maccatalyst",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "maccatalyst" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
+                },
+                new FrameworkReferenceDefinition
+                {
+                    TargetingPackName = "Microsoft.Maui.Controls.Ref.win",
+                    TargetingPackVersion = "8",
+                    NuGetFeed = NuGetFeeds.NuGetOrg,
+                    Platforms = { "windows" },
+                    ImplicitViaProperty = "UseMaui",
+                    ImplicitViaSdk = "Microsoft.Maui.Controls"
                 },
             }
         },
