@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terrajobst.ApiCatalog", "Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "apisof.net", "apisof.net\apisof.net.csproj", "{68575F1D-8460-4B96-8AF7-AB7D14E53F37}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenUsage", "GenUsage\GenUsage.csproj", "{DFFB1C73-5933-4DEF-AF5F-808880609E97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenUsageNuGet", "GenUsageNuGet\GenUsageNuGet.csproj", "{DFFB1C73-5933-4DEF-AF5F-808880609E97}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Terrajobst.UsageCrawling", "Terrajobst.UsageCrawling\Terrajobst.UsageCrawling.csproj", "{2BE290EA-35F6-472D-91D8-4286D504ADE6}"
 EndProject

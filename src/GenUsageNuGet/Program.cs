@@ -8,7 +8,7 @@ using Terrajobst.ApiCatalog;
 using Terrajobst.UsageCrawling;
 using NuGetFeed = Terrajobst.UsageCrawling.NuGetFeed;
 
-namespace GenUsage;
+namespace GenUsageNuGet;
 
 // TODO: Come up with a way to deal with updates in the indexer format.
 //       For starters, we should store an indexer version in the packages table. Also, we should store the nuget.org
