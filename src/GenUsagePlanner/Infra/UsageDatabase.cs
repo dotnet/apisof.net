@@ -38,38 +38,38 @@ public sealed class UsageDatabase : IDisposable
     {
         var commands = new[]
         {
-            @"
-                CREATE TABLE [Metadata]
-                (
-                    [ReferenceDateTime] TEXT
-                )
-            ",
-            @"
-                INSERT INTO Metadata
-                            (ReferenceDateTime)
-                VALUES      (NULL)
-            ",
-            @"
-                CREATE TABLE [ReferenceUnits]
-                (
-                    [ReferenceUnitId] INTEGER PRIMARY KEY,
-                    [Identifier] Text NOT NULL
-                )
-            ",
-            @"
-                CREATE TABLE [Apis]
-                (
-                    [ApiId] INTEGER PRIMARY KEY,
-                    [Guid] Text NOT NULL
-                )
-            ",
-            @"
-                CREATE TABLE [Usages]
-                (
-                    [ReferenceUnitId] INTEGER NOT NULL,
-                    [ApiId] INTEGER NOT NULL
-                )
-            ",
+            """
+            CREATE TABLE [Metadata]
+            (
+                [ReferenceDateTime] TEXT
+            )
+            """,
+            """
+            INSERT INTO Metadata
+                        (ReferenceDateTime)
+            VALUES      (NULL)                        
+            """,
+            """
+            CREATE TABLE [ReferenceUnits]
+            (
+                [ReferenceUnitId] INTEGER PRIMARY KEY,
+                [Identifier] Text NOT NULL
+            )                        
+            """,
+            """
+            CREATE TABLE [Apis]
+            (
+                [ApiId] INTEGER PRIMARY KEY,
+                [Guid] Text NOT NULL
+            )                        
+            """,
+            """
+            CREATE TABLE [Usages]
+            (
+                [ReferenceUnitId] INTEGER NOT NULL,
+                [ApiId] INTEGER NOT NULL
+            )
+            """,
         };
 
         await using var cmd = new SqliteCommand();
