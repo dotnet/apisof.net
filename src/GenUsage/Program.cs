@@ -240,10 +240,6 @@ internal sealed class Program
 
         using var usageDatabase = await UsageDatabase.OpenOrCreateAsync(databasePath);
 
-        Console.WriteLine("Creating temporary indexes...");
-
-        await usageDatabase.CreateTempIndexesAsync();
-
         Console.WriteLine("Discovering existing APIs...");
 
         var apiMap = await usageDatabase.ReadApisAsync();

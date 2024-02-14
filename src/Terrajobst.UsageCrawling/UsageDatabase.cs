@@ -35,14 +35,6 @@ public sealed class UsageDatabase : IDisposable
         return new UsageDatabase(connection);
     }
 
-    public async Task CreateTempIndexesAsync()
-    {
-        await _connection.ExecuteAsync(
-            """
-            CREATE INDEX IF NOT EXISTS IX_Usages_PackageId ON Usages (PackageId);
-            """);
-    }
-
     private static async Task CreateSchemaAsync(SqliteConnection connection)
     {
         var commands = new[]
@@ -53,21 +45,22 @@ public sealed class UsageDatabase : IDisposable
                 [PackageId] INTEGER PRIMARY KEY,
                 [Name]      Text    NOT NULL,
                 [Version]   Text    NOT NULL
-            )
+            ) WITHOUT ROWID
             """,
             """
             CREATE TABLE [Apis]
             (
                 [ApiId] INTEGER PRIMARY KEY,
                 [Guid]  Text    NOT NULL
-            )
+            ) WITHOUT ROWID
             """,
             """
             CREATE TABLE [Usages]
             (
                 [PackageId] INTEGER NOT NULL,
-                [ApiId]     INTEGER NOT NULL
-            )
+                [ApiId]     INTEGER NOT NULL,
+                PRIMARY KEY ([PackageId], [ApiId])
+            ) WITHOUT ROWID
             """,
         };
 
@@ -88,10 +81,6 @@ public sealed class UsageDatabase : IDisposable
 
     public Task VacuumAsync()
     {
-        _connection.ExecuteAsync("""
-             DROP INDEX IF EXISTS IX_Usages_PackageId;
-             """);
-
         return _connection.ExecuteAsync("VACUUM");
     }
 
