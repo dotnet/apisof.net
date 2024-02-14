@@ -70,6 +70,10 @@ public sealed class UsageDatabase : IDisposable
                 [ApiId] INTEGER NOT NULL
             )
             """,
+            """
+            CREATE INDEX IDX_Usages_ReferenceUnitId
+                ON Usages (ReferenceUnitId)
+            """
         };
 
         await using var cmd = new SqliteCommand();
