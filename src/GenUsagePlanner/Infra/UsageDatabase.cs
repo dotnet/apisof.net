@@ -67,12 +67,9 @@ public sealed class UsageDatabase : IDisposable
             CREATE TABLE [Usages]
             (
                 [ReferenceUnitId] INTEGER NOT NULL,
-                [ApiId] INTEGER NOT NULL
-            )
-            """,
-            """
-            CREATE INDEX IDX_Usages_ReferenceUnitId
-                ON Usages (ReferenceUnitId)
+                [ApiId] INTEGER NOT NULL,
+                PRIMARY KEY ([ReferenceUnitId], [ApiId])
+            ) WITHOUT ROWID;
             """
         };
 
