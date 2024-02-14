@@ -37,37 +37,38 @@ public sealed class UsageDatabase : IDisposable
 
     public async Task CreateTempIndexesAsync()
     {
-        await _connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync(
+            """
             CREATE INDEX IF NOT EXISTS IX_Usages_PackageId ON Usages (PackageId);
-        ");
+            """);
     }
 
     private static async Task CreateSchemaAsync(SqliteConnection connection)
     {
         var commands = new[]
         {
-            @"
-                CREATE TABLE [Packages]
-                (
-                    [PackageId] INTEGER PRIMARY KEY,
-                    [Name] Text NOT NULL,
-                    [Version] Text NOT NULL
-                )
-            ",
-            @"
-                CREATE TABLE [Apis]
-                (
-                    [ApiId] INTEGER PRIMARY KEY,
-                    [Guid] Text NOT NULL
-                )
-            ",
-            @"
-                CREATE TABLE [Usages]
-                (
-                    [PackageId] INTEGER NOT NULL,
-                    [ApiId] INTEGER NOT NULL
-                )
-            ",
+            """
+            CREATE TABLE [Packages]
+            (
+                [PackageId] INTEGER PRIMARY KEY,
+                [Name]      Text    NOT NULL,
+                [Version]   Text    NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE [Apis]
+            (
+                [ApiId] INTEGER PRIMARY KEY,
+                [Guid]  Text    NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE [Usages]
+            (
+                [PackageId] INTEGER NOT NULL,
+                [ApiId]     INTEGER NOT NULL
+            )
+            """,
         };
 
         await using var cmd = new SqliteCommand();
@@ -87,9 +88,9 @@ public sealed class UsageDatabase : IDisposable
 
     public Task VacuumAsync()
     {
-        _connection.ExecuteAsync(@"
-            drop index if exists IX_Usages_PackageId;
-        ");
+        _connection.ExecuteAsync("""
+             DROP INDEX IF EXISTS IX_Usages_PackageId;
+             """);
 
         return _connection.ExecuteAsync("VACUUM");
     }
@@ -97,12 +98,12 @@ public sealed class UsageDatabase : IDisposable
     public async Task<IdMap<PackageIdentity>> ReadPackagesAsync()
     {
         var result = new IdMap<PackageIdentity>();
-        var rows = await _connection.QueryAsync<(int Id, string Name, string Version)>(@"
+        var rows = await _connection.QueryAsync<(int Id, string Name, string Version)>("""
             SELECT  PackageId,
                     Name,
                     Version
             FROM    Packages
-        ");
+            """);
 
         foreach (var (id, name, versionText) in rows)
         {
@@ -117,11 +118,11 @@ public sealed class UsageDatabase : IDisposable
     public async Task<IdMap<Guid>> ReadApisAsync()
     {
         var result = new IdMap<Guid>();
-        var rows = await _connection.QueryAsync<(int Id, string GuidText)>(@"
+        var rows = await _connection.QueryAsync<(int Id, string GuidText)>("""
             SELECT  ApiId,
                     Guid
             FROM    Apis
-        ");
+            """);
 
         foreach (var (id, guidText) in rows)
         {
@@ -143,12 +144,12 @@ public sealed class UsageDatabase : IDisposable
     {
         var existingApis = await ReadApisAsync();
 
-        await using var command = new SqliteCommand(@"
+        await using var command = new SqliteCommand("""
             INSERT INTO Apis
                 (ApiId, Guid)
             VALUES
                 (@ApiId, @Guid)
-        ", _connection, transaction);
+            """, _connection, transaction);
 
         var apiIdParameter = command.Parameters.Add("ApiId", SqliteType.Integer);
         var guidParameter = command.Parameters.Add("Guid", SqliteType.Text);
@@ -167,10 +168,10 @@ public sealed class UsageDatabase : IDisposable
     public async Task DeletePackagesAsync(IEnumerable<int> packageIds)
     {
         await using var transaction = _connection.BeginTransaction();
-        await using var command = new SqliteCommand(@"
+        await using var command = new SqliteCommand("""
             DELETE FROM Packages WHERE PackageId = @PackageId;
             DELETE FROM Usages WHERE PackageId = @PackageId;
-        ", _connection, transaction);
+            """, _connection, transaction);
 
         var packageIdParameter = command.Parameters.Add("PackageId", SqliteType.Integer);
 
@@ -197,23 +198,23 @@ public sealed class UsageDatabase : IDisposable
     {
         await using var transaction = _connection.BeginTransaction();
 
-        await _connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync("""
             CREATE TABLE [ApiAncestors]
             (
-                [ApiId] INTEGER NOT NULL,
+                [ApiId]      INTEGER NOT NULL,
                 [AncestorId] INTEGER NOT NULL
             );
             CREATE INDEX IX_ApiAncestors_ApiId ON ApiAncestors (ApiId);
-        ", _connection, transaction);
+            """, _connection, transaction);
 
         // Bulk insert ancestors
         {
-            await using var command = new SqliteCommand(@"
+            await using var command = new SqliteCommand("""
                 INSERT INTO ApiAncestors
                     (ApiId, AncestorId)
                 VALUES
                     (@ApiId, @AncestorId)
-            ", _connection, transaction);
+                """, _connection, transaction);
 
             var apiIdParameter = command.Parameters.Add("ApiId", SqliteType.Integer);
             var ancestorIdParameter = command.Parameters.Add("AncestorId", SqliteType.Integer);
@@ -228,13 +229,13 @@ public sealed class UsageDatabase : IDisposable
 
         await InsertMissingApisAsync(apiMap, transaction);
 
-        var rows = await _connection.QueryAsync<(int ApiId, float Percentage)>(@"
-            select   AA.AncestorId as Api,
-                     cast(count(distinct u.PackageID) as real) / (select count(distinct PackageID) from Usages) as Percentage
-            from     Usages u
-                         join ApiAncestors AA on u.ApiId = AA.ApiId
-            group by AA.AncestorId
-        ");
+        var rows = await _connection.QueryAsync<(int ApiId, float Percentage)>("""
+            SELECT   AA.AncestorId as Api,
+                     CAST(COUNT(distinct u.PackageID) AS real) / (SELECT COUNT(distinct PackageID) FROM Usages) AS Percentage
+            FROM     Usages u
+                         JOIN ApiAncestors AA ON u.ApiId = AA.ApiId
+            GROUP BY AA.AncestorId          
+            """);
 
         await using var writer = new StreamWriter(outputPath);
         foreach (var (apiId, percentage) in rows)
