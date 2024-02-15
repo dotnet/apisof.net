@@ -277,34 +277,21 @@ internal sealed class Program
 
         Console.WriteLine($"Finished deleting packages. Took {stopwatch.Elapsed}");
 
-        Console.WriteLine($"Inserting new packages...");
-
-        stopwatch.Restart();
-
-        using (var packageWriter = usageDatabase.CreatePackageWriter())
-        {
-            foreach (var packageIdentity in packagesToBeIndexed)
-            {
-                var packageId = packageIdMap.Add(packageIdentity);
-                await packageWriter.WriteAsync(packageId, packageIdentity);
-            }
-
-            await packageWriter.SaveAsync();
-        }
-
-        Console.WriteLine($"Finished inserting new packages. Took {stopwatch.Elapsed}");
-
         stopwatch.Restart();
 
         var numberOfWorkers = Environment.ProcessorCount;
         Console.WriteLine($"Crawling using {numberOfWorkers} workers.");
+
+        var crawlingTimeout = TimeSpan.FromHours(5);
+        using var crawlingCancellationTokenSource = new CancellationTokenSource(crawlingTimeout);
+        var crawlingCancellationToken = crawlingCancellationTokenSource.Token;
 
         var inputQueue = new ConcurrentQueue<PackageIdentity>(packagesToBeIndexed);
 
         var outputQueue = new BlockingCollection<PackageResults>();
 
         var workers = Enumerable.Range(0, numberOfWorkers)
-                                .Select(i => Task.Run(() => CrawlWorker(i, inputQueue, outputQueue)))
+                                .Select(i => Task.Run(() => CrawlWorker(i, inputQueue, outputQueue, crawlingCancellationToken)))
                                 .ToArray();
 
         var outputWorker = Task.Run(() => OutputWorker(usageDatabase, apiMap, packageIdMap, outputQueue));
@@ -313,6 +300,9 @@ internal sealed class Program
 
         outputQueue.CompleteAdding();
         await outputWorker;
+
+        if (crawlingCancellationToken.IsCancellationRequested)
+            Console.WriteLine($"Crawling interrupted because timeout of {crawlingTimeout} was exceeded.");
 
         Console.WriteLine($"Finished crawling. Took {stopwatch.Elapsed}");
 
@@ -323,16 +313,6 @@ internal sealed class Program
 
         Console.WriteLine($"Finished inserting missing APIs. Took {stopwatch.Elapsed}");
 
-        Console.WriteLine($"Aggregating results...");
-
-        stopwatch.Restart();
-
-        var ancestors = apiCatalog.GetAllApis()
-                                  .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
-        await usageDatabase.ExportUsagesAsync(apiMap, ancestors, usagesPath);
-
-        Console.WriteLine($"Finished aggregating results. Took {stopwatch.Elapsed}");
-
         Console.WriteLine($"Vacuuming database...");
 
         stopwatch.Restart();
@@ -340,19 +320,32 @@ internal sealed class Program
 
         Console.WriteLine($"Finished vacuuming database. Took {stopwatch.Elapsed}");
 
-        usageDatabase.Dispose();
-
-        Console.WriteLine($"Uploading usages...");
-
-        await crawlerStore.UploadResultsAsync(usagesPath);
+        await usageDatabase.CloseAsync();
 
         Console.WriteLine($"Uploading database...");
 
         await crawlerStore.UploadDatabaseAsync(databasePath);
 
+        Console.WriteLine($"Aggregating results...");
+
+        stopwatch.Restart();
+
+        await usageDatabase.OpenAsync();
+
+        var ancestors = apiCatalog.GetAllApis()
+                                  .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
+        await usageDatabase.InsertApiAncestorsAndExportUsagesAsync(apiMap, ancestors, usagesPath);
+
+        Console.WriteLine($"Finished aggregating results. Took {stopwatch.Elapsed}");
+
+        Console.WriteLine($"Uploading usages...");
+
+        await crawlerStore.UploadResultsAsync(usagesPath);
+
         static async Task CrawlWorker(int workerId,
                                       ConcurrentQueue<PackageIdentity> inputQueue,
-                                      BlockingCollection<PackageResults> outputQueue)
+                                      BlockingCollection<PackageResults> outputQueue,
+                                      CancellationToken crawlingCancellationToken)
         {
             try
             {
@@ -361,6 +354,9 @@ internal sealed class Program
 
                 while (inputQueue.TryDequeue(out var packageId))
                 {
+                    if (crawlingCancellationToken.IsCancellationRequested)
+                        break;
+
                     var log = await RunPackageCrawlerAsync(packageId, fileName);
                     var apis = File.Exists(fileName)
                         ? File.ReadLines(fileName).Select(Guid.Parse).ToArray()
@@ -388,25 +384,27 @@ internal sealed class Program
         {
             try
             {
-                using var usageWriter = database.CreateUsageWriter();
+                using var writer = database.CreatePackageUsageWriter();
 
                 foreach (var (packageIdentity, logLines, apis) in queue.GetConsumingEnumerable())
                 {
                     foreach (var line in logLines)
                         Console.WriteLine($"[Crawler] {line}");
 
+                    var packageId = packageMap.Add(packageIdentity);
+                    await writer.WritePackageAsync(packageId, packageIdentity);
+
                     foreach (var api in apis)
                     {
                         if (!apiMap.Contains(api))
                             continue;
 
-                        var packageId = packageMap.GetId(packageIdentity);
                         var apiId = apiMap.GetId(api);
-                        await usageWriter.WriteAsync(packageId, apiId);
+                        await writer.WriteUsageAsync(packageId, apiId);
                     }
                 }
 
-                await usageWriter.SaveAsync();
+                await writer.SaveAsync();
 
                 Console.WriteLine("Output Worker has finished.");
             }

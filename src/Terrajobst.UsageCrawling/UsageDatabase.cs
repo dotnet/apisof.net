@@ -7,11 +7,32 @@ namespace Terrajobst.UsageCrawling;
 
 public sealed class UsageDatabase : IDisposable
 {
-    private readonly SqliteConnection _connection;
+    private SqliteConnection _connection;
+    private readonly string _fileName;
 
-    private UsageDatabase(SqliteConnection connection)
+    private UsageDatabase(SqliteConnection connection, string fileName)
     {
         _connection = connection;
+        _fileName = fileName;
+    }
+
+    public async Task OpenAsync()
+    {
+        var connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = _fileName,
+            Mode = SqliteOpenMode.ReadWrite,
+            Pooling = false
+        }.ToString();
+
+        _connection = new SqliteConnection(connectionString);
+        await _connection.OpenAsync();
+    }
+
+    public async Task CloseAsync()
+    {
+        await _connection.CloseAsync();
+        await _connection.DisposeAsync();
     }
 
     public static async Task<UsageDatabase> OpenOrCreateAsync(string fileName)
@@ -21,7 +42,8 @@ public sealed class UsageDatabase : IDisposable
         var connectionString = new SqliteConnectionStringBuilder
         {
             DataSource = fileName,
-            Mode = SqliteOpenMode.ReadWriteCreate
+            Mode = SqliteOpenMode.ReadWriteCreate,
+            Pooling = false
         }.ToString();
 
         var connection = new SqliteConnection(connectionString);
@@ -32,7 +54,7 @@ public sealed class UsageDatabase : IDisposable
         if (isNew)
             await CreateSchemaAsync(connection);
 
-        return new UsageDatabase(connection);
+        return new UsageDatabase(connection, fileName);
     }
 
     private static async Task CreateSchemaAsync(SqliteConnection connection)
@@ -173,17 +195,12 @@ public sealed class UsageDatabase : IDisposable
         await transaction.CommitAsync();
     }
 
-    public PackageWriter CreatePackageWriter()
+    public PackageUsageWriter CreatePackageUsageWriter()
     {
-        return new PackageWriter(_connection);
+        return new PackageUsageWriter(_connection);
     }
 
-    public UsageWriter CreateUsageWriter()
-    {
-        return new UsageWriter(_connection);
-    }
-
-    public async Task ExportUsagesAsync(IdMap<Guid> apiMap, IEnumerable<(Guid Api, Guid Ancestor)> ancestors, string outputPath)
+    public async Task InsertApiAncestorsAndExportUsagesAsync(IdMap<Guid> apiMap, IEnumerable<(Guid Api, Guid Ancestor)> ancestors, string outputPath)
     {
         await using var transaction = _connection.BeginTransaction();
 
@@ -194,7 +211,7 @@ public sealed class UsageDatabase : IDisposable
                 [AncestorId] INTEGER NOT NULL
             );
             CREATE INDEX IX_ApiAncestors_ApiId ON ApiAncestors (ApiId);
-            """, _connection, transaction);
+            """, transaction);
 
         // Bulk insert ancestors
         {
@@ -218,6 +235,8 @@ public sealed class UsageDatabase : IDisposable
 
         await InsertMissingApisAsync(apiMap, transaction);
 
+        await transaction.CommitAsync();
+
         var rows = await _connection.QueryAsync<(int ApiId, float Percentage)>("""
             SELECT   AA.AncestorId as Api,
                      CAST(COUNT(distinct u.PackageID) AS real) / (SELECT COUNT(distinct PackageID) FROM Usages) AS Percentage
@@ -232,7 +251,5 @@ public sealed class UsageDatabase : IDisposable
             var guid = apiMap.GetValue(apiId);
             await writer.WriteLineAsync($"{guid:N}\t{percentage}");
         }
-
-        await transaction.RollbackAsync();
     }
 }
