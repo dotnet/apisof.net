@@ -2,8 +2,6 @@
 using System.Xml.Linq;
 
 using Newtonsoft.Json;
-
-using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 

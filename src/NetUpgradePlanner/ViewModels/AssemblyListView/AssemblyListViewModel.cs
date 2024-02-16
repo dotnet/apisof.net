@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-using NetUpgradePlanner.Mvvm;
+﻿using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
 
 using Terrajobst.NetUpgradePlanner;

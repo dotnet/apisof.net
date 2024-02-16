@@ -2,8 +2,6 @@
 
 using NetUpgradePlanner.Mvvm;
 using NetUpgradePlanner.Services;
-
-using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
