@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.NetUpgradePlanne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.NetUpgradePlanner.Excel", "Terrajobst.NetUpgradePlanner.Excel\Terrajobst.NetUpgradePlanner.Excel.csproj", "{EC6D9959-842C-4810-BD66-176ECD820273}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DumpPacks", "DumpPacks\DumpPacks.csproj", "{49A3347C-1D94-4AB4-B7A7-FC645A139573}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,10 @@ Global
 		{EC6D9959-842C-4810-BD66-176ECD820273}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC6D9959-842C-4810-BD66-176ECD820273}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC6D9959-842C-4810-BD66-176ECD820273}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49A3347C-1D94-4AB4-B7A7-FC645A139573}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49A3347C-1D94-4AB4-B7A7-FC645A139573}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49A3347C-1D94-4AB4-B7A7-FC645A139573}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49A3347C-1D94-4AB4-B7A7-FC645A139573}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
