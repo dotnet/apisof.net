@@ -22,7 +22,7 @@ public readonly struct PlatformSet : IComparable, IComparable<PlatformSet>
 
     public bool IsSpecific => _relevantPlatforms is { Count: > 0 };
 
-    public IReadOnlyList<string> Plaforms => _relevantPlatforms ?? Array.Empty<string>();
+    public IReadOnlyList<string> Platforms => _relevantPlatforms ?? Array.Empty<string>();
 
     public static bool TryParse(string text, out PlatformSet value)
     {

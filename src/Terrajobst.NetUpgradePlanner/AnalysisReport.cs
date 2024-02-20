@@ -134,16 +134,16 @@ public sealed class AnalysisReport
                         problems.Add(problem);
                     }
 
-                    var platformAnnoation = platformContext.GetPlatformAnnotation(api);
+                    var platformAnnotation = platformContext.GetPlatformAnnotation(api);
 
-                    if (platformAnnoation.Kind == PlatformAnnotationKind.None)
+                    if (platformAnnotation.Kind == PlatformAnnotationKind.None)
                     {
                         // The desired framework has no platform annotations. Ignore.
                     }
-                    else if (desiredPlatforms.IsAny && platformAnnoation.Kind != PlatformAnnotationKind.Unrestricted)
+                    else if (desiredPlatforms.IsAny && platformAnnotation.Kind != PlatformAnnotationKind.Unrestricted)
                     {
                         var text = "API is not available on all platforms";
-                        var details = platformAnnoation.ToString();
+                        var details = platformAnnotation.ToString();
                         var url = string.Empty;
                         var category = ProblemCategory.CrossPlatform;
                         var problemId = new ProblemId(ProblemSeverity.Warning, category, text, url);
@@ -152,11 +152,11 @@ public sealed class AnalysisReport
                     }
                     else if (desiredPlatforms.IsSpecific)
                     {
-                        var unsupportedPlatforms = desiredPlatforms.Plaforms.Where(p => !platformAnnoation.IsSupported(p));
-                        foreach (var unsupportePlatform in unsupportedPlatforms)
+                        var unsupportedPlatforms = desiredPlatforms.Platforms.Where(p => !platformAnnotation.IsSupported(p));
+                        foreach (var unsupportedPlatform in unsupportedPlatforms)
                         {
-                            var text = $"API is not available on '{unsupportePlatform}'";
-                            var details = platformAnnoation.ToString();
+                            var text = $"API is not available on '{unsupportedPlatform}'";
+                            var details = platformAnnotation.ToString();
                             var url = string.Empty;
                             var category = ProblemCategory.CrossPlatform;
                             var problemId = new ProblemId(ProblemSeverity.Warning, category, text, url);
@@ -251,9 +251,9 @@ public sealed class AnalysisReport
         if (desiredPlatforms.IsAny)
             return false;
 
-        foreach (var platform in desiredPlatforms.Plaforms)
+        foreach (var platform in desiredPlatforms.Platforms)
         {
-            if (!referencedPlatforms.Plaforms.Contains(platform))
+            if (!referencedPlatforms.Platforms.Contains(platform))
                 return false;
         }
 

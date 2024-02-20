@@ -38,7 +38,7 @@ internal sealed partial class SelectPlatformsDialog : Window
 
             Any = platforms.IsAny;
             Specific = platforms.IsSpecific;
-            Platforms = knownPlatforms.Select(n => new PlatformViewModel(n, isChecked: platforms.Plaforms.Contains(n)))
+            Platforms = knownPlatforms.Select(n => new PlatformViewModel(n, isChecked: platforms.Platforms.Contains(n)))
                                       .ToArray();
         }
 
