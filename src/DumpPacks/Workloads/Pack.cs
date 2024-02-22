@@ -15,6 +15,9 @@ public sealed class Pack
         AliasTo = aliasTo.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
 
+    [JsonIgnore]
+    public string Name { get; internal set; } = string.Empty;
+
     public PackKind Kind { get; }
     public string Version { get; }
     

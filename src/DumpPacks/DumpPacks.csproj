@@ -8,4 +8,8 @@
         <RootNamespace></RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="NuGet.Protocol" />
+    </ItemGroup>
+
 </Project>

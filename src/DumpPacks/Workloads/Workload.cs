@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 public sealed class Workload
 {
@@ -15,6 +16,8 @@ public sealed class Workload
         Extends = extends ?? ReadOnlyCollection<string>.Empty;
     }
 
+    [JsonIgnore]
+    public string Name { get; internal set; } = string.Empty;
     public bool Abstract { get; }
     public string Description { get; }
     public IReadOnlyList<string> Packs { get; }

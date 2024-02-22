@@ -1,37 +1,55 @@
-﻿var path = @"C:\\Program Files\\dotnet\\sdk-manifests\\";
+﻿using Microsoft.VisualBasic;
 
-foreach (var versionDirectory in Directory.GetDirectories(path))
+var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+var dotnetDirectory = Path.Join(programFiles, "dotnet");
+
+Console.WriteLine("//");
+Console.WriteLine("// Built-in Packs");
+Console.WriteLine("//");
+
+var sdksRoot =Path.Join(dotnetDirectory, "sdk");
+
+var references = KnownFrameworkReference.Load(sdksRoot);
+
+foreach (var frameworkGroup in references.GroupBy(f => f.TargetFramework)
+                                         .OrderBy(g => g.Key.Framework)
+                                         .ThenBy(g => g.Key.Version))
+{
+    Console.WriteLine($"// {frameworkGroup.Key.GetShortFolderName()}");
+
+    foreach (var packGroup in frameworkGroup.GroupBy(r => r.TargetingPackName)
+                                            .OrderBy(p => p.Key))
+    {
+        var pack = packGroup.MaxBy(p => p.TargetingPackVersion)!;
+        Console.WriteLine($"{pack.TargetingPackName}, {pack.TargetingPackVersion}");
+    }
+}
+
+Console.WriteLine("//");
+Console.WriteLine("// Workload Packs");
+Console.WriteLine("//");
+
+var manifestsRoot = Path.Join(dotnetDirectory, "sdk-manifests");
+
+foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 {
     var versionText = Path.GetFileName(versionDirectory);
-
     var version = Version.Parse(versionText);
-    Console.WriteLine($"** .NET {version.Major}.{version.Minor} **");
+
+    Console.WriteLine($"// net{version.Major}.{version.Minor}");
         
     var environment = await WorkloadEnvironment.LoadAsync(versionDirectory);
-    var packByName = new Dictionary<string, Pack>(StringComparer.OrdinalIgnoreCase);
 
-    foreach (var (_, workload) in environment.Workloads)
-    {
-        foreach (var packName in workload.Packs)
-        {
-            if (!environment.Packs.TryGetValue(packName, out var pack))
-            {
-                Console.WriteLine($"warning: Can't find pack '{packName}'");
-                continue;
-            }
-
-            packByName.TryAdd(packName, pack);
-        }
-    }
-
-    foreach (var (packName, pack) in packByName)
+    foreach (var (pack, workloads) in environment.GetFlattenedPacks())
     {
         if (pack.Kind is not (PackKind.Library or PackKind.Framework))
             continue;
             
-        if (packName.Contains(".Runtime.", StringComparison.OrdinalIgnoreCase))
+        if (pack.Name.Contains(".Runtime.", StringComparison.OrdinalIgnoreCase))
             continue;
-            
-        Console.WriteLine($"{packName}, {pack.Version} ({pack.Kind})");
+
+        var workloadNames = string.Join(", ", workloads.Select(w => w.Name));
+
+        Console.WriteLine($"{pack.Name}, {pack.Version} ({pack.Kind}): {workloadNames}");
     }
 }
