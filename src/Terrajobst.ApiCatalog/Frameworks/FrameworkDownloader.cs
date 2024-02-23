@@ -1,1156 +1,210 @@
-﻿using System.IO.Compression;
+using System.Diagnostics;
 using System.Xml.Linq;
-
-using Newtonsoft.Json;
+using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
 namespace Terrajobst.ApiCatalog;
 
-public sealed class FrameworkDefinition
+public static class FrameworkDownloader
 {
-    public static IReadOnlyList<FrameworkDefinition> All = new List<FrameworkDefinition>
+    public static async Task DownloadAsync(string frameworksPath, string packsPath)
     {
-        new()
+        Validate();
+
+        var entries = new List<FrameworkManifestEntry>();
+
+        var nugetOrg = new NuGetFeed(NuGetFeeds.NuGetOrg);
+        var latestNightly = new NuGetFeed(NuGetFeeds.NightlyLatest);
+
+        var releaseFeeds = new[] { nugetOrg };
+        var releasePacksPath = Path.Join(packsPath, "release");
+        var releaseStore = new NuGetStore(releasePacksPath, releaseFeeds);
+
+        var previewFeeds = new[] { latestNightly, nugetOrg };
+        var previewPacksPath = Path.Join(packsPath, "preview");
+        var previewStore = new NuGetStore(previewPacksPath, previewFeeds);
+
+        foreach (var framework in FrameworkDefinition.All)
         {
-            FrameworkName = "netcoreapp3.0",
-            FrameworkReferences =
+            Console.WriteLine($"Processing packs for {framework.Name}...");
+
+            var store = framework.IsPreview ? previewStore : releaseStore;
+            var packs = framework.BuiltInPacks.Concat(framework.WorkloadPacks).ToArray();
+
+            // Let's first determine the set of TFMs for this framework. This
+            // will create a set including the base framework plus any platform
+            // specific TFMs, such as net5.0-windows.
+
+            var platformFrameworks = new HashSet<NuGetFramework>();
+
+            foreach (var pack in packs)
             {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "3.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "3.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "3.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "3.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    Profile = "WPF",
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "3.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    Profile = "WindowsForms",
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
-                    ImplicitViaProperty = "UseWindowsForms"
-                }
-            }
-        },
-        new()
-        {
-            FrameworkName = "netcoreapp3.1",
-            FrameworkReferences =
-            {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "3.1",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "3.1",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "3.1",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "3.1",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    Profile = "WPF",
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "3.1",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    Profile = "WindowsForms",
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.WindowsDesktop",
-                    ImplicitViaProperty = "UseWindowsForms"
-                }
-            }
-        },
-        new()
-        {
-            FrameworkName = "net5.0",
-            FrameworkReferences =
-            {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "5.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "5.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                //
-                // Windows
-                //
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "5.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "5.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WPF",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "5.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WindowsForms",
-                    ImplicitViaProperty = "UseWindowsForms"
-                }
-            }
-        },
-        new()
-        {
-            FrameworkName = "net6.0",
-            FrameworkReferences =
-            {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "6.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "6.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                //
-                // Windows
-                //
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "6.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "6.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WPF",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "6.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WindowsForms",
-                    ImplicitViaProperty = "UseWindowsForms"
-                },
-                //
-                // Android
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Android.Ref",
-                    TargetingPackVersion = "11",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" }
-                },
-                //
-                // iOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.iOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" }
-                },
-                //
-                // macOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.macOS.Ref",
-                    TargetingPackVersion = "15",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "macos" }
-                },
-                //
-                // tvOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.tvOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "tvos" }
-                },
-                //
-                // watchOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.watchOS.Ref",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "tvos" }
-                },
-                //
-                // MAUI Core
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.any",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.android",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.ios",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.maccatalyst",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.win",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                //
-                // Maui Essentials
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.any",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.android",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.ios",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.maccatalyst",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.win",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                //
-                // MAUI Controls
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.any",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.android",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.ios",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.maccatalyst",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.win",
-                    TargetingPackVersion = "6",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-            }
-        },
-        new()
-        {
-            FrameworkName = "net7.0",
-            FrameworkReferences =
-            {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                //
-                // Windows
-                //
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WPF",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "7.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WindowsForms",
-                    ImplicitViaProperty = "UseWindowsForms"
-                },
-                //
-                // Android
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Android.Ref",
-                    TargetingPackVersion = "11",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" }
-                },
-                //
-                // iOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.iOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" }
-                },
-                //
-                // macOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.macOS.Ref",
-                    TargetingPackVersion = "15",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "macos" }
-                },
-                //
-                // tvOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.tvOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "tvos" }
-                },
-                //
-                // watchOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.watchOS.Ref",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "tvos" }
-                },
-                //
-                // MAUI Core
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.any",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.android",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.ios",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.maccatalyst",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.win",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                //
-                // Maui Essentials
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.any",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.android",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.ios",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.maccatalyst",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.win",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                //
-                // MAUI Controls
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.any",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.android",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.ios",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.maccatalyst",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.win",
-                    TargetingPackVersion = "7",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-            }
-        },
-        new()
-        {
-            FrameworkName = "net8.0",
-            FrameworkReferences =
-            {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "8.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "8.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "", "windows" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                //
-                // Windows
-                //
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "8.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "8.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WPF",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "8.0",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    Profile = "WindowsForms",
-                    ImplicitViaProperty = "UseWindowsForms"
-                },
-                //
-                // Android
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Android.Ref",
-                    TargetingPackVersion = "11",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" }
-                },
-                //
-                // iOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.iOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" }
-                },
-                //
-                // macOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.macOS.Ref",
-                    TargetingPackVersion = "15",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "macos" }
-                },
-                //
-                // tvOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.tvOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "tvos" }
-                },
-                //
-                // watchOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.watchOS.Ref",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "tvos" }
-                },
-                //
-                // MAUI Core
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.any",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.android",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.ios",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.maccatalyst",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Core.Ref.win",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Core"
-                },
-                //
-                // Maui Essentials
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.any",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.android",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.ios",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.maccatalyst",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Essentials.Ref.win",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Essentials"
-                },
-                //
-                // MAUI Controls
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.any",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.android",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "android" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.ios",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "ios" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.maccatalyst",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "maccatalyst" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Maui.Controls.Ref.win",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NuGetOrg,
-                    Platforms = { "windows" },
-                    ImplicitViaProperty = "UseMaui",
-                    ImplicitViaSdk = "Microsoft.Maui.Controls"
-                },
-            }
-        },
-        new()
-        {
-            FrameworkName = "net9.0",
-            FrameworkReferences =
-            {
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.NETCore.App.Ref",
-                    TargetingPackVersion = "9.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
-                    Platforms = { "", "windows", "android", "ios", "macos", "tvos", "watchos" }
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.AspNetCore.App",
-                    TargetingPackName = "Microsoft.AspNetCore.App.Ref",
-                    TargetingPackVersion = "9.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
-                    Platforms = { "", "windows" },
-                    ImplicitViaSdk = "Microsoft.NET.Sdk.Web"
-                },
-                //
-                // Windows
-                //
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "9.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
-                    Platforms = { "windows" },
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WPF",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "9.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
-                    Platforms = { "windows" },
-                    Profile = "WPF",
-                    ImplicitViaProperty = "UseWPF"
-                },
-                new FrameworkReferenceDefinition
-                {
-                    Name = "Microsoft.WindowsDesktop.App.WindowsForms",
-                    TargetingPackName = "Microsoft.WindowsDesktop.App.Ref",
-                    TargetingPackVersion = "9.0",
-                    NuGetFeed = NuGetFeeds.NightlyDotnet9,
-                    Platforms = { "windows" },
-                    Profile = "WindowsForms",
-                    ImplicitViaProperty = "UseWindowsForms"
-                },
-                //
-                // Android
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.Android.Ref",
-                    TargetingPackVersion = "11",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
-                    Platforms = { "android" }
-                },
-                //
-                // iOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.iOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
-                    Platforms = { "ios" }
-                },
-                //
-                // macOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.macOS.Ref",
-                    TargetingPackVersion = "15",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
-                    Platforms = { "macos" }
-                },
-                //
-                // tvOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.tvOS.Ref",
-                    TargetingPackVersion = "14",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
-                    Platforms = { "tvos" }
-                },
-                //
-                // watchOS
-                //
-                new FrameworkReferenceDefinition
-                {
-                    TargetingPackName = "Microsoft.watchOS.Ref",
-                    TargetingPackVersion = "8",
-                    NuGetFeed = NuGetFeeds.NightlyXamarin,
-                    Platforms = { "tvos" }
-                },
-            }
-        }
-    };
-
-    public string FrameworkName { get; set; }
-    public List<FrameworkReferenceDefinition> FrameworkReferences { get; } = new();
-}
-
-public sealed class FrameworkReferenceDefinition
-{
-    public List<string> Platforms { get; } = new();
-    public string Name { get; set; }
-    public string NuGetFeed { get; set; }
-    public string TargetingPackName { get; set; }
-    public string TargetingPackVersion { get; set; }
-    public string Profile { get; set; }
-    public string ImplicitViaSdk { get; set; }
-    public string ImplicitViaProperty { get; set; }
-}
-
-public static class FrameworkPackIndex
-{
-    public static string FileName => "packIndex.json";
-
-    public static void Save(IReadOnlyList<FrameworkPackIndexEntry> entries, string path)
-    {
-        var json = JsonConvert.SerializeObject(entries, Formatting.Indented);
-        File.WriteAllText(path, json);
-    }
-
-    public static IReadOnlyList<FrameworkPackIndexEntry> Load(string path)
-    {
-        var json = File.ReadAllText(path);
-        return JsonConvert.DeserializeObject<IReadOnlyList<FrameworkPackIndexEntry>>(json);
-    }
-}
-
-public sealed class FrameworkPackIndexEntry
-{
-    public string FrameworkName { get; set; }
-    public string FrameworkReference { get; set; }
-    public string ImplicitViaSdk { get; set; }
-    public string ImplicitViaProperty { get; set; }
-    public string[] AssemblyPaths { get; set; }
-}
-
-public sealed class FrameworkDownloader
-{
-    public static async Task Download(string frameworksPath, string packsPath)
-    {
-        foreach (var frameworkDefinition in FrameworkDefinition.All)
-        {
-            await Download(frameworksPath, packsPath, frameworkDefinition);
-        }
-    }
-
-    private static async Task Download(string frameworksPath, string packsPath, FrameworkDefinition frameworkDefinition)
-    {
-        var entries = new List<FrameworkPackIndexEntry>();
-        var frameworkPath = Path.Combine(frameworksPath, frameworkDefinition.FrameworkName);
-        if (Directory.Exists(frameworkPath))
-            return;
-
-        Console.WriteLine($"Downloading {frameworkDefinition.FrameworkName}...");
-        Directory.CreateDirectory(frameworkPath);
-
-        foreach (var frameworkReference in frameworkDefinition.FrameworkReferences)
-        {
-            var feed = new NuGetFeed(frameworkReference.NuGetFeed);
-            var tpVersion = NuGetVersion.Parse(frameworkReference.TargetingPackVersion);
-
-            var versions = await feed.GetAllVersionsAsync(frameworkReference.TargetingPackName);
-            var latest = versions.Where(v => v.Major == tpVersion.Major && v.Minor == tpVersion.Minor).DefaultIfEmpty().Max();
-            if (latest is null)
-                continue;
-
-            var identity = new PackageIdentity(frameworkReference.TargetingPackName, latest);
-            var packDirectoryPath = Path.Combine(packsPath, $"{identity.Id}_{identity.Version}");
-
-            if (!Directory.Exists(packDirectoryPath))
-            {
-                Console.WriteLine($"Downloading {identity}...");
-
-                using var memoryStream = new MemoryStream();
-                await feed.CopyPackageStreamAsync(identity, memoryStream);
-                memoryStream.Position = 0;
-                using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read);
-                archive.ExtractToDirectory(packDirectoryPath);
+                var packFrameworks = GetFrameworkNames(framework, pack);
+                platformFrameworks.UnionWith(packFrameworks);
             }
 
-            var frameworkListPath = Path.Combine(packDirectoryPath, "data", "FrameworkList.xml");
-            var frameworkList = XDocument.Load(frameworkListPath);
-            var paths = new List<string>();
+            // Now we'll need to restore for each of these TFMs.
 
-            foreach (var node in frameworkList.Descendants("File"))
+            foreach (var platformFramework in platformFrameworks)
             {
-                var type = node.Attribute("Type")?.Value;
-                var relativePath = node.Attribute("Path").Value;
-                if (type is not null && type != "Managed")
-                    continue;
+                Console.WriteLine($"{platformFramework.GetShortFolderName()}");
 
-                var qualifiedPath = Path.Combine(packDirectoryPath, relativePath);
-                if (!File.Exists(qualifiedPath))
+                var builder = new PackageGraphBuilder(store, platformFramework);
+
+                foreach (var pack in packs)
                 {
-                    Console.WriteLine($"warning: {frameworkReference.TargetingPackName}: can't find '{qualifiedPath}'");
-                    continue;
+                    var packFrameworks = GetFrameworkNames(framework, pack);
+                    if (!packFrameworks.Contains(platformFramework))
+                        continue;
+
+                    var packVersion = NuGetVersion.Parse(pack.Version);
+                    var packIdentity = new PackageIdentity(pack.Name, packVersion);
+                    await builder.EnqueueAsync(packIdentity);
                 }
 
-                var path = Path.GetRelativePath(frameworkPath, qualifiedPath);
-                var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
-                var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
-                if (frameworkReference.Profile is null || profiles.Contains(frameworkReference.Profile, StringComparer.OrdinalIgnoreCase))
-                    paths.Add(path);
-            }
+                var packageIdentities = await builder.BuildAsync();
 
-            var tfms = frameworkReference.Platforms is null
-                ? new[] { frameworkDefinition.FrameworkName }
-                : frameworkReference.Platforms.Select(p => string.IsNullOrEmpty(p) ? frameworkDefinition.FrameworkName : $"{frameworkDefinition.FrameworkName}-{p}").ToArray();
+                var manifestPackages = new List<FrameworkManifestPackage>();
 
-            foreach (var tfm in tfms)
-            {
-                var entry = new FrameworkPackIndexEntry
+                foreach (var packageIdentity in packageIdentities)
                 {
-                    FrameworkName = tfm,
-                    FrameworkReference = frameworkReference.Name,
-                    ImplicitViaSdk = frameworkReference.ImplicitViaSdk,
-                    ImplicitViaProperty = frameworkReference.ImplicitViaProperty,
-                    AssemblyPaths = paths.ToArray(),
-                };
+                    using var package = await store.GetPackageAsync(packageIdentity);
+
+                    var files = new List<string>();
+
+                    var extractedPackageDirectory = Path.Join(store.PackagesCachePath, packageIdentity.Id, packageIdentity.Version.ToNormalizedString());
+                    Directory.CreateDirectory(extractedPackageDirectory);
+
+                    var frameworkListPath = package.GetFiles().SingleOrDefault(p => string.Equals(p, "Data/FrameworkList.xml", StringComparison.OrdinalIgnoreCase));
+                    var packagePaths = new List<string>();
+
+                    if (frameworkListPath is null)
+                    {
+                        var group = package.GetCatalogReferenceGroup(platformFramework);
+                        if (group is null)
+                        {
+                            Console.WriteLine($"warning: {packageIdentity}: can't find any ref/lib assets for '{platformFramework}'");
+                            continue;
+                        }
+
+                        packagePaths.AddRange(group.Items);
+                    }
+                    else
+                    {
+                        await using var frameworkListStream = package.GetStream(frameworkListPath);
+                        var frameworkList = XDocument.Load(frameworkListStream);
+
+                        foreach (var node in frameworkList.Descendants("File"))
+                        {
+                            var type = node.Attribute("Type")?.Value;
+                            var relativePath = node.Attribute("Path").Value;
+                            if (type is not null && type != "Managed")
+                                continue;
+
+                            relativePath = package.GetFiles().Single(p => p.EndsWith(relativePath, StringComparison.OrdinalIgnoreCase));
+
+                            var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
+                            var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
+                            if (platformFramework.Profile is null || profiles.Contains(platformFramework.Profile, StringComparer.OrdinalIgnoreCase))
+                                packagePaths.Add(relativePath);
+                        }
+                    }
+
+                    foreach (var packagePath in packagePaths)
+                    {
+                        await using var packageStream = package.GetStream(packagePath);
+                        var extractedPath = Path.GetFullPath(Path.Join(extractedPackageDirectory, packagePath));
+                        var extractedDirectory = Path.GetDirectoryName(extractedPath);
+                        Debug.Assert(extractedDirectory is not null);
+                        Directory.CreateDirectory(extractedDirectory);
+                        await using var extractedStream = File.Create(extractedPath);
+                        await packageStream.CopyToAsync(extractedStream);
+
+                        files.Add(extractedPath);
+                    }
+
+                    var manifestPackage = new FrameworkManifestPackage(packageIdentity.Id, packageIdentity.Version.ToNormalizedString(), files);
+                    manifestPackages.Add(manifestPackage);
+                }
+
+                var entry = new FrameworkManifestEntry(platformFramework.GetShortFolderName(), manifestPackages);
                 entries.Add(entry);
             }
         }
 
-        var packIndexPath = Path.Combine(frameworkPath, FrameworkPackIndex.FileName);
-        FrameworkPackIndex.Save(entries, packIndexPath);
+        Directory.CreateDirectory(frameworksPath);
+        var manifestPath = Path.Join(frameworksPath, FrameworkManifest.FileName);
+        var manifest = new FrameworkManifest(entries);
+        manifest.Save(manifestPath);
+    }
+
+    private static IEnumerable<NuGetFramework> GetFrameworkNames(FrameworkDefinition framework, PackReference pack)
+    {
+        var baseFramework = NuGetFramework.Parse(framework.Name);
+
+        if (pack.Platforms.Count == 0)
+        {
+            yield return baseFramework;
+        }
+        else
+        {
+            foreach (var platform in pack.Platforms)
+            {
+                if (string.IsNullOrEmpty(platform))
+                {
+                    yield return baseFramework;
+                }
+                else
+                {
+                    var platformFrameworkName = $"{framework.Name}-{platform}";
+                    var platformFramework = NuGetFramework.Parse(platformFrameworkName);
+                    yield return platformFramework;
+                }
+            }
+        }
+    }
+
+    private static void Validate()
+    {
+        foreach (var framework in FrameworkDefinition.All)
+        {
+            if (framework.BuiltInPacks.Count == 0)
+                Console.WriteLine($"error: '{framework.Name}' doesn't define built-in packs");
+
+            foreach (var pack in framework.BuiltInPacks)
+            {
+                if (pack.Kind != PackKind.Framework)
+                    Console.WriteLine($"error: '{framework.Name}' built-in pack '{pack.Name}' must be a framework pack");
+
+                if (pack.Workloads.Count > 0)
+                    Console.WriteLine($"error: '{framework.Name}' built-in pack '{pack.Name}' can't list workloads");
+
+                ValidatePack(framework, pack);
+            }
+
+            foreach (var pack in framework.WorkloadPacks)
+            {
+                if (pack.Workloads.Count == 0)
+                    Console.WriteLine($"error: '{framework.Name}' workload pack '{pack.Name}' must list workloads");
+
+                ValidatePack(framework, pack);
+            }
+
+            static void ValidatePack(FrameworkDefinition framework, PackReference pack)
+            {
+                if (pack.Kind == PackKind.Framework)
+                {
+                    if (pack.Platforms.Count == 0)
+                        Console.WriteLine($"error: '{framework.Name}' framework pack '{pack.Name}' must list platforms");
+                }
+
+                if (pack.Kind == PackKind.Library)
+                {
+                    if (pack.Platforms.Count > 0)
+                        Console.WriteLine($"error: '{framework.Name}' library pack '{pack.Name}' can't list platforms");
+                }
+            }
+        }
     }
 }

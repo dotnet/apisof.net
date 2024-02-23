@@ -6,7 +6,6 @@ namespace Terrajobst.ApiCatalog;
 
 public class NuGetStore
 {
-    private readonly string _packagesCachePath;
     private readonly NuGetFeed[] _feeds;
     private readonly Dictionary<string, IReadOnlyList<NuGetVersion>> _packageVersionCache = new();
 
@@ -18,8 +17,15 @@ public class NuGetStore
         if (feeds.Length == 0)
             throw new ArgumentException("must have at least one feed", nameof(feeds));
 
-        _packagesCachePath = packagesCachePath;
+        PackagesCachePath = packagesCachePath;
         _feeds = feeds;
+    }
+
+    public string PackagesCachePath { get; }
+
+    public Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)
+    {
+        return GetPackageAsync(identity.Id, identity.Version.ToNormalizedString());
     }
 
     public async Task<PackageArchiveReader> GetPackageAsync(string id, string version)
@@ -29,6 +35,9 @@ public class NuGetStore
             return new PackageArchiveReader(path);
 
         var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
+        var directory = Path.GetDirectoryName(path);
+        if (directory is not null)
+            Directory.CreateDirectory(directory);
 
         await using (var fileStream = File.Create(path))
         {
@@ -52,6 +61,20 @@ public class NuGetStore
 
     public async Task<PackageArchiveReader> ResolvePackageAsync(string id, VersionRange range)
     {
+        var versions = await GetVersionsAsync(id);
+
+        var resolvedVersion = versions.FindBestMatch(range, x => x);
+        if (resolvedVersion is null)
+            return null;
+
+        if (resolvedVersion != range.MinVersion)
+            Console.WriteLine($"Resolved {id} {range} -> {resolvedVersion}");
+
+        return await GetPackageAsync(id, resolvedVersion.ToNormalizedString());
+    }
+
+    public async Task<IReadOnlyList<NuGetVersion>> GetVersionsAsync(string id)
+    {
         if (!_packageVersionCache.TryGetValue(id, out var versions))
         {
             var allVersions = new SortedSet<NuGetVersion>();
@@ -67,14 +90,7 @@ public class NuGetStore
             _packageVersionCache.Add(id, versions);
         }
 
-        var resolvedVersion = versions.FindBestMatch(range, x => x);
-        if (resolvedVersion is null)
-            return null;
-
-        if (resolvedVersion != range.MinVersion)
-            Console.WriteLine($"Resolved {id} {range} -> {resolvedVersion}");
-
-        return await GetPackageAsync(id, resolvedVersion.ToNormalizedString());
+        return versions;
     }
 
     public void DeleteFromCache(string id, string version)
@@ -86,6 +102,6 @@ public class NuGetStore
 
     private string GetPackagePath(string id, string version)
     {
-        return Path.Combine(_packagesCachePath, $"{id}.{version}.nupkg");
+        return Path.Combine(PackagesCachePath, $"{id}.{version}.nupkg");
     }
 }

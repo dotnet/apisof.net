@@ -1,4 +1,4 @@
-﻿namespace Terrajobst.ApiCatalog;
+namespace Terrajobst.ApiCatalog;
 
 public sealed class PackBasedFrameworkProvider : FrameworkProvider
 {
@@ -11,23 +11,22 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
 
     public override IEnumerable<(string FrameworkName, string[] Paths)> Resolve()
     {
-        foreach (var directory in Directory.GetDirectories(_frameworksPath))
+        var packIndexPath = Path.Combine(_frameworksPath, FrameworkManifest.FileName);
+        if (!File.Exists(packIndexPath))
+            yield break;
+
+        var manifest = FrameworkManifest.Load(packIndexPath);
+        var references = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var entry in manifest.Frameworks)
         {
-            var packIndexPath = Path.Combine(directory, FrameworkPackIndex.FileName);
-            if (!File.Exists(packIndexPath))
-                continue;
+            references.Clear();
 
-            var entries = FrameworkPackIndex.Load(packIndexPath);
+            foreach (var package in entry.Packages)
+                references.UnionWith(package.References);
 
-            foreach (var frameworkGroup in entries.GroupBy(e => e.FrameworkName))
-            {
-                var framework = frameworkGroup.Key;
-                var files = frameworkGroup.SelectMany(g => g.AssemblyPaths)
-                    .Select(p => Path.GetFullPath(Path.Combine(directory, p)))
-                    .Distinct()
-                    .ToArray();
-                yield return (framework, files);
-            }
+            var files = references.ToArray();
+            yield return (entry.FrameworkName, files);
         }
     }
 }

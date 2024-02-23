@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualBasic;
+﻿using NuGet.Versioning;
 
 var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 var dotnetDirectory = Path.Join(programFiles, "dotnet");
@@ -34,7 +34,7 @@ var manifestsRoot = Path.Join(dotnetDirectory, "sdk-manifests");
 foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 {
     var versionText = Path.GetFileName(versionDirectory);
-    var version = Version.Parse(versionText);
+    var version = NuGetVersion.Parse(versionText);
 
     Console.WriteLine($"// net{version.Major}.{version.Minor}");
 

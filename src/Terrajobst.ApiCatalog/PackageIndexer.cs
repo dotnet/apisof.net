@@ -28,7 +28,7 @@ public sealed class PackageIndexer
             {
                 var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var item in GetReferenceItems(root))
+                foreach (var item in root.GetCatalogReferenceGroups())
                     targetNames.Add(item.TargetFramework.GetShortFolderName());
 
                 var targets = targetNames.Select(NuGetFramework.Parse).ToArray();
@@ -38,7 +38,7 @@ public sealed class PackageIndexer
 
                 foreach (var target in targets)
                 {
-                    var referenceGroup = GetReferenceItems(root, target);
+                    var referenceGroup = root.GetCatalogReferenceGroup(target);
 
                     Debug.Assert(referenceGroup is not null);
 
@@ -60,7 +60,7 @@ public sealed class PackageIndexer
 
                     foreach (var dependency in dependencies.Values)
                     {
-                        var dependencyReferences = GetReferenceItems(dependency, target);
+                        var dependencyReferences = dependency.GetCatalogReferenceGroup(target);
                         if (dependencyReferences is not null)
                         {
                             foreach (var path in dependencyReferences.Items)
@@ -142,28 +142,6 @@ public sealed class PackageIndexer
 
         var targetString = target.ToString();
         return platforms.Any(p => string.Equals(p, targetString, StringComparison.OrdinalIgnoreCase));
-    }
-
-    private static IEnumerable<FrameworkSpecificGroup> GetReferenceItems(PackageArchiveReader root)
-    {
-        // NOTE: We're not using root.GetReferenceItems() because it apparently doesn't always
-        //       return items from the ref folder. One package where this reproduces is
-        //       System.Security.Cryptography.Csp 4.3.0
-
-        var tfms = new HashSet<string>();
-
-        foreach (var group in root.GetItems("ref").Concat(root.GetItems("lib")))
-        {
-            if (tfms.Add(group.TargetFramework.GetShortFolderName()))
-                yield return group;
-        }
-    }
-
-    private static FrameworkSpecificGroup GetReferenceItems(PackageArchiveReader root, NuGetFramework current)
-    {
-        var referenceItems = GetReferenceItems(root);
-        var referenceGroup = NuGetFrameworkUtility.GetNearest(referenceItems, current);
-        return referenceGroup;
     }
 
     private async Task GetDependenciesAsync(Dictionary<string, PackageArchiveReader> packages, PackageArchiveReader root, NuGetFramework target)

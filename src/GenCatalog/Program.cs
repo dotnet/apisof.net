@@ -134,7 +134,7 @@ internal static class Program
 
     private static async Task DownloadPackagedPlatformsAsync(string archivePath, string packsPath)
     {
-        await FrameworkDownloader.Download(archivePath, packsPath);
+        await FrameworkDownloader.DownloadAsync(archivePath, packsPath);
     }
 
     private static async Task DownloadDotnetPackageListAsync(string packageListPath)
