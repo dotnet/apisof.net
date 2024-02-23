@@ -2,7 +2,7 @@ using System.Xml.Linq;
 using NuGet.Frameworks;
 using NuGet.Versioning;
 
-public class KnownFrameworkReference
+public sealed class KnownFrameworkReference
 {
     public KnownFrameworkReference(string frameworkName,
                                    NuGetFramework targetFramework,

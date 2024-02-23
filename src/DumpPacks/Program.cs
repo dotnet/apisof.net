@@ -48,7 +48,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
         if (pack.Name.Contains(".Runtime.", StringComparison.OrdinalIgnoreCase))
             continue;
 
-        var workloadNames = string.Join(", ", workloads.Select(w => w.Name));
+        var workloadNames = string.Join(", ", workloads.Select(w => w.Name).Order());
 
         Console.WriteLine($"{pack.Name}, {pack.Version} ({pack.Kind}): {workloadNames}");
     }
