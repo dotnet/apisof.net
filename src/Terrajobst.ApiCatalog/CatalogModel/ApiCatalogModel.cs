@@ -11,8 +11,9 @@ public sealed partial class ApiCatalogModel
     public static string Url => "https://apisofdotnet.blob.core.windows.net/catalog/apicatalog.dat";
 
     private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-    private const int FormatVersion = 6;
+    private const int CurrentFormatVersion = 6;
 
+    private readonly int _formatVersion;
     private readonly int _sizeOnDisk;
     private readonly byte[] _buffer;
     private readonly int _stringTableLength;
@@ -43,10 +44,11 @@ public sealed partial class ApiCatalogModel
     private Dictionary<Guid, int> _extensionMethodOffsetByGuid;
     private Dictionary<int, int> _forwardedApis;
 
-    private ApiCatalogModel(int sizeOnDisk, byte[] buffer, int[] tableSizes)
+    private ApiCatalogModel(int formatVersion, int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
         Debug.Assert(tableSizes.Length == 12);
 
+        _formatVersion = formatVersion;
         _stringTableLength = tableSizes[0];
 
         _platformTableOffset = _stringTableLength;
@@ -85,6 +87,8 @@ public sealed partial class ApiCatalogModel
         _buffer = buffer;
         _sizeOnDisk = sizeOnDisk;
     }
+
+    public int FormatVersion => _formatVersion;
 
     internal ReadOnlySpan<byte> StringTable => new(_buffer, 0, _stringTableLength);
 
@@ -482,7 +486,7 @@ public sealed partial class ApiCatalogModel
             throw new InvalidDataException();
 
         var formatVersion = reader.ReadInt32();
-        if (formatVersion != FormatVersion)
+        if (formatVersion != CurrentFormatVersion)
             throw new InvalidDataException();
 
         var numberOfTables = reader.ReadInt32();
@@ -502,7 +506,7 @@ public sealed partial class ApiCatalogModel
 
         var sizeOnDisk = (int)(stream.Position - start);
 
-        return new ApiCatalogModel(sizeOnDisk, buffer, tableSizes);
+        return new ApiCatalogModel(formatVersion, sizeOnDisk, buffer, tableSizes);
     }
 
     public static async Task ConvertAsync(string sqliteDbPath, string outputPath)

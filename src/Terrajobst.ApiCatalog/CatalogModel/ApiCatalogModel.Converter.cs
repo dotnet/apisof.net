@@ -112,7 +112,7 @@ public sealed partial class ApiCatalogModel
 
                 // Version
 
-                binaryWriter.Write(FormatVersion);
+                binaryWriter.Write(CurrentFormatVersion);
 
                 // Table sizes
 
