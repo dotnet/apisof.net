@@ -12,12 +12,12 @@ public sealed class ReferenceUnitWriter : IDisposable
     public ReferenceUnitWriter(SqliteConnection connection)
     {
         _transaction = connection.BeginTransaction();
-        _command = new SqliteCommand(@"
+        _command = new SqliteCommand("""
             INSERT INTO ReferenceUnits
                 (ReferenceUnitId, Identifier)
             VALUES
                 (@ReferenceUnitId, @Identifier)
-        ", connection, _transaction);
+            """, connection, _transaction);
 
         _referenceUnitIdParameter = _command.Parameters.Add("ReferenceUnitId", SqliteType.Integer);
         _identifierParameter = _command.Parameters.Add("Identifier", SqliteType.Text);

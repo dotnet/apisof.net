@@ -100,6 +100,8 @@ internal class Program
 
         Console.WriteLine($"Inserting planner usages...");
 
+        stopwatch.Restart();
+
         using (var writer = usageDatabase.CreateUsageWriter())
         {
             foreach (var fingerprint in plannerFingerprints)
@@ -126,16 +128,6 @@ internal class Program
 
         Console.WriteLine($"Finished inserting missing APIs. Took {stopwatch.Elapsed}");
 
-        Console.WriteLine($"Aggregating results...");
-
-        stopwatch.Restart();
-
-        var ancestors = apiCatalog.GetAllApis()
-                                  .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
-        await usageDatabase.ExportUsagesAsync(apiMap, ancestors, usagesPath);
-
-        Console.WriteLine($"Finished aggregating results. Took {stopwatch.Elapsed}");
-
         Console.WriteLine($"Vacuuming database...");
 
         stopwatch.Restart();
@@ -143,15 +135,27 @@ internal class Program
 
         Console.WriteLine($"Finished vacuuming database. Took {stopwatch.Elapsed}");
 
-        usageDatabase.Dispose();
-
-        Console.WriteLine($"Uploading usages...");
-
-        await store.UploadResultsAsync(usagesPath);
+        await usageDatabase.CloseAsync();
 
         Console.WriteLine($"Uploading database...");
 
         await store.UploadDatabaseAsync(databasePath);
+
+        await usageDatabase.OpenAsync();
+
+        Console.WriteLine($"Aggregating results...");
+
+        stopwatch.Restart();
+
+        var ancestors = apiCatalog.GetAllApis()
+                                  .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
+        await usageDatabase.InsertApiAncestorsAndExportUsagesAsync(apiMap, ancestors, usagesPath);
+
+        Console.WriteLine($"Finished aggregating results. Took {stopwatch.Elapsed}");
+
+        Console.WriteLine($"Uploading usages...");
+
+        await store.UploadResultsAsync(usagesPath);
 
         return 0;
     }

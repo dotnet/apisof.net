@@ -5,11 +5,32 @@ namespace GenUsagePlanner.Infra;
 
 public sealed class UsageDatabase : IDisposable
 {
-    private readonly SqliteConnection _connection;
+    private SqliteConnection _connection;
+    private readonly string _fileName;
 
-    private UsageDatabase(SqliteConnection connection)
+    private UsageDatabase(SqliteConnection connection, string fileName)
     {
         _connection = connection;
+        _fileName = fileName;
+    }
+
+    public async Task OpenAsync()
+    {
+        var connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = _fileName,
+            Mode = SqliteOpenMode.ReadWrite,
+            Pooling = false
+        }.ToString();
+
+        _connection = new SqliteConnection(connectionString);
+        await _connection.OpenAsync();
+    }
+
+    public async Task CloseAsync()
+    {
+        await _connection.CloseAsync();
+        await _connection.DisposeAsync();
     }
 
     public static async Task<UsageDatabase> OpenOrCreateAsync(string fileName)
@@ -31,7 +52,7 @@ public sealed class UsageDatabase : IDisposable
         if (isNew)
             await CreateSchemaAsync(connection);
 
-        return new UsageDatabase(connection);
+        return new UsageDatabase(connection, fileName);
     }
 
     private static async Task CreateSchemaAsync(SqliteConnection connection)
@@ -47,21 +68,21 @@ public sealed class UsageDatabase : IDisposable
             """
             INSERT INTO Metadata
                         (ReferenceDateTime)
-            VALUES      (NULL)                        
+            VALUES      (NULL)
             """,
             """
             CREATE TABLE [ReferenceUnits]
             (
                 [ReferenceUnitId] INTEGER PRIMARY KEY,
                 [Identifier] Text NOT NULL
-            )                        
+            ) WITHOUT ROWID;
             """,
             """
             CREATE TABLE [Apis]
             (
                 [ApiId] INTEGER PRIMARY KEY,
                 [Guid] Text NOT NULL
-            )                        
+            )
             """,
             """
             CREATE TABLE [Usages]
@@ -85,10 +106,10 @@ public sealed class UsageDatabase : IDisposable
 
     public async Task<DateTimeOffset?> GetReferenceDateAsync()
     {
-        var dateTimeOffsetText = await _connection.ExecuteScalarAsync<string?>(@"
+        var dateTimeOffsetText = await _connection.ExecuteScalarAsync<string?>("""
             SELECT ReferenceDateTime
             FROM   Metadata
-        ");
+            """);
 
         return dateTimeOffsetText is null
             ? null
@@ -97,10 +118,10 @@ public sealed class UsageDatabase : IDisposable
 
     public async Task SetReferenceDateAsync(DateTimeOffset referenceDate)
     {
-        await _connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync("""
             UPDATE Metadata
             SET    ReferenceDateTime = @ReferenceDate
-        ", new { ReferenceDate = referenceDate });
+            """, new { ReferenceDate = referenceDate });
     }
 
     public async Task<DateTimeOffset?> GetAndUpdateReferenceDateAsync()
@@ -123,11 +144,11 @@ public sealed class UsageDatabase : IDisposable
     public async Task<IdMap<string>> ReadReferenceUnitsAsync()
     {
         var result = new IdMap<string>();
-        var rows = await _connection.QueryAsync<(int Id, string Identifier)>(@"
+        var rows = await _connection.QueryAsync<(int Id, string Identifier)>("""
             SELECT  ReferenceUnitId,
                     Identifier
             FROM    ReferenceUnits
-        ");
+            """);
 
         foreach (var (id, identifier) in rows)
             result.Add(id, identifier);
@@ -138,11 +159,11 @@ public sealed class UsageDatabase : IDisposable
     public async Task<IdMap<Guid>> ReadApisAsync()
     {
         var result = new IdMap<Guid>();
-        var rows = await _connection.QueryAsync<(int Id, string GuidText)>(@"
+        var rows = await _connection.QueryAsync<(int Id, string GuidText)>("""
             SELECT  ApiId,
                     Guid
             FROM    Apis
-        ");
+            """);
 
         foreach (var (id, guidText) in rows)
         {
@@ -164,12 +185,12 @@ public sealed class UsageDatabase : IDisposable
     {
         var existingApis = await ReadApisAsync();
 
-        await using var command = new SqliteCommand(@"
+        await using var command = new SqliteCommand("""
             INSERT INTO Apis
                 (ApiId, Guid)
             VALUES
                 (@ApiId, @Guid)
-        ", _connection, transaction);
+            """, _connection, transaction);
 
         var apiIdParameter = command.Parameters.Add("ApiId", SqliteType.Integer);
         var guidParameter = command.Parameters.Add("Guid", SqliteType.Text);
@@ -188,10 +209,10 @@ public sealed class UsageDatabase : IDisposable
     public async Task DeleteReferenceUnitsAsync(IEnumerable<int> referenceUnitIds)
     {
         await using var transaction = _connection.BeginTransaction();
-        await using var command = new SqliteCommand(@"
+        await using var command = new SqliteCommand("""
             DELETE FROM ReferenceUnits WHERE ReferenceUnitId = @ReferenceUnitId;
             DELETE FROM Usages WHERE ReferenceUnitId = @ReferenceUnitId;
-        ", _connection, transaction);
+            """, _connection, transaction);
 
         var referenceUnitIdParameter = command.Parameters.Add("ReferenceUnitId", SqliteType.Integer);
 
@@ -214,11 +235,11 @@ public sealed class UsageDatabase : IDisposable
         return new UsageWriter(_connection);
     }
 
-    public async Task ExportUsagesAsync(IdMap<Guid> apiMap, IEnumerable<(Guid Api, Guid Ancestor)> ancestors, string outputPath)
+    public async Task InsertApiAncestorsAndExportUsagesAsync(IdMap<Guid> apiMap, IEnumerable<(Guid Api, Guid Ancestor)> ancestors, string outputPath)
     {
         await using var transaction = _connection.BeginTransaction();
 
-        await _connection.ExecuteAsync(@"
+        await _connection.ExecuteAsync("""
             CREATE TABLE [ApiAncestors]
             (
                 [ApiId] INTEGER NOT NULL,
@@ -226,16 +247,16 @@ public sealed class UsageDatabase : IDisposable
             );
             CREATE INDEX IX_ApiAncestors_ApiId ON ApiAncestors (ApiId);
             CREATE INDEX IX_Usages_ReferenceUnitId ON Usages (ReferenceUnitId);
-        ", _connection, transaction);
+            """, _connection, transaction);
 
         // Bulk insert ancestors
         {
-            await using var command = new SqliteCommand(@"
+            await using var command = new SqliteCommand("""
                 INSERT INTO ApiAncestors
                     (ApiId, AncestorId)
                 VALUES
                     (@ApiId, @AncestorId)
-            ", _connection, transaction);
+                """, _connection, transaction);
 
             var apiIdParameter = command.Parameters.Add("ApiId", SqliteType.Integer);
             var ancestorIdParameter = command.Parameters.Add("AncestorId", SqliteType.Integer);
@@ -250,13 +271,15 @@ public sealed class UsageDatabase : IDisposable
 
         await InsertMissingApisAsync(apiMap, transaction);
 
-        var rows = await _connection.QueryAsync<(int ApiId, float Percentage)>(@"
+        await transaction.CommitAsync();
+
+        var rows = await _connection.QueryAsync<(int ApiId, float Percentage)>("""
             SELECT   AA.AncestorId as Api,
                      CAST(COUNT(DISTINCT u.ReferenceUnitId) AS REAL) / (SELECT COUNT(DISTINCT ReferenceUnitId) FROM Usages) AS Percentage
             FROM     Usages u
                          JOIN ApiAncestors AA ON u.ApiId = AA.ApiId
             GROUP BY AA.AncestorId
-        ");
+            """);
 
         await using var writer = new StreamWriter(outputPath);
         foreach (var (apiId, percentage) in rows)
@@ -264,7 +287,5 @@ public sealed class UsageDatabase : IDisposable
             var guid = apiMap.GetValue(apiId);
             await writer.WriteLineAsync($"{guid:N}\t{percentage}");
         }
-
-        await transaction.RollbackAsync();
     }
 }

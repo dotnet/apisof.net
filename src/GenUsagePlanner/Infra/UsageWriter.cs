@@ -12,12 +12,12 @@ public sealed class UsageWriter : IDisposable
     public UsageWriter(SqliteConnection connection)
     {
         _transaction = connection.BeginTransaction();
-        _command = new SqliteCommand(@"
+        _command = new SqliteCommand("""
             INSERT INTO Usages
                 (ReferenceUnitId, ApiId)
             VALUES
                 (@ReferenceUnitId, @ApiId)
-        ", connection, _transaction);
+            """, connection, _transaction);
 
         _referenceUnitIdParameter = _command.Parameters.Add("ReferenceUnitId", SqliteType.Integer);
         _apiIdParameter = _command.Parameters.Add("ApiId", SqliteType.Integer);
