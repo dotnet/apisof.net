@@ -17,7 +17,8 @@ public static class DotnetPackageIndex
         //"dotnetfoundation",
         "newtonsoft",
         "xamarin",
-        "corewcf"
+        "corewcf",
+        "aspire"
     };
 
     public static async Task CreateAsync(string packageListPath)
