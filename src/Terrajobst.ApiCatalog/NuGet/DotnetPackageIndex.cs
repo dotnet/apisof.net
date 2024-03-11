@@ -32,9 +32,8 @@ public static class DotnetPackageIndex
         foreach (var item in packages)
         {
             var e = new XElement("package",
-                new XAttribute("id", item.Identity.Id),
-                new XAttribute("version", item.Identity.Version),
-                new XAttribute("feed", item.Feed.FeedUrl)
+                new XAttribute("id", item.Id),
+                new XAttribute("version", item.Version)
             );
 
             root.Add(e);
@@ -44,9 +43,9 @@ public static class DotnetPackageIndex
         packageDocument.Save(packageListPath);
     }
 
-    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesAsync(params string[] feedUrls)
+    private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesAsync(params string[] feedUrls)
     {
-        var packages = new List<PackageIdentityWithFeed>();
+        var packages = new List<PackageIdentity>();
 
         foreach (var feedUrl in feedUrls)
         {
@@ -64,7 +63,7 @@ public static class DotnetPackageIndex
         return latestVersions;
     }
 
-    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesAsync(NuGetFeed feed)
+    private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesAsync(NuGetFeed feed)
     {
         Console.WriteLine($"Getting packages from {feed.FeedUrl}...");
 
@@ -74,7 +73,7 @@ public static class DotnetPackageIndex
             return await GetPackagesFromOtherGalleryAsync(feed);
     }
 
-    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesFromNuGetOrgAsync(NuGetFeed feed)
+    private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesFromNuGetOrgAsync(NuGetFeed feed)
     {
         Console.WriteLine($"Fetching owner information...");
         var ownerInformation = await feed.GetOwnerMappingAsync();
@@ -104,10 +103,10 @@ public static class DotnetPackageIndex
 
         Console.WriteLine($"Found {identities.Count:N0} package versions.");
 
-        return identities.Select(i => new PackageIdentityWithFeed(i, feed)).ToArray();
+        return identities.ToArray();
     }
 
-    private static async Task<IReadOnlyList<PackageIdentityWithFeed>> GetPackagesFromOtherGalleryAsync(NuGetFeed feed)
+    private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesFromOtherGalleryAsync(NuGetFeed feed)
     {
         Console.WriteLine($"Enumerating feed...");
 
@@ -117,26 +116,26 @@ public static class DotnetPackageIndex
 
         Console.WriteLine($"Found {identities.Count:N0} package versions.");
 
-        return identities.Select(i => new PackageIdentityWithFeed(i, feed)).ToArray();
+        return identities.ToArray();
     }
 
-    private static IReadOnlyList<PackageIdentityWithFeed> GetLatestVersions(IReadOnlyList<PackageIdentityWithFeed> identities)
+    private static IReadOnlyList<PackageIdentity> GetLatestVersions(IReadOnlyList<PackageIdentity> identities)
     {
-        var result = new List<PackageIdentityWithFeed>();
+        var result = new List<PackageIdentity>();
 
-        var groups = identities.GroupBy(i => i.Identity.Id);
+        var groups = identities.GroupBy(i => i.Id);
 
         foreach (var group in groups.OrderBy(g => g.Key))
         {
             var packageId = group.Key;
-            var versions = group.OrderByDescending(p => p.Identity.Version, VersionComparer.VersionReleaseMetadata);
+            var versions = group.OrderByDescending(p => p.Version, VersionComparer.VersionReleaseMetadata);
 
-            var latestStable = versions.FirstOrDefault(i => !i.Identity.Version.IsPrerelease);
-            var latestPrerelease = versions.FirstOrDefault(i => i.Identity.Version.IsPrerelease);
+            var latestStable = versions.FirstOrDefault(i => !i.Version.IsPrerelease);
+            var latestPrerelease = versions.FirstOrDefault(i => i.Version.IsPrerelease);
 
             if (latestStable != default && latestPrerelease != default)
             {
-                var stableIsNewer = VersionComparer.VersionReleaseMetadata.Compare(latestPrerelease.Identity.Version, latestStable.Identity.Version) <= 0;
+                var stableIsNewer = VersionComparer.VersionReleaseMetadata.Compare(latestPrerelease.Version, latestStable.Version) <= 0;
                 if (stableIsNewer)
                     latestPrerelease = default;
             }
@@ -167,6 +166,4 @@ public static class DotnetPackageIndex
 
         return false;
     }
-
-    private record struct PackageIdentityWithFeed(PackageIdentity Identity, NuGetFeed Feed);
 }

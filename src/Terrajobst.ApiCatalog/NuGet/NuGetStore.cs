@@ -6,29 +6,54 @@ namespace Terrajobst.ApiCatalog;
 
 public class NuGetStore
 {
-    private readonly NuGetFeed _feed;
     private readonly string _packagesCachePath;
+    private readonly NuGetFeed[] _feeds;
     private readonly Dictionary<string, IReadOnlyList<NuGetVersion>> _packageVersionCache = new();
 
-    public NuGetStore(NuGetFeed feed, string packagesCachePath)
+    public NuGetStore(string packagesCachePath, params NuGetFeed[] feeds)
     {
-        _feed = feed;
+        ArgumentException.ThrowIfNullOrEmpty(packagesCachePath);
+        ArgumentNullException.ThrowIfNull(feeds);
+
+        if (feeds.Length == 0)
+            throw new ArgumentException("must have at least one feed", nameof(feeds));
+        
         _packagesCachePath = packagesCachePath;
+        _feeds = feeds;
     }
 
     public async Task<PackageArchiveReader> GetPackageAsync(string id, string version)
     {
         var path = GetPackagePath(id, version);
-        if (path is not null && File.Exists(path))
+        if (File.Exists(path))
             return new PackageArchiveReader(path);
 
         var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
 
-        if (path is null)
-            return await _feed.GetPackageAsync(identity);
+        await using (var fileStream = File.Create(path))
+        {
+            var success = false;
 
-        using (var fileStream = File.Create(path))
-            await _feed.CopyPackageStreamAsync(identity, fileStream);
+            foreach (var feed in _feeds)
+            {
+                try
+                {
+                    using var memoryStream = new MemoryStream();
+                    await feed.CopyPackageStreamAsync(identity, memoryStream);
+                    memoryStream.Position = 0;
+                    await memoryStream.CopyToAsync(fileStream);
+                    success = true;
+                    break;
+                }
+                catch
+                {
+                    // Try next feed
+                }
+            }
+
+            if (!success)
+                throw new Exception($"Can't resolve package {id} {version}");
+        }
     
         return new PackageArchiveReader(path);
     }
@@ -37,7 +62,16 @@ public class NuGetStore
     {
         if (!_packageVersionCache.TryGetValue(id, out var versions))
         {
-            versions = await _feed.GetAllVersionsAsync(id, includeUnlisted: true);
+            var allVersions = new SortedSet<NuGetVersion>();
+            
+            foreach (var feed in _feeds)
+            {
+                var feedVersions = await feed.GetAllVersionsAsync(id, includeUnlisted: true);
+                allVersions.UnionWith(feedVersions);
+            }
+
+            versions = allVersions.ToArray();
+            
             _packageVersionCache.Add(id, versions);
         }
 
@@ -60,9 +94,6 @@ public class NuGetStore
 
     private string GetPackagePath(string id, string version)
     {
-        if (_packagesCachePath is null)
-            return null;
-
         return Path.Combine(_packagesCachePath, $"{id}.{version}.nupkg");
     }
 }
