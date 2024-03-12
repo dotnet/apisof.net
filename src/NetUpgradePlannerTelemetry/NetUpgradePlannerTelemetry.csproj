@@ -6,7 +6,6 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <UserSecretsId>ApiCatalog</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
