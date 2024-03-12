@@ -255,9 +255,9 @@ internal static class Program
                 Version: e.Attribute("version")!.Value))
             .ToArray();
 
-        var nuGetOrg = new NuGetFeed(NuGetFeeds.NuGetOrg);
         var nightlies = new NuGetFeed(NuGetFeeds.NightlyLatest);
-        var nugetStore = new NuGetStore(packagesPath, nuGetOrg, nightlies);
+        var nuGetOrg = new NuGetFeed(NuGetFeeds.NuGetOrg);
+        var nugetStore = new NuGetStore(packagesPath, nightlies, nuGetOrg);
         var packageIndexer = new PackageIndexer(nugetStore, frameworkLocators);
 
         var retryIndexed = false;

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Http.Json;
 using System.Security.Authentication;
 using System.Text.Json.Nodes;
@@ -172,7 +173,7 @@ public sealed class NuGetFeed
         return new PackageArchiveReader(nupkgStream);
     }
 
-    public async Task CopyPackageStreamAsync(PackageIdentity identity, Stream destination)
+    public async Task<bool> TryCopyPackageStreamAsync(PackageIdentity identity, Stream destination)
     {
         var url = await GetPackageUrlAsync(identity);
 
@@ -183,6 +184,11 @@ public sealed class NuGetFeed
             using var httpClient = new HttpClient();
             var nupkgStream = await httpClient.GetStreamAsync(url);
             await nupkgStream.CopyToAsync(destination);
+            return true;
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            return false;
         }
         catch (Exception ex) when (retryCount > 0)
         {
@@ -190,6 +196,11 @@ public sealed class NuGetFeed
             Console.Error.WriteLine($"error: {ex.Message}, retries left = {retryCount}");
             goto Retry;
         }
+    }
+    
+    public async Task CopyPackageStreamAsync(PackageIdentity identity, Stream destination)
+    {
+        await TryCopyPackageStreamAsync(identity, destination);
     }
 
     private async Task<string> GetPackageUrlAsync(PackageIdentity identity)

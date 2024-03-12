@@ -36,18 +36,10 @@ public class NuGetStore
 
             foreach (var feed in _feeds)
             {
-                try
+                if (await feed.TryCopyPackageStreamAsync(identity, fileStream))
                 {
-                    using var memoryStream = new MemoryStream();
-                    await feed.CopyPackageStreamAsync(identity, memoryStream);
-                    memoryStream.Position = 0;
-                    await memoryStream.CopyToAsync(fileStream);
                     success = true;
                     break;
-                }
-                catch
-                {
-                    // Try next feed
                 }
             }
 
