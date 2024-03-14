@@ -66,8 +66,6 @@ internal static class Program
         var nugetUsagesPath = Path.Combine(apiUsagesPath, "nuget.org.tsv");
         var plannerUsagesPath = Path.Combine(apiUsagesPath, "Upgrade Planner.tsv");
         var netfxCompatLabPath = Path.Combine(apiUsagesPath, "NetFx Compat Lab.tsv");
-        var databasePath = Path.Combine(rootPath, "apicatalog.db");
-        var compressedDatabasePath = Path.Combine(rootPath, "apicatalog.db.deflate");
         var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
         var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
 
@@ -81,11 +79,8 @@ internal static class Program
         await DownloadNetFxCompatLabUsages(netfxCompatLabPath);
         await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
         await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
-        await GenerateCatalogDatabaseAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, databasePath);
-        await CompressCatalogDatabaseAsync(databasePath, compressedDatabasePath);
-        await GenerateCatalogModel(databasePath, catalogModelPath);
+        await GenerateCatalogAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, catalogModelPath);
         await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
-        await UploadCatalogDatabaseAsync(compressedDatabasePath);
         await UploadCatalogModelAsync(catalogModelPath);
         await UploadSuffixTreeAsync(suffixTreePath);
 
@@ -314,14 +309,14 @@ internal static class Program
         }
     }
 
-    private static Task GenerateCatalogDatabaseAsync(string platformsPath, string packagesPath, string usagesPath, string outputPath)
+    private static async Task GenerateCatalogAsync(string platformsPath, string packagesPath, string usagesPath, string catalogModelPath)
     {
-        if (File.Exists(outputPath))
-            return Task.CompletedTask;
+        if (File.Exists(catalogModelPath))
+            return;
 
-        File.Delete(outputPath);
+        File.Delete(catalogModelPath);
 
-        using var builder = CatalogBuilder.Create(outputPath);
+        var builder = new CatalogBuilder();
         builder.Index(platformsPath);
         builder.Index(packagesPath);
 
@@ -329,25 +324,8 @@ internal static class Program
         foreach (var (path, name, date) in usageFiles)
             builder.IndexUsages(path, name, date);
 
-        return Task.CompletedTask;
-    }
-
-    private static async Task CompressCatalogDatabaseAsync(string databasePath, string compressedDatabasePath)
-    {
-        await using var inputStream = File.OpenRead(databasePath);
-        await using var outputStream = File.Create(compressedDatabasePath);
-        await using var deflateStream = new DeflateStream(outputStream, CompressionLevel.Optimal);
-        await inputStream.CopyToAsync(deflateStream);
-    }
-
-    private static async Task GenerateCatalogModel(string databasePath, string catalogModelPath)
-    {
-        if (File.Exists(catalogModelPath))
-            return;
-
-        Console.WriteLine($"Generating {Path.GetFileName(catalogModelPath)}...");
-        await ApiCatalogModel.ConvertAsync(databasePath, catalogModelPath);
-
+        builder.Build(catalogModelPath);
+        
         var model = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var stats = model.GetStatistics().ToString();
         Console.WriteLine("Catalog stats:");
@@ -374,15 +352,6 @@ internal static class Program
 
         await using var stream = File.Create(suffixTreePath);
         builder.WriteSuffixTree(stream);
-    }
-
-    private static async Task UploadCatalogDatabaseAsync(string compressedDatabasePath)
-    {
-        Console.WriteLine("Uploading catalog database...");
-        var connectionString = GetAzureStorageConnectionString();
-        var container = "catalog";
-        var blobClient = new BlobClient(connectionString, container, "apicatalog.db.deflate", options: GetBlobOptions());
-        await blobClient.UploadAsync(compressedDatabasePath, overwrite: true);
     }
 
     private static async Task UploadCatalogModelAsync(string catalogModelPath)

@@ -10,8 +10,8 @@ public sealed partial class ApiCatalogModel
 {
     public static string Url => "https://apisofdotnet.blob.core.windows.net/catalog/apicatalog.dat";
 
-    private static IReadOnlyList<byte> MagicHeader { get; } = Encoding.ASCII.GetBytes("APICATFB");
-    private const int CurrentFormatVersion = 6;
+    internal static IReadOnlyList<byte> MagicHeader { get; } = "APICATFB"u8.ToArray();
+    internal const int CurrentFormatVersion = 6;
 
     private readonly int _formatVersion;
     private readonly int _sizeOnDisk;
@@ -508,18 +508,7 @@ public sealed partial class ApiCatalogModel
 
         return new ApiCatalogModel(formatVersion, sizeOnDisk, buffer, tableSizes);
     }
-
-    public static async Task ConvertAsync(string sqliteDbPath, string outputPath)
-    {
-        await using var stream = File.Create(outputPath);
-        await ConvertAsync(sqliteDbPath, stream);
-    }
-
-    public static Task ConvertAsync(string sqliteDbPath, Stream stream)
-    {
-        return Converter.ConvertAsync(sqliteDbPath, stream);
-    }
-    
+   
     public struct FrameworkEnumerator : IEnumerable<FrameworkModel>, IEnumerator<FrameworkModel>
     {
         private readonly ApiCatalogModel _catalog;

@@ -8,7 +8,7 @@ namespace Terrajobst.ApiCatalog;
 public sealed class SuffixTree
 {
     internal const ushort Version = 1;
-    internal static readonly byte[] MagicNumbers = Encoding.UTF8.GetBytes("STFB");
+    internal static readonly byte[] MagicNumbers = "STFB"u8.ToArray();
 
     private readonly byte[] _buffer;
     private readonly int _stringsStart;

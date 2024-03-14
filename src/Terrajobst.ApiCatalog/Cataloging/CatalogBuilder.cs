@@ -1,13 +1,24 @@
+#nullable enable
+
+using System.Collections.Frozen;
 using System.Xml.Linq;
-
-using Dapper;
-
-using Microsoft.Data.Sqlite;
 
 namespace Terrajobst.ApiCatalog;
 
-public sealed class CatalogBuilder : IDisposable
+public sealed partial class CatalogBuilder
 {
+    private readonly TextWriter _logger = Console.Out;
+    private readonly List<IntermediaApi> _apis = new();
+    private readonly List<IntermediaApi> _rootApis = new();
+    private readonly Dictionary<Guid, IntermediaApi> _apiByFingerprint = new();
+    private readonly List<IntermediaAssembly> _assemblies = new();
+    private readonly Dictionary<Guid, IntermediaAssembly> _assemblyByFingerprint = new();
+    private readonly Dictionary<string, IntermediateFramework> _frameworkByName = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<Guid, IntermediatePackage> _packageByFingerprint = new();
+    private readonly SortedSet<string> _platformNames = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<Guid, (Guid, Guid)> _extensions = new();
+    private readonly Dictionary<string, IntermediateUsageSource> _usageSources = new(StringComparer.OrdinalIgnoreCase);
+
     public void Index(string indexPath)
     {
         var files = Directory.GetFiles(indexPath, "*.xml");
@@ -35,70 +46,70 @@ public sealed class CatalogBuilder : IDisposable
 
     private void IndexFramework(XDocument doc)
     {
-        var framework = doc.Root.Attribute("name").Value;
+        var framework = doc.Root!.Attribute("name")!.Value;
         DefineFramework(framework);
         DefineApis(doc.Root.Elements("api"));
         DefineExtensions(doc.Root.Elements("extension"));
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
-            var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint").Value);
-            var name = assemblyElement.Attribute("name").Value;
-            var version = assemblyElement.Attribute("version").Value;
-            var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
+            var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint")!.Value);
+            var name = assemblyElement.Attribute("name")!.Value;
+            var version = assemblyElement.Attribute("version")!.Value;
+            var publicKeyToken = assemblyElement.Attribute("publicKeyToken")!.Value;
             var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
             DefineFrameworkAssembly(framework, assemblyFingerprint);
 
             if (assemblyCreated)
             {
+                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+                {
+                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id")!.Value);
+                    var syntax = syntaxElement.Value;
+                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+                }
+
                 DefinePlatformSupport(assemblyFingerprint, assemblyElement);
                 DefineObsoletions(assemblyFingerprint, assemblyElement);
                 DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
                 DefineExperimentals(assemblyFingerprint, assemblyElement);
-
-                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
-                {
-                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
-                    var syntax = syntaxElement.Value;
-                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
-                }
             }
         }
     }
 
     private void IndexPackage(XDocument doc)
     {
-        var packageFingerprint = Guid.Parse(doc.Root.Attribute("fingerprint").Value);
-        var packageId = doc.Root.Attribute("id").Value;
-        var packageName = doc.Root.Attribute("name").Value;
+        var packageFingerprint = Guid.Parse(doc.Root!.Attribute("fingerprint")!.Value);
+        var packageId = doc.Root.Attribute("id")!.Value;
+        var packageName = doc.Root.Attribute("name")!.Value;
         DefinePackage(packageFingerprint, packageId, packageName);
         DefineApis(doc.Root.Elements("api"));
         DefineExtensions(doc.Root.Elements("extension"));
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
-            var framework = assemblyElement.Attribute("fx").Value;
-            var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint").Value);
-            var name = assemblyElement.Attribute("name").Value;
-            var version = assemblyElement.Attribute("version").Value;
-            var publicKeyToken = assemblyElement.Attribute("publicKeyToken").Value;
+            var framework = assemblyElement.Attribute("fx")!.Value;
+            var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint")!.Value);
+            var name = assemblyElement.Attribute("name")!.Value;
+            var version = assemblyElement.Attribute("version")!.Value;
+            var publicKeyToken = assemblyElement.Attribute("publicKeyToken")!.Value;
             DefineFramework(framework);
             var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
             DefinePackageAssembly(packageFingerprint, framework, assemblyFingerprint);
 
             if (assemblyCreated)
             {
+                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+                {
+                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id")!.Value);
+                    var syntax = syntaxElement.Value;
+                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+                }
+
                 DefinePlatformSupport(assemblyFingerprint, assemblyElement);
                 DefineObsoletions(assemblyFingerprint, assemblyElement);
                 DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
                 DefineExperimentals(assemblyFingerprint, assemblyElement);
-
-                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
-                {
-                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id").Value);
-                    var syntax = syntaxElement.Value;
-                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
-                }
             }
         }
     }
@@ -107,12 +118,12 @@ public sealed class CatalogBuilder : IDisposable
     {
         foreach (var element in apiElements)
         {
-            var fingerprint = Guid.Parse(element.Attribute("fingerprint").Value);
-            var kind = (ApiKind)int.Parse(element.Attribute("kind").Value);
+            var fingerprint = Guid.Parse(element.Attribute("fingerprint")!.Value);
+            var kind = (ApiKind)int.Parse(element.Attribute("kind")!.Value);
             var parentFingerprint = element.Attribute("parent") is null
-                ? Guid.Empty
-                : Guid.Parse(element.Attribute("parent").Value);
-            var name = element.Attribute("name").Value;
+                ? (Guid?)null
+                : Guid.Parse(element.Attribute("parent")!.Value);
+            var name = element.Attribute("name")!.Value;
 
             DefineApi(fingerprint, kind, parentFingerprint, name);
         }
@@ -124,7 +135,7 @@ public sealed class CatalogBuilder : IDisposable
         var usages = ParseFile(path);
         IndexUsages(name, date, usages);
 
-        static IEnumerable<(Guid ApiFingerpritn, float Percentage)> ParseFile(string path)
+        static IEnumerable<(Guid ApiFingerprint, float Percentage)> ParseFile(string path)
         {
             using var streamReader = new StreamReader(path);
 
@@ -144,294 +155,83 @@ public sealed class CatalogBuilder : IDisposable
                     }
                 }
             }
-
         }
     }
 
-    public void IndexUsages(string name, DateOnly date, IEnumerable<(Guid ApiFingerpritn, float Percentage)> usages)
+    public void IndexUsages(string name, DateOnly date, IEnumerable<(Guid ApiFingerprint, float Percentage)> usages)
     {
-        DefineUsageSource(name, date);
-
-        foreach (var (apiFingerprint, percentage) in usages)
-            DefineApiUsage(name, apiFingerprint, percentage);
-    }
-
-    public static CatalogBuilder Create(string path)
-    {
-        // NOTE: We disable pooling to avoid the database from being locked when we're disposed.
-        //       This is critical to allow later parts of the catalog generation to read the file.
-        var connectionString = new SqliteConnectionStringBuilder
+        if (_usageSources.TryGetValue(name, out var existingUsages))
         {
-            DataSource = path,
-            Pooling = false,
-            Mode = SqliteOpenMode.ReadWriteCreate
-        }.ToString();
+            if (existingUsages.Date < date)
+                _usageSources.Remove(name);
+            else
+                return;
+        }
 
-        var connection = new SqliteConnection(connectionString);
-        connection.Open();
-        connection.Execute("PRAGMA JOURNAL_MODE = OFF");
-        connection.Execute("PRAGMA SYNCHRONOUS = OFF");
-        connection.Execute("PRAGMA FOREIGN_KEYS = OFF");
-        CreateSchema(connection);
-
-        var transaction = connection.BeginTransaction();
-        return new CatalogBuilder(connection, transaction);
+        var usageDictionary = usages.ToFrozenDictionary(t => t.ApiFingerprint, t => t.Percentage);
+        var usageSource = new IntermediateUsageSource(name, date, usageDictionary);
+        _usageSources.Add(usageSource.Name, usageSource);
+    }
+    
+    public async Task<ApiCatalogModel> BuildAsync()
+    {
+        await using var stream = new MemoryStream();
+        Build(stream);
+        stream.Position = 0;
+        return await ApiCatalogModel.LoadAsync(stream);
     }
 
-    private readonly SqliteConnection _connection;
-    private readonly SqliteTransaction _transaction;
-
-    private CatalogBuilder(SqliteConnection connection, SqliteTransaction transaction)
+    public void Build(string path)
     {
-        _connection = connection;
-        _transaction = transaction;
+        using var stream = File.Create(path);
+        Build(stream);
     }
 
-    public void Dispose()
+    public void Build(Stream stream)
     {
-        CommitExtensions();
-
-        _transaction.Commit();
-        _transaction.Dispose();
-        _connection.Dispose();
+        ResolveExtensions();
+        var converter = new ApiCatalogWriter(this);
+        converter.Write(stream);
     }
-
-    private static void CreateSchema(SqliteConnection connection)
+    
+    private void DefineApi(Guid fingerprint, ApiKind kind, Guid? parentFingerprint, string name)
     {
-        connection.Execute(@"
-            CREATE TABLE Apis
-            (
-                ApiId       INTEGER PRIMARY KEY,
-                Kind        INTEGER NOT NULL,
-                ApiGuid     TEXT    NOT NULL,
-                ParentApiId INTEGER REFERENCES Apis,
-                Name        TEXT    NOT NULL
-            );
-            CREATE UNIQUE INDEX IX_Apis_ApiGuid ON Apis (ApiGuid);
-            CREATE INDEX IX_Apis_ParentApiId ON Apis (ParentApiId);
-
-            CREATE TABLE Assemblies
-            (
-                AssemblyId     INTEGER NOT NULL PRIMARY KEY,
-                AssemblyGuid   TEXT    NOT NULL,
-                Name           TEXT    NOT NULL,
-                Version        TEXT    NOT NULL,
-                PublicKeyToken TEXT    NOT NULL
-            );
-            CREATE UNIQUE INDEX IX_Assemblies_AssemblyGuid ON Assemblies (AssemblyGuid);
-
-            CREATE TABLE Frameworks
-            (
-                FrameworkId  INTEGER NOT NULL PRIMARY KEY,
-                FriendlyName TEXT    NOT NULL
-            );
-
-            CREATE TABLE FrameworkAssemblies
-            (
-                FrameworkId INTEGER NOT NULL REFERENCES Frameworks,
-                AssemblyId  INTEGER NOT NULL REFERENCES Assemblies
-            );
-            CREATE INDEX IX_FrameworkAssemblies_AssemblyId ON FrameworkAssemblies (AssemblyId);
-            CREATE INDEX IX_FrameworkAssemblies_FrameworkId ON FrameworkAssemblies (FrameworkId);
-
-            CREATE TABLE OSPlatforms
-            (
-                OSPlatformId INTEGER PRIMARY KEY,
-                Name         TEXT NOT NULL
-            );
-
-            CREATE TABLE OSPlatformsSupport
-            (
-                ApiId        INTEGER REFERENCES Apis,
-                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
-                OSPlatformId INTEGER NOT NULL REFERENCES OSPlatforms,
-                IsSupported  INTEGER NOT NULL
-            );
-            CREATE INDEX IX_OSPlatformsSupport_ApiId ON OSPlatformsSupport (ApiId);
-            CREATE INDEX IX_OSPlatformsSupport_AssemblyId ON OSPlatformsSupport (AssemblyId);
-
-            CREATE TABLE Obsoletions
-            (
-                ApiId        INTEGER REFERENCES Apis,
-                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
-                Message      TEXT,
-                IsError      INTEGER,
-                DiagnosticId TEXT,
-                UrlFormat    TEXT
-            );
-            CREATE INDEX IX_Obsoletions_ApiId ON Obsoletions (ApiId);
-            CREATE INDEX IX_Obsoletions_AssemblyId ON Obsoletions (AssemblyId);
-
-            CREATE TABLE PreviewRequirements
-            (
-                ApiId        INTEGER REFERENCES Apis,
-                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
-                Message      TEXT,
-                Url          TEXT
-            );
-            CREATE INDEX IX_PreviewRequirements_ApiId ON PreviewRequirements (ApiId);
-            CREATE INDEX IX_PreviewRequirements_AssemblyId ON PreviewRequirements (AssemblyId);
-
-            CREATE TABLE Experimentals
-            (
-                ApiId        INTEGER REFERENCES Apis,
-                AssemblyId   INTEGER NOT NULL REFERENCES Assemblies,
-                DiagnosticId TEXT,
-                UrlFormat    TEXT
-            );
-            CREATE INDEX IX_Experimentals_ApiId ON Experimentals (ApiId);
-            CREATE INDEX IX_Experimentals_AssemblyId ON Experimentals (AssemblyId);
-
-            CREATE TABLE Packages
-            (
-                PackageId INTEGER NOT NULL PRIMARY KEY,
-                Name      TEXT    NOT NULL
-            );
-
-            CREATE TABLE PackageVersions
-            (
-                PackageVersionId INTEGER NOT NULL PRIMARY KEY,
-                PackageId        INTEGER NOT NULL REFERENCES Packages,
-                Version          TEXT    NOT NULL
-            );
-
-            CREATE TABLE PackageAssemblies
-            (
-                PackageVersionId INTEGER NOT NULL REFERENCES PackageVersions,
-                FrameworkId      INTEGER NOT NULL REFERENCES Frameworks,
-                AssemblyId       INTEGER NOT NULL REFERENCES Assemblies
-            );
-            CREATE INDEX IX_PackageAssemblies_AssemblyId ON PackageAssemblies (AssemblyId);
-
-            CREATE TABLE Syntaxes
-            (
-                SyntaxId INTEGER PRIMARY KEY,
-                Syntax   TEXT NOT NULL
-            );
-
-            CREATE TABLE ExtensionMethods
-            (
-                ExtensionMethodGuid TEXT  NOT NULL,
-                ExtendedTypeId      INTEGER NOT NULL REFERENCES Apis,
-                ExtensionMethodId   INTEGER NOT NULL REFERENCES Apis
-            );
-
-            CREATE TABLE Declarations
-            (
-                ApiId      INTEGER NOT NULL REFERENCES Apis,
-                AssemblyId INTEGER NOT NULL REFERENCES Assemblies,
-                SyntaxId   INTEGER NOT NULL REFERENCES Syntaxes
-            );
-            CREATE INDEX IX_Declarations_ApiId ON Declarations (ApiId);
-
-            CREATE TABLE UsageSources
-            (
-                UsageSourceId INTEGER NOT NULL PRIMARY KEY,
-                Name          TEXT    NOT NULL,
-                Date          TEXT    NOT NULL
-            );
-
-            CREATE TABLE ApiUsages
-            (
-                ApiId         INTEGER NOT NULL REFERENCES Apis,
-                UsageSourceId INTEGER NOT NULL REFERENCES UsageSources,
-                Percentage    REAL    NOT NULL
-            );
-            CREATE INDEX IX_ApiUsages_ApiId ON ApiUsages (ApiId);
-        ");
-    }
-
-    private readonly Dictionary<string, int> _syntaxIdBySyntax = new();
-    private readonly Dictionary<Guid, int> _apiIdByFingerprint = new();
-    private readonly Dictionary<Guid, int> _assemblyIdByFingerprint = new();
-    private readonly Dictionary<string, int> _packageIdByName = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<Guid, int> _packageVersionIdByFingerprint = new();
-    private readonly Dictionary<string, int> _frameworkIdByName = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, int> _osPlatformIdByName = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, int> _usageSourceIdByName = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<Guid, (Guid, Guid)> _extensions = new();
-
-    private int DefineSyntax(string syntax)
-    {
-        if (_syntaxIdBySyntax.TryGetValue(syntax, out var syntaxId))
-            return syntaxId;
-
-        syntaxId = _syntaxIdBySyntax.Count + 1;
-
-        _connection.Execute(
-            @"
-                INSERT INTO [Syntaxes]
-                    (SyntaxId, Syntax)
-                VALUES
-                    (@SyntaxId, @Syntax)
-            ",
-            new {
-                SyntaxId = syntaxId,
-                Syntax = syntax
-            },
-            _transaction
-        );
-
-        _syntaxIdBySyntax.Add(syntax, syntaxId);
-
-        return syntaxId;
-    }
-
-    private void DefineApi(Guid fingerprint, ApiKind kind, Guid parentFingerprint, string name)
-    {
-        if (_apiIdByFingerprint.ContainsKey(fingerprint))
+        if (_apiByFingerprint.ContainsKey(fingerprint))
             return;
 
-        var apiId = _apiIdByFingerprint.Count + 1;
-        var parentApiId = parentFingerprint == Guid.Empty
-            ? (int?)null
-            : _apiIdByFingerprint[parentFingerprint];
+        var parentApi = (IntermediaApi?)null;
 
-        _connection.Execute(
-            @"
-                INSERT INTO [Apis]
-                    (ApiId, Kind, ApiGuid, ParentApiId, Name)
-                VALUES
-                    (@ApiId, @Kind, @ApiGuid, @ParentApiId, @Name)
-            ",
-            new {
-                ApiId = apiId,
-                Kind = kind,
-                ApiGuid = fingerprint.ToString("N"),
-                ParentApiId = parentApiId,
-                Name = name
-            },
-            _transaction
-        );
+        if (parentFingerprint is not null && !_apiByFingerprint.TryGetValue(parentFingerprint.Value, out parentApi))
+        {
+            _logger.WriteLine($"error: can't find parent API {fingerprint}");
+            return;
+        }
 
-        _apiIdByFingerprint.Add(fingerprint, apiId);
+        var index = _apis.Count;
+        var api = new IntermediaApi(index, fingerprint, kind, parentApi, name);
+        _apis.Add(api);
+        _apiByFingerprint.Add(api.Fingerprint, api);
+
+        if (parentApi is null)
+        {
+            _rootApis.Add(api);
+        }
+        else
+        {
+            parentApi.Children ??= new();
+            parentApi.Children.Add(api);
+        }
     }
 
     private bool DefineAssembly(Guid fingerprint, string name, string version, string publicKeyToken)
     {
-        if (_assemblyIdByFingerprint.ContainsKey(fingerprint))
+        if (_assemblyByFingerprint.ContainsKey(fingerprint))
             return false;
 
-        var assemblyId = _assemblyIdByFingerprint.Count + 1;
-
-        _connection.Execute(
-            @"
-                INSERT INTO [Assemblies]
-                    (AssemblyId, AssemblyGuid, Name, Version, PublicKeyToken)
-                VALUES
-                    (@AssemblyId, @AssemblyGuid, @Name, @Version, @PublicKeyToken)
-            ",
-            new {
-                AssemblyId = assemblyId,
-                AssemblyGuid = fingerprint.ToString("N"),
-                Name = name,
-                Version = version,
-                PublicKeyToken = publicKeyToken,
-            },
-            _transaction
-        );
-
-        _assemblyIdByFingerprint.Add(fingerprint, assemblyId);
+        var index = _assemblies.Count;
+        var assembly = new IntermediaAssembly(index, fingerprint, name, version, publicKeyToken);
+        _assemblies.Add(assembly);
+        _assemblyByFingerprint.Add(assembly.Fingerprint, assembly);
         return true;
     }
 
@@ -449,96 +249,91 @@ public sealed class CatalogBuilder : IDisposable
         {
             var id = supportElement.Attribute("id")?.Value;
             var apiFingerprint = id is null ? (Guid?)null : Guid.Parse(id);
-            var platformName = supportElement.Attribute("name").Value;
+            var platformName = supportElement.Attribute("name")!.Value;
 
             DefinePlatformSupport(apiFingerprint, assemblyFingerprint, platformName, isSupported);
         }
     }
 
-    private void DefinePlatform(string platformName)
+    private string DefinePlatform(string platformName)
     {
-        if (_osPlatformIdByName.ContainsKey(platformName))
-            return;
+        if (_platformNames.TryGetValue(platformName, out var result))
+            return result;
 
-        var osPlatformId = _osPlatformIdByName.Count + 1;
-
-        _connection.Execute(
-            @"
-                INSERT INTO OSPlatforms
-                    (OSPlatformId, Name)
-                VALUES
-                    (@OSPlatformId, @Name)
-            ",
-            new {
-                OSPlatformId = osPlatformId,
-                Name = platformName
-            },
-            _transaction
-        );
-
-        _osPlatformIdByName.Add(platformName, osPlatformId);
+        _platformNames.Add(platformName);
+        return platformName;
     }
 
     private void DefinePlatformSupport(Guid? apiFingerprint, Guid assemblyFingerprint, string platformName, bool isSupported)
     {
-        DefinePlatform(platformName);
+        platformName = DefinePlatform(platformName);
 
-        var apiId = apiFingerprint is null ? (int?)null : _apiIdByFingerprint[apiFingerprint.Value];
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
-        var osPlatformId = _osPlatformIdByName[platformName];
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
+        }
 
-        _connection.Execute(
-            @"
-                INSERT INTO OSPlatformsSupport
-                    (ApiId, AssemblyId, OSPlatformId, IsSupported)
-                VALUES
-                    (@ApiId, @AssemblyId, @OSPlatformId, @IsSupported)
-            ",
-            new {
-                ApiId = apiId,
-                AssemblyId = assemblyId,
-                OSPlatformId = osPlatformId,
-                IsSupported = isSupported
-            },
-            _transaction
-        );
+        var platformSupport = new IntermediatePlatformSupport(platformName, isSupported);
+
+        if (apiFingerprint is null)
+        {
+            assembly.PlatformSupport ??= new();
+            assembly.PlatformSupport.Add(platformSupport);
+        }
+        else
+        {
+            if (!_apiByFingerprint.TryGetValue(apiFingerprint.Value, out var api))
+            {
+                _logger.WriteLine($"error: can't find API {apiFingerprint.Value}");
+                return;
+            }
+
+            if (!assembly.Declarations.TryGetValue(api, out var declaration))
+            {
+                _logger.WriteLine($"error: can't find declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint})");
+                return;
+            }
+
+            declaration.PlatformSupport ??= new();
+            declaration.PlatformSupport.Add(platformSupport);
+        }
     }
 
     private void DefineObsoletions(Guid assemblyFingerprint, XElement element)
     {
         foreach (var obsoleteElement in element.Elements("obsolete"))
         {
-            var apiFingerprint = Guid.Parse(obsoleteElement.Attribute("id").Value);
+            var apiFingerprint = Guid.Parse(obsoleteElement.Attribute("id")!.Value);
             var isError = bool.Parse(obsoleteElement.Attribute("isError")?.Value ?? bool.FalseString);
-            var message = obsoleteElement.Attribute("message")?.Value;
-            var diagnosticId = obsoleteElement.Attribute("diagnosticId")?.Value;
-            var urlFormat = obsoleteElement.Attribute("urlFormat")?.Value;
+            var message = obsoleteElement.Attribute("message")?.Value ?? string.Empty;
+            var diagnosticId = obsoleteElement.Attribute("diagnosticId")?.Value ?? string.Empty;
+            var urlFormat = obsoleteElement.Attribute("urlFormat")?.Value ?? string.Empty;
             DefineObsoletion(apiFingerprint, assemblyFingerprint, isError, message, diagnosticId, urlFormat);
         }
     }
 
     private void DefineObsoletion(Guid apiFingerprint, Guid assemblyFingerprint, bool isError, string message, string diagnosticId, string urlFormat)
     {
-        var apiId = _apiIdByFingerprint[apiFingerprint];
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+        if (!_apiByFingerprint.TryGetValue(apiFingerprint, out var api))
+        {
+            _logger.WriteLine($"error: can't find API {apiFingerprint}");
+            return;
+        }
 
-        _connection.Execute(
-            @"
-                INSERT INTO Obsoletions
-                    (ApiId, AssemblyId, Message, IsError, DiagnosticId, UrlFormat)
-                VALUES
-                    (@ApiId, @AssemblyId, @Message, @IsError, @DiagnosticId, @UrlFormat)
-            ",
-            new {
-                ApiId = apiId,
-                AssemblyId = assemblyId,
-                Message = message,
-                IsError = isError,
-                DiagnosticId = diagnosticId,
-                UrlFormat = urlFormat
-            },
-            _transaction
-        );
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
+        }
+
+        if (!assembly.Declarations.TryGetValue(api, out var declaration))
+        {
+            _logger.WriteLine($"error: can't find declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint})");
+            return;
+        }
+
+        declaration.Obsoletion = new IntermediateObsoletion(isError, message, diagnosticId, urlFormat);
     }
 
     private void DefinePreviewRequirements(Guid assemblyFingerprint, XElement element)
@@ -547,8 +342,8 @@ public sealed class CatalogBuilder : IDisposable
         {
             var id = previewRequirementElement.Attribute("id")?.Value;
             var apiFingerprint = id is null ? (Guid?)null : Guid.Parse(id);
-            var message = previewRequirementElement.Attribute("message")?.Value;
-            var url = previewRequirementElement.Attribute("url")?.Value;
+            var message = previewRequirementElement.Attribute("message")?.Value ?? string.Empty;
+            var url = previewRequirementElement.Attribute("url")?.Value ?? string.Empty;
 
             DefinePreviewRequirements(apiFingerprint, assemblyFingerprint, message, url);
         }
@@ -556,24 +351,34 @@ public sealed class CatalogBuilder : IDisposable
 
     private void DefinePreviewRequirements(Guid? apiFingerprint, Guid assemblyFingerprint, string message, string url)
     {
-        var apiId = apiFingerprint is null ? (int?)null : _apiIdByFingerprint[apiFingerprint.Value];
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
+        }
 
-        _connection.Execute(
-            @"
-                INSERT INTO PreviewRequirements
-                    (ApiId, AssemblyId, Message, Url)
-                VALUES
-                    (@ApiId, @AssemblyId, @Message, @Url)
-            ",
-            new {
-                ApiId = apiId,
-                AssemblyId = assemblyId,
-                Message = message,
-                Url = url
-            },
-            _transaction
-        );
+        var previewRequirement = new IntermediatePreviewRequirement(message, url);
+
+        if (apiFingerprint is null)
+        {
+            assembly.PreviewRequirement = previewRequirement;
+        }
+        else
+        {
+            if (!_apiByFingerprint.TryGetValue(apiFingerprint.Value, out var api))
+            {
+                _logger.WriteLine($"error: can't find API {apiFingerprint.Value}");
+                return;
+            }
+
+            if (!assembly.Declarations.TryGetValue(api, out var declaration))
+            {
+                _logger.WriteLine($"error: can't find declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint})");
+                return;
+            }
+
+            declaration.PreviewRequirement = previewRequirement;
+        }
     }
 
     private void DefineExperimentals(Guid assemblyFingerprint, XElement element)
@@ -582,8 +387,8 @@ public sealed class CatalogBuilder : IDisposable
         {
             var id = experimentalElement.Attribute("id")?.Value;
             var apiFingerprint = id is null ? (Guid?)null : Guid.Parse(id);
-            var diagnosticId = experimentalElement.Attribute("diagnosticId")?.Value;
-            var urlFormat = experimentalElement.Attribute("urlFormat")?.Value;
+            var diagnosticId = experimentalElement.Attribute("diagnosticId")?.Value ?? string.Empty;
+            var urlFormat = experimentalElement.Attribute("urlFormat")?.Value ?? string.Empty;
 
             DefineExperimentals(apiFingerprint, assemblyFingerprint, diagnosticId, urlFormat);
         }
@@ -591,33 +396,43 @@ public sealed class CatalogBuilder : IDisposable
 
     private void DefineExperimentals(Guid? apiFingerprint, Guid assemblyFingerprint, string diagnosticId, string urlFormat)
     {
-        var apiId = apiFingerprint is null ? (int?)null : _apiIdByFingerprint[apiFingerprint.Value];
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
+        }
 
-        _connection.Execute(
-            @"
-                INSERT INTO Experimentals
-                    (ApiId, AssemblyId, DiagnosticId, UrlFormat)
-                VALUES
-                    (@ApiId, @AssemblyId, @DiagnosticId, @UrlFormat)
-            ",
-            new {
-                ApiId = apiId,
-                AssemblyId = assemblyId,
-                DiagnosticId = diagnosticId,
-                UrlFormat = urlFormat
-            },
-            _transaction
-        );
+        var experimental = new IntermediateExperimental(diagnosticId, urlFormat);
+
+        if (apiFingerprint is null)
+        {
+            assembly.Experimental = experimental;
+        }
+        else
+        {
+            if (!_apiByFingerprint.TryGetValue(apiFingerprint.Value, out var api))
+            {
+                _logger.WriteLine($"error: can't find API {apiFingerprint.Value}");
+                return;
+            }
+
+            if (!assembly.Declarations.TryGetValue(api, out var declaration))
+            {
+                _logger.WriteLine($"error: can't find declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint})");
+                return;
+            }
+
+            declaration.Experimental = experimental;
+        }
     }
 
     private void DefineExtensions(IEnumerable<XElement> extensionElements)
     {
         foreach (var experimentalElement in extensionElements)
         {
-            var guid = Guid.Parse(experimentalElement.Attribute("fingerprint").Value);
-            var typeGuid = Guid.Parse(experimentalElement.Attribute("type").Value);
-            var methodGuid = Guid.Parse(experimentalElement.Attribute("method").Value);
+            var guid = Guid.Parse(experimentalElement.Attribute("fingerprint")!.Value);
+            var typeGuid = Guid.Parse(experimentalElement.Attribute("type")!.Value);
+            var methodGuid = Guid.Parse(experimentalElement.Attribute("method")!.Value);
             DefineExtension(guid, typeGuid, methodGuid);
         }
     }
@@ -630,225 +445,201 @@ public sealed class CatalogBuilder : IDisposable
         _extensions.TryAdd(extensionGuid, (typeGuid, methodGuid));
     }
 
-    private void CommitExtensions()
+    private void ResolveExtensions()
     {
-        foreach (var (extensionMethodGuid, (typeGuid, methodGuid)) in _extensions)
+        foreach (var (extensionMethodGuid, (typeFingerprint, methodFingerprint)) in _extensions)
         {
-            if (!_apiIdByFingerprint.TryGetValue(typeGuid, out var typeId))
+            if (!_apiByFingerprint.TryGetValue(typeFingerprint, out var type))
             {
-                Console.WriteLine($"error: can't resolve extension type {typeGuid}");
+                Console.WriteLine($"error: can't resolve extension type {typeFingerprint}");
                 continue;
             }
 
-            if (!_apiIdByFingerprint.TryGetValue(methodGuid, out var methodId))
+            if (!_apiByFingerprint.TryGetValue(methodFingerprint, out var method))
             {
-                Console.WriteLine($"error: can't resolve extension method {methodId}");
+                Console.WriteLine($"error: can't resolve extension method {method}");
                 continue;
             }
 
-            _connection.Execute(
-                @"
-                    INSERT INTO ExtensionMethods
-                        (ExtensionMethodGuid, ExtendedTypeId, ExtensionMethodId)
-                    VALUES
-                        (@ExtensionMethodGuid, @TypeId, @MethodId)
-                ",
-                new {
-                    ExtensionMethodGuid = extensionMethodGuid.ToString("N"),
-                    TypeId = typeId,
-                    MethodId = methodId
-                },
-                _transaction
-            );
+            var extension = new IntermediateExtension(extensionMethodGuid, method);
+            type.Extensions ??= new();
+            type.Extensions.Add(extension);
         }
     }
 
     private void DefineDeclaration(Guid assemblyFingerprint, Guid apiFingerprint, string syntax)
     {
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
-        var apiId = _apiIdByFingerprint[apiFingerprint];
-        var syntaxId = DefineSyntax(syntax);
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
+        }
 
-        _connection.Execute(
-            @"
-                INSERT INTO [Declarations]
-                    (AssemblyId, ApiId, SyntaxId)
-                VALUES
-                    (@AssemblyId, @ApiId, @SyntaxId)
-            ",
-            new {
-                AssemblyId = assemblyId,
-                ApiId = apiId,
-                SyntaxId = syntaxId
-            },
-            _transaction
-        );
+        if (!_apiByFingerprint.TryGetValue(apiFingerprint, out var api))
+        {
+            _logger.WriteLine($"error: can't find API {apiFingerprint}");
+            return;
+        }
+
+        if (assembly.Declarations.TryGetValue(api, out var declaration))
+        {
+            _logger.WriteLine($"error: declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint}) already exists");
+            return;
+        }
+
+        declaration = new IntermediateDeclaration(syntax);
+        assembly.Declarations.Add(api, declaration);
     }
 
     private void DefineFramework(string frameworkName)
     {
-        if (_frameworkIdByName.ContainsKey(frameworkName))
+        if (_frameworkByName.TryGetValue(frameworkName, out var framework))
             return;
 
-        var frameworkId = _frameworkIdByName.Count + 1;
-
-        _connection.Execute(
-            @"
-                INSERT INTO [Frameworks]
-                    (FrameworkId, FriendlyName)
-                VALUES
-                    (@FrameworkId, @FriendlyName)
-            ",
-            new {
-                FrameworkId = frameworkId,
-                FriendlyName = frameworkName
-            },
-            _transaction
-        );
-
-        _frameworkIdByName.Add(frameworkName, frameworkId);
+        framework = new IntermediateFramework(frameworkName);
+        _frameworkByName.Add(framework.Name, framework);
     }
 
-    private void DefineFrameworkAssembly(string framework, Guid assemblyFingerprint)
+    private void DefineFrameworkAssembly(string frameworkName, Guid assemblyFingerprint)
     {
-        var frameworkId = _frameworkIdByName[framework];
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
-
-        _connection.Execute(
-            @"
-                INSERT INTO [FrameworkAssemblies]
-                    (FrameworkId, AssemblyId)
-                VALUES
-                    (@FrameworkId, @AssemblyId)
-            ",
-            new {
-                FrameworkId = frameworkId,
-                AssemblyId = assemblyId
-            },
-            _transaction
-        );
-    }
-
-    private void DefinePackage(Guid fingerprint, string id, string version)
-    {
-        if (_packageVersionIdByFingerprint.ContainsKey(fingerprint))
-            return;
-
-        var packageVersionId = _packageVersionIdByFingerprint.Count + 1;
-        var packageId = DefinePackageName(id);
-
-        _connection.Execute(
-            @"
-                INSERT INTO [PackageVersions]
-                    (PackageVersionId, PackageId, Version)
-                VALUES
-                    (@PackageVersionId, @PackageId, @Version)
-            ",
-            new {
-                PackageVersionId = packageVersionId,
-                PackageId = packageId,
-                Version = version
-            },
-            _transaction
-        );
-
-        _packageVersionIdByFingerprint.Add(fingerprint, packageVersionId);
-    }
-
-    private int DefinePackageName(string name)
-    {
-        if (!_packageIdByName.TryGetValue(name, out var packageId))
+        if (!_frameworkByName.TryGetValue(frameworkName, out var framework))
         {
-            packageId = _packageIdByName.Count + 1;
+            _logger.WriteLine($"error: can't find framework {frameworkName}");
+            return;
+        }        
 
-            _connection.Execute(
-                @"
-                    INSERT INTO [Packages]
-                        (PackageId, Name)
-                    VALUES
-                        (@PackageId, @Name)
-                ",
-                new {
-                    PackageId = packageId,
-                    Name = name,
-                },
-                _transaction
-            );
-
-            _packageIdByName.Add(name, packageId);
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
         }
 
-        return packageId;
+        framework.Assemblies.Add(assembly);
+        assembly.Frameworks.Add(framework);
     }
 
+    private void DefinePackage(Guid fingerprint, string name, string version)
+    {
+        if (_packageByFingerprint.TryGetValue(fingerprint, out var package))
+            return;
+
+        package = new IntermediatePackage(fingerprint, name, version);
+        _packageByFingerprint.Add(package.Fingerprint, package);
+    }
+    
     private void DefinePackageAssembly(Guid packageFingerprint, string frameworkName, Guid assemblyFingerprint)
     {
-        var packageVersionId = _packageVersionIdByFingerprint[packageFingerprint];
-        var frameworkId = _frameworkIdByName[frameworkName];
-        var assemblyId = _assemblyIdByFingerprint[assemblyFingerprint];
+        if (!_packageByFingerprint.TryGetValue(packageFingerprint, out var package))
+        {
+            _logger.WriteLine($"error: can't find package {packageFingerprint}");
+            return;
+        }
 
-        _connection.Execute(
-            @"
-                INSERT INTO [PackageAssemblies]
-                    (PackageVersionId, FrameworkId, AssemblyId)
-                VALUES
-                    (@PackageVersionId, @FrameworkId, @AssemblyId)
-            ",
-            new {
-                PackageVersionId = packageVersionId,
-                FrameworkId = frameworkId,
-                AssemblyId = assemblyId
-            },
-            _transaction
-        );
+        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+        {
+            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+            return;
+        }
+        
+        DefineFramework(frameworkName);
+
+        var framework = _frameworkByName[frameworkName];
+        package.Assemblies.Add((framework, assembly));
+        assembly.Packages.Add((package, framework));
     }
 
-    private void DefineUsageSource(string name, DateOnly date)
+    private sealed class IntermediaApi(int index, Guid fingerprint, ApiKind kind, IntermediaApi? parent, string name)
     {
-        if (_usageSourceIdByName.ContainsKey(name))
-            return;
+        public int Index { get; } = index;
+        public Guid Fingerprint { get; } = fingerprint;
+        public ApiKind Kind { get; } = kind;
+        public IntermediaApi? Parent { get; } = parent;
+        public string Name { get; } = name;
+        public List<IntermediaApi>? Children { get; set; }
+        public List<IntermediateExtension>? Extensions { get; set; }
+    }
+    
+    private sealed class IntermediaAssembly(int index, Guid fingerprint, string name, string version, string publicKeyToken)
+    {
+        public int Index { get; } = index;
+        public Guid Fingerprint { get; } = fingerprint;
+        public string Name { get; } = name;
+        public string Version { get; } = version;
+        public string PublicKeyToken { get; } = publicKeyToken;
 
-        var usageSourceId = _usageSourceIdByName.Count + 1;
+        public Dictionary<IntermediaApi, IntermediateDeclaration> Declarations { get; } = new();
 
-        _connection.Execute(
-            @"
-                INSERT INTO [UsageSources]
-                    (UsageSourceId, Name, Date)
-                VALUES
-                    (@UsageSourceId, @Name, @Date)
-            ",
-            new {
-                UsageSourceId = usageSourceId,
-                Name = name,
-                Date = new DateTime(date.Year, date.Month, date.Day)
-            },
-            _transaction
-        );
+        public List<IntermediateFramework> Frameworks { get; } = new();
 
-        _usageSourceIdByName.Add(name, usageSourceId);
+        public List<(IntermediatePackage, IntermediateFramework)> Packages { get; } = new();
+
+        public IntermediatePreviewRequirement? PreviewRequirement { get; set; }
+        public IntermediateExperimental? Experimental { get; set; }
+        public List<IntermediatePlatformSupport>? PlatformSupport { get; set; }
+
+        public IEnumerable<IntermediaApi> RootApis => Declarations.Select(d => d.Key).Where(d => d.Parent is null);
     }
 
-    private void DefineApiUsage(string usageSourceName, Guid apiFingerprint, float percentage)
+    private sealed class IntermediateDeclaration(string syntax)
     {
-        if (!_usageSourceIdByName.TryGetValue(usageSourceName, out var usageSourceId))
-            return;
+        public string Syntax { get; } = syntax;
+        public IntermediateObsoletion? Obsoletion { get; set; }
+        public IntermediatePreviewRequirement? PreviewRequirement { get; set; }
+        public IntermediateExperimental? Experimental { get; set; }
+        public List<IntermediatePlatformSupport>? PlatformSupport { get; set; }
+    }
 
-        if (!_apiIdByFingerprint.TryGetValue(apiFingerprint, out var apiId))
-            return;
+    private sealed class IntermediateObsoletion(bool isError, string message, string diagnosticId, string urlFormat)
+    {
+        public bool IsError { get; } = isError;
+        public string Message { get; } = message;
+        public string DiagnosticId { get; } = diagnosticId;
+        public string UrlFormat { get; } = urlFormat;
+    }
 
-        _connection.Execute(
-            @"
-                INSERT INTO [ApiUsages]
-                    (ApiId, UsageSourceId, Percentage)
-                VALUES
-                    (@ApiId, @UsageSourceId, @Percentage)
-            ",
-            new {
-                ApiId = apiId,
-                UsageSourceId = usageSourceId,
-                Percentage = percentage
-            },
-            _transaction
-        );
+    private sealed class IntermediatePreviewRequirement(string message, string url)
+    {
+        public string Message { get; } = message;
+        public string Url { get; } = url;
+    }
+
+    private sealed class IntermediateExperimental(string diagnosticId, string urlFormat)
+    {
+        public string DiagnosticId { get; } = diagnosticId;
+        public string UrlFormat { get; } = urlFormat;
+    }
+
+    private sealed class IntermediatePlatformSupport(string platformName, bool isSupported)
+    {
+        public string PlatformName { get; } = platformName;
+        public bool IsSupported { get; } = isSupported;
+    }
+
+    private sealed class IntermediateFramework(string name)
+    {
+        public string Name { get; } = name;
+
+        public List<IntermediaAssembly> Assemblies { get; } = new();
+    }
+
+    private sealed class IntermediatePackage(Guid fingerprint, string name, string version)
+    {
+        public Guid Fingerprint { get; } = fingerprint;
+        public string Name { get; } = name;
+        public string Version { get; } = version;
+        public List<(IntermediateFramework, IntermediaAssembly)> Assemblies { get; } = new();
+    }
+
+    private sealed class IntermediateExtension(Guid fingerprint, IntermediaApi method)
+    {
+        public Guid Fingerprint { get; } = fingerprint;
+        public IntermediaApi Method { get; } = method;
+    }
+
+    private sealed class IntermediateUsageSource(string name, DateOnly date, FrozenDictionary<Guid, float> usages)
+    {
+        public string Name { get; } = name;
+        public DateOnly Date { get; } = date;
+        public FrozenDictionary<Guid, float> Usages { get; } = usages;
     }
 }

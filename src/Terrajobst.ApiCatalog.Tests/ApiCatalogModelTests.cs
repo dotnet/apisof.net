@@ -16,7 +16,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Read_MagicNumber_Invalid_Throws()
     {
-        var invalidMagicNumber = Encoding.UTF8.GetBytes("APIC_TFB");
+        var invalidMagicNumber = "APIC_TFB"u8.ToArray();
         await using var stream = new MemoryStream(invalidMagicNumber);
         await Assert.ThrowsAsync<InvalidDataException>(() => ApiCatalogModel.LoadAsync(stream));
     }
@@ -27,7 +27,7 @@ public class ApiCatalogModelTests
         using var stream = new MemoryStream();
         using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
         {
-            writer.Write(Encoding.UTF8.GetBytes("APICATFB"));
+            writer.Write("APICATFB"u8);
             writer.Write(1);
         }
 
@@ -42,7 +42,7 @@ public class ApiCatalogModelTests
         await using var stream = new MemoryStream();
         await using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
         {
-            writer.Write(Encoding.UTF8.GetBytes("APICATFB"));
+            writer.Write("APICATFB"u8);
             writer.Write(999_999_999);
         }
 
