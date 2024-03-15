@@ -9,7 +9,7 @@ public sealed class Pack
                 IReadOnlyDictionary<string, string>? aliasTo)
     {
         aliasTo ??= ReadOnlyDictionary<string, string>.Empty;
-        
+
         Kind = kind;
         Version = version;
         AliasTo = aliasTo.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -20,7 +20,7 @@ public sealed class Pack
 
     public PackKind Kind { get; }
     public string Version { get; }
-    
+
     [JsonPropertyName("alias-to")]
     public IReadOnlyDictionary<string, string> AliasTo { get; }
 }

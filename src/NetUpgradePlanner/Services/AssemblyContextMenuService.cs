@@ -23,7 +23,7 @@ internal sealed class AssemblyContextMenuService
     {
         _workspaceService = workspaceService;
         _selectFrameworkDialogService = selectFrameworkDialogService;
-        _selectPlatformsDialogService = selectPlatformsDialogService;       
+        _selectPlatformsDialogService = selectPlatformsDialogService;
         _serviceProvider = serviceProvider;
     }
 

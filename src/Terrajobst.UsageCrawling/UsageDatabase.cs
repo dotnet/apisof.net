@@ -242,7 +242,7 @@ public sealed class UsageDatabase : IDisposable
                      CAST(COUNT(distinct u.PackageID) AS real) / (SELECT COUNT(distinct PackageID) FROM Usages) AS Percentage
             FROM     Usages u
                          JOIN ApiAncestors AA ON u.ApiId = AA.ApiId
-            GROUP BY AA.AncestorId          
+            GROUP BY AA.AncestorId
             """);
 
         await using var writer = new StreamWriter(outputPath);

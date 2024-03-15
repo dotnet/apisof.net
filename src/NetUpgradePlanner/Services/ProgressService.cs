@@ -90,7 +90,7 @@ internal sealed class ProgressService
         Percentage = Math.Clamp((float)value / maximum, 0.0f, 1.0f);
         OnChanged();
     }
-   
+
     public event EventHandler? Changed;
 
     internal sealed class ProgressMonitor : IProgressMonitor

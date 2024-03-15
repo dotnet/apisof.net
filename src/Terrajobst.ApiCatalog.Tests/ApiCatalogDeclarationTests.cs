@@ -1977,7 +1977,7 @@ public class ApiCatalogDeclarationTests
                 public class TheClass
                 {
                     private TheClass() { }
-                    
+
                     public int TheMethod([DefaultValue(0)] int arg0) => throw null;
                 }
             }
@@ -2193,7 +2193,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static IEnumerable<string> Test() => throw null; 
+                    public static IEnumerable<string> Test() => throw null;
                 }
             }
         ";
@@ -2219,7 +2219,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static string[] Test() => throw null; 
+                    public static string[] Test() => throw null;
                 }
             }
         ";
@@ -2245,7 +2245,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static string[,,] Test() => throw null; 
+                    public static string[,,] Test() => throw null;
                 }
             }
         ";
@@ -2271,7 +2271,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static unsafe int* Test() => throw null; 
+                    public static unsafe int* Test() => throw null;
                 }
             }
         ";
@@ -2297,7 +2297,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static int? Test() => throw null; 
+                    public static int? Test() => throw null;
                 }
             }
         ";
@@ -2323,7 +2323,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static string? Test() => throw null; 
+                    public static string? Test() => throw null;
                 }
             }
         ";
@@ -2349,7 +2349,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static string Test() => throw null; 
+                    public static string Test() => throw null;
                 }
             }
         ";
@@ -2376,7 +2376,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static string Test() => throw null; 
+                    public static string Test() => throw null;
                 }
             }
         ";
@@ -2403,7 +2403,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static (string, int) Test() => throw null; 
+                    public static (string, int) Test() => throw null;
                 }
             }
         ";
@@ -2430,7 +2430,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static (string Key, int Value) Test() => throw null; 
+                    public static (string Key, int Value) Test() => throw null;
                 }
             }
         ";
@@ -2457,7 +2457,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public static (string, int Value, float) Test() => throw null; 
+                    public static (string, int Value, float) Test() => throw null;
                 }
             }
         ";
@@ -2483,7 +2483,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public unsafe static T M<T>(delegate*<T, int, void> combinator) => throw null; 
+                    public unsafe static T M<T>(delegate*<T, int, void> combinator) => throw null;
                 }
             }
         ";
@@ -2510,7 +2510,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public unsafe static T M<T>(delegate*<void> combinator) => throw null; 
+                    public unsafe static T M<T>(delegate*<void> combinator) => throw null;
                 }
             }
         ";
@@ -2537,7 +2537,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public unsafe static T M<T>(delegate* managed<void> combinator) => throw null; 
+                    public unsafe static T M<T>(delegate* managed<void> combinator) => throw null;
                 }
             }
         ";
@@ -2564,7 +2564,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public unsafe static T M<T>(delegate* unmanaged<void> combinator) => throw null; 
+                    public unsafe static T M<T>(delegate* unmanaged<void> combinator) => throw null;
                 }
             }
         ";
@@ -2595,7 +2595,7 @@ public class ApiCatalogDeclarationTests
             {
                 public static class TheClass
                 {
-                    public unsafe static T M<T>(delegate* unmanaged[%CC%]<void> combinator) => throw null; 
+                    public unsafe static T M<T>(delegate* unmanaged[%CC%]<void> combinator) => throw null;
                 }
             }
         ".Replace("%CC%", callingConvention);

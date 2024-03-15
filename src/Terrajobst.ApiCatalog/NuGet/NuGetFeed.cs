@@ -29,7 +29,7 @@ public sealed class NuGetFeed
     {
         if (TryGetAzureDevOpsFeed(FeedUrl, out var organization, out var project, out var feed))
             return await GetAllPackagesFromAzureDevOpsFeedAsync(organization, project, feed);
-    
+
         var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
         var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
         var catalogIndexUrl = serviceIndex.GetServiceEntryUri("Catalog/3.0.0")?.ToString();
@@ -197,7 +197,7 @@ public sealed class NuGetFeed
             goto Retry;
         }
     }
-    
+
     public async Task CopyPackageStreamAsync(PackageIdentity identity, Stream destination)
     {
         await TryCopyPackageStreamAsync(identity, destination);
@@ -232,8 +232,8 @@ public sealed class NuGetFeed
 
         if (match.Success)
         {
-            organization = match.Groups["Organization"].Value; 
-            project = match.Groups["Project"].Value; 
+            organization = match.Groups["Organization"].Value;
+            project = match.Groups["Project"].Value;
             feed = match.Groups["Feed"].Value;
             return true;
         }

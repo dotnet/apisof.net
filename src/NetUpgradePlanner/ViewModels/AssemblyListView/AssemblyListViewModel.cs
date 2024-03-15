@@ -12,7 +12,7 @@ internal sealed class AssemblyListViewModel : ViewModel
     private IReadOnlyList<AssemblyViewModel> _assemblies = Array.Empty<AssemblyViewModel>();
     private AssemblyViewModel? _selectedAssembly;
 
-    public AssemblyListViewModel(WorkspaceService workspaceService,                            
+    public AssemblyListViewModel(WorkspaceService workspaceService,
                                  IconService iconService)
     {
         _workspaceService = workspaceService;

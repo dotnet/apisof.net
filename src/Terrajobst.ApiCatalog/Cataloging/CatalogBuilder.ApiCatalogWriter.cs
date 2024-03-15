@@ -42,7 +42,7 @@ public sealed partial class CatalogBuilder
         {
             _builder = builder;
         }
-        
+
         public void Write(Stream stream)
         {
             var tables = new[]
@@ -401,7 +401,7 @@ public sealed partial class CatalogBuilder
                 .OrderBy(t => t.ApiOffset)
                 .ThenBy(t => t.AssemblyOffset)
                 .ToArray();
-                
+
             _obsoletionTable.WriteInt32(entries.Length);
 
             foreach (var entry in entries)
@@ -667,7 +667,7 @@ public sealed partial class CatalogBuilder
             public void WriteGuid(Guid guid)
             {
                 var span = (Span<byte>)stackalloc byte[16];
-                var success = guid.TryWriteBytes(span); 
+                var success = guid.TryWriteBytes(span);
                 Debug.Assert(success);
                 _writer.Write(span);
             }

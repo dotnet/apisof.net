@@ -66,5 +66,5 @@ public class KnownFrameworkReference
         }
 
         return result.ToArray();
-    }  
+    }
 }

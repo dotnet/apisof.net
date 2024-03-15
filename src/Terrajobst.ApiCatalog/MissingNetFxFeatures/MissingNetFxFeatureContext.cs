@@ -14,8 +14,8 @@ public sealed class MissingNetFxFeatureContext
     private MissingNetFxFeatureContext()
     {
         Features = LoadFeatures();
-    }  
-    
+    }
+
     public IReadOnlyList<MissingNetFxFeature> Features { get; }
 
     private IReadOnlyList<MissingNetFxFeature> LoadFeatures()

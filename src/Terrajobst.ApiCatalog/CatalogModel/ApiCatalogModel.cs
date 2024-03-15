@@ -409,7 +409,7 @@ public sealed partial class ApiCatalogModel
 
         return result;
     }
-    
+
     public ApiModel? GetForwardedApi(ApiModel api)
     {
         if (_forwardedApis is null)
@@ -508,7 +508,7 @@ public sealed partial class ApiCatalogModel
 
         return new ApiCatalogModel(formatVersion, sizeOnDisk, buffer, tableSizes);
     }
-   
+
     public struct FrameworkEnumerator : IEnumerable<FrameworkModel>, IEnumerator<FrameworkModel>
     {
         private readonly ApiCatalogModel _catalog;
@@ -813,7 +813,7 @@ public sealed partial class ApiCatalogModel
         {
         }
     }
-    
+
     public struct ApiEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
     {
         private readonly ApiCatalogModel _catalog;

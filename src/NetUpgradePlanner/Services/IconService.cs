@@ -26,7 +26,7 @@ internal sealed class IconService
     private static string GetUri(IconKind icon)
     {
         var iconName = icon.ToString();
-        return GetUri(iconName);        
+        return GetUri(iconName);
     }
 
     private static string GetUri(string iconName)

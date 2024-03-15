@@ -63,7 +63,7 @@ internal sealed class MainWindowViewModel : ViewModel
         CheckForApplicationUpdateCommand = new Command(async () => await CheckForApplicationUpdateAsync(), () => !_progressService.IsRunning &&  !_offlineDetectionService.IsOfflineInstallation);
         UpdateApplicationCommand = new Command(async () => await UpdateApplicationAsync(), () => !_progressService.IsRunning && !_offlineDetectionService.IsOfflineInstallation);
         AboutCommand = new Command(() => About());
-        
+
         UpdateTitle();
     }
 
@@ -92,7 +92,7 @@ internal sealed class MainWindowViewModel : ViewModel
     public ICommand SendFeedbackCommand { get; }
 
     public ICommand CheckForApplicationUpdateCommand { get; }
-    
+
     public ICommand UpdateApplicationCommand { get; }
 
     public ICommand AboutCommand { get; }
@@ -101,7 +101,7 @@ internal sealed class MainWindowViewModel : ViewModel
     {
         get => !_offlineDetectionService.IsOfflineInstallation;
     }
-    
+
     public bool HasApplicationUpdate
     {
         get => _hasApplicationUpdate;
@@ -304,7 +304,7 @@ internal sealed class MainWindowViewModel : ViewModel
         var processDirectory = Path.GetDirectoryName(Environment.ProcessPath);
         if (processDirectory is null)
             return;
-        
+
         var dialog = new SaveFileDialog();
         dialog.Filter = $"ZIP Archives (*.zip)|*.zip";
         dialog.FileName = "NetUpgradePlanner_Offline.zip";
@@ -324,7 +324,7 @@ internal sealed class MainWindowViewModel : ViewModel
             archive.CreateEntry("Offline.txt");
         }, "Creating ZIP file...");
     }
-    
+
     private async Task UpdateCatalogAsync()
     {
         await _catalogService.UpdateAsync();
@@ -363,7 +363,7 @@ internal sealed class MainWindowViewModel : ViewModel
         }
         else
         {
-            var result = MessageBox.Show("Update available. Update now?", 
+            var result = MessageBox.Show("Update available. Update now?",
                                          ThisAssembly.AssemblyTitle,
                                          MessageBoxButton.YesNo,
                                          MessageBoxImage.Question,

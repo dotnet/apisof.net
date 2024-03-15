@@ -44,7 +44,7 @@ internal sealed class FluentCatalogBuilder
     public async Task<ApiCatalogModel> BuildAsync()
     {
         var builder = new CatalogBuilder();
-            
+
         foreach (var doc in _documents)
             builder.IndexDocument(doc);
 

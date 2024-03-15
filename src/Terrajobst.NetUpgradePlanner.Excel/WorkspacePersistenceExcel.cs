@@ -187,7 +187,7 @@ public static class WorkspacePersistenceExcel
             {
                 var assemblyName = assembly.Entry.Name;
                 var severity = problem.ProblemId.Severity.ToString();
-                var category = problem.ProblemId.Category.ToString();                
+                var category = problem.ProblemId.Category.ToString();
                 var url = problem.ProblemId.Url;
                 var text = problem.ProblemId.Text;
                 var textObj = string.IsNullOrEmpty(url)

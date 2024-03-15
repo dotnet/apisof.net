@@ -172,7 +172,7 @@ public sealed partial class CatalogBuilder
         var usageSource = new IntermediateUsageSource(name, date, usageDictionary);
         _usageSources.Add(usageSource.Name, usageSource);
     }
-    
+
     public async Task<ApiCatalogModel> BuildAsync()
     {
         await using var stream = new MemoryStream();
@@ -193,7 +193,7 @@ public sealed partial class CatalogBuilder
         var converter = new ApiCatalogWriter(this);
         converter.Write(stream);
     }
-    
+
     private void DefineApi(Guid fingerprint, ApiKind kind, Guid? parentFingerprint, string name)
     {
         if (_apiByFingerprint.ContainsKey(fingerprint))
@@ -506,7 +506,7 @@ public sealed partial class CatalogBuilder
         {
             _logger.WriteLine($"error: can't find framework {frameworkName}");
             return;
-        }        
+        }
 
         if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
         {
@@ -526,7 +526,7 @@ public sealed partial class CatalogBuilder
         package = new IntermediatePackage(fingerprint, name, version);
         _packageByFingerprint.Add(package.Fingerprint, package);
     }
-    
+
     private void DefinePackageAssembly(Guid packageFingerprint, string frameworkName, Guid assemblyFingerprint)
     {
         if (!_packageByFingerprint.TryGetValue(packageFingerprint, out var package))
@@ -540,7 +540,7 @@ public sealed partial class CatalogBuilder
             _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
             return;
         }
-        
+
         DefineFramework(frameworkName);
 
         var framework = _frameworkByName[frameworkName];
@@ -558,7 +558,7 @@ public sealed partial class CatalogBuilder
         public List<IntermediaApi>? Children { get; set; }
         public List<IntermediateExtension>? Extensions { get; set; }
     }
-    
+
     private sealed class IntermediaAssembly(int index, Guid fingerprint, string name, string version, string publicKeyToken)
     {
         public int Index { get; } = index;

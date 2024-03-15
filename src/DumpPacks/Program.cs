@@ -37,14 +37,14 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
     var version = Version.Parse(versionText);
 
     Console.WriteLine($"// net{version.Major}.{version.Minor}");
-        
+
     var environment = await WorkloadEnvironment.LoadAsync(versionDirectory);
 
     foreach (var (pack, workloads) in environment.GetFlattenedPacks())
     {
         if (pack.Kind is not (PackKind.Library or PackKind.Framework))
             continue;
-            
+
         if (pack.Name.Contains(".Runtime.", StringComparison.OrdinalIgnoreCase))
             continue;
 

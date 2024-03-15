@@ -10,6 +10,6 @@ internal sealed class OfflineDetectionService
         var offlineFile = Path.Join(appDirectory, "Offline.txt");
         IsOfflineInstallation = File.Exists(offlineFile);
     }
-    
+
     public bool IsOfflineInstallation { get; }
 }

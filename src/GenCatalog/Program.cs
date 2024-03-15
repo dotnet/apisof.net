@@ -325,7 +325,7 @@ internal static class Program
             builder.IndexUsages(path, name, date);
 
         builder.Build(catalogModelPath);
-        
+
         var model = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var stats = model.GetStatistics().ToString();
         Console.WriteLine("Catalog stats:");

@@ -1086,7 +1086,7 @@ public sealed class FrameworkDownloader
         foreach (var frameworkReference in frameworkDefinition.FrameworkReferences)
         {
             var feed = new NuGetFeed(frameworkReference.NuGetFeed);
-            var tpVersion = NuGetVersion.Parse(frameworkReference.TargetingPackVersion); 
+            var tpVersion = NuGetVersion.Parse(frameworkReference.TargetingPackVersion);
 
             var versions = await feed.GetAllVersionsAsync(frameworkReference.TargetingPackName);
             var latest = versions.Where(v => v.Major == tpVersion.Major && v.Minor == tpVersion.Minor).DefaultIfEmpty().Max();
@@ -1124,7 +1124,7 @@ public sealed class FrameworkDownloader
                     Console.WriteLine($"warning: {frameworkReference.TargetingPackName}: can't find '{qualifiedPath}'");
                     continue;
                 }
-                
+
                 var path = Path.GetRelativePath(frameworkPath, qualifiedPath);
                 var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
                 var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();

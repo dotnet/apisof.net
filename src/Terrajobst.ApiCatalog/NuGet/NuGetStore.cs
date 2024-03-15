@@ -17,7 +17,7 @@ public class NuGetStore
 
         if (feeds.Length == 0)
             throw new ArgumentException("must have at least one feed", nameof(feeds));
-        
+
         _packagesCachePath = packagesCachePath;
         _feeds = feeds;
     }
@@ -46,7 +46,7 @@ public class NuGetStore
             if (!success)
                 throw new Exception($"Can't resolve package {id} {version}");
         }
-    
+
         return new PackageArchiveReader(path);
     }
 
@@ -55,7 +55,7 @@ public class NuGetStore
         if (!_packageVersionCache.TryGetValue(id, out var versions))
         {
             var allVersions = new SortedSet<NuGetVersion>();
-            
+
             foreach (var feed in _feeds)
             {
                 var feedVersions = await feed.GetAllVersionsAsync(id, includeUnlisted: true);
@@ -63,7 +63,7 @@ public class NuGetStore
             }
 
             versions = allVersions.ToArray();
-            
+
             _packageVersionCache.Add(id, versions);
         }
 
