@@ -25,7 +25,7 @@ jobs:
 
     - name: Generate usage
       env:
-        AzureBlobStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
       run: |
         cd ./src/GenUsageNuGet
         dotnet run -- crawl

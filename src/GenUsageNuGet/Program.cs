@@ -201,10 +201,10 @@ internal sealed class Program
         if (!string.IsNullOrEmpty(outputPath))
             return new FileSystemCrawlerStore(outputPath);
 
-        var connectionString = config["AzureBlobStorageConnectionString"];
+        var connectionString = config["AzureStorageConnectionString"];
         if (connectionString is null)
         {
-            Console.Error.WriteLine("error: can't find configuration for AzureBlobStorageConnectionString");
+            Console.Error.WriteLine("error: can't find configuration for AzureStorageConnectionString");
             Environment.Exit(1);
         }
 
