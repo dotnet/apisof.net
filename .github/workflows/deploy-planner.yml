@@ -67,7 +67,7 @@ jobs:
         path: artifacts/squirrel-release
 
     - name: Upload release
-      uses: azure/CLI@v1
+      uses: azure/cli@v2
       env:
         AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
       with:
