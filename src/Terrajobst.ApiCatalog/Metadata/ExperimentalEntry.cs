@@ -22,11 +22,19 @@ public sealed class ExperimentalEntry
                                                      nameof(System.Diagnostics.CodeAnalysis),
                                                      "ExperimentalAttribute"))
             {
-                var diagnosticId = attribute.ConstructorArguments[0].Value as string;
-                var urlFormat = attribute.GetNamedArgument("UrlFormat");
+                var diagnosticId = GetFirstArgumentAsString(attribute) ?? string.Empty;
+                var urlFormat = attribute.GetNamedArgument("UrlFormat") ?? string.Empty;
 
                 return new ExperimentalEntry(diagnosticId, urlFormat);
             }
+        }
+
+        static string GetFirstArgumentAsString(AttributeData attribute)
+        {
+            if (attribute.ConstructorArguments.Length == 1)
+                return attribute.ConstructorArguments[0].Value as string;
+
+            return null;
         }
 
         return null;
