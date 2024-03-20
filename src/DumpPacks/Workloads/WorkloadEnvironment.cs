@@ -1,6 +1,7 @@
 ﻿using System.Collections.Frozen;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using NuGet.Versioning;
 
 public sealed class WorkloadEnvironment
 {
@@ -18,6 +19,7 @@ public sealed class WorkloadEnvironment
                 packByName.Add(name, pack);
         }
 
+        Manifests = manifests;
         Workloads = workloadByName.ToFrozenDictionary();
         Packs = packByName.ToFrozenDictionary();
 
@@ -27,6 +29,8 @@ public sealed class WorkloadEnvironment
         foreach (var (key, value) in Packs)
             value.Name = key;
     }
+
+    public IReadOnlyList<WorkloadManifest> Manifests { get; }
 
     public FrozenDictionary<string, Workload> Workloads { get; }
 
@@ -43,19 +47,60 @@ public sealed class WorkloadEnvironment
             }
         };
 
-        var manifestPaths = Directory.GetFiles(path, "WorkloadManifest.json", SearchOption.AllDirectories);
         var manifests = new List<WorkloadManifest>();
 
-        foreach (var manifestPath in manifestPaths)
+        foreach (var workloadDirectory in Directory.GetDirectories(path))
         {
+            var manifestPath = ResolveManifestPath(workloadDirectory);
+            if (manifestPath is null)
+            {
+                Console.WriteLine($"warning: can't manifest in {workloadDirectory}");
+                continue;
+            }
+            
             await using var manifestStream = File.OpenRead(manifestPath);
-
             var manifest = await JsonSerializer.DeserializeAsync<WorkloadManifest>(manifestStream, options);
             if (manifest is not null)
                 manifests.Add(manifest);
         }
 
         return new WorkloadEnvironment(manifests);
+
+        static string? ResolveManifestPath(string workloadDirectory)
+        {
+            const string manifestName = "WorkloadManifest.json";
+
+            var versionlessPath = Path.Join(workloadDirectory, manifestName);
+            if (File.Exists(versionlessPath))
+                return versionlessPath;
+            
+            var versionDirectories = Directory.GetDirectories(workloadDirectory);
+            if (versionDirectories.Length == 0)
+            {
+                Console.WriteLine($"warning: can't find version directories in {workloadDirectory}");
+                return null;
+            }
+
+            var highestVersion = versionDirectories.Select(p => (Path: p, Version: ParseVersionOrNull(p)))
+                                                   .Where(t => t.Version is not null)
+                                                   .OrderBy(t => t.Version)
+                                                   .LastOrDefault();
+
+            if (highestVersion != default)
+            {
+                var highestVersionPath = Path.Join(highestVersion.Path, "WorkloadManifest.json");
+                if (File.Exists(highestVersionPath))
+                    return highestVersionPath;
+            }
+
+            return null;
+        }
+        
+        static NuGetVersion? ParseVersionOrNull(string path)
+        {
+            var fileName = Path.GetFileName(path);
+            return !NuGetVersion.TryParse(fileName, out var result) ? null : result;
+        }
     }
 
     public IReadOnlyList<(Pack, HashSet<Workload> Workloads)> GetFlattenedPacks()

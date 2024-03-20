@@ -7,7 +7,7 @@ Console.WriteLine("//");
 Console.WriteLine("// Built-in Packs");
 Console.WriteLine("//");
 
-var sdksRoot =Path.Join(dotnetDirectory, "sdk");
+var sdksRoot = Path.Join(dotnetDirectory, "sdk");
 
 var references = KnownFrameworkReference.Load(sdksRoot);
 
