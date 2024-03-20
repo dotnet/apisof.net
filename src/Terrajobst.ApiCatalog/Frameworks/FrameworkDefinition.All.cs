@@ -637,7 +637,7 @@ public partial class FrameworkDefinition
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
-                new PackReference("Microsoft.Maui.Graphics.Windows")
+                new PackReference("Microsoft.Maui.Graphics.Win2D.WinUI.Desktop")
                 {
                     Version = "8.0.6",
                     Kind = PackKind.Library,
@@ -771,7 +771,7 @@ public partial class FrameworkDefinition
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
-                new PackReference("Microsoft.Maui.Graphics.Windows")
+                new PackReference("Microsoft.Maui.Graphics.Win2D.WinUI.Desktop")
                 {
                     Version = "9.0.0",
                     Kind = PackKind.Library,

@@ -50,6 +50,14 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 
         var workloadNames = string.Join(", ", workloads.Select(w => w.Name).Order());
 
-        Console.WriteLine($"{pack.Name}, {pack.Version} ({pack.Kind}): {workloadNames}");
+        if (!pack.AliasTo.Any())
+        {
+            Console.WriteLine($"{pack.Name}, {pack.Version} ({pack.Kind}): {workloadNames}");
+        }
+        else
+        {
+            foreach (var aliasTo in pack.AliasTo.Values.Distinct().Order())
+                Console.WriteLine($"{aliasTo}, {pack.Version} ({pack.Kind}): {workloadNames}");
+        }
     }
 }
