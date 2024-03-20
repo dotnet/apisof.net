@@ -98,16 +98,23 @@ public static class FrameworkDownloader
                         foreach (var node in frameworkList.Descendants("File"))
                         {
                             var type = node.Attribute("Type")?.Value;
-                            var relativePath = node.Attribute("Path").Value;
+                            var relativePath = node.Attribute("Path")!.Value;
                             if (type is not null && type != "Managed")
                                 continue;
 
                             relativePath = package.GetFiles().Single(p => p.EndsWith(relativePath, StringComparison.OrdinalIgnoreCase));
 
-                            var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
-                            var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
-                            if (platformFramework.Profile is null || profiles.Contains(platformFramework.Profile, StringComparer.OrdinalIgnoreCase))
-                                packagePaths.Add(relativePath);
+                            // TODO: Should we record the profiles?
+                            //
+                            //       This would be useful for WPF and WinForms in .NET Core 3.x.
+                            //
+                            // var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
+                            // var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
+                            //
+                            // if (string.IsNullOrEmpty(platformFramework.Profile) || profiles.Contains(platformFramework.Profile, StringComparer.OrdinalIgnoreCase))
+                            //    packagePaths.Add(relativePath);
+                            
+                            packagePaths.Add(relativePath);
                         }
                     }
 
