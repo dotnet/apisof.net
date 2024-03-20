@@ -243,6 +243,11 @@ internal static class CatalogExtensions
     {
         return namedArguments.OrderBy(kv => kv.Key);
     }
+    
+    public static string GetSingleArgumentAsString(this AttributeData attribute)
+    {
+        return attribute.ConstructorArguments is [{ Value: string result }] ? result : null;
+    }
 
     public static string GetNamedArgument(this AttributeData attribute, string name)
     {

@@ -26,8 +26,7 @@ public sealed class PlatformSupportEntry
                                                      nameof(System.Runtime.Versioning),
                                                      nameof(SupportedOSPlatformAttribute)))
             {
-                if (attribute.ConstructorArguments.Length == 1 &&
-                    attribute.ConstructorArguments[0].Value is string argument)
+                if (attribute.ConstructorArguments is [{ Value: string argument }])
                 {
                     supportedPlatforms ??= new List<string>();
                     supportedPlatforms.Add(argument);
@@ -39,8 +38,7 @@ public sealed class PlatformSupportEntry
                                                      nameof(System.Runtime.Versioning),
                                                      nameof(UnsupportedOSPlatformAttribute)))
             {
-                if (attribute.ConstructorArguments.Length == 1 &&
-                    attribute.ConstructorArguments[0].Value is string argument)
+                if (attribute.ConstructorArguments is [{ Value: string argument }])
                 {
                     unsupportedPlatforms ??= new List<string>();
                     unsupportedPlatforms.Add(argument);

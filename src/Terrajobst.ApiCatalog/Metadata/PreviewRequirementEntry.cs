@@ -24,13 +24,7 @@ public sealed class PreviewRequirementEntry
                                                      nameof(System.Runtime.Versioning),
                                                      nameof(RequiresPreviewFeaturesAttribute)))
             {
-                var message = (string)null;
-
-                if (attribute.ConstructorArguments.Length == 1)
-                {
-                    message = attribute.ConstructorArguments[0].Value as string;
-                }
-
+                var message = attribute.GetSingleArgumentAsString();
                 var url = attribute.GetNamedArgument(nameof(RequiresPreviewFeaturesAttribute.Url));
 
                 return new PreviewRequirementEntry(message, url);

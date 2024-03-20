@@ -26,14 +26,14 @@ public sealed class ObsoletionEntry
                 var message = (string)null;
                 var isError = false;
 
-                if (attribute.ConstructorArguments.Length == 1)
+                if (attribute.ConstructorArguments is [{ Value: string arg1_0 }])
                 {
-                    message = attribute.ConstructorArguments[0].Value as string;
+                    message = arg1_0;
                 }
-                else if (attribute.ConstructorArguments.Length == 2)
+                else if (attribute.ConstructorArguments is [{ Value: string arg2_0 }, { Value: bool arg2_1 }])
                 {
-                    message = attribute.ConstructorArguments[0].Value as string;
-                    isError = attribute.ConstructorArguments[1].Value is true;
+                    message = arg2_0;
+                    isError = arg2_1;
                 }
 
                 var diagnosticId = attribute.GetNamedArgument(nameof(ObsoleteAttribute.DiagnosticId));
