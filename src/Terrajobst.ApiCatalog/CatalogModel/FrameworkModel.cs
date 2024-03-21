@@ -26,6 +26,8 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
         }
     }
 
+    public bool IsPreview => _catalog.IsPreviewFramework(this);
+    
     public AssemblyEnumerator Assemblies
     {
         get

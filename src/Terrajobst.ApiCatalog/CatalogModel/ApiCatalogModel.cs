@@ -3,6 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -43,6 +44,7 @@ public sealed partial class ApiCatalogModel
     private Dictionary<Guid, int> _apiOffsetByGuid;
     private Dictionary<Guid, int> _extensionMethodOffsetByGuid;
     private Dictionary<int, int> _forwardedApis;
+    private HashSet<int> _previewFrameworks;
 
     private ApiCatalogModel(int formatVersion, int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
@@ -202,6 +204,52 @@ public sealed partial class ApiCatalogModel
 
         var offset = _extensionMethodOffsetByGuid[guid];
         return new ExtensionMethodModel(this, offset);
+    }
+
+    internal bool IsPreviewFramework(FrameworkModel model)
+    {
+        if (_previewFrameworks is null)
+        {
+            var previewFrameworks = GetPreviewFrameworks(this);
+            Interlocked.CompareExchange(ref _previewFrameworks, previewFrameworks, null);
+        }
+
+        return _previewFrameworks.Contains(model.Id);
+        
+        static HashSet<int> GetPreviewFrameworks(ApiCatalogModel apiCatalogModel)
+        {
+            var previewFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            
+            foreach (var framework in FrameworkDefinition.All)
+            {
+                if (!framework.IsPreview)
+                    continue;
+
+                previewFrameworkNames.Add(framework.Name);
+
+                foreach (var pack in framework.BuiltInPacks.Concat(framework.WorkloadPacks))
+                {
+                    foreach (var platform in pack.Platforms)
+                    {
+                        if (string.IsNullOrEmpty(platform))
+                            continue;
+
+                        var platformFramework = $"{framework.Name}-{platform}";
+                        previewFrameworkNames.Add(platformFramework);
+                    }
+                }
+            }
+
+            var result = new HashSet<int>();
+
+            foreach (var framework in apiCatalogModel.Frameworks)
+            {
+                if (previewFrameworkNames.Contains(framework.Name))
+                    result.Add(framework.Id);
+            }
+
+            return result;
+        }
     }
 
     internal string GetString(int offset)

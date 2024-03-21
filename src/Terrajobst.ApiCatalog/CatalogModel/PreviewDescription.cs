@@ -1,4 +1,5 @@
-﻿using NuGet.Versioning;
+﻿using NuGet.Frameworks;
+using NuGet.Versioning;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -8,6 +9,7 @@ public readonly struct PreviewDescription
 {
     public static PreviewDescription? Create(ApiModel api)
     {
+        FrameworkModel? apiPreviewFramework = null;
         PreviewRequirementModel? apiPreviewRequirement = null;
         ExperimentalModel? apiExperimental = null;
         PackageModel? apiPrereleasePackage = null;
@@ -20,48 +22,87 @@ public readonly struct PreviewDescription
             var declarationExperimental = declaration.GetEffectiveExperimental();
             apiExperimental ??= declarationExperimental;
 
+            var declarationPreviewFramework = declaration.Assembly.Frameworks.Where(fx => fx.IsPreview)
+                                                                             .Cast<FrameworkModel?>()
+                                                                             .FirstOrDefault();
+            apiPreviewFramework ??= declarationPreviewFramework;
+
+            var hasStableInBoxDeclaration = declarationPreviewRequirement is null &&
+                                            declarationExperimental is null &&
+                                            declarationPreviewFramework is null &&
+                                            declaration.Assembly.Frameworks.Any(IsStableFramework); 
+            if (hasStableInBoxDeclaration)
+                return null;
+
             PackageModel? declarationPrereleasePackage = null;
+            var hasAnyStablePackages = false;
 
             foreach (var (package, _) in declaration.Assembly.Packages)
             {
                 var version = NuGetVersion.Parse(package.Version);
                 if (version.IsPrerelease)
+                {
                     declarationPrereleasePackage = package;
+                }
                 else
+                {
                     declarationPrereleasePackage = null;
+                    hasAnyStablePackages = true;
+                }
             }
 
             apiPrereleasePackage ??= declarationPrereleasePackage;
 
-            var declarationIsStable = declarationPreviewRequirement is null &&
-                                      declarationExperimental is null &&
-                                      declarationPrereleasePackage is null;
+            var hasStablePackage = declarationPrereleasePackage is null &&
+                                   hasAnyStablePackages;
 
-            if (declarationIsStable)
+            if (hasStablePackage)
                 return null;
         }
 
         if (apiPreviewRequirement is not null)
         {
             var description = apiPreviewRequirement.Value.Message;
+            if (string.IsNullOrEmpty(description))
+                description = "The API requires turning on platform preview features.";
             var url = apiPreviewRequirement.Value.Url;
             return new PreviewDescription(PreviewReason.MarkedWithRequiresPreviewFeatures, description, url);
         }
 
         if (apiExperimental is not null)
         {
-            var description = $"{apiExperimental.Value.DiagnosticId}: This API is marked as experimental.";
+            var diagnosticId = apiExperimental.Value.DiagnosticId;
+            var description = string.IsNullOrEmpty(diagnosticId)
+                                ? "This API is marked as experimental."
+                                : $"{diagnosticId}: This API is marked as experimental.";
             var url = apiExperimental.Value.Url;
             return new PreviewDescription(PreviewReason.MarkedWithExperimental, description, url);
         }
 
+        if (apiPreviewFramework is not null)
+        {
+            var description = "The API is contained in a preview framework.";
+            return new PreviewDescription(PreviewReason.FrameworkPreview, description, null);
+        }
+
         if (apiPrereleasePackage is not null)
         {
-            var description = $"This API is contained in a prerelease package.";
-            return new PreviewDescription(PreviewReason.MarkedWithExperimental, description, null);
+            var description = "This API is contained in a prerelease package.";
+            return new PreviewDescription(PreviewReason.PackagePrerelease, description, null);
         }
 
         return null;
+
+        static bool IsStableFramework(FrameworkModel fx)
+        {
+            if (fx.IsPreview)
+                return false;
+                
+            // For the sake of stability we only consider .NET Framework and .NET Core.
+            var nugetFramework = NuGetFramework.Parse(fx.Name);
+            return string.Equals(nugetFramework.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(nugetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     public PreviewDescription(PreviewReason reason, string description, string url)
@@ -74,4 +115,9 @@ public readonly struct PreviewDescription
     public PreviewReason Reason { get; }
     public string Description { get; }
     public string Url { get; }
+
+    public override string ToString()
+    {
+        return Description;
+    }
 }
