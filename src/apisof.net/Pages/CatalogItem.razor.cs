@@ -74,7 +74,7 @@ public partial class CatalogItem
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework.GetShortFolderName() == SelectedFramework) ??
                                Availability.Frameworks.FirstOrDefault();
         PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedFramework);
-        SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(SelectedAvailability);
+        SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(Api);
 
         if (ExtensionMethod is not null)
             Breadcrumbs = ExtensionMethod.Value.ExtendedType.AncestorsAndSelf().Reverse().Append(ExtensionMethod.Value.ExtensionMethod);

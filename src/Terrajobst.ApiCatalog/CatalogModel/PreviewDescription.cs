@@ -6,32 +6,59 @@ namespace Terrajobst.ApiCatalog;
 
 public readonly struct PreviewDescription
 {
-    public static PreviewDescription? Create(ApiFrameworkAvailability availability)
+    public static PreviewDescription? Create(ApiModel api)
     {
-        var previewRequirement = availability.Declaration.GetEffectivePreviewRequirement();
-        if (previewRequirement is not null)
+        PreviewRequirementModel? apiPreviewRequirement = null;
+        ExperimentalModel? apiExperimental = null;
+        PackageModel? apiPrereleasePackage = null;
+        
+        foreach (var declaration in api.Declarations)
         {
-            var description = previewRequirement.Value.Message;
-            var url = previewRequirement.Value.Url;
+            var declarationPreviewRequirement = declaration.GetEffectivePreviewRequirement();
+            apiPreviewRequirement ??= declarationPreviewRequirement;
+
+            var declarationExperimental = declaration.GetEffectiveExperimental();
+            apiExperimental ??= declarationExperimental;
+
+            PackageModel? declarationPrereleasePackage = null;
+
+            foreach (var (package, _) in declaration.Assembly.Packages)
+            {
+                var version = NuGetVersion.Parse(package.Version);
+                if (version.IsPrerelease)
+                    declarationPrereleasePackage = package;
+                else
+                    declarationPrereleasePackage = null;
+            }
+
+            apiPrereleasePackage ??= declarationPrereleasePackage;
+
+            var declarationIsStable = declarationPreviewRequirement is null &&
+                                      declarationExperimental is null &&
+                                      declarationPrereleasePackage is null;
+
+            if (declarationIsStable)
+                return null;
+        }
+
+        if (apiPreviewRequirement is not null)
+        {
+            var description = apiPreviewRequirement.Value.Message;
+            var url = apiPreviewRequirement.Value.Url;
             return new PreviewDescription(PreviewReason.MarkedWithRequiresPreviewFeatures, description, url);
         }
 
-        var experimental = availability.Declaration.GetEffectiveExperimental();
-        if (experimental is not null)
+        if (apiExperimental is not null)
         {
-            var description = $"{experimental.Value.DiagnosticId}: This API is marked as experimental.";
-            var url = experimental.Value.Url;
+            var description = $"{apiExperimental.Value.DiagnosticId}: This API is marked as experimental.";
+            var url = apiExperimental.Value.Url;
             return new PreviewDescription(PreviewReason.MarkedWithExperimental, description, url);
         }
 
-        if (availability.Package is not null)
+        if (apiPrereleasePackage is not null)
         {
-            var version = NuGetVersion.Parse(availability.Package.Value.Version);
-            if (version.IsPrerelease)
-            {
-                var description = $"This API is contained in a prerelease package.";
-                return new PreviewDescription(PreviewReason.MarkedWithExperimental, description, null);
-            }
+            var description = $"This API is contained in a prerelease package.";
+            return new PreviewDescription(PreviewReason.MarkedWithExperimental, description, null);
         }
 
         return null;
