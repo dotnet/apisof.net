@@ -38,13 +38,13 @@ jobs:
     - name: dotnet publish
       run: |
         cd src/NetUpgradePlanner
-        dotnet publish -c Release
+        dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
     - name: squirrel pack
       shell: pwsh
       run: |
         mkdir .artifacts/squirrel-release
-        cd .artifacts/bin/NetUpgradePlanner
+        cd .artifacts/publish/NetUpgradePlanner
         Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe");
         Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "../../squirrel-release"
         Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../../squirrel-release"

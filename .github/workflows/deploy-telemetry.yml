@@ -28,7 +28,7 @@ jobs:
     - name: dotnet publish
       run: |
         cd src/NetUpgradePlannerTelemetry
-        dotnet publish -c Release
+        dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
     - name: Deploy Azure Function
       uses: Azure/functions-action@v1

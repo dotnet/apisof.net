@@ -29,13 +29,13 @@ jobs:
     - name: dotnet publish
       run: |
         cd src/apisof.net
-        dotnet publish -c Release /p:SourceRevisionId=${{ github.sha }}
+        dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: site
-        path: .artifacts/bin/apisof.net
+        path: .artifacts/publish/apisof.net
 
   deploy:
     needs: build
@@ -46,11 +46,11 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: site
-        path: .artifacts/bin/apisof.net
+        path: .artifacts/publish/apisof.net
 
     - name: webapps-deploy
       uses: azure/webapps-deploy@v3
       with:
         app-name: apisofdotnet
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }}
-        package: .artifacts/bin/apisof.net
+        package: .artifacts/publish/apisof.net
