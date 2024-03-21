@@ -29,13 +29,13 @@ jobs:
     - name: Build packages
       run: |
         cd src/
-        dotnet build -c Release -o '../artifacts/bin' /p:SourceRevisionId=${{ github.sha }}
+        dotnet build -c Release /p:SourceRevisionId=${{ github.sha }}
 
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: bin
-        path: artifacts/bin
+        path: .artifacts/package
 
   deploy:
     needs: build
@@ -50,8 +50,8 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: bin
-        path: artifacts/bin
+        path: .artifacts/package
 
     - name: dotnet nuget push
       run: |
-        dotnet nuget push ./artifacts/bin/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_TOKEN }} --skip-duplicate
+        dotnet nuget push .artifacts/package/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_ORG_TOKEN }} --skip-duplicate

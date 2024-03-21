@@ -38,22 +38,22 @@ jobs:
     - name: dotnet publish
       run: |
         cd src/NetUpgradePlanner
-        dotnet publish -c Release -o '../../artifacts/NetUpgradePlanner'
+        dotnet publish -c Release
 
     - name: squirrel pack
       shell: pwsh
       run: |
-        mkdir artifacts/squirrel-release
-        cd artifacts/NetUpgradePlanner
+        mkdir .artifacts/squirrel-release
+        cd .artifacts/bin/NetUpgradePlanner
         Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe");
-        Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "../squirrel-release"
-        Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../squirrel-release"
+        Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "../../squirrel-release"
+        Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../../squirrel-release"
 
     - name: Upload build
       uses: actions/upload-artifact@v4
       with:
         name: squirrel-release
-        path: artifacts/squirrel-release
+        path: .artifacts/squirrel-release
 
   deploy:
     needs: build
@@ -64,7 +64,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: squirrel-release
-        path: artifacts/squirrel-release
+        path: .artifacts/squirrel-release
 
     - name: Upload release
       uses: azure/cli@v2
@@ -72,4 +72,4 @@ jobs:
         AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
       with:
         inlineScript: |
-            az storage blob upload-batch -d squirrel -s artifacts/squirrel-release --overwrite
+            az storage blob upload-batch -d squirrel -s .artifacts/squirrel-release --overwrite
