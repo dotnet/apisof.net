@@ -21,7 +21,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
     {
         get
         {
-            return _catalog.AssemblyTable.ReadGuid(0);
+            return _catalog.AssemblyTable.ReadGuid(_offset);
         }
     }
 
