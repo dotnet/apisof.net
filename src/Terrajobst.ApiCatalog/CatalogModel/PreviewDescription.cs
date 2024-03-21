@@ -65,7 +65,11 @@ public readonly struct PreviewDescription
             var description = apiPreviewRequirement.Value.Message;
             if (string.IsNullOrEmpty(description))
                 description = "The API requires turning on platform preview features.";
+
             var url = apiPreviewRequirement.Value.Url;
+            if (string.IsNullOrEmpty(url))
+                url = "https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2252";
+
             return new PreviewDescription(PreviewReason.MarkedWithRequiresPreviewFeatures, description, url);
         }
 
@@ -75,7 +79,11 @@ public readonly struct PreviewDescription
             var description = string.IsNullOrEmpty(diagnosticId)
                                 ? "This API is marked as experimental."
                                 : $"{diagnosticId}: This API is marked as experimental.";
+
             var url = apiExperimental.Value.Url;
+            if (string.IsNullOrEmpty(url))
+                url = "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-12.0/experimental-attribute";
+
             return new PreviewDescription(PreviewReason.MarkedWithExperimental, description, url);
         }
 
