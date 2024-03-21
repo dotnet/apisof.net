@@ -29,7 +29,7 @@ jobs:
     - name: Build packages
       run: |
         cd src/
-        dotnet deploy /p:SourceRevisionId=${{ github.sha }}
+        dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
     - name: Upload build
       uses: actions/upload-artifact@v4
