@@ -10,7 +10,7 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed partial class ApiCatalogModel
 {
-    public static string Url => "https://apisofdotnet.blob.core.windows.net/catalog/apicatalog.dat";
+    public static string Url => "https://apisof.net/catalog/download";
 
     internal static IReadOnlyList<byte> MagicHeader { get; } = "APICATFB"u8.ToArray();
     internal const int CurrentFormatVersion = 6;
