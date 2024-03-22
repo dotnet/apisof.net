@@ -478,6 +478,7 @@ public sealed partial class ApiCatalogModel
         var result = new Dictionary<int, int>();
         ForwardTypeMembers(result, this, "System.Reflection.TypeInfo", "System.Type");
         ForwardTypeMembers(result, this, "System.Type", "System.Reflection.MemberInfo");
+        ForwardTypeMembers(result, this, "Microsoft.Win32.FileDialog", "Microsoft.Win32.CommonItemDialog");
         return result.ToFrozenDictionary();
 
         static void ForwardTypeMembers(Dictionary<int, int> receiver, ApiCatalogModel catalog, string fromTypeFullName, string toTypeFullName)

@@ -36,6 +36,13 @@ public sealed class AnalysisReport
         var knownFrameworkAssemblies = catalog.GetAssemblyNames();
         var latestNetFramework = catalog.GetLatestNetFramework();
         var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+        
+        foreach (var api in catalog.GetAllApis())
+        {
+            var forwardedApi = catalog.GetForwardedApi(api);
+            if (forwardedApi is not null)
+                apiByGuid[api.Guid] = forwardedApi.Value;
+        }
 
         var availabilityContext = ApiAvailabilityContext.Create(catalog);
         var missingFeatureContext = MissingNetFxFeatureContext.Create();
