@@ -4,118 +4,106 @@ using System.Collections.Frozen;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
-using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
-public sealed partial class ApiCatalogModel
+public sealed class ApiCatalogModel
 {
     public static string Url => "https://apisof.net/catalog/download";
 
-    internal static IReadOnlyList<byte> MagicHeader { get; } = "APICATFB"u8.ToArray();
-    internal const int CurrentFormatVersion = 6;
-
     private readonly int _formatVersion;
-    private readonly int _sizeOnDisk;
+    private readonly int _compressedSize;
     private readonly byte[] _buffer;
-    private readonly int _stringTableLength;
-    private readonly int _platformTableOffset;
-    private readonly int _platformTableLength;
-    private readonly int _frameworkTableOffset;
-    private readonly int _frameworkTableLength;
-    private readonly int _packageTableOffset;
-    private readonly int _packageTableLength;
-    private readonly int _assemblyTableOffset;
-    private readonly int _assemblyTableLength;
-    private readonly int _usageSourcesTableOffset;
-    private readonly int _usageSourcesTableLength;
-    private readonly int _apiTableOffset;
-    private readonly int _apiTableLength;
-    private readonly int _obsoletionTableOffset;
-    private readonly int _obsoletionTableLength;
-    private readonly int _platformSupportTableOffset;
-    private readonly int _platformSupportTableLength;
-    private readonly int _previewRequirementTableOffset;
-    private readonly int _previewRequirementTableLength;
-    private readonly int _experimentalTableOffset;
-    private readonly int _experimentalTableLength;
-    private readonly int _extensionMethodTableOffset;
-    private readonly int _extensionMethodTableLength;
+
+    private readonly TableRange _stringHeapRange;
+    private readonly TableRange _blobHeapRange;
+    private readonly TableRange _platformTableRange;
+    private readonly TableRange _frameworkTableRange;
+    private readonly TableRange _packageTableRange;
+    private readonly TableRange _assemblyTableRange;
+    private readonly TableRange _usageSourcesTableRange;
+    private readonly TableRange _apiTableRange;
+    private readonly TableRange _rootApiTableRange;
+    private readonly TableRange _extensionMethodTableRange;
+    private readonly TableRange _obsoletionTableRange;
+    private readonly TableRange _platformSupportTableRange;
+    private readonly TableRange _previewRequirementTableRange;
+    private readonly TableRange _experimentalTableRange;
 
     private FrozenDictionary<Guid, int> _apiOffsetByGuid;
     private FrozenDictionary<Guid, int> _extensionMethodOffsetByGuid;
     private FrozenDictionary<int, int> _forwardedApis;
     private FrozenSet<int> _previewFrameworks;
 
-    private ApiCatalogModel(int formatVersion, int sizeOnDisk, byte[] buffer, int[] tableSizes)
+    private readonly struct TableRange(int offset, int length)
     {
-        Debug.Assert(tableSizes.Length == 12);
+        public int Offset { get; } = offset;
+        public int Length { get; } = length;
+        public int End => Offset + Length;
+
+        public ReadOnlySpan<byte> GetBytes(byte[] buffer)
+        {
+            return buffer.AsSpan(Offset, Length);
+        }
+    }
+
+    private ApiCatalogModel(int formatVersion, int compressedSize, byte[] buffer, int[] tableSizes)
+    {
+        Debug.Assert(tableSizes.Length == ApiCatalogSchema.NumberOfTables);
 
         _formatVersion = formatVersion;
-        _stringTableLength = tableSizes[0];
 
-        _platformTableOffset = _stringTableLength;
-        _platformTableLength = tableSizes[1];
+        var tableIndex = 0;
+        _stringHeapRange = new(0, tableSizes[tableIndex++]);
+        _blobHeapRange = new(_stringHeapRange.End, tableSizes[tableIndex++]);
+        _platformTableRange = new(_blobHeapRange.End, tableSizes[tableIndex++]);
+        _frameworkTableRange = new(_platformTableRange.End, tableSizes[tableIndex++]);
+        _packageTableRange = new(_frameworkTableRange.End, tableSizes[tableIndex++]);
+        _assemblyTableRange = new(_packageTableRange.End, tableSizes[tableIndex++]);
+        _usageSourcesTableRange = new(_assemblyTableRange.End, tableSizes[tableIndex++]);
+        _apiTableRange = new(_usageSourcesTableRange.End, tableSizes[tableIndex++]);
+        _rootApiTableRange = new(_apiTableRange.End, tableSizes[tableIndex++]);
+        _extensionMethodTableRange = new(_rootApiTableRange.End, tableSizes[tableIndex++]);
+        _obsoletionTableRange = new(_extensionMethodTableRange.End, tableSizes[tableIndex++]);
+        _platformSupportTableRange = new(_obsoletionTableRange.End, tableSizes[tableIndex++]);
+        _previewRequirementTableRange = new(_platformSupportTableRange.End, tableSizes[tableIndex++]);
+        _experimentalTableRange = new(_previewRequirementTableRange.End, tableSizes[tableIndex++]);
 
-        _frameworkTableOffset = _platformTableOffset + _platformTableLength;
-        _frameworkTableLength = tableSizes[2];
-
-        _packageTableOffset = _frameworkTableOffset + _frameworkTableLength;
-        _packageTableLength = tableSizes[3];
-
-        _assemblyTableOffset = _packageTableOffset + _packageTableLength;
-        _assemblyTableLength = tableSizes[4];
-
-        _usageSourcesTableOffset = _assemblyTableOffset + _assemblyTableLength;
-        _usageSourcesTableLength = tableSizes[5];
-
-        _apiTableOffset = _usageSourcesTableOffset + _usageSourcesTableLength;
-        _apiTableLength = tableSizes[6];
-
-        _obsoletionTableOffset = _apiTableOffset + _apiTableLength;
-        _obsoletionTableLength = tableSizes[7];
-
-        _platformSupportTableOffset = _obsoletionTableOffset + _obsoletionTableLength;
-        _platformSupportTableLength = tableSizes[8];
-
-        _previewRequirementTableOffset = _platformSupportTableOffset + _platformSupportTableLength;
-        _previewRequirementTableLength = tableSizes[9];
-
-        _experimentalTableOffset = _previewRequirementTableOffset + _previewRequirementTableLength;
-        _experimentalTableLength = tableSizes[10];
-
-        _extensionMethodTableOffset = _experimentalTableOffset + _experimentalTableLength;
-        _extensionMethodTableLength = tableSizes[11];
+        Debug.Assert(tableIndex == tableSizes.Length);
 
         _buffer = buffer;
-        _sizeOnDisk = sizeOnDisk;
+        _compressedSize = compressedSize;
     }
 
     public int FormatVersion => _formatVersion;
 
-    internal ReadOnlySpan<byte> StringTable => new(_buffer, 0, _stringTableLength);
+    internal ReadOnlySpan<byte> StringHeap => _stringHeapRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> PlatformTable => new(_buffer, _platformTableOffset, _platformTableLength);
+    internal ReadOnlySpan<byte> BlobHeap => _blobHeapRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> FrameworkTable => new(_buffer, _frameworkTableOffset, _frameworkTableLength);
+    internal ReadOnlySpan<byte> PlatformTable => _platformTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> PackageTable => new(_buffer, _packageTableOffset, _packageTableLength);
+    internal ReadOnlySpan<byte> FrameworkTable => _frameworkTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> AssemblyTable => new(_buffer, _assemblyTableOffset, _assemblyTableLength);
+    internal ReadOnlySpan<byte> PackageTable => _packageTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> UsageSourcesTable => new(_buffer, _usageSourcesTableOffset, _usageSourcesTableLength);
+    internal ReadOnlySpan<byte> AssemblyTable => _assemblyTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> ApiTable => new(_buffer, _apiTableOffset, _apiTableLength);
+    internal ReadOnlySpan<byte> UsageSourceTable => _usageSourcesTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> ObsoletionTable => new(_buffer, _obsoletionTableOffset, _obsoletionTableLength);
+    internal ReadOnlySpan<byte> ApiTable => _apiTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> PlatformSupportTable => new(_buffer, _platformSupportTableOffset, _platformSupportTableLength);
+    internal ReadOnlySpan<byte> RootApiTable => _rootApiTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> PreviewRequirementTable => new(_buffer, _previewRequirementTableOffset, _previewRequirementTableLength);
+    internal ReadOnlySpan<byte> ExtensionMethodTable => _extensionMethodTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> ExperimentalTable => new(_buffer, _experimentalTableOffset, _experimentalTableLength);
+    internal ReadOnlySpan<byte> ObsoletionTable => _obsoletionTableRange.GetBytes(_buffer);
 
-    internal ReadOnlySpan<byte> ExtensionMethodTable => new(_buffer, _extensionMethodTableOffset, _extensionMethodTableLength);
+    internal ReadOnlySpan<byte> PlatformSupportTable => _platformSupportTableRange.GetBytes(_buffer);
+
+    internal ReadOnlySpan<byte> PreviewRequirementTable => _previewRequirementTableRange.GetBytes(_buffer);
+
+    internal ReadOnlySpan<byte> ExperimentalTable => _experimentalTableRange.GetBytes(_buffer);
 
     public FrameworkEnumerator Frameworks
     {
@@ -157,11 +145,19 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public ApiEnumerator RootApis
+    public RootApisEnumerator RootApis
     {
         get
         {
-            return new ApiEnumerator(this, 0);
+            return new RootApisEnumerator(this);
+        }
+    }
+
+    public AllApisEnumerator AllApis
+    {
+        get
+        {
+            return new AllApisEnumerator(this);
         }
     }
 
@@ -173,21 +169,21 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public IEnumerable<ApiModel> GetAllApis()
-    {
-        return RootApis.SelectMany(r => r.DescendantsAndSelf());
-    }
-
     public ApiModel GetApiById(int id)
     {
         return new ApiModel(this, id);
+    }
+
+    public AssemblyModel GetAssemblyById(int id)
+    {
+        return new AssemblyModel(this, id);
     }
 
     public ApiModel GetApiByGuid(Guid guid)
     {
         if (_apiOffsetByGuid is null)
         {
-            var apiByGuid = GetAllApis().ToFrozenDictionary(a => a.Guid, a => a.Id);
+            var apiByGuid = AllApis.ToFrozenDictionary(a => a.Guid, a => a.Id);
             Interlocked.CompareExchange(ref _apiOffsetByGuid, apiByGuid, null);
         }
 
@@ -216,11 +212,11 @@ public sealed partial class ApiCatalogModel
         }
 
         return _previewFrameworks.Contains(model.Id);
-        
+
         static FrozenSet<int> GetPreviewFrameworks(ApiCatalogModel apiCatalogModel)
         {
             var previewFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            
+
             foreach (var framework in FrameworkDefinition.All)
             {
                 if (!framework.IsPreview)
@@ -255,14 +251,14 @@ public sealed partial class ApiCatalogModel
 
     internal string GetString(int offset)
     {
-        var stringLength = StringTable.ReadInt32(offset);
-        var stringSpan = StringTable.Slice(offset + 4, stringLength);
+        var stringLength = StringHeap.ReadInt32(offset);
+        var stringSpan = StringHeap.Slice(offset + 4, stringLength);
         return Encoding.UTF8.GetString(stringSpan);
     }
 
     internal Markup GetMarkup(int offset)
     {
-        var span = StringTable[offset..];
+        var span = BlobHeap[offset..];
         var partsCount = BinaryPrimitives.ReadInt32LittleEndian(span);
         span = span[4..];
 
@@ -301,28 +297,28 @@ public sealed partial class ApiCatalogModel
 
     internal int GetExtensionMethodOffset(int extensionTypeId)
     {
-        const int rowSize = 16 + 4 + 4;
-        Debug.Assert((ExtensionMethodTable.Length - 4) % rowSize == 0);
+        var rowSize = ApiCatalogSchema.ExtensionMethodRow.Size;
+        Debug.Assert(ExtensionMethodTable.Length % rowSize == 0);
 
         var low = 0;
-        var high = (ExtensionMethodTable.Length - 4) / rowSize - 1;
+        var high = ExtensionMethodTable.Length / rowSize - 1;
 
         while (low <= high)
         {
             var middle = low + ((high - low) >> 1);
-            var rowStart = 4 + middle * rowSize;
+            var rowStart = middle * rowSize;
 
-            var rowExtensionTypeId = ExtensionMethodTable.ReadInt32(rowStart + 16);
-            var comparison = extensionTypeId.CompareTo(rowExtensionTypeId);
+            var rowExtensionTypeId = ApiCatalogSchema.ExtensionMethodRow.ExtendedType.Read(this, rowStart);
+            var comparison = extensionTypeId.CompareTo(rowExtensionTypeId.Id);
 
             if (comparison == 0)
             {
                 // The table is allowed to contain multiple entries. Just look backwards and adjust the row offset
                 // until we find a row with different values.
                 var previousRowStart = rowStart - rowSize;
-                while (previousRowStart > 0)
+                while (previousRowStart >= 0)
                 {
-                    var previousRowExtensionTypeId = ExtensionMethodTable.ReadInt32(previousRowStart + 16);
+                    var previousRowExtensionTypeId = ApiCatalogSchema.ExtensionMethodRow.ExtendedType.Read(this, previousRowStart);
                     if (previousRowExtensionTypeId != rowExtensionTypeId)
                         break;
 
@@ -342,35 +338,45 @@ public sealed partial class ApiCatalogModel
         return -1;
     }
 
-    private static int GetDeclarationTableOffset(ReadOnlySpan<byte> table, int rowSize, int apiId, int assemblyId)
+    private int GetDeclarationTableOffset(ReadOnlySpan<byte> table,
+                                          int rowSize,
+                                          ApiCatalogSchema.Field<ApiModel?> apiField,
+                                          ApiCatalogSchema.Field<AssemblyModel> assemblyField,
+                                          ApiModel? api,
+                                          AssemblyModel assembly)
     {
-        Debug.Assert((table.Length - 4) % rowSize == 0);
+        Debug.Assert(table.Length % rowSize == 0);
 
         var low = 0;
-        var high = (table.Length - 4) / rowSize - 1;
+        var high = table.Length / rowSize - 1;
+
+        var lookupKey = (api?.Id ?? -1, assembly.Id);
 
         while (low <= high)
         {
             var middle = low + ((high - low) >> 1);
-            var rowStart = 4 + middle * rowSize;
+            var rowStart = middle * rowSize;
 
-            var rowApiId = table.ReadInt32(rowStart);
-            var rowAssemblyId = table.ReadInt32(rowStart + 4);
+            var rowApi = apiField.Read(this, rowStart);
+            var rowAssembly = assemblyField.Read(this, rowStart);
 
-            var comparison = (apiId, assemblyId).CompareTo((rowApiId, rowAssemblyId));
+            var rowKey = (rowApi?.Id ?? -1, rowAssembly.Id);
+            var comparison = lookupKey.CompareTo(rowKey);
 
             if (comparison == 0)
             {
                 // The declaration table is allowed to contain multiple entries for a given apiId/assemblyId
-                // combination. Our binary search may hav jumped in the middle of sequence of rows with the same
+                // combination. Our binary search may have jumped in the middle of sequence of rows with the same
                 // apiId/assemblyId. Just look backwards and adjust the row offset until we find a row with different
                 // values.
                 var previousRowStart = rowStart - rowSize;
-                while (previousRowStart > 0)
+                while (previousRowStart >= 0)
                 {
-                    var previousRowApiId = table.ReadInt32(previousRowStart);
-                    var previousRowAssemblyId = table.ReadInt32(previousRowStart + 4);
-                    var same = (previousRowApiId, previousRowAssemblyId) == (apiId, assemblyId);
+                    var previousRowApi = apiField.Read(this, previousRowStart);
+                    var previousRowAssembly = assemblyField.Read(this, previousRowStart);
+                    var previousRowKey = (previousRowApi?.Id ?? -1, previousRowAssembly.Id);
+
+                    var same = previousRowKey == lookupKey;
                     if (!same)
                         break;
 
@@ -390,52 +396,84 @@ public sealed partial class ApiCatalogModel
         return -1;
     }
 
-    internal ObsoletionModel? GetObsoletion(int apiId, int assemblyId)
+    internal ObsoletionModel? GetObsoletion(ApiModel api, AssemblyModel assembly)
     {
-        var offset = GetDeclarationTableOffset(ObsoletionTable, 21, apiId, assemblyId);
+        var offset = GetDeclarationTableOffset(ObsoletionTable,
+                                               ApiCatalogSchema.ObsoletionRow.Size,
+                                               ApiCatalogSchema.ObsoletionRow.Api,
+                                               ApiCatalogSchema.ObsoletionRow.Assembly,
+                                               api,
+                                               assembly);
+
         return offset < 0 ? null : new ObsoletionModel(this, offset);
     }
 
-    internal IEnumerable<PlatformSupportModel> GetPlatformSupport(int apiId, int assemblyId)
+    internal IEnumerable<PlatformSupportModel> GetPlatformSupport(ApiModel? api, AssemblyModel assembly)
     {
-        const int rowSize = 13;
-
-        var offset = GetDeclarationTableOffset(PlatformSupportTable, rowSize, apiId, assemblyId);
+        var offset = GetDeclarationTableOffset(PlatformSupportTable,
+                                               ApiCatalogSchema.PlatformSupportRow.Size,
+                                               ApiCatalogSchema.PlatformSupportRow.Api,
+                                               ApiCatalogSchema.PlatformSupportRow.Assembly,
+                                               api,
+                                               assembly);
         if (offset < 0)
             yield break;
 
-        while (offset < PlatformSupportTable.Length)
+        var enumerator = ApiCatalogSchema.PlatformSupportRow.Platforms.Read(this, offset);
+        while (enumerator.MoveNext())
         {
-            var rowApiId = PlatformSupportTable.ReadInt32(offset);
-            var rowAssemblyId = PlatformSupportTable.ReadInt32(offset + 4);
-
-            if (rowApiId != apiId ||
-                rowAssemblyId != assemblyId)
-                yield break;
-
-            yield return new PlatformSupportModel(this, offset);
-            offset += rowSize;
+            var o = enumerator.Current;
+            yield return new PlatformSupportModel(this, o);
         }
     }
 
-    internal PreviewRequirementModel? GetPreviewRequirement(int apiId, int assemblyId)
+    internal PreviewRequirementModel? GetPreviewRequirement(ApiModel? api, AssemblyModel assembly)
     {
-        var offset = GetDeclarationTableOffset(PreviewRequirementTable, 16, apiId, assemblyId);
+        var offset = GetDeclarationTableOffset(PreviewRequirementTable,
+                                               ApiCatalogSchema.PreviewRequirementRow.Size,
+                                               ApiCatalogSchema.PreviewRequirementRow.Api,
+                                               ApiCatalogSchema.PreviewRequirementRow.Assembly,
+                                               api,
+                                               assembly);
+
         return offset < 0 ? null : new PreviewRequirementModel(this, offset);
     }
 
-    internal ExperimentalModel? GetExperimental(int apiId, int assemblyId)
+    internal ExperimentalModel? GetExperimental(ApiModel? api, AssemblyModel assembly)
     {
-        var offset = GetDeclarationTableOffset(ExperimentalTable, 16, apiId, assemblyId);
+        var offset = GetDeclarationTableOffset(ExperimentalTable,
+                                               ApiCatalogSchema.ExperimentalRow.Size,
+                                               ApiCatalogSchema.ExperimentalRow.Api,
+                                               ApiCatalogSchema.ExperimentalRow.Assembly,
+                                               api,
+                                               assembly);
+
         return offset < 0 ? null : new ExperimentalModel(this, offset);
     }
 
     public ApiCatalogStatistics GetStatistics()
     {
         var allApis = RootApis.SelectMany(a => a.DescendantsAndSelf());
+        var tableSizes = new[] {
+            ("String Heap", StringHeap.Length, -1),
+            ("Blob Heap", BlobHeap.Length, -1),
+            ("Platform Table", PlatformTable.Length, PlatformTable.Length / ApiCatalogSchema.PlatformRow.Size),
+            ("Framework Table", FrameworkTable.Length, FrameworkTable.Length / ApiCatalogSchema.FrameworkRow.Size),
+            ("Package Table", PackageTable.Length, PackageTable.Length / ApiCatalogSchema.PackageRow.Size),
+            ("Assembly Table", AssemblyTable.Length, AssemblyTable.Length / ApiCatalogSchema.AssemblyRow.Size),
+            ("Usage Source Table", UsageSourceTable.Length, UsageSourceTable.Length / ApiCatalogSchema.UsageSourceRow.Size),
+            ("API Table", ApiTable.Length, ApiTable.Length / ApiCatalogSchema.ApiRow.Size),
+            ("Root API Table", RootApiTable.Length, RootApiTable.Length / ApiCatalogSchema.RootApiRow.Size),
+            ("Obsoletion Table", ObsoletionTable.Length, ObsoletionTable.Length / ApiCatalogSchema.ObsoletionRow.Size),
+            ("Platform Support Table", PlatformSupportTable.Length, PlatformSupportTable.Length / ApiCatalogSchema.PlatformSupportRow.Size),
+            ("Preview Requirement Table", PreviewRequirementTable.Length, PreviewRequirementTable.Length / ApiCatalogSchema.PreviewRequirementRow.Size),
+            ("Experimental Table", ExperimentalTable.Length, ExperimentalTable.Length / ApiCatalogSchema.ExperimentalRow.Size),
+            ("Extension Method Table", ExtensionMethodTable.Length, ExtensionMethodTable.Length / ApiCatalogSchema.ExtensionMethodRow.Size)
+        };
+
         return new ApiCatalogStatistics(
-            sizeOnDisk: _sizeOnDisk,
-            sizeInMemory: _buffer.Length,
+            sizeCompressed: _compressedSize,
+            sizeUncompressed: _buffer.Length,
             numberOfApis: allApis.Count(),
             numberOfExtensionMethods: ExtensionMethods.Count(),
             numberOfDeclarations: allApis.SelectMany(a => a.Declarations).Count(),
@@ -445,7 +483,8 @@ public sealed partial class ApiCatalogModel
             numberOfPackages: Packages.Select(p => p.Name).Distinct().Count(),
             numberOfPackageVersions: Packages.Count(),
             numberOfPackageAssemblies: Assemblies.SelectMany(a => a.Packages).Count(),
-            numberOfUsageSources: UsageSources.Count()
+            numberOfUsageSources: UsageSources.Count(),
+            tableSizes
         );
     }
 
@@ -483,8 +522,8 @@ public sealed partial class ApiCatalogModel
 
         static void ForwardTypeMembers(Dictionary<int, int> receiver, ApiCatalogModel catalog, string fromTypeFullName, string toTypeFullName)
         {
-            var toApi = catalog.GetAllApis().Single(a => a.GetFullName() == toTypeFullName);
-            var fromApi = catalog.GetAllApis().Single(a => a.GetFullName() == fromTypeFullName);
+            var toApi = catalog.AllApis.Single(a => a.GetFullName() == toTypeFullName);
+            var fromApi = catalog.AllApis.Single(a => a.GetFullName() == fromTypeFullName);
 
             var toMemberByRelativeName = toApi.Descendants()
                                               .Select(a => (Name: a.GetFullName()[(toTypeFullName.Length + 1)..], Api: a))
@@ -531,15 +570,18 @@ public sealed partial class ApiCatalogModel
 
         using var reader = new BinaryReader(stream);
 
-        var magicHeader = reader.ReadBytes(8);
-        if (!magicHeader.SequenceEqual(MagicHeader))
-            throw new InvalidDataException();
+        var magicNumber = reader.ReadBytes(ApiCatalogSchema.MagicNumber.Length);
+        if (!ApiCatalogSchema.MagicNumber.SequenceEqual(magicNumber))
+            throw new InvalidDataException("API Catalog magic number doesn't match.");
 
         var formatVersion = reader.ReadInt32();
-        if (formatVersion != CurrentFormatVersion)
-            throw new InvalidDataException();
+        if (formatVersion != ApiCatalogSchema.FormatVersion)
+            throw new InvalidDataException($"API Catalog version doesn't match. Found {formatVersion}, expected {ApiCatalogSchema.FormatVersion}.");
 
         var numberOfTables = reader.ReadInt32();
+        if (numberOfTables != ApiCatalogSchema.NumberOfTables)
+            throw new InvalidDataException($"API Catalog table count doesn't match. Found {numberOfTables}, expected {ApiCatalogSchema.NumberOfTables}.");
+
         var tableSizes = new int[numberOfTables];
         for (var i = 0; i < tableSizes.Length; i++)
             tableSizes[i] = reader.ReadInt32();
@@ -562,14 +604,12 @@ public sealed partial class ApiCatalogModel
     public struct FrameworkEnumerator : IEnumerable<FrameworkModel>, IEnumerator<FrameworkModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
-        public FrameworkEnumerator(ApiCatalogModel catalog)
+        internal FrameworkEnumerator(ApiCatalogModel catalog)
         {
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(catalog.FrameworkTable, ApiCatalogSchema.FrameworkRow.Size);
             _catalog = catalog;
-            _index = -1;
-            _count = _catalog.FrameworkTable.ReadInt32(0);
         }
 
         IEnumerator<FrameworkModel> IEnumerable<FrameworkModel>.GetEnumerator()
@@ -584,11 +624,7 @@ public sealed partial class ApiCatalogModel
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -605,7 +641,7 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = _catalog.FrameworkTable.ReadInt32(4 + _index * 4);
+                var offset = _enumerator.Current;
                 return new FrameworkModel(_catalog, offset);
             }
         }
@@ -623,14 +659,12 @@ public sealed partial class ApiCatalogModel
     public struct PlatformEnumerator : IEnumerable<PlatformModel>, IEnumerator<PlatformModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
-        public PlatformEnumerator(ApiCatalogModel catalog)
+        internal PlatformEnumerator(ApiCatalogModel catalog)
         {
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(catalog.PlatformTable, ApiCatalogSchema.PlatformRow.Size);
             _catalog = catalog;
-            _index = -1;
-            _count = _catalog.PlatformTable.ReadInt32(0);
         }
 
         IEnumerator<PlatformModel> IEnumerable<PlatformModel>.GetEnumerator()
@@ -645,11 +679,7 @@ public sealed partial class ApiCatalogModel
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -666,7 +696,7 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = 4 + _index * 4;
+                var offset = _enumerator.Current;
                 return new PlatformModel(_catalog, offset);
             }
         }
@@ -684,14 +714,12 @@ public sealed partial class ApiCatalogModel
     public struct PackageEnumerator : IEnumerable<PackageModel>, IEnumerator<PackageModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
-        public PackageEnumerator(ApiCatalogModel catalog)
+        internal PackageEnumerator(ApiCatalogModel catalog)
         {
             _catalog = catalog;
-            _count = catalog.PackageTable.ReadInt32(0);
-            _index = -1;
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(catalog.PackageTable, ApiCatalogSchema.PackageRow.Size);
         }
 
         IEnumerator<PackageModel> IEnumerable<PackageModel>.GetEnumerator()
@@ -706,11 +734,7 @@ public sealed partial class ApiCatalogModel
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -727,7 +751,7 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = _catalog.PackageTable.ReadInt32(4 + _index * 4);
+                var offset = _enumerator.Current;
                 return new PackageModel(_catalog, offset);
             }
         }
@@ -745,14 +769,12 @@ public sealed partial class ApiCatalogModel
     public struct AssemblyEnumerator : IEnumerable<AssemblyModel>, IEnumerator<AssemblyModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
-        public AssemblyEnumerator(ApiCatalogModel catalog)
+        internal AssemblyEnumerator(ApiCatalogModel catalog)
         {
             _catalog = catalog;
-            _count = catalog.AssemblyTable.ReadInt32(0);
-            _index = -1;
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(catalog.AssemblyTable, ApiCatalogSchema.AssemblyRow.Size);
         }
 
         IEnumerator<AssemblyModel> IEnumerable<AssemblyModel>.GetEnumerator()
@@ -767,11 +789,7 @@ public sealed partial class ApiCatalogModel
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -788,7 +806,7 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = _catalog.AssemblyTable.ReadInt32(4 + _index * 4);
+                var offset = _enumerator.Current;
                 return new AssemblyModel(_catalog, offset);
             }
         }
@@ -806,14 +824,12 @@ public sealed partial class ApiCatalogModel
     public struct UsageSourceEnumerator : IEnumerable<UsageSourceModel>, IEnumerator<UsageSourceModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
-        public UsageSourceEnumerator(ApiCatalogModel catalog)
+        internal UsageSourceEnumerator(ApiCatalogModel catalog)
         {
             _catalog = catalog;
-            _index = -1;
-            _count = _catalog.UsageSourcesTable.ReadInt32(0);
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(catalog.UsageSourceTable, ApiCatalogSchema.UsageSourceRow.Size);
         }
 
         IEnumerator<UsageSourceModel> IEnumerable<UsageSourceModel>.GetEnumerator()
@@ -828,11 +844,7 @@ public sealed partial class ApiCatalogModel
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -849,7 +861,7 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = 4 + _index * 8;
+                var offset = _enumerator.Current;
                 return new UsageSourceModel(_catalog, offset);
             }
         }
@@ -864,19 +876,15 @@ public sealed partial class ApiCatalogModel
         }
     }
 
-    public struct ApiEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
+    public struct RootApisEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
-        public ApiEnumerator(ApiCatalogModel catalog, int offset)
+        internal RootApisEnumerator(ApiCatalogModel catalog)
         {
             _catalog = catalog;
-            _offset = offset;
-            _count = catalog.ApiTable.ReadInt32(offset);
-            _index = -1;
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(_catalog.RootApiTable, ApiCatalogSchema.RootApiRow.Size);
         }
 
         IEnumerator<ApiModel> IEnumerable<ApiModel>.GetEnumerator()
@@ -884,18 +892,14 @@ public sealed partial class ApiCatalogModel
             return GetEnumerator();
         }
 
-        public ApiEnumerator GetEnumerator()
+        public RootApisEnumerator GetEnumerator()
         {
             return this;
         }
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -912,7 +916,62 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = _catalog.ApiTable.ReadInt32(_offset + 4 + 4 * _index);
+                var rowOffset = _enumerator.Current;
+                return ApiCatalogSchema.RootApiRow.Api.Read(_catalog, rowOffset);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
+    public struct AllApisEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
+    {
+        private readonly ApiCatalogModel _catalog;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
+
+        public AllApisEnumerator(ApiCatalogModel catalog)
+        {
+            _catalog = catalog;
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(_catalog.ApiTable, ApiCatalogSchema.ApiRow.Size);
+        }
+
+        IEnumerator<ApiModel> IEnumerable<ApiModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public AllApisEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            return _enumerator.MoveNext();
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ApiModel Current
+        {
+            get
+            {
+                var offset = _enumerator.Current;
                 return new ApiModel(_catalog, offset);
             }
         }
@@ -930,14 +989,12 @@ public sealed partial class ApiCatalogModel
     public struct ExtensionMethodEnumerator : IEnumerable<ExtensionMethodModel>, IEnumerator<ExtensionMethodModel>
     {
         private readonly ApiCatalogModel _catalog;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.TableRowEnumerator _enumerator;
 
         public ExtensionMethodEnumerator(ApiCatalogModel catalog)
         {
             _catalog = catalog;
-            _index = -1;
-            _count = _catalog.ExtensionMethodTable.ReadInt32(0);
+            _enumerator = new ApiCatalogSchema.TableRowEnumerator(_catalog.ExtensionMethodTable, ApiCatalogSchema.ExtensionMethodRow.Size);
         }
 
         IEnumerator<ExtensionMethodModel> IEnumerable<ExtensionMethodModel>.GetEnumerator()
@@ -952,11 +1009,7 @@ public sealed partial class ApiCatalogModel
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -973,7 +1026,7 @@ public sealed partial class ApiCatalogModel
         {
             get
             {
-                var offset = 4 + _index * (16 + 4 + 4);
+                var offset = _enumerator.Current;
                 return new ExtensionMethodModel(_catalog, offset);
             }
         }

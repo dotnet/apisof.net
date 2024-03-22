@@ -35,9 +35,9 @@ public sealed class AnalysisReport
     {
         var knownFrameworkAssemblies = catalog.GetAssemblyNames();
         var latestNetFramework = catalog.GetLatestNetFramework();
-        var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+        var apiByGuid = catalog.AllApis.ToDictionary(a => a.Guid);
         
-        foreach (var api in catalog.GetAllApis())
+        foreach (var api in catalog.AllApis)
         {
             var forwardedApi = catalog.GetForwardedApi(api);
             if (forwardedApi is not null)

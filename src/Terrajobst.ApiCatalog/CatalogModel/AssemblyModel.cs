@@ -9,6 +9,8 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     internal AssemblyModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.AssemblyTable, ApiCatalogSchema.AssemblyRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
@@ -17,47 +19,20 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     public int Id => _offset;
 
-    public Guid Guid
-    {
-        get
-        {
-            return _catalog.AssemblyTable.ReadGuid(_offset);
-        }
-    }
+    public Guid Guid => ApiCatalogSchema.AssemblyRow.Guid.Read(_catalog, _offset);
 
-    public string Name
-    {
-        get
-        {
-            var stringOffset = _catalog.AssemblyTable.ReadInt32(_offset + 16);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Name => ApiCatalogSchema.AssemblyRow.Name.Read(_catalog, _offset);
 
-    public string PublicKeyToken
-    {
-        get
-        {
-            var stringOffset = _catalog.AssemblyTable.ReadInt32(_offset + 20);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string PublicKeyToken => ApiCatalogSchema.AssemblyRow.PublicKeyToken.Read(_catalog, _offset);
 
-    public string Version
-    {
-        get
-        {
-            var stringOffset = _catalog.AssemblyTable.ReadInt32(_offset + 24);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Version => ApiCatalogSchema.AssemblyRow.Version.Read(_catalog, _offset);
 
     public RootApiEnumerator RootApis
     {
         get
         {
-            var offset = _offset + 28;
-            return new RootApiEnumerator(_catalog, offset);
+            var enumerator = ApiCatalogSchema.AssemblyRow.RootApis.Read(_catalog, _offset);
+            return new RootApiEnumerator(enumerator);
         }
     }
 
@@ -65,9 +40,8 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
     {
         get
         {
-            var rootApiCount = _catalog.AssemblyTable.ReadInt32(_offset + 28);
-            var frameworkTableOffset = _offset + 32 + rootApiCount * 4;
-            return new FrameworkEnumerator(_catalog, frameworkTableOffset);
+            var enumerator = ApiCatalogSchema.AssemblyRow.Frameworks.Read(_catalog, _offset);
+            return new FrameworkEnumerator(enumerator);
         }
     }
 
@@ -75,13 +49,8 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
     {
         get
         {
-            var rootApiCountOffset = _offset + 28;
-            var rootApiCount = _catalog.AssemblyTable.ReadInt32(rootApiCountOffset);
-            var frameworkCountOffset = rootApiCountOffset + 4 + rootApiCount * 4;
-            var frameworkCount = _catalog.AssemblyTable.ReadInt32(frameworkCountOffset);
-
-            var packageTableOffset = frameworkCountOffset + 4 + frameworkCount * 4;
-            return new PackageEnumerator(_catalog, packageTableOffset);
+            var enumerator = ApiCatalogSchema.AssemblyRow.Packages.Read(_catalog, _offset);
+            return new PackageEnumerator(enumerator);
         }
     }
 
@@ -89,7 +58,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
     {
         get
         {
-            return _catalog.GetPlatformSupport(-1, _offset);
+            return _catalog.GetPlatformSupport(null, this);
         }
     }
 
@@ -97,7 +66,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
     {
         get
         {
-            return _catalog.GetPreviewRequirement(-1, _offset);
+            return _catalog.GetPreviewRequirement(null, this);
         }
     }
 
@@ -105,7 +74,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
     {
         get
         {
-            return _catalog.GetExperimental(-1, _offset);
+            return _catalog.GetExperimental(null, this);
         }
     }
 
@@ -142,17 +111,11 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     public struct RootApiEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
     {
-        private readonly ApiCatalogModel _catalog;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.ArrayEnumerator<ApiModel> _enumerator;
 
-        public RootApiEnumerator(ApiCatalogModel catalog, int offset)
+        internal RootApiEnumerator(ApiCatalogSchema.ArrayEnumerator<ApiModel> enumerator)
         {
-            _catalog = catalog;
-            _offset = offset;
-            _count = catalog.AssemblyTable.ReadInt32(offset);
-            _index = -1;
+            _enumerator = enumerator;
         }
 
         IEnumerator<ApiModel> IEnumerable<ApiModel>.GetEnumerator()
@@ -167,11 +130,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -186,11 +145,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
         public ApiModel Current
         {
-            get
-            {
-                var offset = _catalog.AssemblyTable.ReadInt32(_offset + 4 + 4 * _index);
-                return new ApiModel(_catalog, offset);
-            }
+            get { return _enumerator.Current; }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -205,17 +160,11 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     public struct FrameworkEnumerator : IEnumerable<FrameworkModel>, IEnumerator<FrameworkModel>
     {
-        private readonly ApiCatalogModel _catalog;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.ArrayEnumerator<FrameworkModel> _enumerator;
 
-        public FrameworkEnumerator(ApiCatalogModel catalog, int offset)
+        internal FrameworkEnumerator(ApiCatalogSchema.ArrayEnumerator<FrameworkModel> enumerator)
         {
-            _catalog = catalog;
-            _offset = offset;
-            _count = catalog.AssemblyTable.ReadInt32(offset);
-            _index = -1;
+            _enumerator = enumerator;
         }
 
         IEnumerator<FrameworkModel> IEnumerable<FrameworkModel>.GetEnumerator()
@@ -230,11 +179,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -251,8 +196,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
         {
             get
             {
-                var offset = _catalog.AssemblyTable.ReadInt32(_offset + 4 + 4 * _index);
-                return new FrameworkModel(_catalog, offset);
+                return _enumerator.Current;
             }
         }
 
@@ -268,17 +212,11 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     public struct PackageEnumerator : IEnumerable<(PackageModel Package, FrameworkModel Framework)>, IEnumerator<(PackageModel Package, FrameworkModel Framework)>
     {
-        private readonly ApiCatalogModel _catalog;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.AssemblyPackageTupleLayout> _enumerator;
 
-        public PackageEnumerator(ApiCatalogModel catalog, int offset)
+        internal PackageEnumerator(ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.AssemblyPackageTupleLayout> enumerator)
         {
-            _catalog = catalog;
-            _offset = offset;
-            _count = catalog.AssemblyTable.ReadInt32(offset);
-            _index = -1;
+            _enumerator = enumerator;
         }
 
         IEnumerator<(PackageModel Package, FrameworkModel Framework)> IEnumerable<(PackageModel Package, FrameworkModel Framework)>.GetEnumerator()
@@ -293,11 +231,7 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -314,12 +248,10 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
         {
             get
             {
-                var offset = _offset + 4 + _index * 8;
-                var packageOffset = _catalog.AssemblyTable.ReadInt32(offset);
-                var frameworkOffset = _catalog.AssemblyTable.ReadInt32(offset + 4);
-                var packageModel = new PackageModel(_catalog, packageOffset);
-                var frameworkModel = new FrameworkModel(_catalog, frameworkOffset);
-                return (packageModel, frameworkModel);
+                var offset = _enumerator.Current;
+                var package = _enumerator.Layout.Package.Read(_enumerator.Catalog, offset);
+                var framework = _enumerator.Layout.Framework.Read(_enumerator.Catalog, offset);
+                return (package, framework);
             }
         }
 

@@ -7,6 +7,8 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
     internal ApiDeclarationModel(ApiModel api, int offset)
     {
+        ApiCatalogSchema.EnsureValidBlobOffset(api.Catalog, offset);
+
         _api = api;
         _offset = offset;
     }
@@ -15,20 +17,13 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
     public ApiModel Api => _api;
 
-    public AssemblyModel Assembly
-    {
-        get
-        {
-            var assemblyOffset = _api.Catalog.ApiTable.ReadInt32(_offset);
-            return new AssemblyModel(_api.Catalog, assemblyOffset);
-        }
-    }
+    public AssemblyModel Assembly => ApiCatalogSchema.ApiDeclarationStructure.Assembly.Read(_api.Catalog, _offset);
 
     public ObsoletionModel? Obsoletion
     {
         get
         {
-            return _api.Catalog.GetObsoletion(_api.Id, Assembly.Id);
+            return _api.Catalog.GetObsoletion(_api, Assembly);
         }
     }
 
@@ -36,7 +31,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
     {
         get
         {
-            return _api.Catalog.GetPlatformSupport(_api.Id, Assembly.Id);
+            return _api.Catalog.GetPlatformSupport(_api, Assembly);
         }
     }
 
@@ -44,7 +39,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
     {
         get
         {
-            return _api.Catalog.GetPreviewRequirement(_api.Id, Assembly.Id);
+            return _api.Catalog.GetPreviewRequirement(_api, Assembly);
         }
     }
 
@@ -52,13 +47,13 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
     {
         get
         {
-            return _api.Catalog.GetExperimental(_api.Id, Assembly.Id);
+            return _api.Catalog.GetExperimental(_api, Assembly);
         }
     }
 
     public Markup GetMyMarkup()
     {
-        var markupOffset = _api.Catalog.ApiTable.ReadInt32(_offset + 4);
+        var markupOffset = ApiCatalogSchema.ApiDeclarationStructure.SyntaxOffset.Read(_api.Catalog, _offset);
         return _api.Catalog.GetMarkup(markupOffset);
     }
 

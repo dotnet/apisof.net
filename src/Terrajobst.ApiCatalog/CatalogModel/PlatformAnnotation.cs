@@ -47,13 +47,13 @@ public readonly struct PlatformAnnotation : IEquatable<PlatformAnnotation>
         switch (Kind)
         {
             case PlatformAnnotationKind.None:
-                return $"The framework doesn't have platform annotations.";
+                return "The framework doesn't have platform annotations.";
             case PlatformAnnotationKind.Unrestricted:
-                return $"The API is supported on any platform.";
+                return "The API is supported on any platform.";
             case PlatformAnnotationKind.UnrestrictedExceptFor:
             {
                 var sb = new StringBuilder();
-                sb.AppendLine($"The API is supported on any platform except for:");
+                sb.AppendLine("The API is supported on any platform except for:");
 
                 foreach (var e in Entries)
                     sb.AppendLine($"- {e}");
@@ -63,7 +63,7 @@ public readonly struct PlatformAnnotation : IEquatable<PlatformAnnotation>
             case PlatformAnnotationKind.RestrictedTo:
             {
                 var sb = new StringBuilder();
-                sb.AppendLine($"The API is only supported on these platforms:");
+                sb.AppendLine("The API is only supported on these platforms:");
 
                 foreach (var e in Entries)
                     sb.AppendLine($"- {e}");

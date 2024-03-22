@@ -7,26 +7,15 @@ public readonly struct PlatformSupportModel : IEquatable<PlatformSupportModel>
 
     internal PlatformSupportModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidBlobOffset(catalog, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
 
-    public string PlatformName
-    {
-        get
-        {
-            var stringOffset = _catalog.PlatformSupportTable.ReadInt32(_offset + 8);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string PlatformName => ApiCatalogSchema.PlatformIsSupportedTuple.Platform.Read(_catalog, _offset);
 
-    public bool IsSupported
-    {
-        get
-        {
-            return _catalog.PlatformSupportTable.ReadByte(_offset + 12) == 1;
-        }
-    }
+    public bool IsSupported => ApiCatalogSchema.PlatformIsSupportedTuple.IsSupported.Read(_catalog, _offset);
 
     public override bool Equals(object obj)
     {

@@ -190,8 +190,8 @@ public sealed partial class CatalogBuilder
     public void Build(Stream stream)
     {
         ResolveExtensions();
-        var converter = new ApiCatalogWriter(this);
-        converter.Write(stream);
+        var writer = new CatalogWriter(this);
+        writer.Write(stream);
     }
 
     private void DefineApi(Guid fingerprint, ApiKind kind, Guid? parentFingerprint, string name)
@@ -487,7 +487,7 @@ public sealed partial class CatalogBuilder
             return;
         }
 
-        declaration = new IntermediateDeclaration(syntax);
+        declaration = new IntermediateDeclaration(api, assembly, syntax);
         assembly.Declarations.Add(api, declaration);
     }
 
@@ -580,8 +580,10 @@ public sealed partial class CatalogBuilder
         public IEnumerable<IntermediaApi> RootApis => Declarations.Select(d => d.Key).Where(d => d.Parent is null);
     }
 
-    private sealed class IntermediateDeclaration(string syntax)
+    private sealed class IntermediateDeclaration(IntermediaApi api, IntermediaAssembly assembly, string syntax)
     {
+        public IntermediaApi Api { get; } = api;
+        public IntermediaAssembly Assembly { get; } = assembly;
         public string Syntax { get; } = syntax;
         public IntermediateObsoletion? Obsoletion { get; set; }
         public IntermediatePreviewRequirement? PreviewRequirement { get; set; }

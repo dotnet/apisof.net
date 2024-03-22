@@ -1,35 +1,93 @@
 ﻿@page "/stats"
 
-<div class="container-fluid">
-    <dl>
-        <dt>#Apis</dt>
-        <dd>@Statistics.NumberOfApis.ToString("N0")</dd>
+<div class="container-fluid mt-3">
+    <div class="statistics-container">
+        <div>
+            <h3>
+                Statistics
+                <small class="text-muted">For Nerds</small>
+            </h3>
+            <table class="table table-striped table-sm">
+                <tbody>
+                <tr>
+                    <th>APIs</th>
+                    <td>@Statistics.NumberOfApis.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Extension Methods</th>
+                    <td>@Statistics.NumberOfExtensionMethods.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Declarations</th>
+                    <td>@Statistics.NumberOfDeclarations.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Assemblies</th>
+                    <td>@Statistics.NumberOfAssemblies.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Frameworks</th>
+                    <td>@Statistics.NumberOfFrameworks.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Framework Assemblies</th>
+                    <td>@Statistics.NumberOfFrameworkAssemblies.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Packages</th>
+                    <td>@Statistics.NumberOfPackages.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Package Versions</th>
+                    <td>@Statistics.NumberOfPackageVersions.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Package Assemblies</th>
+                    <td>@Statistics.NumberOfPackageAssemblies.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Usage Sources</th>
+                    <td>@Statistics.NumberOfUsageSources.ToString("N0")</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <th>Size Compressed</th>
+                    <td>@Statistics.SizeCompressed.ToString("N0")</td>
+                    <td>bytes</td>
+                </tr>
+                <tr>
+                    <th>Size Uncompressed</th>
+                    <td>@Statistics.SizeUncompressed.ToString("N0")</td>
+                    <td>bytes</td>
+                </tr>
+                @foreach (var (tableName, size, rows) in Statistics.TableSizes)
+                {
+                    <tr>
+                        <th>@tableName</th>
+                        <td>@size.ToString("N0")</td>
+                        <td>bytes</td>
+                    </tr>
 
-        <dt>#Extension Methods</dt>
-        <dd>@Statistics.NumberOfExtensionMethods.ToString("N0")</dd>
-
-        <dt>#Declarations</dt>
-        <dd>@Statistics.NumberOfDeclarations.ToString("N0")</dd>
-
-        <dt>#Assemblies</dt>
-        <dd>@Statistics.NumberOfAssemblies.ToString("N0")</dd>
-
-        <dt>#Frameworks</dt>
-        <dd>@Statistics.NumberOfFrameworks.ToString("N0")</dd>
-
-        <dt>#Framework Assemblies</dt>
-        <dd>@Statistics.NumberOfFrameworkAssemblies.ToString("N0")</dd>
-
-        <dt>#Packages</dt>
-        <dd>@Statistics.NumberOfPackages.ToString("N0")</dd>
-
-        <dt>#Package Versions</dt>
-        <dd>@Statistics.NumberOfPackageVersions.ToString("N0")</dd>
-
-        <dt>#Package Assemblies</dt>
-        <dd>@Statistics.NumberOfPackageAssemblies.ToString("N0")</dd>
-
-        <dt>#Usage sources</dt>
-        <dd>@Statistics.NumberOfUsageSources.ToString("N0")</dd>
-    </dl>
+                    if (rows >= 0)
+                    {
+                        <tr>
+                            <th>@tableName</th>
+                            <td>@rows.ToString("N0")</td>
+                            <td>rows</td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

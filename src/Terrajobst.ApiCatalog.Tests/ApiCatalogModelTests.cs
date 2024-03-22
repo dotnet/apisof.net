@@ -69,7 +69,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var ctor = catalog.GetAllApis().Single(a => a.Kind == ApiKind.Constructor);
+        var ctor = catalog.AllApis.Single(a => a.Kind == ApiKind.Constructor);
         var result = catalog.GetApiById(ctor.Id);
         Assert.Equal(ctor, result);
     }
@@ -92,7 +92,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var ctor = catalog.GetAllApis().Single(a => a.Kind == ApiKind.Constructor);
+        var ctor = catalog.AllApis.Single(a => a.Kind == ApiKind.Constructor);
         var result = catalog.GetApiByGuid(ctor.Guid);
         Assert.Equal(ctor, result);
     }
@@ -115,7 +115,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var type = catalog.AllApis.Single(a => a.Name == "TheClass");
         var typeNamespace = type.Parent!.Value;
 
         Assert.Equal("TheClass", type.Name);
@@ -153,7 +153,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var type = catalog.AllApis.Single(a => a.Name == "TheClass");
         var typeNamespace = type.Parent!.Value;
 
         Assert.Equal("TheClass", type.Name);
@@ -194,7 +194,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var type = catalog.AllApis.Single(a => a.Name == "TheClass");
 
         var declaration = Assert.Single(type.Declarations);
         var assembly = Assert.Single(catalog.Assemblies);
@@ -228,7 +228,7 @@ public class ApiCatalogModelTests
                     fx.AddAssembly("System.Runtime", source)))
             .BuildAsync();
 
-        var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var type = catalog.AllApis.Single(a => a.Name == "TheClass");
 
         var declaration = Assert.Single(type.Declarations);
         var assembly = Assert.Single(catalog.Assemblies);
@@ -264,8 +264,8 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
-        var system = catalog.GetAllApis().Single(a => a.Name == "System");
+        var theClass = catalog.AllApis.Single(a => a.Name == "TheClass");
+        var system = catalog.AllApis.Single(a => a.Name == "System");
 
         Assert.Equal(system.AncestorsAndSelf(), new[] { system });
         Assert.Equal(system.Ancestors(), Array.Empty<ApiModel>());
@@ -292,8 +292,8 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
-        var system = catalog.GetAllApis().Single(a => a.Name == "System");
+        var theClass = catalog.AllApis.Single(a => a.Name == "TheClass");
+        var system = catalog.AllApis.Single(a => a.Name == "System");
 
         Assert.Equal(system.DescendantsAndSelf(), new[] { system, theClass });
         Assert.Equal(system.Descendants(), new[] { theClass });
@@ -321,9 +321,9 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
-        var theMethod = catalog.GetAllApis().Single(a => a.Name == "TheMethod(String)");
-        var theNamespace = catalog.GetAllApis().Single(a => a.Name == "TheNamespace");
+        var theClass = catalog.AllApis.Single(a => a.Name == "TheClass");
+        var theMethod = catalog.AllApis.Single(a => a.Name == "TheMethod(String)");
+        var theNamespace = catalog.AllApis.Single(a => a.Name == "TheNamespace");
 
         Assert.Equal("TheMethod(String)", theMethod.Name);
         Assert.Equal(ApiKind.Method, theMethod.Kind);
@@ -354,7 +354,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -380,7 +380,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -430,7 +430,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -480,7 +480,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -506,7 +506,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -534,7 +534,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -562,7 +562,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -590,7 +590,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -618,7 +618,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var declaration = Assert.Single(api.Declarations);
 
@@ -649,7 +649,7 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
         var declaration = Assert.Single(api.Declarations);
 
         var actual = declaration.PlatformSupport.Select(ps => (ps.PlatformName, ps.IsSupported))
@@ -687,7 +687,7 @@ public class ApiCatalogModelTests
                     fx.AddAssembly("System.Runtime", source)))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
         var availabilityContext = ApiAvailabilityContext.Create(catalog);
         var availability = availabilityContext.GetAvailability(api);
 
@@ -720,7 +720,7 @@ public class ApiCatalogModelTests
                 u.Add("T:System.TheClass", 0.55f))
             .BuildAsync();
 
-        var api = catalog.GetAllApis().Single(a => a.GetFullName() == "System.TheClass");
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
 
         var usageSource = Assert.Single(catalog.UsageSources);
         Assert.Equal("nuget", usageSource.Name);
@@ -753,8 +753,8 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var theClass = catalog.GetAllApis().Single(a => a.Name == "TheClass");
-        var theMethod = catalog.GetAllApis().Single(a => a.Name == "TheMethod(TheClass, Int32)");
+        var theClass = catalog.AllApis.Single(a => a.Name == "TheClass");
+        var theMethod = catalog.AllApis.Single(a => a.Name == "TheMethod(TheClass, Int32)");
 
         var extensionMethod = Assert.Single(catalog.ExtensionMethods);
         Assert.Equal(theClass, extensionMethod.ExtendedType);
@@ -800,8 +800,8 @@ public class ApiCatalogModelTests
                 fx.AddAssembly("System.Runtime", source))
             .BuildAsync();
 
-        var theClass1 = catalog.GetAllApis().Single(a => a.Name == "TheClass1");
-        var theClass2 = catalog.GetAllApis().Single(a => a.Name == "TheClass2");
+        var theClass1 = catalog.AllApis.Single(a => a.Name == "TheClass1");
+        var theClass2 = catalog.AllApis.Single(a => a.Name == "TheClass2");
 
         var theClass1Extensions = theClass1.ExtensionMethods.Select(m => m.ExtensionMethod.Name).OrderBy(x => x).ToArray();
         var theClass2Extensions = theClass2.ExtensionMethods.Select(m => m.ExtensionMethod.Name).OrderBy(x => x).ToArray();
@@ -832,7 +832,7 @@ public class ApiCatalogModelTests
             .BuildAsync();
 
         var assembly = Assert.Single(catalog.Assemblies);
-        var type = catalog.GetAllApis().Single(a => a.Name == "TheClass");
+        var type = catalog.AllApis.Single(a => a.Name == "TheClass");
         var typeNamespace = type.Parent;
 
         Assert.Equal(typeNamespace, Assert.Single(assembly.RootApis));

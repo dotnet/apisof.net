@@ -7,7 +7,7 @@ namespace Terrajobst.ApiCatalog;
 
 public static class DotnetPackageIndex
 {
-    private static readonly string[] DotnetPlatformOwners = new[] {
+    private static readonly string[] DotnetPlatformOwners = {
         "aspnet",
         "dotnetframework",
         "dotnetiot",
@@ -75,7 +75,7 @@ public static class DotnetPackageIndex
 
     private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesFromNuGetOrgAsync(NuGetFeed feed)
     {
-        Console.WriteLine($"Fetching owner information...");
+        Console.WriteLine("Fetching owner information...");
         var ownerInformation = await feed.GetOwnerMappingAsync();
 
         var packageIds = ownerInformation.Keys
@@ -86,7 +86,7 @@ public static class DotnetPackageIndex
 
         Console.WriteLine($"Found {packageIds.Length:N0} relevant package IDs.");
 
-        Console.WriteLine($"Getting versions...");
+        Console.WriteLine("Getting versions...");
 
         ConcurrentBag<PackageIdentity> identities = new ConcurrentBag<PackageIdentity>();
 
@@ -108,7 +108,7 @@ public static class DotnetPackageIndex
 
     private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesFromOtherGalleryAsync(NuGetFeed feed)
     {
-        Console.WriteLine($"Enumerating feed...");
+        Console.WriteLine("Enumerating feed...");
 
         var identities = await feed.GetAllPackagesAsync();
 

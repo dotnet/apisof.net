@@ -7,27 +7,15 @@ public readonly struct ExperimentalModel
 
     internal ExperimentalModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.ExperimentalTable, ApiCatalogSchema.ExperimentalRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
 
-    public string DiagnosticId
-    {
-        get
-        {
-            var stringOffset = _catalog.ExperimentalTable.ReadInt32(_offset + 8);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string DiagnosticId => ApiCatalogSchema.ExperimentalRow.DiagnosticId.Read(_catalog, _offset);
 
-    public string UrlFormat
-    {
-        get
-        {
-            var stringOffset = _catalog.ExperimentalTable.ReadInt32(_offset + 12);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string UrlFormat => ApiCatalogSchema.ExperimentalRow.UrlFormat.Read(_catalog, _offset);
 
     public string Url
     {

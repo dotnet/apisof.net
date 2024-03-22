@@ -7,6 +7,8 @@ public readonly struct ExtensionMethodModel : IEquatable<ExtensionMethodModel>
 
     internal ExtensionMethodModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.ExtensionMethodTable, ApiCatalogSchema.ExtensionMethodRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
@@ -15,31 +17,11 @@ public readonly struct ExtensionMethodModel : IEquatable<ExtensionMethodModel>
 
     public int Id => _offset;
 
-    public Guid Guid
-    {
-        get
-        {
-            return _catalog.ExtensionMethodTable.ReadGuid(_offset);
-        }
-    }
+    public Guid Guid => ApiCatalogSchema.ExtensionMethodRow.Guid.Read(_catalog, _offset);
 
-    public ApiModel ExtendedType
-    {
-        get
-        {
-            var offset = _catalog.ExtensionMethodTable.ReadInt32(_offset + 16);
-            return new ApiModel(_catalog, offset);
-        }
-    }
+    public ApiModel ExtendedType => ApiCatalogSchema.ExtensionMethodRow.ExtendedType.Read(_catalog, _offset);
 
-    public ApiModel ExtensionMethod
-    {
-        get
-        {
-            var offset = _catalog.ExtensionMethodTable.ReadInt32(_offset + 20);
-            return new ApiModel(_catalog, offset);
-        }
-    }
+    public ApiModel ExtensionMethod => ApiCatalogSchema.ExtensionMethodRow.ExtensionMethod.Read(_catalog, _offset);
 
     public override bool Equals(object obj)
     {

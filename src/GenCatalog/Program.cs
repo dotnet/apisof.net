@@ -342,7 +342,7 @@ internal static class Program
         var catalog = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var builder = new SuffixTreeBuilder();
 
-        foreach (var api in catalog.GetAllApis())
+        foreach (var api in catalog.AllApis)
         {
             if (api.Kind.IsAccessor())
                 continue;

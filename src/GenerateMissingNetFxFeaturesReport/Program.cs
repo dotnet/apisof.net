@@ -41,7 +41,7 @@ if (includeMatched)
 
 writer.WriteLine();
 
-foreach (var api in catalog.GetAllApis())
+foreach (var api in catalog.AllApis)
 {
     if (api.Kind == ApiKind.Namespace)
         continue;

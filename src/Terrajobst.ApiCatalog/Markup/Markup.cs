@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
@@ -9,6 +11,35 @@ public class Markup
     public Markup(IEnumerable<MarkupPart> parts)
     {
         Parts = parts.ToImmutableArray();
+    }
+
+    public Guid GetFingerprint()
+    {
+        var guidBuffer = (Span<byte>)stackalloc byte[16];
+
+        using var stream = new MemoryStream();
+
+        using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+        {
+            foreach (var part in Parts)
+            {
+                writer.Write((byte)part.Kind);
+                writer.Write(part.Text);
+
+                if (part.Reference is not null)
+                {
+                    var result = part.Reference.Value.TryWriteBytes(guidBuffer);
+                    Debug.Assert(result);
+                    writer.Write(guidBuffer);
+                }
+            }
+        }
+
+        stream.Position = 0;
+
+        using var md5 = MD5.Create();
+        var hashBytes = md5.ComputeHash(stream);
+        return new Guid(hashBytes);
     }
 
     public ImmutableArray<MarkupPart> Parts { get; }

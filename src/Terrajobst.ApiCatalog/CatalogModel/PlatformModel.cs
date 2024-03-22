@@ -7,20 +7,15 @@ public readonly struct PlatformModel : IEquatable<PlatformModel>
 
     internal PlatformModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.PlatformTable, ApiCatalogSchema.PlatformRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
 
     public ApiCatalogModel Catalog => _catalog;
 
-    public string Name
-    {
-        get
-        {
-            var stringOffset = _catalog.PlatformTable.ReadInt32(_offset);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Name => ApiCatalogSchema.PlatformRow.Name.Read(_catalog, _offset);
 
     public override bool Equals(object obj)
     {

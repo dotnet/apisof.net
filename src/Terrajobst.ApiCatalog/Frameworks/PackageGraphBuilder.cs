@@ -53,7 +53,7 @@ internal sealed class PackageGraphBuilder
             if (dependencyVersion is null)
             {
                 Console.WriteLine($"warning: Can't find a best match for {dependency.Id}: {dependency.VersionRange}");
-                Console.WriteLine($"Available versions:");
+                Console.WriteLine("Available versions:");
                 foreach (var v in allVersions)
                     Console.WriteLine(v);
                 continue;

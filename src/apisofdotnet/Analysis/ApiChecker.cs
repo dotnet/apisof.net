@@ -15,13 +15,13 @@ internal static class ApiChecker
                            IReadOnlyList<string> platforms,
                            Action<AssemblyResult> resultReceiver)
     {
-        var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+        var apiByGuid = catalog.AllApis.ToDictionary(a => a.Guid);
         var availabilityContext = ApiAvailabilityContext.Create(catalog);
 
         var platformContexts = frameworks.Select(fx => PlatformAnnotationContext.Create(availabilityContext, fx.GetShortFolderName()))
                                          .ToDictionary(pc => pc.Framework);
 
-        foreach (var api in catalog.GetAllApis())
+        foreach (var api in catalog.AllApis)
         {
             var forwardedApi = catalog.GetForwardedApi(api);
             if (forwardedApi is not null)

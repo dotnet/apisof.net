@@ -113,7 +113,7 @@ public static class FrameworkDownloader
                             //
                             // if (string.IsNullOrEmpty(platformFramework.Profile) || profiles.Contains(platformFramework.Profile, StringComparer.OrdinalIgnoreCase))
                             //    packagePaths.Add(relativePath);
-                            
+
                             packagePaths.Add(relativePath);
                         }
                     }

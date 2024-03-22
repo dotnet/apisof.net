@@ -9,6 +9,8 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
     internal FrameworkModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.FrameworkTable, ApiCatalogSchema.FrameworkRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
@@ -17,22 +19,16 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
     public int Id => _offset;
 
-    public string Name
-    {
-        get
-        {
-            var stringOffset = _catalog.FrameworkTable.ReadInt32(_offset);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Name => ApiCatalogSchema.FrameworkRow.Name.Read(_catalog, _offset);
 
     public bool IsPreview => _catalog.IsPreviewFramework(this);
-    
+
     public AssemblyEnumerator Assemblies
     {
         get
         {
-            return new AssemblyEnumerator(_catalog, _offset + 4);
+            var enumerator = ApiCatalogSchema.FrameworkRow.Assemblies.Read(_catalog, _offset);
+            return new AssemblyEnumerator(enumerator);
         }
     }
 
@@ -69,17 +65,11 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
     public struct AssemblyEnumerator : IEnumerable<AssemblyModel>, IEnumerator<AssemblyModel>
     {
-        private readonly ApiCatalogModel _catalog;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private ApiCatalogSchema.ArrayEnumerator<AssemblyModel> _enumerator;
 
-        public AssemblyEnumerator(ApiCatalogModel catalog, int offset)
+        internal AssemblyEnumerator(ApiCatalogSchema.ArrayEnumerator<AssemblyModel> enumerator)
         {
-            _catalog = catalog;
-            _offset = offset;
-            _count = catalog.FrameworkTable.ReadInt32(offset);
-            _index = -1;
+            _enumerator = enumerator;
         }
 
         IEnumerator<AssemblyModel> IEnumerable<AssemblyModel>.GetEnumerator()
@@ -94,11 +84,7 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -113,11 +99,7 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
         public AssemblyModel Current
         {
-            get
-            {
-                var offset = _catalog.FrameworkTable.ReadInt32(_offset + 4 + 4 * _index);
-                return new AssemblyModel(_catalog, offset);
-            }
+            get { return _enumerator.Current; }
         }
 
         IEnumerator IEnumerable.GetEnumerator()

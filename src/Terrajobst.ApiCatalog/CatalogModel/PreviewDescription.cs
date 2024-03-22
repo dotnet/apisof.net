@@ -13,7 +13,7 @@ public readonly struct PreviewDescription
         PreviewRequirementModel? apiPreviewRequirement = null;
         ExperimentalModel? apiExperimental = null;
         PackageModel? apiPrereleasePackage = null;
-        
+
         foreach (var declaration in api.Declarations)
         {
             var declarationPreviewRequirement = declaration.GetEffectivePreviewRequirement();
@@ -30,7 +30,7 @@ public readonly struct PreviewDescription
             var hasStableInBoxDeclaration = declarationPreviewRequirement is null &&
                                             declarationExperimental is null &&
                                             declarationPreviewFramework is null &&
-                                            declaration.Assembly.Frameworks.Any(IsStableFramework); 
+                                            declaration.Assembly.Frameworks.Any(IsStableFramework);
             if (hasStableInBoxDeclaration)
                 return null;
 
@@ -105,7 +105,7 @@ public readonly struct PreviewDescription
         {
             if (fx.IsPreview)
                 return false;
-                
+
             // For the sake of stability we only consider .NET Framework and .NET Core.
             var nugetFramework = NuGetFramework.Parse(fx.Name);
             return string.Equals(nugetFramework.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase) ||

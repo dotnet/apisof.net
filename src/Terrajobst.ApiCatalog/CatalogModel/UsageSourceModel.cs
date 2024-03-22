@@ -7,29 +7,19 @@ public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
 
     internal UsageSourceModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.UsageSourceTable, ApiCatalogSchema.UsageSourceRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
 
     public ApiCatalogModel Catalog => _catalog;
 
-    public string Name
-    {
-        get
-        {
-            var stringOffset = _catalog.UsageSourcesTable.ReadInt32(_offset);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public int Id => _offset;
 
-    public DateOnly Date
-    {
-        get
-        {
-            var dayNumber = _catalog.UsageSourcesTable.ReadInt32(_offset + 4);
-            return DateOnly.FromDayNumber(dayNumber);
-        }
-    }
+    public string Name => ApiCatalogSchema.UsageSourceRow.Name.Read(_catalog, _offset);
+
+    public DateOnly Date => ApiCatalogSchema.UsageSourceRow.Date.Read(_catalog, _offset);
 
     public override bool Equals(object obj)
     {

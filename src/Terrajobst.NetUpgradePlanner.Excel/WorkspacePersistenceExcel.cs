@@ -248,7 +248,7 @@ public static class WorkspacePersistenceExcel
         var rowCount = 1;
 
         var catalog = workspace.Report.Catalog;
-        var apiByGuid = catalog.GetAllApis().ToDictionary(a => a.Guid);
+        var apiByGuid = catalog.AllApis.ToDictionary(a => a.Guid);
 
         foreach (var assembly in workspace.AssemblySet.Entries)
         {

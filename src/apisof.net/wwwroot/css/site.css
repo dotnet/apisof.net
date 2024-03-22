@@ -51,6 +51,17 @@
     outline: none;
 }
 
+/* Stats */
+
+.statistics-container > div {
+    margin: 0 auto;
+    width: 400px;
+}
+
+.statistics-container table td:nth-child(2) {
+    text-align: right;
+}
+
 /* Search */
 
 .modal-dialog.modal-full {

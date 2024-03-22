@@ -7,37 +7,19 @@ public readonly struct ApiUsageModel : IEquatable<ApiUsageModel>
 
     internal ApiUsageModel(ApiModel api, int offset)
     {
+        ApiCatalogSchema.EnsureValidBlobOffset(api.Catalog, offset);
+
         _api = api;
         _offset = offset;
     }
 
     public ApiCatalogModel Catalog => Api.Catalog;
 
-    public ApiModel Api
-    {
-        get
-        {
-            return _api;
-        }
-    }
+    public ApiModel Api => _api;
 
-    public UsageSourceModel Source
-    {
-        get
-        {
-            var usageSourceOffset = _api.Catalog.ApiTable.ReadInt32(_offset);
-            return new UsageSourceModel(_api.Catalog, usageSourceOffset);
-        }
-    }
+    public UsageSourceModel Source => ApiCatalogSchema.ApiUsageStructure.UsageSource.Read(_api.Catalog, _offset);
 
-    public float Percentage
-    {
-        get
-        {
-            var offset = _offset + 4;
-            return _api.Catalog.ApiTable.ReadSingle(offset);
-        }
-    }
+    public float Percentage => ApiCatalogSchema.ApiUsageStructure.Percentage.Read(_api.Catalog, _offset);
 
     public override bool Equals(object obj)
     {

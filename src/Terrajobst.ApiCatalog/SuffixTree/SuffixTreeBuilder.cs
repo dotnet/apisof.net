@@ -25,7 +25,7 @@ public sealed class SuffixTreeBuilder
         if (childIndex < 0)
         {
             childIndex = ~childIndex;
-            var child = new Node() { Text = text };
+            var child = new Node { Text = text };
             node.InsertChild(childIndex, child);
         }
 

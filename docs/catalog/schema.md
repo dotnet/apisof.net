@@ -1,138 +1,105 @@
 # API Catalog Schema
 
-The binary catalog schema looks as follows:
+The format of the catalog is inspired by the .NET metadata format (ECMA 335). It
+is comprised of heaps and tables.
 
-| Offset | Length | Name                    |
-| ------ | ------ | ----------------------- |
-| 0      | 60     | Header                  |
-| 60     | Rest   | Deflate compressed body |
+The data is separated into two sections, the header and the body:
+
+* `Header`
+* Deflate compressed body
+
+In order to read the format the header will be read first and then then body
+will need to be decompressed.
 
 ## Header
 
-| Offset | Length | Type      | Name        | Comment    |
-| ------ | ------ | --------- | ----------- | ---------- |
-| 0      | 8      | char8[8]  | Magic Value | 'APICATFB' |
-| 4      | 4      | int32     | Version     |            |
-| 8      | 48     | int32[12] | Table Sizes |            |
+| Offset | Length | Type        | Name        |
+| ------ | ------ | ----------- | ----------- |
+| 0      | 8      | `Char8[8]`  | Magic Value |
+| 4      | 4      | `Int32`     | Version     |
+| 8      | 56     | `Int32[14]` | Table Sizes |
 
-The table sizes are in the following order:
+- The magic value is `APICATFB`
+- This is version `7`
+- The table sizes are in the following order:
+  1. [String Heap]
+  1. [Blob Heap]
+  1. [Platform Table]
+  1. [Framework Table]
+  1. [Package Table]
+  1. [Assembly Table]
+  1. [Usage Source Table]
+  1. [API Table]
+  1. [Root API Table]
+  1. [Extension Methods Table]
+  1. [Obsoletion Table]
+  1. [Platform Support Table]
+  1. [Preview Requirement Table]
+  1. [Experimental Table]
 
-1. String Table
-1. Platform Table
-1. Framework Table
-1. Package Table
-1. Assembly Table
-1. Usage Sources Table
-1. API Table
-1. Obsoletion Table
-1. Platform Support Table
-1. Preview Requirement Table
-1. Experimental Table
-1. Extension Methods Table
+## String Heap
 
-## String Table
-
-Probably shouldn't be a table -- it's more of a blob. Users will have an offset
-that points into the string table. They read a length-prefixed UTF8 string.
+Stores length-prefixed UTF8 encoded strings. Users will have an offset that
+points into the heap.
 
 | Type       | Length | Comment             |
 | ---------- | ------ | ------------------- |
-| int32      | 4      | Number of bytes `N` |
-| char8[`N`] | `N`    | UTF8 characters.    |
+| `Int32`    | 4      | Number of bytes `N` |
+| `char8[N]` | `N`    | UTF8 characters.    |
+
+## Blob Heap
+
+Stores arbitrary chunks of encoded data. The format depends.
 
 ## Platform Table
 
-The table starts with a header that states how many rows are in the table:
-
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
-
 Each row looks as follows:
 
-| Offset | Length | Type                | Name          | Comment |
-| ------ | ------ | ------------------- | ------------- | ------- |
-| 0      | 4      | string table offset | Platform Name |         |
+| Offset | Length | Type           | Name          |
+| ------ | ------ | -------------- | ------------- |
+| 0      | 4      | `StringOffset` | Platform Name |
 
 ## Framework Table
 
-The rows are of varying length, so the header first states how many rows there
-are followed by an array with the row start offsets, relative to the table start
-(before header):
-
-| Offset | Length | Type       | Name          | Comment |
-| ------ | ------ | ---------- | ------------- | ------- |
-| 0      | 4      | int32      | Row count `R` |         |
-| 4      | 4*`R`  | int32[`R`] | Row offsets   |         |
-
 Each row looks as follows:
 
-| Offset | Length | Type                | Name                     | Comment |
-| ------ | ------ | ------------------- | ------------------------ | ------- |
-| 0      | 4      | string table offset | Framework Name           |         |
-| 4      | 4      | int32               | Number of assemblies `A` |         |
-| 8      | 4*`A`  | int32[`A`]          | Assembly offsets         |         |
+| Offset | Length | Type                               | Name           |
+| ------ | ------ | ---------------------------------- | -------------- |
+| 0      | 4      | `StringOffset`                     | Framework Name |
+| 4      | 4      | `BlobOffset` -> `AssemblyOffset[]` | Assemblies     |
 
 ## Package Table
 
-The rows are of varying length, so the header first states how many rows there
-are followed by an array with the row start offsets, relative to the table start
-(before header):
-
-| Offset | Length | Type       | Name          | Comment |
-| ------ | ------ | ---------- | ------------- | ------- |
-| 0      | 4      | int32      | Row count `R` |         |
-| 4      | 4*`R`  | int32[`R`] | Row offsets   |         |
-
 Each row looks as follows:
 
-| Offset | Length | Type                | Name                                            | Comment |
-| ------ | ------ | ------------------- | ----------------------------------------------- | ------- |
-| 0      | 4      | string table offset | Package Name                                    |         |
-| 4      | 4      | string table offset | Package Version                                 |         |
-| 8      | 4      | int32               | Number of assemblies `A`                        |         |
-| 12     | 8*`A`  | (int32, int32)[`A`] | (Framework table offset, assembly table offset) |         |
+| Offset | Length | Type                                                  | Name            |
+| ------ | ------ | ----------------------------------------------------- | --------------- |
+| 0      | 4      | `StringOffset`                                        | Package Name    |
+| 4      | 4      | `StringOffset`                                        | Package Version |
+| 8      | 4      | `BlobOffset` -> `(FrameworkOffset, AssemblyOffset)[]` | Assemblies      |
 
 ## Assembly Table
 
-The rows are of varying length, so the header first states how many rows there
-are followed by an array with the row start offsets, relative to the table start
-(before header):
+Each row looks as follows:
 
-| Offset | Length | Type       | Name          | Comment |
-| ------ | ------ | ---------- | ------------- | ------- |
-| 0      | 4      | int32      | Row count `R` |         |
-| 4      | 4*`R`  | int32[`R`] | Row offsets   |         |
+| Offset | Length | Type                                                 | Name           |
+| ------ | ------ | ---------------------------------------------------- | -------------- |
+| 0      | 16     | `GUID`                                               | Fingerprint    |
+| 16     | 4      | `StringOffset`                                       | Name           |
+| 20     | 4      | `StringOffset`                                       | PublicKeyToken |
+| 24     | 4      | `StringOffset`                                       | Version        |
+| 28     | 4      | `BlobOffset` -> `ApiOffset[]`                        | Root APIs      |
+| 32     | 4      | `BlobOffset` -> `FrameworkOffset[]`                  | Frameworks     |
+| 36     | 8      | `BlobOffset` -> `(PackageOffset, FrameworkOffset)[]` | Packages       |
+
+## Usage Source Table
 
 Each row looks as follows:
 
-| Offset                     | Length | Type                   | Name                                           | Comment |
-| -------------------------- | ------ | ---------------------- | ---------------------------------------------- | ------- |
-| 0                          | 16     | GUID                   | Fingerprint                                    |         |
-| 16                         | 4      | string table offset    | Name                                           |         |
-| 20                         | 4      | string table offset    | PublicKeyToken                                 |         |
-| 24                         | 4      | string table offset    | Version                                        |         |
-| 28                         | 4      | int32                  | Number of root APIs `R`                        |         |
-| 32                         | 4*`R`  | API table offset       | Root APIs                                      |         |
-| 32 + 4*`R`                 | 4      | int32                  | Number of frameworks `F`                       |         |
-| 32 + 4*`R` + 4             | 4*`F`  | framework table offset | Frameworks                                     |         |
-| 32 + 4*`R` + 4 + 4*`F`     | 4      | int32                  | Number of packages `P`                         |         |
-| 32 + 4*`R` + 4 + 4*`F` + 4 | 8*`P`  | (int32, int32)[`P`]    | (Package table offset, framework table offset) |         |
-
-## Usage Sources Table
-
-The table starts with a header that states how many rows are in the table:
-
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row count |         |
-
-Each row looks as follows:
-
-| Offset | Length | Type                | Name              | Comment |
-| ------ | ------ | ------------------- | ----------------- | ------- |
-| 0      | 4      | string table offset | Usage Source Name |         |
-| 4      | 4      | int32               | Day number        |         |
+| Offset | Length | Type           | Name              |
+| ------ | ------ | -------------- | ----------------- |
+| 0      | 4      | `StringOffset` | Usage Source Name |
+| 4      | 4      | `Int32`        | Day number        |
 
 > [!NOTE]
 >
@@ -141,114 +108,161 @@ Each row looks as follows:
 
 ## API Table
 
-The API table is a serialized tree of the APIs; generally speaking the rows are
-of varying lengths and the consumer will have to have an offset to a particular
-API.
+Each row looks as follows:
 
-The table starts with the roots:
+| Offset | Length | Type                                             | Name         |
+| ------ | ------ | ------------------------------------------------ | ------------ |
+| 0      | 16     | `GUID`                                           | Fingerprint  |
+| 16     | 1      | `Byte`                                           | API kind     |
+| 17     | 4      | `ApiOffset`                                      | Parent       |
+| 21     | 4      | `StringOffset`                                   | Name         |
+| 25     | 4      | `BlobOffset` -> `ApiOffset[]`                    | Children     |
+| 29     | 4      | `BlobOffset` -> `(AssemblyOffset, BlobOffset)[]` | Declarations |
+| 33     | 4      | `BlobOffset` -> `(UsageSourceOffset, float)`     | Usages       |
 
-| Offset | Length | Type       | Name             | Comment                          |
-| ------ | ------ | ---------- | ---------------- | -------------------------------- |
-| 0      | 4      | int32      | Node Count `N`   |                                  |
-| 4      | 4*`N`  | int32[`N`] | API table offset | Points to all the top-level APIs |
-
-Each API looks as follows:
-
-| Offset                     | Length | Type                | Name                                         | Comment |
-| -------------------------- | ------ | ------------------- | -------------------------------------------- | ------- |
-| 0                          | 16     | GUID                | Fingerprint                                  |         |
-| 16                         | 1      | byte                | API kind                                     |         |
-| 17                         | 4      | API table offset    | Parent                                       |         |
-| 21                         | 4      | string table offset | Name                                         |         |
-| 25                         | 4      | int32               | Child count `C`                              |         |
-| 29                         | 4*`C`  | API table offset[C] | Children                                     |         |
-| 29 + 4*`C`                 | 4      | int32               | Declaration Count `D`                        |         |
-| 29 + 4*`C` + 4             | 8*`D`  | (int32, int32)[`D`] | (Assembly table offset, string table offset) |         |
-| 29 + 4*`C` + 4 + 8*`D`     | 4      | int32               | Usage data point count `U`                   |         |
-| 29 + 4*`C` + 4 + 8*`D` + 4 | 8*`U`  | (int32, float)[`U`] | (Usage data source offset, percentage)       |         |
-
-## Obsoletion Table
-
-The table starts with a header that states how many rows are in the table:
-
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row count |         |
+## Root API Table
 
 Each row looks as follows:
 
-| Offset | Length | Type                  | Name          | Comment |
-| ------ | ------ | --------------------- | ------------- | ------- |
-| 0      | 4      | API table offset      | API           |         |
-| 4      | 4      | assembly table offset | Assembly      |         |
-| 8      | 4      | string table offset   | Message       |         |
-| 12     | 1      | bool                  | Is Error      |         |
-| 13     | 4      | string table offset   | Diagnostic ID |         |
-| 17     | 4      | string table offset   | URL Format    |         |
-
-## Platform Support Table
-
-The table starts with a header that states how many rows are in the table:
-
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row count |         |
-
-Each row looks as follows:
-
-| Offset | Length | Type                  | Name          | Comment |
-| ------ | ------ | --------------------- | ------------- | ------- |
-| 0      | 4      | API table offset      | API           |         |
-| 4      | 4      | assembly table offset | Assembly      |         |
-| 8      | 4      | platform table offset | Platform      |         |
-| 12     | 1      | bool                  | Is Supported  |         |
-
-## Preview Requirement Table
-
-The table starts with a header that states how many rows are in the table:
-
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row count |         |
-
-Each row looks as follows:
-
-| Offset | Length | Type                  | Name     | Comment |
-| ------ | ------ | --------------------- | -------- | ------- |
-| 0      | 4      | API table offset      | API      |         |
-| 4      | 4      | assembly table offset | Assembly |         |
-| 8      | 4      | string table offset   | Message  |         |
-| 12     | 4      | string table offset   | URL      |         |
-
-## Experimental Table
-
-The table starts with a header that states how many rows are in the table:
-
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row count |         |
-
-Each row looks as follows:
-
-| Offset | Length | Type                  | Name          | Comment |
-| ------ | ------ | --------------------- | ------------- | ------- |
-| 0      | 4      | API table offset      | API           |         |
-| 4      | 4      | assembly table offset | Assembly      |         |
-| 8      | 4      | string table offset   | Diagnostic ID |         |
-| 12     | 4      | string table offset   | URL Format    |         |
+| Offset | Length | Type        | Name |
+| ------ | ------ | ----------- | ---- |
+| 0      | 4      | `ApiOffset` | API  |
 
 ## Extension Methods Table
 
-The table starts with a header that states how many rows are in the table:
+Each row looks as follows:
 
-| Offset | Length | Type  | Name      | Comment |
-| ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row count |         |
+| Offset | Length | Type        | Name                  |
+| ------ | ------ | ----------- | --------------------- |
+| 0      | 4      | `GUID`      | Extension Method GUID |
+| 4      | 4      | `ApiOffset` | Extended Type         |
+| 8      | 4      | `ApiOffset` | Extension Method      |
+
+## Obsoletion Table
 
 Each row looks as follows:
 
-| Offset | Length | Type             | Name                  | Comment |
-| ------ | ------ | ---------------- | --------------------- | ------- |
-| 0      | 4      | GUID             | Extension Method GUID |         |
-| 4      | 4      | API table offset | Extended Type         |         |
-| 8      | 4      | API table offset | Extension Method      |         |
+| Offset | Length | Type             | Name          |
+| ------ | ------ | ---------------- | ------------- |
+| 0      | 4      | `ApiOffset`      | API           |
+| 4      | 4      | `AssemblyOffset` | Assembly      |
+| 8      | 4      | `StringOffset`   | Message       |
+| 12     | 1      | `Boolean`        | Is Error      |
+| 13     | 4      | `StringOffset`   | Diagnostic ID |
+| 17     | 4      | `StringOffset`   | URL Format    |
+
+- The rows are sorted by API and Assembly, to allow binary search based on them.
+
+## Platform Support Table
+
+Each row looks as follows:
+
+| Offset | Length | Type                                        | Name         |
+| ------ | ------ | ------------------------------------------- | ------------ |
+| 0      | 4      | `ApiOffset`                                 | API          |
+| 4      | 4      | `AssemblyOffset`                            | Assembly     |
+| 8      | 4      | `BlobOffset` -> `(StringOffset, Boolean)[]` | Support      |
+
+- The rows are sorted by API and Assembly, to allow binary search based on them.
+
+## Preview Requirement Table
+
+Each row looks as follows:
+
+| Offset | Length | Type             | Name     |
+| ------ | ------ | ---------------- | -------- |
+| 0      | 4      | `ApiOffset`      | API      |
+| 4      | 4      | `AssemblyOffset` | Assembly |
+| 8      | 4      | `StringOffset`   | Message  |
+| 12     | 4      | `StringOffset`   | URL      |
+
+- The rows are sorted by API and Assembly, to allow binary search based on them.
+
+## Experimental Table
+
+Each row looks as follows:
+
+| Offset | Length | Type             | Name          |
+| ------ | ------ | ---------------- | ------------- |
+| 0      | 4      | `ApiOffset`      | API           |
+| 4      | 4      | `AssemblyOffset` | Assembly      |
+| 8      | 4      | `StringOffset`   | Diagnostic ID |
+| 12     | 4      | `StringOffset`   | URL Format    |
+
+- The rows are sorted by API and Assembly, to allow binary search based on them.
+
+## Blobs
+
+### Arrays
+
+The most common types of blobs are arrays. Arrays are stored length-prefixed.
+The length is stored as an `Int32`. Please note the length is number of
+elements, not number of bytes.
+
+Element types can either be simple types or tuples:
+
+- `FrameworkOffset[]`
+- `AssemblyOffset[]`
+- `ApiOffset[]`
+- `(FrameworkOffset, AssemblyOffset)[]`
+- `(PackageOffset, FrameworkOffset)[]`
+- `(AssemblyOffset, BlobOffset)[]`
+- `(UsageSourceOffset, Float)[]`
+- `(StringOffset, Boolean)[]`
+
+Tuples are stored in sequence with no padding or length prefix.
+
+### Syntax
+
+The declaration syntax of an API is stored as stream of tokens.
+
+* `Int32` - TokenCount
+* Sequence of `Token`
+
+Each `Token` has:
+
+* `Byte` - Kind
+* `StringOffset` - Text
+
+If the token kind is `Reference` then the Text field is followed by an
+`ApiOffset`.
+
+Kind is one of following:
+
+* `0` - Whitespace
+* `1` - LiteralNumber
+* `2` - LiteralString
+* `3` - Punctuation
+* `4` - Keyword
+* `5` - Reference
+
+## Types
+
+| Type                | Representation | Comment                                                      |
+| ------------------- | -------------- | ------------------------------------------------------------ |
+| `GUID`              | `Byte[16]`     | A GUID                                                       |
+| `Boolean`           | `Byte`         | A Boolean with `True` being `1`, `0` otherwise               |
+| `Float`             | `Single`       | A 32-bit floating point                                      |
+| `StringOffset`      | `Int32`        | Points to a length-prefixed string in the [string heap]      |
+| `BlobOffset`        | `Int32`        | Points to data in the [blob heap]. Representation depends.   |
+| `PlatformOffset`    | `Int32`        | Points to the beginning of a row in the [Platform table]     |
+| `FrameworkOffset`   | `Int32`        | Points to the beginning of a row in the [Framework table]    |
+| `PackageOffset`     | `Int32`        | Points to the beginning of a row in the [Package table]      |
+| `AssemblyOffset`    | `Int32`        | Points to the beginning of a row in the [Assembly table]     |
+| `UsageSourceOffset` | `Int32`        | Points to the beginning of a row in the [Usage source table] |
+| `ApiOffset`         | `Int32`        | Points to the beginning of a row in the [API table]          |
+
+[String Heap]: #string-heap
+[Blob Heap]: #blob-heap
+[Platform Table]: #platform-table
+[Framework Table]: #framework-table
+[Package Table]: #package-table
+[Assembly Table]: #assembly-table
+[Usage Source Table]: #usage-source-table
+[API Table]: #api-table
+[Root API Table]: #root-api-table
+[Obsoletion Table]: #obsoletion-table
+[Platform Support Table]: #platform-support-table
+[Preview Requirement Table]: #preview-requirement-table
+[Experimental Table]: #experimental-table
+[Extension Methods Table]: #extension-methods-table

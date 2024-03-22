@@ -7,44 +7,19 @@ public readonly struct ObsoletionModel : IEquatable<ObsoletionModel>
 
     internal ObsoletionModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.ObsoletionTable, ApiCatalogSchema.ObsoletionRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
 
-    public string Message
-    {
-        get
-        {
-            var stringOffset = _catalog.ObsoletionTable.ReadInt32(_offset + 8);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Message => ApiCatalogSchema.ObsoletionRow.Message.Read(_catalog, _offset);
 
-    public bool IsError
-    {
-        get
-        {
-            return _catalog.ObsoletionTable.ReadByte(_offset + 12) == 1;
-        }
-    }
+    public bool IsError => ApiCatalogSchema.ObsoletionRow.IsError.Read(_catalog, _offset);
 
-    public string DiagnosticId
-    {
-        get
-        {
-            var stringOffset = _catalog.ObsoletionTable.ReadInt32(_offset + 13);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string DiagnosticId => ApiCatalogSchema.ObsoletionRow.DiagnosticId.Read(_catalog, _offset);
 
-    public string UrlFormat
-    {
-        get
-        {
-            var stringOffset = _catalog.ObsoletionTable.ReadInt32(_offset + 17);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string UrlFormat => ApiCatalogSchema.ObsoletionRow.UrlFormat.Read(_catalog, _offset);
 
     public string Url
     {

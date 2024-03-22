@@ -332,7 +332,7 @@ internal sealed class Program
 
         await usageDatabase.OpenAsync();
 
-        var ancestors = apiCatalog.GetAllApis()
+        var ancestors = apiCatalog.AllApis
                                   .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
         await usageDatabase.InsertApiAncestorsAndExportUsagesAsync(apiMap, ancestors, usagesPath);
 

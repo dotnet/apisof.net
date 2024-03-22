@@ -31,7 +31,7 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
 
             // For frameworks with a platform, such as `net5.0-windows`, we also want to add in all references
             // from the base framework, such as `net5.0`.
-            
+
             var fx = NuGetFramework.Parse(entry.FrameworkName);
             var baseFx = GetBaseFramework(fx);
             if (baseFx is not null)
@@ -40,7 +40,7 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
                 foreach (var package in baseEntry.Packages)
                     references.UnionWith(package.References);
             }
-            
+
             var files = references.ToArray();
             yield return (entry.FrameworkName, files);
         }
@@ -49,8 +49,8 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
         {
             var hasPlatform = fx.HasPlatform;
             var hasNetCoreApp3Profile = string.Equals(fx.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
-                                        fx.Version.Major == 3 && fx.HasProfile; 
-            
+                                        fx.Version.Major == 3 && fx.HasProfile;
+
             if (hasPlatform || hasNetCoreApp3Profile)
                 return new NuGetFramework(fx.Framework, fx.Version);
 

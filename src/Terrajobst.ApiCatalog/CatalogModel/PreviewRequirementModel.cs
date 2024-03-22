@@ -7,27 +7,15 @@ public readonly struct PreviewRequirementModel
 
     internal PreviewRequirementModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.PreviewRequirementTable, ApiCatalogSchema.PreviewRequirementRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
 
-    public string Message
-    {
-        get
-        {
-            var stringOffset = _catalog.PreviewRequirementTable.ReadInt32(_offset + 8);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Message => ApiCatalogSchema.PreviewRequirementRow.Message.Read(_catalog, _offset);
 
-    public string Url
-    {
-        get
-        {
-            var stringOffset = _catalog.PreviewRequirementTable.ReadInt32(_offset + 12);
-            return _catalog.GetString(stringOffset);
-        }
-    }
+    public string Url => ApiCatalogSchema.PreviewRequirementRow.Url.Read(_catalog, _offset);
 
     public override bool Equals(object obj)
     {

@@ -10,6 +10,8 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
     internal ApiModel(ApiCatalogModel catalog, int offset)
     {
+        ApiCatalogSchema.EnsureValidOffset(catalog.ApiTable, ApiCatalogSchema.ApiRow.Size, offset);
+
         _catalog = catalog;
         _offset = offset;
     }
@@ -18,48 +20,20 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
     public int Id => _offset;
 
-    public Guid Guid
+    public Guid Guid => ApiCatalogSchema.ApiRow.Guid.Read(_catalog, _offset);
+
+    public ApiKind Kind => ApiCatalogSchema.ApiRow.Kind.Read(_catalog, _offset);
+
+    public ApiModel? Parent => ApiCatalogSchema.ApiRow.Parent.Read(_catalog, _offset);
+
+    public string Name => ApiCatalogSchema.ApiRow.Name.Read(_catalog, _offset);
+
+    public ChildrenEnumerator Children
     {
         get
         {
-            return _catalog.ApiTable.ReadGuid(_offset);
-        }
-    }
-
-    public ApiKind Kind
-    {
-        get
-        {
-            return (ApiKind)_catalog.ApiTable.ReadByte(_offset + 16);
-        }
-    }
-
-    public ApiModel? Parent
-    {
-        get
-        {
-            var parentOffset = _catalog.ApiTable.ReadInt32(_offset + 17);
-            if (parentOffset == -1)
-                return null;
-
-            return new ApiModel(_catalog, parentOffset);
-        }
-    }
-
-    public string Name
-    {
-        get
-        {
-            var stringOffset = _catalog.ApiTable.ReadInt32(_offset + 21);
-            return _catalog.GetString(stringOffset);
-        }
-    }
-
-    public ApiCatalogModel.ApiEnumerator Children
-    {
-        get
-        {
-            return new ApiCatalogModel.ApiEnumerator(_catalog, _offset + 25);
+            var enumerator = ApiCatalogSchema.ApiRow.Children.Read(_catalog, _offset);
+            return new ChildrenEnumerator(enumerator);
         }
     }
 
@@ -67,9 +41,8 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         get
         {
-            var childCount = _catalog.ApiTable.ReadInt32(_offset + 25);
-            var declarationTableOffset = _offset + 29 + childCount * 4;
-            return new DeclarationEnumerator(this, declarationTableOffset);
+            var enumerator = ApiCatalogSchema.ApiRow.Declarations.Read(_catalog, _offset);
+            return new DeclarationEnumerator(_offset, enumerator);
         }
     }
 
@@ -77,12 +50,8 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
     {
         get
         {
-            var childCount = _catalog.ApiTable.ReadInt32(_offset + 25);
-            var declarationTableOffset = _offset + 29 + childCount * 4;
-
-            var declarationCount = _catalog.ApiTable.ReadInt32(declarationTableOffset);
-            var usagesTableOffset = declarationTableOffset + 4 + declarationCount * 8;
-            return new UsageEnumerator(this, usagesTableOffset);
+            var enumerator = ApiCatalogSchema.ApiRow.Usages.Read(_catalog, _offset);
+            return new UsageEnumerator(_offset, enumerator);
         }
     }
 
@@ -342,19 +311,64 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         }
     }
 
+    public struct ChildrenEnumerator : IEnumerable<ApiModel>, IEnumerator<ApiModel>
+    {
+        private ApiCatalogSchema.ArrayEnumerator<ApiModel> _enumerator;
+
+        internal ChildrenEnumerator(ApiCatalogSchema.ArrayEnumerator<ApiModel> enumerator)
+        {
+            _enumerator = enumerator;
+        }
+
+        IEnumerator<ApiModel> IEnumerable<ApiModel>.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public ChildrenEnumerator GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            return _enumerator.MoveNext();
+        }
+
+        void IEnumerator.Reset()
+        {
+            throw new NotSupportedException();
+        }
+
+        object IEnumerator.Current
+        {
+            get { return Current; }
+        }
+
+        public ApiModel Current
+        {
+            get { return _enumerator.Current; }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        void IDisposable.Dispose()
+        {
+        }
+    }
+
     public struct DeclarationEnumerator : IEnumerable<ApiDeclarationModel>, IEnumerator<ApiDeclarationModel>
     {
-        private readonly ApiModel _apiModel;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private readonly int _apiOffset;
+        private ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.ApiDeclarationLayout> _enumerator;
 
-        public DeclarationEnumerator(ApiModel apiModel, int offset)
+        internal DeclarationEnumerator(int apiOffset, ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.ApiDeclarationLayout> enumerator)
         {
-            _apiModel = apiModel;
-            _offset = offset;
-            _count = _apiModel.Catalog.ApiTable.ReadInt32(offset);
-            _index = -1;
+            _apiOffset = apiOffset;
+            _enumerator = enumerator;
         }
 
         IEnumerator<ApiDeclarationModel> IEnumerable<ApiDeclarationModel>.GetEnumerator()
@@ -369,11 +383,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -390,8 +400,9 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         {
             get
             {
-                var offset = _offset + 4 + 8 * _index;
-                return new ApiDeclarationModel(_apiModel, offset);
+                var declarationOffset = _enumerator.Current;
+                var api = new ApiModel(_enumerator.Catalog, _apiOffset);
+                return new ApiDeclarationModel(api, declarationOffset);
             }
         }
 
@@ -407,17 +418,13 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
     public struct UsageEnumerator : IEnumerable<ApiUsageModel>, IEnumerator<ApiUsageModel>
     {
-        private readonly ApiModel _apiModel;
-        private readonly int _offset;
-        private readonly int _count;
-        private int _index;
+        private readonly int _apiOffset;
+        private ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.ApiUsageLayout> _enumerator;
 
-        public UsageEnumerator(ApiModel apiModel, int offset)
+        internal UsageEnumerator(int apiOffset, ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.ApiUsageLayout> enumerator)
         {
-            _apiModel = apiModel;
-            _offset = offset;
-            _count = _apiModel.Catalog.ApiTable.ReadInt32(offset);
-            _index = -1;
+            _apiOffset = apiOffset;
+            _enumerator = enumerator;
         }
 
         IEnumerator<ApiUsageModel> IEnumerable<ApiUsageModel>.GetEnumerator()
@@ -432,11 +439,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
         public bool MoveNext()
         {
-            if (_index >= _count - 1)
-                return false;
-
-            _index++;
-            return true;
+            return _enumerator.MoveNext();
         }
 
         void IEnumerator.Reset()
@@ -453,8 +456,9 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         {
             get
             {
-                var offset = _offset + 4 + 8 * _index;
-                return new ApiUsageModel(_apiModel, offset);
+                var usageOffset = _enumerator.Current;
+                var api = new ApiModel(_enumerator.Catalog, _apiOffset);
+                return new ApiUsageModel(api, usageOffset);
             }
         }
 
@@ -493,12 +497,12 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
         public bool MoveNext()
         {
-            var offset = _offset + (_index + 1) * (16 + 4 + 4);
-            if (_offset < 0 || offset >= _apiModel.Catalog.ExtensionMethodTable.Length)
+            var nextRowOffset = _offset + (_index + 1) * ApiCatalogSchema.ExtensionMethodRow.Size;
+            if (_offset < 0 || nextRowOffset >= _apiModel.Catalog.ExtensionMethodTable.Length)
                 return false;
 
-            var extendedTypeId = _apiModel.Catalog.ExtensionMethodTable.ReadInt32(offset + 16);
-            if (extendedTypeId != _apiModel.Id)
+            var extendedType = ApiCatalogSchema.ExtensionMethodRow.ExtendedType.Read(_apiModel.Catalog, nextRowOffset);
+            if (extendedType != _apiModel)
                 return false;
 
             _index++;
@@ -519,7 +523,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         {
             get
             {
-                var offset = _offset + _index * (16 + 4 + 4);
+                var offset = _offset + _index * ApiCatalogSchema.ExtensionMethodRow.Size;
                 return new ExtensionMethodModel(_apiModel.Catalog, offset);
             }
         }
