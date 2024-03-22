@@ -1,5 +1,6 @@
 ﻿using System.Buffers.Binary;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
@@ -41,10 +42,10 @@ public sealed partial class ApiCatalogModel
     private readonly int _extensionMethodTableOffset;
     private readonly int _extensionMethodTableLength;
 
-    private Dictionary<Guid, int> _apiOffsetByGuid;
-    private Dictionary<Guid, int> _extensionMethodOffsetByGuid;
-    private Dictionary<int, int> _forwardedApis;
-    private HashSet<int> _previewFrameworks;
+    private FrozenDictionary<Guid, int> _apiOffsetByGuid;
+    private FrozenDictionary<Guid, int> _extensionMethodOffsetByGuid;
+    private FrozenDictionary<int, int> _forwardedApis;
+    private FrozenSet<int> _previewFrameworks;
 
     private ApiCatalogModel(int formatVersion, int sizeOnDisk, byte[] buffer, int[] tableSizes)
     {
@@ -186,7 +187,7 @@ public sealed partial class ApiCatalogModel
     {
         if (_apiOffsetByGuid is null)
         {
-            var apiByGuid = GetAllApis().ToDictionary(a => a.Guid, a => a.Id);
+            var apiByGuid = GetAllApis().ToFrozenDictionary(a => a.Guid, a => a.Id);
             Interlocked.CompareExchange(ref _apiOffsetByGuid, apiByGuid, null);
         }
 
@@ -198,7 +199,7 @@ public sealed partial class ApiCatalogModel
     {
         if (_extensionMethodOffsetByGuid is null)
         {
-            var extensionMethodOffsetByGuid = ExtensionMethods.ToDictionary(a => a.Guid, a => a.Id);
+            var extensionMethodOffsetByGuid = ExtensionMethods.ToFrozenDictionary(a => a.Guid, a => a.Id);
             Interlocked.CompareExchange(ref _extensionMethodOffsetByGuid, extensionMethodOffsetByGuid, null);
         }
 
@@ -216,7 +217,7 @@ public sealed partial class ApiCatalogModel
 
         return _previewFrameworks.Contains(model.Id);
         
-        static HashSet<int> GetPreviewFrameworks(ApiCatalogModel apiCatalogModel)
+        static FrozenSet<int> GetPreviewFrameworks(ApiCatalogModel apiCatalogModel)
         {
             var previewFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             
@@ -240,7 +241,7 @@ public sealed partial class ApiCatalogModel
                 }
             }
 
-            var result = new HashSet<int>();
+            var result = new List<int>();
 
             foreach (var framework in apiCatalogModel.Frameworks)
             {
@@ -248,7 +249,7 @@ public sealed partial class ApiCatalogModel
                     result.Add(framework.Id);
             }
 
-            return result;
+            return result.ToFrozenSet();
         }
     }
 
@@ -472,12 +473,12 @@ public sealed partial class ApiCatalogModel
         return null;
     }
 
-    private Dictionary<int, int> ComputeForwardedApis()
+    private FrozenDictionary<int, int> ComputeForwardedApis()
     {
         var result = new Dictionary<int, int>();
         ForwardTypeMembers(result, this, "System.Reflection.TypeInfo", "System.Type");
         ForwardTypeMembers(result, this, "System.Type", "System.Reflection.MemberInfo");
-        return result;
+        return result.ToFrozenDictionary();
 
         static void ForwardTypeMembers(Dictionary<int, int> receiver, ApiCatalogModel catalog, string fromTypeFullName, string toTypeFullName)
         {

@@ -1,4 +1,5 @@
-﻿using NuGet.Frameworks;
+﻿using System.Collections.Frozen;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -12,19 +13,17 @@ public sealed class ApiAvailabilityContext
     }
 
     private readonly ApiCatalogModel _catalog;
-    private readonly Dictionary<NuGetFramework, int> _frameworkIds;
-    private readonly Dictionary<int, HashSet<int>> _frameworkAssemblies;
-    private readonly Dictionary<int, IReadOnlyList<PackageFolder>> _packageFolders;
+    private readonly FrozenDictionary<NuGetFramework, int> _frameworkIds;
+    private readonly FrozenDictionary<int, HashSet<int>> _frameworkAssemblies;
+    private readonly FrozenDictionary<int, IReadOnlyList<PackageFolder>> _packageFolders;
 
     private ApiAvailabilityContext(ApiCatalogModel catalog)
     {
         _catalog = catalog;
-        _frameworkIds = new Dictionary<NuGetFramework, int>();
         _frameworkAssemblies = catalog.Frameworks.Select(fx => (fx.Id, Assemblies: fx.Assemblies.Select(a => a.Id).ToHashSet()))
-                                                 .ToDictionary(t => t.Id, t => t.Assemblies);
+                                                 .ToFrozenDictionary(t => t.Id, t => t.Assemblies);
 
-        _packageFolders = new Dictionary<int, IReadOnlyList<PackageFolder>>();
-
+        var frameworkIds = new Dictionary<NuGetFramework, int>();
         var nugetFrameworks = new Dictionary<int, NuGetFramework>();
 
         foreach (var fx in catalog.Frameworks)
@@ -34,8 +33,10 @@ public sealed class ApiAvailabilityContext
                 continue;
 
             nugetFrameworks.Add(fx.Id, nugetFramework);
-            _frameworkIds.Add(nugetFramework, fx.Id);
+            frameworkIds.Add(nugetFramework, fx.Id);
         }
+
+        var packageFolders = new Dictionary<int, IReadOnlyList<PackageFolder>>();
 
         foreach (var package in catalog.Packages)
         {
@@ -56,8 +57,11 @@ public sealed class ApiAvailabilityContext
             }
 
             if (folders.Count > 0)
-                _packageFolders.Add(package.Id, folders.Values.ToArray());
+                packageFolders.Add(package.Id, folders.Values.ToArray());
         }
+
+        _frameworkIds = frameworkIds.ToFrozenDictionary();
+        _packageFolders = packageFolders.ToFrozenDictionary();
     }
 
     public ApiCatalogModel Catalog => _catalog;
