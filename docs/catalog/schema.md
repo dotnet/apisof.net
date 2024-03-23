@@ -67,11 +67,11 @@ are followed by an array with the row start offsets, relative to the table start
 
 Each row looks as follows:
 
-| Offset | Length | Type                | Name                 | Comment |
-| ------ | ------ | ------------------- | -------------------- | ------- |
-| 0      | 4      | string table offset | Framework Name       |         |
-| 4      | 4      | int32               | Number of assemblies |         |
-| 8      | N      | int32[]             | Assembly offsets     |         |
+| Offset | Length | Type                | Name                     | Comment |
+| ------ | ------ | ------------------- | ------------------------ | ------- |
+| 0      | 4      | string table offset | Framework Name           |         |
+| 4      | 4      | int32               | Number of assemblies `A` |         |
+| 8      | 4*`A`  | int32[`A`]          | Assembly offsets         |         |
 
 ## Package Table
 
@@ -86,12 +86,12 @@ are followed by an array with the row start offsets, relative to the table start
 
 Each row looks as follows:
 
-| Offset | Length | Type                | Name                                          | Comment |
-| ------ | ------ | ------------------- | --------------------------------------------- | ------- |
-| 0      | 4      | string table offset | Package Name                                  |         |
-| 4      | 4      | string table offset | Package Version                               |         |
-| 8      | 4      | int32               | Number of assemblies                          |         |
-| 12     | N      | (int32, int32)[]    | Framework table offset, Assembly table offset |         |
+| Offset | Length | Type                | Name                                            | Comment |
+| ------ | ------ | ------------------- | ----------------------------------------------- | ------- |
+| 0      | 4      | string table offset | Package Name                                    |         |
+| 4      | 4      | string table offset | Package Version                                 |         |
+| 8      | 4      | int32               | Number of assemblies `A`                        |         |
+| 12     | 8*`A`  | (int32, int32)[`A`] | (Framework table offset, assembly table offset) |         |
 
 ## Assembly Table
 
@@ -106,18 +106,18 @@ are followed by an array with the row start offsets, relative to the table start
 
 Each row looks as follows:
 
-| Offset                     | Length | Type                   | Name                                         | Comment |
-| -------------------------- | ------ | ---------------------- | -------------------------------------------- | ------- |
-| 0                          | 16     | GUID                   | Fingerprint                                  |         |
-| 16                         | 4      | string table offset    | Name                                         |         |
-| 20                         | 4      | string table offset    | PublicKeyToken                               |         |
-| 24                         | 4      | string table offset    | Version                                      |         |
-| 28                         | 4      | int32                  | Number of root APIs `R`                      |         |
-| 32                         | 4*`R`  | API table offset       | Root APIs                                    |         |
-| 32 + 4*`R`                 | 4      | int32                  | Number of frameworks `F`                     |         |
-| 32 + 4*`R` + 4             | 4*`F`  | framework table offset | Frameworks                                   |         |
-| 32 + 4*`R` + 4 + 4*`F`     | 4      | int32                  | Number of packages `P`                       |         |
-| 32 + 4*`R` + 4 + 4*`F` + 4 | N      | (int32, int32)[]       | Package table offset, Framework table offset |         |
+| Offset                     | Length | Type                   | Name                                           | Comment |
+| -------------------------- | ------ | ---------------------- | ---------------------------------------------- | ------- |
+| 0                          | 16     | GUID                   | Fingerprint                                    |         |
+| 16                         | 4      | string table offset    | Name                                           |         |
+| 20                         | 4      | string table offset    | PublicKeyToken                                 |         |
+| 24                         | 4      | string table offset    | Version                                        |         |
+| 28                         | 4      | int32                  | Number of root APIs `R`                        |         |
+| 32                         | 4*`R`  | API table offset       | Root APIs                                      |         |
+| 32 + 4*`R`                 | 4      | int32                  | Number of frameworks `F`                       |         |
+| 32 + 4*`R` + 4             | 4*`F`  | framework table offset | Frameworks                                     |         |
+| 32 + 4*`R` + 4 + 4*`F`     | 4      | int32                  | Number of packages `P`                         |         |
+| 32 + 4*`R` + 4 + 4*`F` + 4 | 8*`P`  | (int32, int32)[`P`]    | (Package table offset, framework table offset) |         |
 
 ## Usage Sources Table
 
@@ -154,18 +154,18 @@ The table starts with the roots:
 
 Each API looks as follows:
 
-| Offset                       | Length  | Type                | Name                                         | Comment |
-| ---------------------------- | ------- | ------------------- | -------------------------------------------- | ------- |
-| 0                            | 16      | GUID                | Fingerprint                                  |         |
-| 16                           | 1       | byte                | API kind                                     |         |
-| 17                           | 4       | API table offset    | Parent                                       |         |
-| 21                           | 4       | string table offset | Name                                         |         |
-| 25                           | 4       | int32               | Child count `C`                              |         |
-| 29                           | 4*`C`   | API table offset[C] | Children                                     |         |
-| 29 + 4*`C`                   | 4       | int32               | Declaration Count `D`                        |         |
-| 29 + 4*`C` + 4               | 8 * `D` | (int32, int32)[`D`] | (Assembly table offset, string table offset) |         |
-| 29 + 4*`C` + 4 + 8 * `D`     | 4       | int32               | Usage data point count `U`                   |         |
-| 29 + 4*`C` + 4 + 8 * `D` + 4 | 8 * `U` | (int32, float)      | (Usage data source offset, float)            |         |
+| Offset                     | Length | Type                | Name                                         | Comment |
+| -------------------------- | ------ | ------------------- | -------------------------------------------- | ------- |
+| 0                          | 16     | GUID                | Fingerprint                                  |         |
+| 16                         | 1      | byte                | API kind                                     |         |
+| 17                         | 4      | API table offset    | Parent                                       |         |
+| 21                         | 4      | string table offset | Name                                         |         |
+| 25                         | 4      | int32               | Child count `C`                              |         |
+| 29                         | 4*`C`  | API table offset[C] | Children                                     |         |
+| 29 + 4*`C`                 | 4      | int32               | Declaration Count `D`                        |         |
+| 29 + 4*`C` + 4             | 8*`D`  | (int32, int32)[`D`] | (Assembly table offset, string table offset) |         |
+| 29 + 4*`C` + 4 + 8*`D`     | 4      | int32               | Usage data point count `U`                   |         |
+| 29 + 4*`C` + 4 + 8*`D` + 4 | 8*`U`  | (int32, float)[`U`] | (Usage data source offset, percentage)       |         |
 
 ## Obsoletion Table
 
