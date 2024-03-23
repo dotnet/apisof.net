@@ -15,14 +15,10 @@ The general process works as follows:
    packages.
 
 3. The output of the indexing is a bunch of XML files that are then translated into
-   an SQLite database.
+   a [binary catalog][schema].
 
-4. The SQLite database is exported into a binary blob.
+4. The binary catalog is uploaded to blob storage and can be accessed publicly.
 
-5. Both the SQLite database as well as the binary blob are uploaded to blob
-   storage and can be accessed publicly.
+5. The website serves out of the [binary blob][schema].
 
-6. The website serves out of the binary blob.
-
-## Schema
-
+[schema]: schema.md
