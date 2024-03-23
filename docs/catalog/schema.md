@@ -60,10 +60,10 @@ The rows are of varying length, so the header first states how many rows there
 are followed by an array with the row start offsets, relative to the table start
 (before header):
 
-| Offset | Length        | Type    | Name       | Comment |
-| ------ | ------------- | ------- | ---------- | ------- |
-| 0      | 4             | int32   | Row Count  |         |
-| 4      | Row Count * 4 | int32[] | Row Starts |         |
+| Offset | Length | Type       | Name          | Comment |
+| ------ | ------ | ---------- | ------------- | ------- |
+| 0      | 4      | int32      | Row count `R` |         |
+| 4      | 4*`R`  | int32[`R`] | Row offsets   |         |
 
 Each row looks as follows:
 
@@ -79,10 +79,10 @@ The rows are of varying length, so the header first states how many rows there
 are followed by an array with the row start offsets, relative to the table start
 (before header):
 
-| Offset | Length        | Type    | Name       | Comment |
-| ------ | ------------- | ------- | ---------- | ------- |
-| 0      | 4             | int32   | Row Count  |         |
-| 4      | Row Count * 4 | int32[] | Row Starts |         |
+| Offset | Length | Type       | Name          | Comment |
+| ------ | ------ | ---------- | ------------- | ------- |
+| 0      | 4      | int32      | Row count `R` |         |
+| 4      | 4*`R`  | int32[`R`] | Row offsets   |         |
 
 Each row looks as follows:
 
@@ -99,16 +99,16 @@ The rows are of varying length, so the header first states how many rows there
 are followed by an array with the row start offsets, relative to the table start
 (before header):
 
-| Offset | Length        | Type    | Name       | Comment |
-| ------ | ------------- | ------- | ---------- | ------- |
-| 0      | 4             | int32   | Row Count  |         |
-| 4      | Row Count * 4 | int32[] | Row Starts |         |
+| Offset | Length | Type       | Name          | Comment |
+| ------ | ------ | ---------- | ------------- | ------- |
+| 0      | 4      | int32      | Row count `R` |         |
+| 4      | 4*`R`  | int32[`R`] | Row offsets   |         |
 
 Each row looks as follows:
 
 | Offset                     | Length | Type                   | Name                                         | Comment |
 | -------------------------- | ------ | ---------------------- | -------------------------------------------- | ------- |
-| 0                          | 16     | Guid                   | Fingerprint                                  |         |
+| 0                          | 16     | GUID                   | Fingerprint                                  |         |
 | 16                         | 4      | string table offset    | Name                                         |         |
 | 20                         | 4      | string table offset    | PublicKeyToken                               |         |
 | 24                         | 4      | string table offset    | Version                                      |         |
@@ -125,7 +125,7 @@ The table starts with a header that states how many rows are in the table:
 
 | Offset | Length | Type  | Name      | Comment |
 | ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
+| 0      | 4      | int32 | Row count |         |
 
 Each row looks as follows:
 
@@ -173,7 +173,7 @@ The table starts with a header that states how many rows are in the table:
 
 | Offset | Length | Type  | Name      | Comment |
 | ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
+| 0      | 4      | int32 | Row count |         |
 
 Each row looks as follows:
 
@@ -192,7 +192,7 @@ The table starts with a header that states how many rows are in the table:
 
 | Offset | Length | Type  | Name      | Comment |
 | ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
+| 0      | 4      | int32 | Row count |         |
 
 Each row looks as follows:
 
@@ -209,7 +209,7 @@ The table starts with a header that states how many rows are in the table:
 
 | Offset | Length | Type  | Name      | Comment |
 | ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
+| 0      | 4      | int32 | Row count |         |
 
 Each row looks as follows:
 
@@ -226,7 +226,7 @@ The table starts with a header that states how many rows are in the table:
 
 | Offset | Length | Type  | Name      | Comment |
 | ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
+| 0      | 4      | int32 | Row count |         |
 
 Each row looks as follows:
 
@@ -243,7 +243,7 @@ The table starts with a header that states how many rows are in the table:
 
 | Offset | Length | Type  | Name      | Comment |
 | ------ | ------ | ----- | --------- | ------- |
-| 0      | 4      | int32 | Row Count |         |
+| 0      | 4      | int32 | Row count |         |
 
 Each row looks as follows:
 
