@@ -17,6 +17,9 @@ public partial class CatalogItem
     public NavigationManager NavigationManager { get; set; }
 
     [Inject]
+    public SourceResolverService SourceResolver { get; set; }
+
+    [Inject]
     public DocumentationResolverService DocumentationResolver { get; set; }
 
     [Parameter]
@@ -41,6 +44,8 @@ public partial class CatalogItem
     public PreviewDescription? SelectedPreviewDescription { get; set; }
 
     public Markup SelectedMarkup { get; set; }
+
+    public string SourceUrl { get; set; }
 
     public string HelpUrl { get; set; }
 
@@ -102,7 +107,13 @@ public partial class CatalogItem
 
         SelectedMarkup = SelectedAvailability?.Declaration.GetMarkup();
 
-        HelpUrl = await DocumentationResolver.ResolveAsync(Api);
+        var results = await Task.WhenAll(
+            SourceResolver.ResolveAsync(Api),
+            DocumentationResolver.ResolveAsync(Api)
+        );
+        
+        SourceUrl = results[0];
+        HelpUrl = results[1];
     }
 
     private static string SelectFramework(ApiAvailability availability, string selectedFramework)

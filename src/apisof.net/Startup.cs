@@ -22,6 +22,8 @@ public class Startup
         services.AddSingleton<IconService>();
         services.AddSingleton<DocumentationResolverService>();
         services.AddHttpClient<DocumentationResolverService>();
+        services.AddSingleton<SourceResolverService>();
+        services.AddHttpClient<SourceResolverService>();
         services.AddHostedService<CatalogServiceWarmUp>();
     }
 

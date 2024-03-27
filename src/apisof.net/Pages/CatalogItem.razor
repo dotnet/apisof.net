@@ -178,6 +178,16 @@ else
                         </tr>
                     }
 
+                    @if (!string.IsNullOrEmpty(SourceUrl))
+                    {
+                        <tr>
+                            <th>Implementation</th>
+                            <td>
+                                <a href="@SourceUrl" target="_blank">Source</a>
+                            </td>
+                        </tr>
+                    }
+
                     @if (!string.IsNullOrEmpty(HelpUrl))
                     {
                         <tr>
