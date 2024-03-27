@@ -1,14 +1,37 @@
-﻿namespace ApisOfDotNet;
+﻿using ApisOfDotNet.Services;
 
-public class Program
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorPages();
+builder.Services.AddServerSideBlazor();
+builder.Services.AddControllers();
+builder.Services.AddSingleton<CatalogService>();
+builder.Services.AddSingleton<IconService>();
+builder.Services.AddSingleton<DocumentationResolverService>();
+builder.Services.AddHttpClient<DocumentationResolverService>();
+builder.Services.AddSingleton<SourceResolverService>();
+builder.Services.AddHttpClient<SourceResolverService>();
+builder.Services.AddHostedService<CatalogServiceWarmUp>();
+
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
 {
-    public static async Task Main(string[] args)
-    {
-        using var host = CreateHostBuilder(args).Build();
-        await host.RunAsync();
-    }
-
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+    app.UseDeveloperExceptionPage();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.MapBlazorHub();
+app.MapDefaultControllerRoute();
+app.MapFallbackToPage("/_Host");
+
+app.Run();
