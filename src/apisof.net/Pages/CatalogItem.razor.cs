@@ -16,6 +16,9 @@ public partial class CatalogItem
     [Inject]
     public NavigationManager NavigationManager { get; set; }
 
+    [Inject]
+    public DocumentationResolverService DocumentationResolver { get; set; }
+
     [Parameter]
     public string Guid { get; set; }
 
@@ -39,7 +42,7 @@ public partial class CatalogItem
 
     public Markup SelectedMarkup { get; set; }
 
-    public string HelpLink { get; set; }
+    public string HelpUrl { get; set; }
 
     protected override void OnInitialized()
     {
@@ -99,13 +102,7 @@ public partial class CatalogItem
 
         SelectedMarkup = SelectedAvailability?.Declaration.GetMarkup();
 
-        var helpLink = Api.GetHelpLink();
-        using var httpClient = new HttpClient();
-        using var response = await httpClient.GetAsync(helpLink);
-        if (response.StatusCode == HttpStatusCode.OK)
-            HelpLink = helpLink;
-        else
-            HelpLink = null;
+        HelpUrl = await DocumentationResolver.ResolveAsync(Api);
     }
 
     private static string SelectFramework(ApiAvailability availability, string selectedFramework)

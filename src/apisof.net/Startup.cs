@@ -20,6 +20,8 @@ public class Startup
         services.AddControllers();
         services.AddSingleton<CatalogService>();
         services.AddSingleton<IconService>();
+        services.AddSingleton<DocumentationResolverService>();
+        services.AddHttpClient<DocumentationResolverService>();
         services.AddHostedService<CatalogServiceWarmUp>();
     }
 

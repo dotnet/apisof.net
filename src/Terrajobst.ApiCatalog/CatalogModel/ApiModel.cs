@@ -199,62 +199,6 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
                 : string.Empty;
     }
 
-    public string GetHelpLink()
-    {
-        var segments = AncestorsAndSelf().Reverse();
-
-        var sb = new StringBuilder();
-        var inAngleBrackets = false;
-        var numberOfGenerics = 0;
-
-        foreach (var s in segments)
-        {
-            if (sb.Length > 0)
-                sb.Append('.');
-
-            foreach (var c in s.Name)
-            {
-                if (inAngleBrackets)
-                {
-                    if (c == ',')
-                    {
-                        numberOfGenerics++;
-                    }
-                    else if (c == '>')
-                    {
-                        inAngleBrackets = false;
-
-                        if (s.Kind.IsType())
-                        {
-                            sb.Append('-');
-                            sb.Append(numberOfGenerics);
-                        }
-                    }
-                    continue;
-                }
-
-                if (c == '(')
-                {
-                    break;
-                }
-                else if (c == '<')
-                {
-                    inAngleBrackets = true;
-                    numberOfGenerics = 1;
-                    continue;
-                }
-                else
-                {
-                    sb.Append(char.ToLower(c));
-                }
-            }
-        }
-
-        var path = sb.ToString();
-
-        return $"https://docs.microsoft.com/en-us/dotnet/api/{path}";
-    }
-
     public override bool Equals(object obj)
     {
         return obj is ApiModel model && Equals(model);
