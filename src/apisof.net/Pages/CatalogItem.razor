@@ -240,11 +240,11 @@ else
                     }
                     @if (Api.Kind == ApiKind.Property)
                     {
-                        var getter = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.PropertyGetter);
-                        var setter = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.PropertySetter);
+                        var getter = GetAccessor(ApiKind.PropertyGetter);
+                        var setter = GetAccessor(ApiKind.PropertySetter);
 
-                        var getterAnnotation = getter == default ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(getter);
-                        var setterAnnotation = setter == default ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(setter);
+                        var getterAnnotation = getter is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(getter.Value);
+                        var setterAnnotation = setter is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(setter.Value);
                         var annotation = getterAnnotation ?? setterAnnotation;
                         if (annotation is not null)
                         {
@@ -269,11 +269,11 @@ else
                     }
                     else if (Api.Kind == ApiKind.Event)
                     {
-                        var adder = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.EventAdder);
-                        var remover = Api.Children.SingleOrDefault(a => a.Kind == ApiKind.EventRemover);
+                        var adder = GetAccessor(ApiKind.EventAdder);
+                        var remover = GetAccessor(ApiKind.EventRemover);
 
-                        var adderAnnotation = adder == default ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(adder);
-                        var removerAnnotation = remover == default ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(remover);
+                        var adderAnnotation = adder is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(adder.Value);
+                        var removerAnnotation = remover is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(remover.Value);
                         var annotation = adderAnnotation ?? removerAnnotation;
                         if (annotation is not null)
                         {

@@ -1,5 +1,4 @@
-﻿using System.Net;
-
+﻿using System.Diagnostics;
 using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
@@ -114,6 +113,15 @@ public partial class CatalogItem
         
         SourceUrl = results[0];
         HelpUrl = results[1];
+    }
+
+    private ApiModel? GetAccessor(ApiKind kind)
+    {
+        Debug.Assert(kind.IsAccessor());
+        return Api.Children
+            .Where(c => c.Kind == kind && c.Declarations.Any(d => d.Assembly == SelectedAvailability.Declaration.Assembly))
+            .Cast<ApiModel?>()
+            .FirstOrDefault();
     }
 
     private static string SelectFramework(ApiAvailability availability, string selectedFramework)
