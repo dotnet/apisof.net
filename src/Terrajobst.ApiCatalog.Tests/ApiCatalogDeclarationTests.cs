@@ -13,18 +13,18 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Enum()
     {
-        var source = @"
-            namespace Test
-            {
-                public enum TheEnum
-                {
-                    A,
-                    B
-                }
-            }
-        ";
+        var source = """
+             namespace Test
+             {
+                 public enum TheEnum
+                 {
+                     A,
+                     B
+                 }
+             }
+             """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public enum TheEnum
@@ -33,7 +33,7 @@ public class ApiCatalogDeclarationTests
                     B = 1
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -41,7 +41,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Enum_WithBase()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public enum TheEnum : byte
@@ -50,9 +50,9 @@ public class ApiCatalogDeclarationTests
                     B
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public enum TheEnum : byte
@@ -61,7 +61,7 @@ public class ApiCatalogDeclarationTests
                     B = 1
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -69,7 +69,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Enum_Flags()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -82,9 +82,9 @@ public class ApiCatalogDeclarationTests
                     C = A | B
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [Flags]
@@ -96,7 +96,7 @@ public class ApiCatalogDeclarationTests
                     C = A | B
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -104,23 +104,23 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Struct()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public struct TheStruct
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public struct TheStruct
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -128,23 +128,23 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Struct_ReadOnly()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public readonly struct TheStruct
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public readonly struct TheStruct
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -152,7 +152,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Struct_WithInterface()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -161,16 +161,16 @@ public class ApiCatalogDeclarationTests
                     int IComparable.CompareTo(object other) => 0;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public struct TheStruct : IComparable
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -178,7 +178,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Struct_WithInterfaces()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -188,16 +188,16 @@ public class ApiCatalogDeclarationTests
                     object ICloneable.Clone() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public struct TheStruct : ICloneable, IComparable
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -205,7 +205,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -213,16 +213,16 @@ public class ApiCatalogDeclarationTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -230,7 +230,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_Derived()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheBase
@@ -242,9 +242,9 @@ public class ApiCatalogDeclarationTests
                     internal TheDerived() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheBase
@@ -254,7 +254,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -262,7 +262,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_DerivedAndInterface()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -276,9 +276,9 @@ public class ApiCatalogDeclarationTests
                     int IComparable.CompareTo(object other) => 0;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheBase
@@ -288,7 +288,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -296,7 +296,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_DerivedAndInterfaces()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -311,9 +311,9 @@ public class ApiCatalogDeclarationTests
                     object ICloneable.Clone() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheBase
@@ -323,7 +323,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -331,7 +331,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_Abstract()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public abstract class TheClass
@@ -339,16 +339,16 @@ public class ApiCatalogDeclarationTests
                     internal TheClass() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheClass
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -356,7 +356,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_Sealed()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public sealed class TheClass
@@ -364,16 +364,16 @@ public class ApiCatalogDeclarationTests
                     internal TheClass() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public sealed class TheClass
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -381,23 +381,23 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_Static()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -405,7 +405,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_Nested_Public()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheOuterClass
@@ -417,9 +417,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheOuterClass
@@ -429,7 +429,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -437,7 +437,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Class_Nested_Protected()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheOuterClass
@@ -449,9 +449,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheOuterClass
@@ -461,7 +461,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -469,23 +469,23 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public interface TheInterface
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -493,7 +493,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_WithInterface()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -501,16 +501,16 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface : IComparable
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -518,7 +518,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_WithInterfaces()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -526,16 +526,16 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface : ICloneable, IComparable
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -543,7 +543,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_Property()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public interface TheInterface
@@ -551,9 +551,9 @@ public class ApiCatalogDeclarationTests
                     int Length { get; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface
@@ -561,7 +561,7 @@ public class ApiCatalogDeclarationTests
                     int Length { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -569,7 +569,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_Property_Default()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public interface TheInterface
@@ -577,9 +577,9 @@ public class ApiCatalogDeclarationTests
                     virtual int Length { get { return -1; } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface
@@ -587,7 +587,7 @@ public class ApiCatalogDeclarationTests
                     virtual int Length { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -595,7 +595,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_Event()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -604,9 +604,9 @@ public class ApiCatalogDeclarationTests
                     event EventHandler OnChanged;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface
@@ -614,7 +614,7 @@ public class ApiCatalogDeclarationTests
                     event EventHandler OnChanged;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -622,7 +622,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_Event_Default()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -631,9 +631,9 @@ public class ApiCatalogDeclarationTests
                     virtual event EventHandler OnChanged { add { } remove { } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface
@@ -641,7 +641,7 @@ public class ApiCatalogDeclarationTests
                     virtual event EventHandler OnChanged;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -649,7 +649,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Interface_Method()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public interface TheInterface
@@ -657,9 +657,9 @@ public class ApiCatalogDeclarationTests
                     int Test();
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public interface TheInterface
@@ -667,7 +667,7 @@ public class ApiCatalogDeclarationTests
                     int Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -677,19 +677,19 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Delegate()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public delegate void TheDelegate();
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public delegate void TheDelegate();
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -697,19 +697,19 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Delegate_WithArg()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public delegate void TheDelegate(int arg0);
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public delegate void TheDelegate(int arg0);
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -717,19 +717,19 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Delegate_WithArgs()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public delegate void TheDelegate(int arg0, string arg1);
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public delegate void TheDelegate(int arg0, string arg1);
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -737,7 +737,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Get_Only()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -746,9 +746,9 @@ public class ApiCatalogDeclarationTests
                     public int Length { get { return 0; } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -756,7 +756,7 @@ public class ApiCatalogDeclarationTests
                     public int Length { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -764,7 +764,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Set_Only()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -773,9 +773,9 @@ public class ApiCatalogDeclarationTests
                     public int Length { set { } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -783,7 +783,7 @@ public class ApiCatalogDeclarationTests
                     public int Length { set; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -791,7 +791,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Get_And_Set()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -800,9 +800,9 @@ public class ApiCatalogDeclarationTests
                     public int Length { get; set; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -810,7 +810,7 @@ public class ApiCatalogDeclarationTests
                     public int Length { get; set; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -818,7 +818,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Virtual()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -827,9 +827,9 @@ public class ApiCatalogDeclarationTests
                     public virtual int Length { get; set; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -837,7 +837,7 @@ public class ApiCatalogDeclarationTests
                     public virtual int Length { get; set; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -845,7 +845,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Abstract()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public abstract class TheClass
@@ -854,9 +854,9 @@ public class ApiCatalogDeclarationTests
                     public abstract int Length { get; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheClass
@@ -864,7 +864,7 @@ public class ApiCatalogDeclarationTests
                     public abstract int Length { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -872,7 +872,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Override()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public abstract class TheBase
@@ -886,9 +886,9 @@ public class ApiCatalogDeclarationTests
                     public override int Length { get { return -1; } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheBase
@@ -900,7 +900,7 @@ public class ApiCatalogDeclarationTests
                     public override int Length { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -908,7 +908,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Sealed()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public abstract class TheBase
@@ -922,9 +922,9 @@ public class ApiCatalogDeclarationTests
                     public override sealed int Length { get { return -1; } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheBase
@@ -936,7 +936,7 @@ public class ApiCatalogDeclarationTests
                     public override sealed int Length { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -944,7 +944,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -954,9 +954,9 @@ public class ApiCatalogDeclarationTests
                     public static int Length { get; set; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -965,7 +965,7 @@ public class ApiCatalogDeclarationTests
                     public static int Length { get; set; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -973,7 +973,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Get_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -986,9 +986,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1000,7 +1000,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1008,7 +1008,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Set_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1021,9 +1021,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1035,7 +1035,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1043,7 +1043,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Get_Attribute_And_Set()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1057,9 +1057,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1072,7 +1072,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1080,7 +1080,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Property_Get_Attribute_And_Set_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Diagnostics;
             namespace Test
@@ -1096,9 +1096,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1112,7 +1112,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1120,7 +1120,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Indexer_Get_Only()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1129,18 +1129,18 @@ public class ApiCatalogDeclarationTests
                     public char this[int index] { get => throw null; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
-                [DefaultMember(""Item"")]
+                [DefaultMember("Item")]
                 public class TheClass
                 {
                     public char this[int index] { get; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1148,7 +1148,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Indexer_Set_Only()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1157,18 +1157,18 @@ public class ApiCatalogDeclarationTests
                     public char this[int index] { set { } }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
-                [DefaultMember(""Item"")]
+                [DefaultMember("Item")]
                 public class TheClass
                 {
                     public char this[int index] { set; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1176,7 +1176,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Indexer_Get_And_Set()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1185,18 +1185,18 @@ public class ApiCatalogDeclarationTests
                     public char this[int index] { set { } get => throw null; }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
-                [DefaultMember(""Item"")]
+                [DefaultMember("Item")]
                 public class TheClass
                 {
                     public char this[int index] { get; set; }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1204,7 +1204,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1214,9 +1214,9 @@ public class ApiCatalogDeclarationTests
                     public event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1224,7 +1224,7 @@ public class ApiCatalogDeclarationTests
                     public event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1232,7 +1232,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Virtual()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1242,9 +1242,9 @@ public class ApiCatalogDeclarationTests
                     public virtual event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1252,7 +1252,7 @@ public class ApiCatalogDeclarationTests
                     public virtual event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1260,7 +1260,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Abstract()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1270,9 +1270,9 @@ public class ApiCatalogDeclarationTests
                     public abstract event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheClass
@@ -1280,7 +1280,7 @@ public class ApiCatalogDeclarationTests
                     public abstract event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1288,7 +1288,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Override()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1303,9 +1303,9 @@ public class ApiCatalogDeclarationTests
                     public override event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheBase
@@ -1317,7 +1317,7 @@ public class ApiCatalogDeclarationTests
                     public override event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1325,7 +1325,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Sealed()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1340,9 +1340,9 @@ public class ApiCatalogDeclarationTests
                     public override sealed event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheBase
@@ -1354,7 +1354,7 @@ public class ApiCatalogDeclarationTests
                     public override sealed event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1362,7 +1362,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1372,9 +1372,9 @@ public class ApiCatalogDeclarationTests
                     public static event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1383,7 +1383,7 @@ public class ApiCatalogDeclarationTests
                     public static event EventHandler Changed;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1391,7 +1391,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Add_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Diagnostics;
             namespace Test
@@ -1406,9 +1406,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1421,7 +1421,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1429,7 +1429,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Remove_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Diagnostics;
             namespace Test
@@ -1444,9 +1444,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1459,7 +1459,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1467,7 +1467,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Event_Add_Attribute_And_Remove_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Diagnostics;
             namespace Test
@@ -1483,9 +1483,9 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1499,7 +1499,7 @@ public class ApiCatalogDeclarationTests
                     }
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1507,7 +1507,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Field()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1516,9 +1516,9 @@ public class ApiCatalogDeclarationTests
                     public int TheField;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1526,7 +1526,7 @@ public class ApiCatalogDeclarationTests
                     public int TheField;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1534,7 +1534,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Field_Static()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -1542,9 +1542,9 @@ public class ApiCatalogDeclarationTests
                     public static int TheField;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1552,7 +1552,7 @@ public class ApiCatalogDeclarationTests
                     public static int TheField;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1560,7 +1560,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Field_ReadOnly()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1569,9 +1569,9 @@ public class ApiCatalogDeclarationTests
                     public readonly int TheField;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1579,7 +1579,7 @@ public class ApiCatalogDeclarationTests
                     public readonly int TheField;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1587,7 +1587,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Field_Const()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1596,9 +1596,9 @@ public class ApiCatalogDeclarationTests
                     public const int TheField = 42;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1606,7 +1606,7 @@ public class ApiCatalogDeclarationTests
                     public const int TheField = 42;
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1614,7 +1614,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1623,9 +1623,9 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod() {}
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1633,7 +1633,7 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1641,7 +1641,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Static()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -1649,9 +1649,9 @@ public class ApiCatalogDeclarationTests
                     public static void TheMethod() {}
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -1659,7 +1659,7 @@ public class ApiCatalogDeclarationTests
                     public static void TheMethod();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1667,7 +1667,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Virtual()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1676,9 +1676,9 @@ public class ApiCatalogDeclarationTests
                     public virtual void TheMethod() {}
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1686,7 +1686,7 @@ public class ApiCatalogDeclarationTests
                     public virtual void TheMethod();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1694,7 +1694,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Abstract()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public abstract class TheClass
@@ -1703,9 +1703,9 @@ public class ApiCatalogDeclarationTests
                     public abstract void TheMethod();
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public abstract class TheClass
@@ -1713,7 +1713,7 @@ public class ApiCatalogDeclarationTests
                     public abstract void TheMethod();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1721,7 +1721,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Override()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1730,9 +1730,9 @@ public class ApiCatalogDeclarationTests
                     public override string ToString() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1740,7 +1740,7 @@ public class ApiCatalogDeclarationTests
                     public override string ToString();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1748,7 +1748,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Sealed()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1757,9 +1757,9 @@ public class ApiCatalogDeclarationTests
                     public override sealed string ToString() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1767,7 +1767,7 @@ public class ApiCatalogDeclarationTests
                     public override sealed string ToString();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1775,7 +1775,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_RefReturn()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1784,9 +1784,9 @@ public class ApiCatalogDeclarationTests
                     public ref int TheMethod() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1794,7 +1794,7 @@ public class ApiCatalogDeclarationTests
                     public ref int TheMethod();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1802,7 +1802,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_WithArg()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1811,9 +1811,9 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(int arg0) { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1821,7 +1821,7 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(int arg0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1829,7 +1829,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_WithArgs()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1838,9 +1838,9 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(int arg0, string arg1) { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1848,7 +1848,7 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(int arg0, string arg1);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1856,7 +1856,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_WithoutParams()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1865,9 +1865,9 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(object[] args) { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1875,7 +1875,7 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(object[] args);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1883,7 +1883,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_WithParams()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -1892,9 +1892,9 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(params object[] args) { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1902,7 +1902,7 @@ public class ApiCatalogDeclarationTests
                     public void TheMethod(params object[] args);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1910,7 +1910,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Attribute()
     {
-        var source = @"
+        var source = """
             using System;
             namespace Test
             {
@@ -1921,9 +1921,9 @@ public class ApiCatalogDeclarationTests
                     public int TheMethod(int arg0) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1932,7 +1932,7 @@ public class ApiCatalogDeclarationTests
                     public int TheMethod(int arg0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1940,7 +1940,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Attribute_On_Return()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -1951,9 +1951,9 @@ public class ApiCatalogDeclarationTests
                     public int TheMethod(int arg0) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1962,7 +1962,7 @@ public class ApiCatalogDeclarationTests
                     public int TheMethod(int arg0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1970,7 +1970,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Method_Attribute_On_Parameter()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -1981,9 +1981,9 @@ public class ApiCatalogDeclarationTests
                     public int TheMethod([DefaultValue(0)] int arg0) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -1991,7 +1991,7 @@ public class ApiCatalogDeclarationTests
                     public int TheMethod([DefaultValue(0)] int arg0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -1999,7 +1999,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Constructor()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2007,9 +2007,9 @@ public class ApiCatalogDeclarationTests
                     public TheClass() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -2017,7 +2017,7 @@ public class ApiCatalogDeclarationTests
                     public TheClass();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2025,7 +2025,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Constructor_Static()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2034,16 +2034,16 @@ public class ApiCatalogDeclarationTests
                     static TheClass() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2051,7 +2051,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Finalizer()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2060,9 +2060,9 @@ public class ApiCatalogDeclarationTests
                     ~TheClass() { }
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -2070,7 +2070,7 @@ public class ApiCatalogDeclarationTests
                     ~TheClass();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2078,7 +2078,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Operator_Implicit()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2087,9 +2087,9 @@ public class ApiCatalogDeclarationTests
                     public static implicit operator TheClass(int value) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -2097,7 +2097,7 @@ public class ApiCatalogDeclarationTests
                     public static implicit operator TheClass(int value);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2105,7 +2105,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Operator_Explicit()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2114,9 +2114,9 @@ public class ApiCatalogDeclarationTests
                     public static explicit operator TheClass(int value) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -2124,7 +2124,7 @@ public class ApiCatalogDeclarationTests
                     public static explicit operator TheClass(int value);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2132,7 +2132,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Operator_Unary()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2141,9 +2141,9 @@ public class ApiCatalogDeclarationTests
                     public static float operator +(TheClass operand) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -2151,7 +2151,7 @@ public class ApiCatalogDeclarationTests
                     public static float operator +(TheClass operand);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2159,7 +2159,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Operator_Binary()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public class TheClass
@@ -2168,9 +2168,9 @@ public class ApiCatalogDeclarationTests
                     public static TheClass operator +(TheClass left, int right) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public class TheClass
@@ -2178,7 +2178,7 @@ public class ApiCatalogDeclarationTests
                     public static TheClass operator +(TheClass left, int right);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2186,7 +2186,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Generic()
     {
-        var source = @"
+        var source = """
             using System.Collections.Generic;
 
             namespace Test
@@ -2196,9 +2196,9 @@ public class ApiCatalogDeclarationTests
                     public static IEnumerable<string> Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2206,7 +2206,7 @@ public class ApiCatalogDeclarationTests
                     public static IEnumerable<string> Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2214,7 +2214,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Array()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2222,9 +2222,9 @@ public class ApiCatalogDeclarationTests
                     public static string[] Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2232,7 +2232,7 @@ public class ApiCatalogDeclarationTests
                     public static string[] Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2240,7 +2240,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Array_MultiDimensional()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2248,9 +2248,9 @@ public class ApiCatalogDeclarationTests
                     public static string[,,] Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2258,7 +2258,7 @@ public class ApiCatalogDeclarationTests
                     public static string[,,] Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2266,7 +2266,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Pointer()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2274,9 +2274,9 @@ public class ApiCatalogDeclarationTests
                     public static unsafe int* Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2284,7 +2284,7 @@ public class ApiCatalogDeclarationTests
                     public static int* Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2292,7 +2292,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Nullable_ValueType()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2300,9 +2300,9 @@ public class ApiCatalogDeclarationTests
                     public static int? Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2310,7 +2310,7 @@ public class ApiCatalogDeclarationTests
                     public static int? Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2318,7 +2318,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Nullable_ReferenceType_Nullable()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2326,9 +2326,9 @@ public class ApiCatalogDeclarationTests
                     public static string? Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2336,7 +2336,7 @@ public class ApiCatalogDeclarationTests
                     public static string? Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected, nullableEnabled: true);
     }
@@ -2344,7 +2344,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Nullable_ReferenceType_NonNullable()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2352,9 +2352,9 @@ public class ApiCatalogDeclarationTests
                     public static string Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2362,7 +2362,7 @@ public class ApiCatalogDeclarationTests
                     public static string! Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected, nullableEnabled: true);
     }
@@ -2370,7 +2370,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Nullable_ReferenceType_Oblivious()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2379,9 +2379,9 @@ public class ApiCatalogDeclarationTests
                     public static string Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2389,7 +2389,7 @@ public class ApiCatalogDeclarationTests
                     public static string Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected, nullableEnabled: true);
     }
@@ -2397,7 +2397,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Tuple()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2406,9 +2406,9 @@ public class ApiCatalogDeclarationTests
                     public static (string, int) Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2416,7 +2416,7 @@ public class ApiCatalogDeclarationTests
                     public static (string, int) Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2424,7 +2424,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Tuple_Named()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2433,9 +2433,9 @@ public class ApiCatalogDeclarationTests
                     public static (string Key, int Value) Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2443,7 +2443,7 @@ public class ApiCatalogDeclarationTests
                     public static (string Key, int Value) Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2451,7 +2451,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Tuple_Named_Partially()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2460,9 +2460,9 @@ public class ApiCatalogDeclarationTests
                     public static (string, int Value, float) Test() => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2470,14 +2470,14 @@ public class ApiCatalogDeclarationTests
                     public static (string, int Value, float) Test();
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
     [Fact]
     public void Signature_FunctionPointer()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2486,9 +2486,9 @@ public class ApiCatalogDeclarationTests
                     public unsafe static T M<T>(delegate*<T, int, void> combinator) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2496,7 +2496,7 @@ public class ApiCatalogDeclarationTests
                     public static T M<T>(delegate*<T, int, void> combinator);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2504,7 +2504,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_FunctionPointer_NoArgs()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2513,9 +2513,9 @@ public class ApiCatalogDeclarationTests
                     public unsafe static T M<T>(delegate*<void> combinator) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2523,7 +2523,7 @@ public class ApiCatalogDeclarationTests
                     public static T M<T>(delegate*<void> combinator);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2531,7 +2531,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_FunctionPointer_Managed()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2540,9 +2540,9 @@ public class ApiCatalogDeclarationTests
                     public unsafe static T M<T>(delegate* managed<void> combinator) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2550,7 +2550,7 @@ public class ApiCatalogDeclarationTests
                     public static T M<T>(delegate*<void> combinator);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2558,7 +2558,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_FunctionPointer_Unmanaged()
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2567,9 +2567,9 @@ public class ApiCatalogDeclarationTests
                     public unsafe static T M<T>(delegate* unmanaged<void> combinator) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2577,7 +2577,7 @@ public class ApiCatalogDeclarationTests
                     public static T M<T>(delegate* unmanaged<void> combinator);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2589,7 +2589,7 @@ public class ApiCatalogDeclarationTests
     [InlineData("Thiscall")]
     public void Signature_FunctionPointer_Unmanaged_With_CallingConvention(string callingConvention)
     {
-        var source = @"
+        var source = """
             #nullable disable
             namespace Test
             {
@@ -2598,9 +2598,9 @@ public class ApiCatalogDeclarationTests
                     public unsafe static T M<T>(delegate* unmanaged[%CC%]<void> combinator) => throw null;
                 }
             }
-        ".Replace("%CC%", callingConvention);
+            """.Replace("%CC%", callingConvention);
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2608,7 +2608,7 @@ public class ApiCatalogDeclarationTests
                     public static T M<T>(delegate* unmanaged[%CC%]<void> combinator);
                 }
             }
-        ".Replace("%CC%", callingConvention);
+            """.Replace("%CC%", callingConvention);
 
         Assert(source, expected);
     }
@@ -2616,7 +2616,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Dynamic()
     {
-        var source = @"
+        var source = """
             using System.Collections.Generic;
             namespace Test
             {
@@ -2625,9 +2625,9 @@ public class ApiCatalogDeclarationTests
                     public static dynamic M(dynamic p1, IEnumerable<dynamic> p2) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2635,7 +2635,7 @@ public class ApiCatalogDeclarationTests
                     public static dynamic M(dynamic p1, IEnumerable<dynamic> p2);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2643,7 +2643,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Parameter_Ref()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2651,9 +2651,9 @@ public class ApiCatalogDeclarationTests
                     public static void M(ref int p0) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2661,7 +2661,7 @@ public class ApiCatalogDeclarationTests
                     public static void M(ref int p0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2669,7 +2669,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Parameter_Out()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2677,9 +2677,9 @@ public class ApiCatalogDeclarationTests
                     public static void M(out int p0) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2687,7 +2687,7 @@ public class ApiCatalogDeclarationTests
                     public static void M(out int p0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2695,7 +2695,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Signature_Parameter_In()
     {
-        var source = @"
+        var source = """
             namespace Test
             {
                 public static class TheClass
@@ -2703,9 +2703,9 @@ public class ApiCatalogDeclarationTests
                     public static void M(in int p0) => throw null;
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 public static class TheClass
@@ -2713,7 +2713,7 @@ public class ApiCatalogDeclarationTests
                     public static void M(in int p0);
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2721,7 +2721,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Null()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2730,9 +2730,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(null)]
@@ -2740,7 +2740,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2748,26 +2748,26 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_String()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
-                [DefaultValue(""test"")]
+                [DefaultValue("test")]
                 public static class TheClass
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
-                [DefaultValue(""test"")]
+                [DefaultValue("test")]
                 public static class TheClass
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2775,7 +2775,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Boolean()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2784,9 +2784,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(false)]
@@ -2794,7 +2794,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2802,7 +2802,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Int32()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2811,9 +2811,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(1)]
@@ -2821,7 +2821,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2829,7 +2829,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Int16()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2838,9 +2838,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(1)]
@@ -2848,7 +2848,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2856,7 +2856,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Single()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2865,9 +2865,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(1.5F)]
@@ -2875,7 +2875,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2883,7 +2883,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Double()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2892,9 +2892,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(1.5)]
@@ -2902,7 +2902,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2910,7 +2910,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Array()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2919,9 +2919,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(new[] { 1, 2, 3 })]
@@ -2929,7 +2929,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2937,7 +2937,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Enum()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -2946,9 +2946,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(EditorBrowsableState.Never)]
@@ -2956,7 +2956,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2964,7 +2964,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Enum_Flags()
     {
-        var source = @"
+        var source = """
             using System;
             using System.ComponentModel;
             namespace Test
@@ -2974,9 +2974,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(AttributeTargets.Method | AttributeTargets.Field)]
@@ -2984,7 +2984,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -2992,7 +2992,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Enum_Flags_All()
     {
-        var source = @"
+        var source = """
             using System;
             using System.ComponentModel;
             namespace Test
@@ -3002,9 +3002,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(AttributeTargets.All)]
@@ -3012,7 +3012,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -3020,7 +3020,7 @@ public class ApiCatalogDeclarationTests
     [Fact]
     public void Attribute_Type()
     {
-        var source = @"
+        var source = """
             using System.ComponentModel;
             namespace Test
             {
@@ -3029,9 +3029,9 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
-        var expected = @"
+        var expected = """
             namespace Test
             {
                 [DefaultValue(typeof(TheClass))]
@@ -3039,7 +3039,7 @@ public class ApiCatalogDeclarationTests
                 {
                 }
             }
-        ";
+            """;
 
         Assert(source, expected);
     }
@@ -3080,7 +3080,6 @@ public class ApiCatalogDeclarationTests
         foreach (var api in entry.Apis)
             Emit(indentedWriter, api);
 
-        expected = expected.Unindent();
         var actual = stringWriter.ToString();
 
         var expectedLines = expected.SplitLines();

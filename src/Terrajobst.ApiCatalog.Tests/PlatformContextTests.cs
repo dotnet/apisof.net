@@ -7,22 +7,22 @@ public class PlatformContextTests
     [Fact]
     public async Task PlatformContext_AllowList()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [SupportedOSPlatform(""ios"")]
-                [SupportedOSPlatform(""tvos"")]
+                [SupportedOSPlatform("ios")]
+                [SupportedOSPlatform("tvos")]
                 public class TheClass { }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is only supported on these platforms:
             - iOS
             - Mac Catalyst
             - tvOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -40,28 +40,28 @@ public class PlatformContextTests
         Assert.True(annotation.IsSupported("maccatalyst"));
         Assert.False(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_AllowList_RemoveImpliedPlatform()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [SupportedOSPlatform(""ios"")]
-                [SupportedOSPlatform(""tvos"")]
-                [UnsupportedOSPlatform(""maccatalyst"")]
+                [SupportedOSPlatform("ios")]
+                [SupportedOSPlatform("tvos")]
+                [UnsupportedOSPlatform("maccatalyst")]
                 public class TheClass { }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is only supported on these platforms:
             - iOS
             - tvOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -79,28 +79,28 @@ public class PlatformContextTests
         Assert.False(annotation.IsSupported("maccatalyst"));
         Assert.False(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_DenyList()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [UnsupportedOSPlatform(""ios"")]
-                [UnsupportedOSPlatform(""tvos"")]
+                [UnsupportedOSPlatform("ios")]
+                [UnsupportedOSPlatform("tvos")]
                 public class TheClass { }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is supported on any platform except for:
             - iOS
             - Mac Catalyst
             - tvOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -118,28 +118,28 @@ public class PlatformContextTests
         Assert.False(annotation.IsSupported("maccatalyst"));
         Assert.True(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_DenyList_AddImpliedPlatform()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [SupportedOSPlatform(""maccatalyst"")]
-                [UnsupportedOSPlatform(""ios"")]
-                [UnsupportedOSPlatform(""tvos"")]
+                [SupportedOSPlatform("maccatalyst")]
+                [UnsupportedOSPlatform("ios")]
+                [UnsupportedOSPlatform("tvos")]
                 public class TheClass { }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is supported on any platform except for:
             - iOS
             - tvOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -157,25 +157,25 @@ public class PlatformContextTests
         Assert.True(annotation.IsSupported("maccatalyst"));
         Assert.True(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_Assembly()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
-            [assembly: UnsupportedOSPlatform(""ios"")]
+            [assembly: UnsupportedOSPlatform("ios")]
             namespace System
             {
                 public class TheClass { }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is supported on any platform except for:
             - iOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -190,28 +190,28 @@ public class PlatformContextTests
         Assert.False(annotation.IsSupported("ios"));
         Assert.True(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_Type()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [UnsupportedOSPlatform(""ios"")]
+                [UnsupportedOSPlatform("ios")]
                 public class TheClass
                 {
                     public void TheMethod() {}
                 }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is supported on any platform except for:
             - iOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -226,28 +226,28 @@ public class PlatformContextTests
         Assert.False(annotation.IsSupported("ios"));
         Assert.True(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_Property()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
                 public class TheClass
                 {
-                    [SupportedOSPlatform(""ios"")]
+                    [SupportedOSPlatform("ios")]
                     public int TheProperty => 0;
                 }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is only supported on these platforms:
             - iOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -262,13 +262,13 @@ public class PlatformContextTests
         Assert.True(annotation.IsSupported("ios"));
         Assert.False(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_Property_Accessor()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
@@ -276,17 +276,17 @@ public class PlatformContextTests
                 {
                     public int TheProperty
                     {
-                        [UnsupportedOSPlatform(""ios"")]
+                        [UnsupportedOSPlatform("ios")]
                         get => 0;
                     }
                 }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is supported on any platform except for:
             - iOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -301,29 +301,29 @@ public class PlatformContextTests
         Assert.False(annotation.IsSupported("ios"));
         Assert.True(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_Event()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Runtime.Versioning;
             namespace System
             {
                 public class TheClass
                 {
-                    [SupportedOSPlatform(""ios"")]
+                    [SupportedOSPlatform("ios")]
                     public event EventHandler TheEvent;
                 }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is only supported on these platforms:
             - iOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -338,13 +338,13 @@ public class PlatformContextTests
         Assert.True(annotation.IsSupported("ios"));
         Assert.False(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     [Fact]
     public async Task PlatformContext_Event_Accessor()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Runtime.Versioning;
             namespace System
@@ -353,18 +353,18 @@ public class PlatformContextTests
                 {
                     public event EventHandler TheEvent
                     {
-                        [UnsupportedOSPlatform(""ios"")]
+                        [UnsupportedOSPlatform("ios")]
                         add { }
                         remove { }
                     }
                 }
             }
-        ";
+            """;
 
-        var expectedPlatforms = @"
+        var expectedPlatforms = """
             The API is supported on any platform except for:
             - iOS
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
@@ -379,22 +379,22 @@ public class PlatformContextTests
         Assert.False(annotation.IsSupported("ios"));
         Assert.True(annotation.IsSupported("windows"));
 
-        Assert.Equal(expectedPlatforms.Unindent(), annotation.ToString().Trim());
+        Assert.Equal(expectedPlatforms, annotation.ToString().Trim());
     }
 
     private static string GetOperatingSystemWithImpliedPlatform()
     {
-        return @"
+        return """
             using System.Runtime.Versioning;
 
             namespace System
             {
                 public sealed class OperatingSystem
                 {
-                    [SupportedOSPlatformGuard(""maccatalyst"")]
+                    [SupportedOSPlatformGuard("maccatalyst")]
                     public static bool IsIOS() { return false; }
                 }
             }
-        ";
+            """;
     }
 }

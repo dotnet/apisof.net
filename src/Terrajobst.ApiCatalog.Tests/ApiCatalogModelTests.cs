@@ -54,7 +54,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task GetApiById()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -62,7 +62,7 @@ public class ApiCatalogModelTests
                     public TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -77,7 +77,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task GetApiByGuid()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -85,7 +85,7 @@ public class ApiCatalogModelTests
                     public TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -100,7 +100,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -108,7 +108,7 @@ public class ApiCatalogModelTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -141,12 +141,12 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_WithoutNamespace()
     {
-        var source = @"
+        var source = """
             public class TheClass
             {
                 private TheClass() { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -179,7 +179,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Declaration_Framework()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -187,7 +187,7 @@ public class ApiCatalogModelTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -212,7 +212,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Declaration_Package()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -220,7 +220,7 @@ public class ApiCatalogModelTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddPackage("System.Oob", "1.0.0", p => p
@@ -249,7 +249,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Ancestors()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -257,7 +257,7 @@ public class ApiCatalogModelTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -277,7 +277,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Descendants()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -285,7 +285,7 @@ public class ApiCatalogModelTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -305,7 +305,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Member()
     {
-        var source = @"
+        var source = """
             namespace TheNamespace
             {
                 public class TheClass
@@ -314,7 +314,7 @@ public class ApiCatalogModelTests
                     public int TheMethod(string p) { return -1; }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -340,14 +340,14 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_RequiresPreviewFeature()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [RequiresPreviewFeatures(""This API is in preview"")]
+                [RequiresPreviewFeatures("This API is in preview")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net6.0", fx =>
@@ -366,14 +366,14 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_RequiresPreviewFeature_Url()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [RequiresPreviewFeatures(""This API is in preview"", Url=""https://aka.ms/test"")]
+                [RequiresPreviewFeatures("This API is in preview", Url="https://aka.ms/test")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net6.0", fx =>
@@ -392,7 +392,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Experimental()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Diagnostics.CodeAnalysis;
 
@@ -420,10 +420,10 @@ public class ApiCatalogModelTests
 
             namespace System
             {
-                [Experimental(""SYSLIB0042"")]
+                [Experimental("SYSLIB0042")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net6.0", fx =>
@@ -442,7 +442,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Experimental_Url()
     {
-        var source = @"
+        var source = """
             using System;
             using System.Diagnostics.CodeAnalysis;
 
@@ -470,10 +470,10 @@ public class ApiCatalogModelTests
 
             namespace System
             {
-                [Experimental(""SYSLIB0042"", UrlFormat=""https://aka.ms/syslib/{0}"")]
+                [Experimental("SYSLIB0042", UrlFormat="https://aka.ms/syslib/{0}")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net6.0", fx =>
@@ -493,13 +493,13 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Obsoletion()
     {
-        var source = @"
+        var source = """
             namespace System
             {
-                [Obsolete(""Do not use"")]
+                [Obsolete("Do not use")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -521,13 +521,13 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Obsoletion_IsError()
     {
-        var source = @"
+        var source = """
             namespace System
             {
-                [Obsolete(""Do not use"", true)]
+                [Obsolete("Do not use", true)]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -549,13 +549,13 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Obsoletion_DiagnosticId()
     {
-        var source = @"
+        var source = """
             namespace System
             {
-                [Obsolete(""Do not use"", DiagnosticId = ""CA123"")]
+                [Obsolete("Do not use", DiagnosticId = "CA123")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -577,13 +577,13 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Obsoletion_UrlFormat()
     {
-        var source = @"
+        var source = """
             namespace System
             {
-                [Obsolete(""Do not use"", UrlFormat = ""https://aka.ms/an-issue"")]
+                [Obsolete("Do not use", UrlFormat = "https://aka.ms/an-issue")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -605,13 +605,13 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Obsoletion_UrlFormat_And_DiagnosticId()
     {
-        var source = @"
+        var source = """
             namespace System
             {
-                [Obsolete(""Do not use"", UrlFormat = ""https://aka.ms/{0}"", DiagnosticId=""CA123"")]
+                [Obsolete("Do not use", UrlFormat = "https://aka.ms/{0}", DiagnosticId="CA123")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -633,16 +633,16 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_PlatformSupport()
     {
-        var source = @"
+        var source = """
             using System.Runtime.Versioning;
             namespace System
             {
-                [UnsupportedOSPlatform(""windows"")]
-                [SupportedOSPlatform(""windows10"")]
-                [UnsupportedOSPlatform(""browser"")]
+                [UnsupportedOSPlatform("windows")]
+                [SupportedOSPlatform("windows10")]
+                [UnsupportedOSPlatform("browser")]
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -670,12 +670,12 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Availability_Framework()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -706,12 +706,12 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Type_Usages()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -734,7 +734,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Method_Extension()
     {
-        var source = @"
+        var source = """
             using System.Collections.Generic;
 
             namespace System
@@ -746,7 +746,7 @@ public class ApiCatalogModelTests
                     public static void TheMethod(this TheClass c, int x) { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -768,7 +768,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Method_Extension_Multiple()
     {
-        var source = @"
+        var source = """
             using System.Collections.Generic;
 
             namespace System
@@ -793,7 +793,7 @@ public class ApiCatalogModelTests
                     public static void M2_4(this TheClass2 c) { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -816,7 +816,7 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Assembly_RootApis()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass
@@ -824,7 +824,7 @@ public class ApiCatalogModelTests
                     private TheClass() { }
                 }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -841,12 +841,12 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Assemblies_Unified_Between_Frameworks()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net461", fx =>
@@ -865,12 +865,12 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Assemblies_Unified_Between_Packages()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddPackage("System.Oob", "1.0.0", p =>
@@ -891,12 +891,12 @@ public class ApiCatalogModelTests
     [Fact]
     public async Task Assemblies_Unified_Between_Frameworks_and_Packages()
     {
-        var source = @"
+        var source = """
             namespace System
             {
                 public class TheClass { }
             }
-        ";
+            """;
 
         var catalog = await new FluentCatalogBuilder()
             .AddFramework("net45", fx =>
