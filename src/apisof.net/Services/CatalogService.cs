@@ -32,13 +32,13 @@ public sealed class CatalogService
     {
         if (!_environment.IsDevelopment())
         {
-            File.Delete(GetDatabasePath());
+            File.Delete(GetCatalogPath());
             File.Delete(GetSuffixTreePath());
         }
 
         var azureConnectionString = _configuration["AzureStorageConnectionString"];
 
-        var databasePath = GetDatabasePath();
+        var databasePath = GetCatalogPath();
         if (File.Exists(databasePath))
         {
             _logger.LogInformation("Found catalog on disk. Skipping download.");
@@ -96,19 +96,19 @@ public sealed class CatalogService
         _jobInfo = jobInfo;
     }
 
-    private string GetDatabasePath()
+    private string GetCatalogPath()
     {
-        var binDirectory = Path.GetDirectoryName(GetType().Assembly.Location);
-        var cacheLocation = Path.Combine(binDirectory, "apicatalog.dat");
-        return cacheLocation;
+        var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
+        var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
+        var directory = environmentPath ?? applicationPath;  
+        return Path.Combine(directory, "apicatalog.dat");
     }
 
     private string GetSuffixTreePath()
     {
-        var databasePath = GetDatabasePath();
-        var directory = Path.GetDirectoryName(databasePath);
-        var cacheLocation = Path.Combine(directory, "suffixTree.dat");
-        return cacheLocation;
+        var databasePath = GetCatalogPath();
+        var directory = Path.GetDirectoryName(databasePath)!;
+        return Path.Combine(directory, "suffixTree.dat");
     }
 
     public ApiCatalogModel Catalog => _catalog;

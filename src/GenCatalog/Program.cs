@@ -21,9 +21,11 @@ internal static class Program
             return -1;
         }
 
+        var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
+        var defaultPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Catalog");
         var rootPath = args.Length == 1
             ? args[0]
-            : Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Catalog");
+            : environmentPath ?? defaultPath;
 
         var success = true;
 
