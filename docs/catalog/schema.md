@@ -221,20 +221,11 @@ The declaration syntax of an API is stored as stream of tokens.
 
 Each `Token` has:
 
-* `Byte` - Kind
-* `StringOffset` - Text
-
-If the token kind is `Reference` then the Text field is followed by an
-`ApiOffset`.
-
-Kind is one of following:
-
-* `0` - Whitespace
-* `1` - LiteralNumber
-* `2` - LiteralString
-* `3` - Punctuation
-* `4` - Keyword
-* `5` - Reference
+* `Byte` - [Kind](../../src/Terrajobst.ApiCatalog/Markup/MarkupTokenKind.cs)
+* If the token kind isn't a keyword or operator token, it's followed by
+  - `StringOffset` - Text
+* If the token kind is `Reference` then the Text field is followed by an
+  `ApiOffset`.
 
 ## Types
 

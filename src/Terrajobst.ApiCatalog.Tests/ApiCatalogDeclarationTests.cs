@@ -3097,7 +3097,7 @@ public class ApiCatalogDeclarationTests
 
         static void Emit(IndentedTextWriter writer, ApiEntry api, bool addComma = false)
         {
-            var markup = Markup.Parse(api.Syntax);
+            var markup = Markup.FromXml(api.Syntax);
 
             var lines = markup.ToString().SplitLines();
             for (var i = 0; i < lines.Length; i++)

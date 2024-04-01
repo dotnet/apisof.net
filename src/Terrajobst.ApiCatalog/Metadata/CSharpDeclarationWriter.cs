@@ -2,6 +2,7 @@
 using System.Reflection.Metadata;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using static Terrajobst.ApiCatalog.MarkupTokenKind;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -36,7 +37,7 @@ internal static class CSharpDeclarationWriter
 
     private static void WriteNamespaceDeclaration(INamespaceSymbol @namespace, SyntaxWriter writer)
     {
-        writer.WriteKeyword("namespace");
+        writer.Write(NamespaceKeyword);
         writer.WriteSpace();
 
         var parents = new Stack<INamespaceSymbol>();
@@ -54,7 +55,7 @@ internal static class CSharpDeclarationWriter
             if (isFirst)
                 isFirst = false;
             else
-                writer.WritePunctuation(".");
+                writer.Write(DotToken);
 
             var n = parents.Pop();
             writer.WriteReference(n, n.Name);
@@ -94,27 +95,27 @@ internal static class CSharpDeclarationWriter
 
         if (type.IsStatic)
         {
-            writer.WriteKeyword("static");
+            writer.Write(StaticKeyword);
             writer.WriteSpace();
         }
         else if (type.IsAbstract)
         {
-            writer.WriteKeyword("abstract");
+            writer.Write(AbstractKeyword);
             writer.WriteSpace();
         }
         else if (type.IsSealed)
         {
-            writer.WriteKeyword("sealed");
+            writer.Write(SealedKeyword);
             writer.WriteSpace();
         }
 
         if (type.IsReadOnly)
         {
-            writer.WriteKeyword("readonly");
+            writer.Write(ReadonlyKeyword);
             writer.WriteSpace();
         }
 
-        writer.WriteKeyword("class");
+        writer.Write(ClassKeyword);
         writer.WriteSpace();
 
         writer.WriteReference(type, type.Name);
@@ -129,7 +130,7 @@ internal static class CSharpDeclarationWriter
         if (hasBaseType || implementsInterfaces)
         {
             writer.WriteSpace();
-            writer.WritePunctuation(":");
+            writer.Write(ColonToken);
 
             if (hasBaseType)
             {
@@ -146,7 +147,7 @@ internal static class CSharpDeclarationWriter
                     if (isFirst)
                         isFirst = false;
                     else
-                        writer.WritePunctuation(",");
+                        writer.Write(CommaToken);
 
                     writer.WriteSpace();
                     WriteTypeReference(@interface, writer);
@@ -166,11 +167,11 @@ internal static class CSharpDeclarationWriter
 
         if (type.IsReadOnly)
         {
-            writer.WriteKeyword("readonly");
+            writer.Write(ReadonlyKeyword);
             writer.WriteSpace();
         }
 
-        writer.WriteKeyword("struct");
+        writer.Write(StructKeyword);
         writer.WriteSpace();
         writer.WriteReference(type, type.Name);
 
@@ -179,7 +180,7 @@ internal static class CSharpDeclarationWriter
         if (type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any())
         {
             writer.WriteSpace();
-            writer.WritePunctuation(":");
+            writer.Write(ColonToken);
 
             var isFirst = true;
 
@@ -188,7 +189,7 @@ internal static class CSharpDeclarationWriter
                 if (isFirst)
                     isFirst = false;
                 else
-                    writer.WritePunctuation(",");
+                    writer.Write(CommaToken);
 
                 writer.WriteSpace();
                 WriteTypeReference(@interface, writer);
@@ -204,7 +205,7 @@ internal static class CSharpDeclarationWriter
         WriteAccessibility(type.DeclaredAccessibility, writer);
 
         writer.WriteSpace();
-        writer.WriteKeyword("interface");
+        writer.Write(InterfaceKeyword);
         writer.WriteSpace();
         writer.WriteReference(type, type.Name);
 
@@ -213,7 +214,7 @@ internal static class CSharpDeclarationWriter
         if (type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any())
         {
             writer.WriteSpace();
-            writer.WritePunctuation(":");
+            writer.Write(ColonToken);
 
             var isFirst = true;
 
@@ -222,7 +223,7 @@ internal static class CSharpDeclarationWriter
                 if (isFirst)
                     isFirst = false;
                 else
-                    writer.WritePunctuation(",");
+                    writer.Write(CommaToken);
 
                 writer.WriteSpace();
                 WriteTypeReference(@interface, writer);
@@ -238,7 +239,7 @@ internal static class CSharpDeclarationWriter
         WriteAccessibility(type.DeclaredAccessibility, writer);
 
         writer.WriteSpace();
-        writer.WriteKeyword("delegate");
+        writer.Write(DelegateKeyword);
         writer.WriteSpace();
 
         var invokeMethod = (IMethodSymbol)type.GetMembers("Invoke")
@@ -251,7 +252,7 @@ internal static class CSharpDeclarationWriter
 
         WriteConstraints(type.TypeParameters, writer);
 
-        writer.WritePunctuation(";");
+        writer.Write(SemicolonToken);
     }
 
     private static void WriteEnumDeclaration(INamedTypeSymbol type, SyntaxWriter writer)
@@ -260,7 +261,7 @@ internal static class CSharpDeclarationWriter
         WriteAccessibility(type.DeclaredAccessibility, writer);
 
         writer.WriteSpace();
-        writer.WriteKeyword("enum");
+        writer.Write(EnumKeyword);
         writer.WriteSpace();
 
         writer.WriteReference(type, type.Name);
@@ -268,7 +269,7 @@ internal static class CSharpDeclarationWriter
         if (type.EnumUnderlyingType is not null && type.EnumUnderlyingType.SpecialType != SpecialType.System_Int32)
         {
             writer.WriteSpace();
-            writer.WritePunctuation(":");
+            writer.Write(ColonToken);
             writer.WriteSpace();
             WriteTypeReference(type.EnumUnderlyingType, writer);
         }
@@ -289,26 +290,26 @@ internal static class CSharpDeclarationWriter
 
         if (field.IsConst)
         {
-            writer.WriteKeyword("const");
+            writer.Write(ConstKeyword);
             writer.WriteSpace();
         }
         else
         {
             if (field.IsStatic)
             {
-                writer.WriteKeyword("static");
+                writer.Write(StaticKeyword);
                 writer.WriteSpace();
             }
             if (field.IsReadOnly)
             {
-                writer.WriteKeyword("readonly");
+                writer.Write(ReadonlyKeyword);
                 writer.WriteSpace();
             }
         }
 
         if (field.IsVolatile)
         {
-            writer.WriteKeyword("volatile");
+            writer.Write(VolatileKeyword);
             writer.WriteSpace();
         }
 
@@ -319,12 +320,12 @@ internal static class CSharpDeclarationWriter
         if (field.HasConstantValue)
         {
             writer.WriteSpace();
-            writer.WritePunctuation("=");
+            writer.Write(EqualsToken);
             writer.WriteSpace();
             WriteConstant(field.Type, field.ConstantValue, writer);
         }
 
-        writer.WritePunctuation(";");
+        writer.Write(SemicolonToken);
     }
 
     private static void WriteEnumFieldDeclaration(IFieldSymbol field, SyntaxWriter writer)
@@ -332,7 +333,7 @@ internal static class CSharpDeclarationWriter
         WriteAttributeList(field.GetAttributes(), writer);
         writer.WriteReference(field, field.Name);
         writer.WriteSpace();
-        writer.WritePunctuation("=");
+        writer.Write(EqualsToken);
         writer.WriteSpace();
         WriteEnum(field.ContainingType, field.ConstantValue, isForEnumDeclaration: true, writer);
     }
@@ -340,7 +341,7 @@ internal static class CSharpDeclarationWriter
     private static void WriteMethodDeclaration(IMethodSymbol method, SyntaxWriter writer)
     {
         WriteAttributeList(method.GetAttributes(), writer);
-        WriteAttributeList(method.GetReturnTypeAttributes(), writer, "return");
+        WriteAttributeList(method.GetReturnTypeAttributes(), writer, ReturnKeyword);
 
         if (method.MethodKind != MethodKind.Destructor &&
             method.ContainingType.TypeKind != TypeKind.Interface)
@@ -351,7 +352,7 @@ internal static class CSharpDeclarationWriter
 
         if (method.IsStatic)
         {
-            writer.WriteKeyword("static");
+            writer.Write(StaticKeyword);
             writer.WriteSpace();
         }
 
@@ -361,24 +362,24 @@ internal static class CSharpDeclarationWriter
             {
                 if (method.ContainingType.TypeKind != TypeKind.Interface)
                 {
-                    writer.WriteKeyword("abstract");
+                    writer.Write(AbstractKeyword);
                     writer.WriteSpace();
                 }
             }
             else if (method.IsVirtual)
             {
-                writer.WriteKeyword("virtual");
+                writer.Write(VirtualKeyword);
                 writer.WriteSpace();
             }
             else if (method.IsOverride)
             {
-                writer.WriteKeyword("override");
+                writer.Write(OverrideKeyword);
                 writer.WriteSpace();
             }
 
             if (method.IsSealed)
             {
-                writer.WriteKeyword("sealed");
+                writer.Write(SealedKeyword);
                 writer.WriteSpace();
             }
         }
@@ -389,22 +390,22 @@ internal static class CSharpDeclarationWriter
         }
         else if (method.MethodKind == MethodKind.Destructor)
         {
-            writer.WritePunctuation("~");
+            writer.Write(TildeToken);
             writer.WriteReference(method, method.ContainingType.Name);
         }
         else if (method.MethodKind == MethodKind.Conversion)
         {
             if (method.Name == "op_Explicit")
             {
-                writer.WriteKeyword("explicit");
+                writer.Write(ExplicitKeyword);
             }
             else if (method.Name == "op_Implicit")
             {
-                writer.WriteKeyword("implicit");
+                writer.Write(ImplicitKeyword);
             }
 
             writer.WriteSpace();
-            writer.WriteKeyword("operator");
+            writer.Write(OperatorKeyword);
             writer.WriteSpace();
             WriteTypeReference(method.ReturnType, writer);
         }
@@ -414,21 +415,18 @@ internal static class CSharpDeclarationWriter
             writer.WriteSpace();
 
             var operatorKind = SyntaxFacts.GetOperatorKind(method.MetadataName);
-            var isKeyword = SyntaxFacts.IsKeywordKind(operatorKind);
             var operatorText = SyntaxFacts.GetText(operatorKind);
-            writer.WriteKeyword("operator");
+            writer.Write(OperatorKeyword);
             writer.WriteSpace();
 
-            if (isKeyword)
-                writer.WriteKeyword(operatorText);
-            else
-                writer.WritePunctuation(operatorText);
+            var tokenKind = MarkupFacts.GetTokenKind(operatorText);
+            writer.Write(tokenKind);
         }
         else
         {
             if (method.RefKind == RefKind.Ref)
             {
-                writer.WriteKeyword("ref");
+                writer.Write(RefKeyword);
                 writer.WriteSpace();
             }
 
@@ -440,7 +438,7 @@ internal static class CSharpDeclarationWriter
         WriteTypeParameterList(method.TypeParameters, writer);
         WriteParameterList(method.Parameters, writer);
         WriteConstraints(method.TypeParameters, writer);
-        writer.WritePunctuation(";");
+        writer.Write(SemicolonToken);
     }
 
     private static void WritePropertyDeclaration(IPropertySymbol property, SyntaxWriter writer)
@@ -455,7 +453,7 @@ internal static class CSharpDeclarationWriter
 
         if (property.IsStatic)
         {
-            writer.WriteKeyword("static");
+            writer.Write(StaticKeyword);
             writer.WriteSpace();
         }
 
@@ -463,24 +461,24 @@ internal static class CSharpDeclarationWriter
         {
             if (property.ContainingType.TypeKind != TypeKind.Interface)
             {
-                writer.WriteKeyword("abstract");
+                writer.Write(AbstractKeyword);
                 writer.WriteSpace();
             }
         }
         else if (property.IsVirtual)
         {
-            writer.WriteKeyword("virtual");
+            writer.Write(VirtualKeyword);
             writer.WriteSpace();
         }
         else if (property.IsOverride)
         {
-            writer.WriteKeyword("override");
+            writer.Write(OverrideKeyword);
             writer.WriteSpace();
         }
 
         if (property.IsSealed)
         {
-            writer.WriteKeyword("sealed");
+            writer.Write(SealedKeyword);
             writer.WriteSpace();
         }
 
@@ -494,9 +492,9 @@ internal static class CSharpDeclarationWriter
         else
         {
             writer.WriteReference(property, "this");
-            writer.WritePunctuation("[");
+            writer.Write(OpenBracketToken);
             WriteParameters(property.Parameters, writer);
-            writer.WritePunctuation("]");
+            writer.Write(CloseBracketToken);
         }
 
         var getterAttributes = property.GetMethod.GetCatalogAttributes();
@@ -506,50 +504,50 @@ internal static class CSharpDeclarationWriter
         if (!multipleLines)
         {
             writer.WriteSpace();
-            writer.WritePunctuation("{");
+            writer.Write(OpenBraceToken);
 
             if (property.GetMethod is not null)
             {
                 writer.WriteSpace();
-                writer.WriteKeyword("get");
-                writer.WritePunctuation(";");
+                writer.Write(GetKeyword);
+                writer.Write(SemicolonToken);
             }
 
             if (property.SetMethod is not null)
             {
                 writer.WriteSpace();
-                writer.WriteKeyword("set");
-                writer.WritePunctuation(";");
+                writer.Write(SetKeyword);
+                writer.Write(SemicolonToken);
             }
 
             writer.WriteSpace();
-            writer.WritePunctuation("}");
+            writer.Write(CloseBraceToken);
         }
         else
         {
             writer.WriteLine();
-            writer.WritePunctuation("{");
+            writer.Write(OpenBraceToken);
             writer.WriteLine();
             writer.Indent++;
 
             if (property.GetMethod is not null)
             {
                 WriteAttributeList(getterAttributes, writer);
-                writer.WriteKeyword("get");
-                writer.WritePunctuation(";");
+                writer.Write(GetKeyword);
+                writer.Write(SemicolonToken);
                 writer.WriteLine();
             }
 
             if (property.SetMethod is not null)
             {
                 WriteAttributeList(setterAttributes, writer);
-                writer.WriteKeyword("set");
-                writer.WritePunctuation(";");
+                writer.Write(SetKeyword);
+                writer.Write(SemicolonToken);
                 writer.WriteLine();
             }
 
             writer.Indent--;
-            writer.WritePunctuation("}");
+            writer.Write(CloseBraceToken);
             writer.WriteLine();
         }
     }
@@ -566,7 +564,7 @@ internal static class CSharpDeclarationWriter
 
         if (@event.IsStatic)
         {
-            writer.WriteKeyword("static");
+            writer.Write(StaticKeyword);
             writer.WriteSpace();
         }
 
@@ -574,28 +572,28 @@ internal static class CSharpDeclarationWriter
         {
             if (@event.ContainingType.TypeKind != TypeKind.Interface)
             {
-                writer.WriteKeyword("abstract");
+                writer.Write(AbstractKeyword);
                 writer.WriteSpace();
             }
         }
         else if (@event.IsVirtual)
         {
-            writer.WriteKeyword("virtual");
+            writer.Write(VirtualKeyword);
             writer.WriteSpace();
         }
         else if (@event.IsOverride)
         {
-            writer.WriteKeyword("override");
+            writer.Write(OverrideKeyword);
             writer.WriteSpace();
         }
 
         if (@event.IsSealed)
         {
-            writer.WriteKeyword("sealed");
+            writer.Write(SealedKeyword);
             writer.WriteSpace();
         }
 
-        writer.WriteKeyword("event");
+        writer.Write(EventKeyword);
         writer.WriteSpace();
         WriteTypeReference(@event.Type, writer);
         writer.WriteSpace();
@@ -607,38 +605,38 @@ internal static class CSharpDeclarationWriter
 
         if (!multipleLines)
         {
-            writer.WritePunctuation(";");
+            writer.Write(SemicolonToken);
         }
         else
         {
             writer.WriteLine();
-            writer.WritePunctuation("{");
+            writer.Write(OpenBraceToken);
             writer.WriteLine();
             writer.Indent++;
 
             if (@event.AddMethod is not null)
             {
                 WriteAttributeList(adderAttributes, writer);
-                writer.WriteKeyword("add");
-                writer.WritePunctuation(";");
+                writer.Write(AddKeyword);
+                writer.Write(SemicolonToken);
                 writer.WriteLine();
             }
 
             if (@event.RemoveMethod is not null)
             {
                 WriteAttributeList(removerAttributes, writer);
-                writer.WriteKeyword("remove");
-                writer.WritePunctuation(";");
+                writer.Write(RemoveKeyword);
+                writer.Write(SemicolonToken);
                 writer.WriteLine();
             }
 
             writer.Indent--;
-            writer.WritePunctuation("}");
+            writer.Write(CloseBraceToken);
             writer.WriteLine();
         }
     }
 
-    private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, SyntaxWriter writer, string target = null, bool compact = false)
+    private static void WriteAttributeList(ImmutableArray<AttributeData> attributes, SyntaxWriter writer, MarkupTokenKind target = None, bool compact = false)
     {
         var attributesWritten = false;
 
@@ -649,26 +647,26 @@ internal static class CSharpDeclarationWriter
 
             if (!compact)
             {
-                writer.WritePunctuation("[");
+                writer.Write(OpenBracketToken);
             }
             else
             {
                 if (attributesWritten)
                 {
-                    writer.WritePunctuation(",");
+                    writer.Write(CommaToken);
                     writer.WriteSpace();
                 }
                 else
                 {
-                    writer.WritePunctuation("[");
+                    writer.Write(OpenBracketToken);
                     attributesWritten = true;
                 }
             }
 
-            if (target is not null)
+            if (target != None)
             {
-                writer.WriteKeyword(target);
-                writer.WritePunctuation(":");
+                writer.Write(target);
+                writer.Write(ColonToken);
                 writer.WriteSpace();
             }
 
@@ -683,7 +681,7 @@ internal static class CSharpDeclarationWriter
                                attribute.NamedArguments.Any();
 
             if (hasArguments)
-                writer.WritePunctuation("(");
+                writer.Write(OpenParenToken);
 
             var isFirst = true;
 
@@ -697,7 +695,7 @@ internal static class CSharpDeclarationWriter
                     }
                     else
                     {
-                        writer.WritePunctuation(",");
+                        writer.Write(CommaToken);
                         writer.WriteSpace();
                     }
 
@@ -715,7 +713,7 @@ internal static class CSharpDeclarationWriter
                     }
                     else
                     {
-                        writer.WritePunctuation(",");
+                        writer.Write(CommaToken);
                         writer.WriteSpace();
                     }
 
@@ -725,7 +723,7 @@ internal static class CSharpDeclarationWriter
 
                     writer.WriteReference(propertyOrField, arg.Key);
                     writer.WriteSpace();
-                    writer.WritePunctuation("=");
+                    writer.Write(EqualsToken);
                     writer.WriteSpace();
 
                     WriteTypedConstant(arg.Value, writer);
@@ -733,18 +731,18 @@ internal static class CSharpDeclarationWriter
             }
 
             if (hasArguments)
-                writer.WritePunctuation(")");
+                writer.Write(CloseParenToken);
 
             if (!compact)
             {
-                writer.WritePunctuation("]");
+                writer.Write(CloseBracketToken);
                 writer.WriteLine();
             }
         }
 
         if (compact && attributesWritten)
         {
-            writer.WritePunctuation("]");
+            writer.Write(CloseBracketToken);
             writer.WriteSpace();
         }
     }
@@ -754,26 +752,26 @@ internal static class CSharpDeclarationWriter
         if (constant.IsNull)
         {
             if (constant.Type?.IsValueType == true)
-                writer.WriteKeyword("default");
+                writer.Write(DefaultKeyword);
             else
-                writer.WriteKeyword("null");
+                writer.Write(NullKeyword);
         }
         else
         {
             switch (constant.Kind)
             {
                 case TypedConstantKind.Type:
-                    writer.WriteKeyword("typeof");
-                    writer.WritePunctuation("(");
+                    writer.Write(TypeofKeyword);
+                    writer.Write(OpenParenToken);
                     WriteTypeReference((ITypeSymbol)constant.Value, writer);
-                    writer.WritePunctuation(")");
+                    writer.Write(CloseParenToken);
                     break;
                 case TypedConstantKind.Array:
-                    writer.WriteKeyword("new");
-                    writer.WritePunctuation("[");
-                    writer.WritePunctuation("]");
+                    writer.Write(NewKeyword);
+                    writer.Write(OpenBracketToken);
+                    writer.Write(CloseBracketToken);
                     writer.WriteSpace();
-                    writer.WritePunctuation("{");
+                    writer.Write(OpenBraceToken);
                     writer.WriteSpace();
                     var isFirst = true;
                     foreach (var value in constant.Values)
@@ -784,14 +782,14 @@ internal static class CSharpDeclarationWriter
                         }
                         else
                         {
-                            writer.WritePunctuation(",");
+                            writer.Write(CommaToken);
                             writer.WriteSpace();
                         }
 
                         WriteTypedConstant(value, writer);
                     }
                     writer.WriteSpace();
-                    writer.WritePunctuation("}");
+                    writer.Write(CloseBraceToken);
                     break;
                 case TypedConstantKind.Enum:
                 case TypedConstantKind.Primitive:
@@ -809,9 +807,9 @@ internal static class CSharpDeclarationWriter
         if (value is null)
         {
             if (type.IsValueType)
-                writer.WriteKeyword("default");
+                writer.Write(DefaultKeyword);
             else
-                writer.WriteKeyword("null");
+                writer.Write(NullKeyword);
         }
         else if (type.TypeKind == TypeKind.Enum)
         {
@@ -820,9 +818,9 @@ internal static class CSharpDeclarationWriter
         else if (value is bool valueBool)
         {
             if (valueBool)
-                writer.WriteKeyword("true");
+                writer.Write(TrueKeyword);
             else
-                writer.WriteKeyword("false");
+                writer.Write(FalseKeyword);
         }
         else if (value is string valueString)
         {
@@ -900,26 +898,26 @@ internal static class CSharpDeclarationWriter
         switch (accessibility)
         {
             case Accessibility.Private:
-                writer.WriteKeyword("private");
+                writer.Write(PrivateKeyword);
                 break;
             case Accessibility.ProtectedAndInternal:
-                writer.WriteKeyword("private");
+                writer.Write(PrivateKeyword);
                 writer.WriteSpace();
-                writer.WriteKeyword("protected");
+                writer.Write(ProtectedKeyword);
                 break;
             case Accessibility.Protected:
-                writer.WriteKeyword("protected");
+                writer.Write(ProtectedKeyword);
                 break;
             case Accessibility.Internal:
-                writer.WriteKeyword("internal");
+                writer.Write(InternalKeyword);
                 break;
             case Accessibility.ProtectedOrInternal:
-                writer.WriteKeyword("protected");
+                writer.Write(ProtectedKeyword);
                 writer.WriteSpace();
-                writer.WriteKeyword("internal");
+                writer.Write(InternalKeyword);
                 break;
             case Accessibility.Public:
-                writer.WriteKeyword("public");
+                writer.Write(PublicKeyword);
                 break;
             default:
                 throw new Exception($"Unexpected accessibility: {accessibility}");
@@ -931,7 +929,7 @@ internal static class CSharpDeclarationWriter
         if (!typeParameters.Any())
             return;
 
-        writer.WritePunctuation("<");
+        writer.Write(LessThanToken);
 
         var isFirst = true;
 
@@ -943,25 +941,25 @@ internal static class CSharpDeclarationWriter
             }
             else
             {
-                writer.WritePunctuation(",");
+                writer.Write(CommaToken);
                 writer.WriteSpace();
             }
 
             if (typeParameter.Variance == VarianceKind.In)
             {
-                writer.WriteKeyword("in");
+                writer.Write(InKeyword);
                 writer.WriteSpace();
             }
             else if (typeParameter.Variance == VarianceKind.Out)
             {
-                writer.WriteKeyword("out");
+                writer.Write(OutKeyword);
                 writer.WriteSpace();
             }
 
             WriteTypeReference(typeParameter, writer);
         }
 
-        writer.WritePunctuation(">");
+        writer.Write(GreaterThanToken);
     }
 
     private static void WriteConstraints(ImmutableArray<ITypeParameterSymbol> typeParameters, SyntaxWriter writer)
@@ -971,29 +969,29 @@ internal static class CSharpDeclarationWriter
 
         static void WriteConstructorConstraint(SyntaxWriter writer)
         {
-            writer.WriteKeyword("new");
-            writer.WritePunctuation("(");
-            writer.WritePunctuation(")");
+            writer.Write(NewKeyword);
+            writer.Write(OpenParenToken);
+            writer.Write(CloseParenToken);
         }
 
         static void WriteNotNullConstraint(SyntaxWriter writer)
         {
-            writer.WriteKeyword("notnull");
+            writer.Write(NotnullKeyword);
         }
 
         static void WriteReferenceTypeConstraint(SyntaxWriter writer)
         {
-            writer.WriteKeyword("class");
+            writer.Write(ClassKeyword);
         }
 
         static void WriteUnmanagedTypeConstraint(SyntaxWriter writer)
         {
-            writer.WriteKeyword("unmanaged");
+            writer.Write(UnmanagedKeyword);
         }
 
         static void WriteValueTypeConstraint(SyntaxWriter writer)
         {
-            writer.WriteKeyword("struct");
+            writer.Write(StructKeyword);
         }
 
         var constraintBuilders = new List<Action<SyntaxWriter>>(5);
@@ -1026,17 +1024,17 @@ internal static class CSharpDeclarationWriter
 
             writer.WriteLine();
             writer.Indent++;
-            writer.WriteKeyword("where");
+            writer.Write(WhereKeyword);
             writer.WriteSpace();
             writer.WriteReference(typeParameter, typeParameter.Name);
-            writer.WritePunctuation(":");
+            writer.Write(CommaToken);
             writer.WriteSpace();
 
             for (var i = 0; i < constraintBuilders.Count; i++)
             {
                 if (i > 0)
                 {
-                    writer.WritePunctuation(",");
+                    writer.Write(CommaToken);
                     writer.WriteSpace();
                 }
 
@@ -1051,7 +1049,7 @@ internal static class CSharpDeclarationWriter
                 {
                     if (needsComma)
                     {
-                        writer.WritePunctuation(",");
+                        writer.Write(CommaToken);
                         writer.WriteSpace();
                     }
                     else
@@ -1080,11 +1078,11 @@ internal static class CSharpDeclarationWriter
                 if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
                 {
                     WriteTypeReference(namedType.TypeArguments[0], writer);
-                    writer.WritePunctuation("?");
+                    writer.Write(QuestionToken);
                 }
                 else if (namedType.IsTupleType)
                 {
-                    writer.WritePunctuation("(");
+                    writer.Write(OpenParenToken);
                     var isFirst = true;
                     foreach (var field in namedType.TupleElements)
                     {
@@ -1094,7 +1092,7 @@ internal static class CSharpDeclarationWriter
                         }
                         else
                         {
-                            writer.WritePunctuation(",");
+                            writer.Write(CommaToken);
                             writer.WriteSpace();
                         }
 
@@ -1106,59 +1104,59 @@ internal static class CSharpDeclarationWriter
                             writer.WriteReference(field, field.Name);
                         }
                     }
-                    writer.WritePunctuation(")");
+                    writer.Write(CloseParenToken);
                 }
                 else
                 {
                     switch (namedType.SpecialType)
                     {
                         case SpecialType.System_Object:
-                            writer.WriteKeyword("object");
+                            writer.Write(ObjectKeyword);
                             break;
                         case SpecialType.System_Void:
-                            writer.WriteKeyword("void");
+                            writer.Write(VoidKeyword);
                             break;
                         case SpecialType.System_Boolean:
-                            writer.WriteKeyword("bool");
+                            writer.Write(BoolKeyword);
                             break;
                         case SpecialType.System_Char:
-                            writer.WriteKeyword("char");
+                            writer.Write(CharKeyword);
                             break;
                         case SpecialType.System_SByte:
-                            writer.WriteKeyword("sbyte");
+                            writer.Write(SbyteKeyword);
                             break;
                         case SpecialType.System_Byte:
-                            writer.WriteKeyword("byte");
+                            writer.Write(ByteKeyword);
                             break;
                         case SpecialType.System_Int16:
-                            writer.WriteKeyword("short");
+                            writer.Write(ShortKeyword);
                             break;
                         case SpecialType.System_UInt16:
-                            writer.WriteKeyword("ushort");
+                            writer.Write(UshortKeyword);
                             break;
                         case SpecialType.System_Int32:
-                            writer.WriteKeyword("int");
+                            writer.Write(IntKeyword);
                             break;
                         case SpecialType.System_UInt32:
-                            writer.WriteKeyword("uint");
+                            writer.Write(UintKeyword);
                             break;
                         case SpecialType.System_Int64:
-                            writer.WriteKeyword("long");
+                            writer.Write(LongKeyword);
                             break;
                         case SpecialType.System_UInt64:
-                            writer.WriteKeyword("ulong");
+                            writer.Write(UlongKeyword);
                             break;
                         case SpecialType.System_Decimal:
-                            writer.WriteKeyword("decimal");
+                            writer.Write(DecimalKeyword);
                             break;
                         case SpecialType.System_Single:
-                            writer.WriteKeyword("float");
+                            writer.Write(FloatKeyword);
                             break;
                         case SpecialType.System_Double:
-                            writer.WriteKeyword("double");
+                            writer.Write(DoubleKeyword);
                             break;
                         case SpecialType.System_String:
-                            writer.WriteKeyword("string");
+                            writer.Write(StringKeyword);
                             break;
                         case SpecialType.None:
                         case SpecialType.System_ArgIterator:
@@ -1204,24 +1202,24 @@ internal static class CSharpDeclarationWriter
             case TypeKind.Array:
                 var array = (IArrayTypeSymbol)type;
                 WriteTypeReference(array.ElementType, writer);
-                writer.WritePunctuation("[");
+                writer.Write(OpenBracketToken);
                 for (var i = 1; i < array.Rank; i++)
-                    writer.WritePunctuation(",");
-                writer.WritePunctuation("]");
+                    writer.Write(CommaToken);
+                writer.Write(CloseBracketToken);
                 break;
             case TypeKind.Pointer:
                 var ptr = (IPointerTypeSymbol)type;
                 WriteTypeReference(ptr.PointedAtType, writer);
-                writer.WritePunctuation("*");
+                writer.Write(AsteriskToken);
                 break;
             case TypeKind.Dynamic:
-                writer.WriteKeyword("dynamic");
+                writer.Write(DynamicKeyword);
                 break;
             case TypeKind.FunctionPointer:
             {
                 var fp = (IFunctionPointerTypeSymbol)type;
-                writer.WriteKeyword("delegate");
-                writer.WritePunctuation("*");
+                writer.Write(DelegateKeyword);
+                writer.Write(AsteriskToken);
 
                 if (fp.Signature.CallingConvention != SignatureCallingConvention.Default)
                 {
@@ -1230,34 +1228,34 @@ internal static class CSharpDeclarationWriter
                     switch (fp.Signature.CallingConvention)
                     {
                         case SignatureCallingConvention.Unmanaged:
-                            writer.WriteKeyword("unmanaged");
+                            writer.Write(UnmanagedKeyword);
                             break;
                         case SignatureCallingConvention.CDecl:
-                            WriteCallingConvention("Cdecl", writer);
+                            WriteCallingConvention(CdeclKeyword, writer);
                             break;
                         case SignatureCallingConvention.StdCall:
-                            WriteCallingConvention("Stdcall", writer);
+                            WriteCallingConvention(StdcallKeyword, writer);
                             break;
                         case SignatureCallingConvention.ThisCall:
-                            WriteCallingConvention("Thiscall", writer);
+                            WriteCallingConvention(ThiscallKeyword, writer);
                             break;
                         case SignatureCallingConvention.FastCall:
-                            WriteCallingConvention("Fastcall", writer);
+                            WriteCallingConvention(FastcallKeyword, writer);
                             break;
                         default:
                             throw new Exception($"Unexpected calling convention: {fp.Signature.CallingConvention}");
                     }
 
-                    static void WriteCallingConvention(string name, SyntaxWriter writer)
+                    static void WriteCallingConvention(MarkupTokenKind convention, SyntaxWriter writer)
                     {
-                        writer.WriteKeyword("unmanaged");
-                        writer.WritePunctuation("[");
-                        writer.WriteKeyword(name);
-                        writer.WritePunctuation("]");
+                        writer.Write(UnmanagedKeyword);
+                        writer.Write(OpenBracketToken);
+                        writer.Write(convention);
+                        writer.Write(CloseBracketToken);
                     }
                 }
 
-                writer.WritePunctuation("<");
+                writer.Write(LessThanToken);
 
                 var isFirst = true;
                 foreach (var p in fp.Signature.Parameters)
@@ -1277,16 +1275,16 @@ internal static class CSharpDeclarationWriter
                     }
                     else
                     {
-                        writer.WritePunctuation(",");
+                        writer.Write(CommaToken);
                         writer.WriteSpace();
                     }
                 }
 
-                writer.WritePunctuation(">");
+                writer.Write(GreaterThanToken);
                 break;
             }
             case TypeKind.Error:
-                writer.WritePunctuation("?");
+                writer.Write(QuestionToken);
                 break;
             case TypeKind.Unknown:
             case TypeKind.Module:
@@ -1299,11 +1297,11 @@ internal static class CSharpDeclarationWriter
         {
             if (type.NullableAnnotation == NullableAnnotation.Annotated)
             {
-                writer.WritePunctuation("?");
+                writer.Write(QuestionToken);
             }
             else if (type.NullableAnnotation == NullableAnnotation.NotAnnotated)
             {
-                writer.WritePunctuation("!");
+                writer.Write(ExclamationToken);
             }
         }
     }
@@ -1313,27 +1311,27 @@ internal static class CSharpDeclarationWriter
         if (!typeParameters.Any())
             return;
 
-        writer.WritePunctuation("<");
+        writer.Write(LessThanToken);
 
         for (var i = 0; i < typeParameters.Length; i++)
         {
             if (i > 0)
             {
-                writer.WritePunctuation(",");
+                writer.Write(CommaToken);
                 writer.WriteSpace();
             }
 
             WriteTypeReference(typeParameters[i], writer);
         }
 
-        writer.WritePunctuation(">");
+        writer.Write(GreaterThanToken);
     }
 
     private static void WriteParameterList(ImmutableArray<IParameterSymbol> parameters, SyntaxWriter writer)
     {
-        writer.WritePunctuation("(");
+        writer.Write(OpenParenToken);
         WriteParameters(parameters, writer);
-        writer.WritePunctuation(")");
+        writer.Write(CloseParenToken);
     }
 
     private static void WriteParameters(ImmutableArray<IParameterSymbol> parameters, SyntaxWriter writer)
@@ -1342,7 +1340,7 @@ internal static class CSharpDeclarationWriter
         {
             if (i > 0)
             {
-                writer.WritePunctuation(",");
+                writer.Write(CommaToken);
                 writer.WriteSpace();
             }
 
@@ -1352,36 +1350,36 @@ internal static class CSharpDeclarationWriter
 
             if (parameter.IsParams)
             {
-                writer.WriteKeyword("params");
+                writer.Write(ParamsKeyword);
                 writer.WriteSpace();
             }
 
             if (i == 0 && method?.IsExtensionMethod == true)
             {
-                writer.WriteKeyword("this");
+                writer.Write(ThisKeyword);
                 writer.WriteSpace();
             }
 
             if (parameter.RefKind == RefKind.In)
             {
-                writer.WriteKeyword("in");
+                writer.Write(InKeyword);
                 writer.WriteSpace();
             }
             else if (parameter.RefKind == RefKind.Ref)
             {
-                writer.WriteKeyword("ref");
+                writer.Write(RefKeyword);
                 writer.WriteSpace();
             }
             else if (parameter.RefKind == RefKind.RefReadOnly)
             {
-                writer.WriteKeyword("ref");
+                writer.Write(RefKeyword);
                 writer.WriteSpace();
-                writer.WriteKeyword("readonly");
+                writer.Write(ReadonlyKeyword);
                 writer.WriteSpace();
             }
             else if (parameter.RefKind == RefKind.Out)
             {
-                writer.WriteKeyword("out");
+                writer.Write(OutKeyword);
                 writer.WriteSpace();
             }
 
@@ -1392,7 +1390,7 @@ internal static class CSharpDeclarationWriter
             if (parameter.HasExplicitDefaultValue)
             {
                 writer.WriteSpace();
-                writer.WritePunctuation("=");
+                writer.Write(EqualsToken);
                 writer.WriteSpace();
                 WriteConstant(parameter.Type, parameter.ExplicitDefaultValue, writer);
             }
@@ -1484,7 +1482,7 @@ internal static class CSharpDeclarationWriter
                 if (i != (usedFieldsAndValues.Count - 1))
                 {
                     writer.WriteSpace();
-                    writer.WritePunctuation("|");
+                    writer.Write(BarToken);
                     writer.WriteSpace();
                 }
 
@@ -1530,7 +1528,7 @@ internal static class CSharpDeclarationWriter
         if (!isForEnumDeclaration)
         {
             writer.WriteReference(symbol.ContainingType, symbol.ContainingType.Name);
-            writer.WritePunctuation(".");
+            writer.Write(DotToken);
         }
 
         writer.WriteReference(symbol, symbol.Name);
@@ -1540,9 +1538,9 @@ internal static class CSharpDeclarationWriter
                                                           object constantValue,
                                                           SyntaxWriter writer)
     {
-        writer.WritePunctuation("(");
+        writer.Write(OpenParenToken);
         WriteTypeReference(enumType, writer);
-        writer.WritePunctuation(")");
+        writer.Write(CloseParenToken);
         WriteConstant(enumType.EnumUnderlyingType!, constantValue, writer);
     }
 

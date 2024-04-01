@@ -50,15 +50,17 @@ internal static class CatalogExtensions
 
     public static string GetCatalogSyntax(this ISymbol symbol)
     {
-        var writer = new StringSyntaxWriter();
-        CSharpDeclarationWriter.WriteDeclaration(symbol, writer);
+        var writer = new MarkupStringWriter();
+        var w = new SyntaxWriter(writer);
+        CSharpDeclarationWriter.WriteDeclaration(symbol, w);
         return writer.ToString();
     }
 
     public static string GetCatalogSyntaxMarkup(this ISymbol symbol)
     {
-        var writer = new MarkupSyntaxWriter();
-        CSharpDeclarationWriter.WriteDeclaration(symbol, writer);
+        var writer = new MarkupXmlWriter();
+        var w = new SyntaxWriter(writer);
+        CSharpDeclarationWriter.WriteDeclaration(symbol, w);
         return writer.ToString();
     }
 

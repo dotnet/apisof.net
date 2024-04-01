@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿#nullable enable
+using System.Text;
 using System.Text.Encodings.Web;
 
 using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
-
+using Microsoft.Extensions.Primitives;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Shared;
@@ -37,69 +38,78 @@ public partial class SyntaxView
     {
         var markupBuilder = new StringBuilder();
 
-        foreach (var part in Markup.Parts)
+        void WriteToken(string text, string cssClass, Guid? link = null, string? tooltip = null)
         {
-            var includeText = true;
+            markupBuilder.Append($"<span class=\"{cssClass}\"");
+            
+            if (tooltip is not null)
+                markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
 
-            switch (part.Kind)
-            {
-                case MarkupPartKind.Whitespace:
-                    break;
-                case MarkupPartKind.LiteralNumber:
-                    markupBuilder.Append("<span class=\"number\">");
-                    break;
-                case MarkupPartKind.LiteralString:
-                    markupBuilder.Append("<span class=\"string\">");
-                    break;
-                case MarkupPartKind.Punctuation when part.Text == "!":
-                    markupBuilder.Append("<span class=\"annotation\">not null");
-                    includeText = false;
-                    break;
-                case MarkupPartKind.Punctuation:
-                    markupBuilder.Append("<span class=\"punctuation\">");
-                    break;
-                case MarkupPartKind.Keyword:
-                    markupBuilder.Append("<span class=\"keyword\">");
-                    break;
-                case MarkupPartKind.Reference:
-                {
-                    var api = part.Reference is null
-                        ? (ApiModel?)null
-                        : CatalogService.Catalog.GetApiByGuid(part.Reference.Value);
+            markupBuilder.Append(">");
+            
+            if (link is not null)
+                markupBuilder.Append($"<a href=\"catalog/{link:N}\">");
 
-                    var tooltip = api is null ? null : GeneratedTooltip(api.Value);
+            markupBuilder.Append(HtmlEncoder.Encode(text));
 
-                    if (api == Current)
-                    {
-                        markupBuilder.Append("<span class=\"reference-current\">");
-                    }
-                    else if (api is not null)
-                    {
-                        var referenceClass = GetReferenceClass(api.Value.Kind);
-                        markupBuilder.Append($"<span class=\"{referenceClass}\"");
-                        if (tooltip is not null)
-                            markupBuilder.Append($"data-toggle=\"popover\" data-trigger=\"hover\" data-placement=\"top\" data-html=\"true\" data-content=\"{HtmlEncoder.Default.Encode(tooltip)}\"");
-
-                        markupBuilder.Append(">");
-                    }
-
-                    if (api is not null && api != Current)
-                        markupBuilder.Append($"<a href=\"catalog/{part.Reference:N}\">");
-
-                    break;
-                }
-            }
-
-            if (includeText)
-                markupBuilder.Append(HtmlEncoder.Encode(part.Text));
-
-            if (part.Kind == MarkupPartKind.Reference)
+            if (link is not null)
                 markupBuilder.Append("</a>");
-
+            
             markupBuilder.Append("</span>");
         }
 
-        return new MarkupString(markupBuilder.ToString());
+        foreach (var token in Markup.Tokens)
+        {
+            switch (token.Kind)
+            {
+                case MarkupTokenKind.Space:
+                case MarkupTokenKind.LineBreak:
+                    WriteToken(token.Text, "whitespace");
+                    break;
+                case MarkupTokenKind.LiteralNumber:
+                    WriteToken(token.Text, "number");
+                    break;
+                case MarkupTokenKind.LiteralString:
+                    WriteToken(token.Text, "string");
+                    break;
+                default:
+                {
+                    if (token.Kind.IsPunctuation())
+                    {
+                        WriteToken(token.Text, "punctuation");
+                    }
+                    else if (token.Kind.IsKeyword())
+                    {
+                        WriteToken(token.Text, "keyword");
+                    }
+                    else if (token.Kind == MarkupTokenKind.ReferenceToken)
+                    {
+                        var api = token.Reference is null
+                            ? (ApiModel?)null
+                            : CatalogService.Catalog.GetApiByGuid(token.Reference.Value);
+
+                        if (api is null)
+                        {                           
+                            WriteToken(token.Text, "reference");
+                        }
+                        else
+                        {
+                            var tooltip = GeneratedTooltip(api.Value);
+                            var link = api == Current ? (Guid?)null : api.Value.Guid;
+                            var cssClass = api == Current ? "reference-current" : GetReferenceClass(api.Value.Kind);
+                            WriteToken(token.Text, cssClass, link, tooltip);
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception($"Unexpected token kind {token.Kind}");
+                    }
+                    break;
+                }
+            }
+        }
+
+        return new MarkupString(markupBuilder.ToString().Trim());
     }
 
     private string GeneratedTooltip(ApiModel current)
@@ -134,11 +144,15 @@ public partial class SyntaxView
             case ApiKind.Struct:
             case ApiKind.Class:
                 return kind.ToString().ToLower();
+            case ApiKind.Constructor:
+                // The only way to see them as a reference is via attributes.
+                //
+                // When we're rendering constructors themselves, we use a fixed class for the current item.
+                return "class";
             case ApiKind.Namespace:
             case ApiKind.Constant:
             case ApiKind.EnumItem:
             case ApiKind.Field:
-            case ApiKind.Constructor:
             case ApiKind.Destructor:
             case ApiKind.Property:
             case ApiKind.PropertyGetter:

@@ -4,7 +4,7 @@ internal static partial class ApiCatalogSchema
 {
     internal static ReadOnlySpan<byte> MagicNumber => "APICATFB"u8;
 
-    internal const int FormatVersion = 7;
+    internal const int FormatVersion = 8;
     internal const int NumberOfTables = 14;
 
     // Tables

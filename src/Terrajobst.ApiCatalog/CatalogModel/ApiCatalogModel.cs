@@ -259,22 +259,32 @@ public sealed class ApiCatalogModel
     internal Markup GetMarkup(int offset)
     {
         var span = BlobHeap[offset..];
-        var partsCount = BinaryPrimitives.ReadInt32LittleEndian(span);
+        var tokenCount = BinaryPrimitives.ReadInt32LittleEndian(span);
         span = span[4..];
 
-        var parts = new List<MarkupPart>(partsCount);
+        var tokens = new List<MarkupToken>(tokenCount);
 
-        for (var i = 0; i < partsCount; i++)
+        for (var i = 0; i < tokenCount; i++)
         {
-            var kind = (MarkupPartKind)span[0];
+            var kind = (MarkupTokenKind)span[0];
             span = span[1..];
-            var textOffset = BinaryPrimitives.ReadInt32LittleEndian(span);
-            var text = GetString(textOffset);
-            span = span[4..];
+
+            string text;
+
+            if (kind.GetTokenText() is not null)
+            {
+                text = null;
+            }
+            else
+            {
+                var textOffset = BinaryPrimitives.ReadInt32LittleEndian(span);
+                text = GetString(textOffset);
+                span = span[4..];
+            }
 
             Guid? reference;
 
-            if (kind == MarkupPartKind.Reference)
+            if (kind == MarkupTokenKind.ReferenceToken)
             {
                 var apiOffset = BinaryPrimitives.ReadInt32LittleEndian(span);
                 if (apiOffset < 0)
@@ -288,11 +298,11 @@ public sealed class ApiCatalogModel
                 reference = null;
             }
 
-            var part = new MarkupPart(kind, text, reference);
-            parts.Add(part);
+            var token = new MarkupToken(kind, text, reference);
+            tokens.Add(token);
         }
 
-        return new Markup(parts);
+        return new Markup(tokens);
     }
 
     internal int GetExtensionMethodOffset(int extensionTypeId)

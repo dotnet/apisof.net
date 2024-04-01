@@ -66,7 +66,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
                          .ToList();
         markups.Reverse();
 
-        var parts = new List<MarkupPart>();
+        var tokens = new List<MarkupToken>();
 
         var indent = 0;
 
@@ -75,29 +75,29 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
             if (indent > 0)
             {
                 if (indent - 1 > 0)
-                    parts.Add(new MarkupPart(MarkupPartKind.Whitespace, new string(' ', 4 * (indent - 1))));
-                parts.Add(new MarkupPart(MarkupPartKind.Punctuation, "{"));
-                parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
+                    AddIndentation(tokens, indent - 1);
+                tokens.Add(new MarkupToken(MarkupTokenKind.OpenBraceToken));
+                tokens.Add(new MarkupToken(MarkupTokenKind.LineBreak));
             }
 
             var needsIndent = true;
 
-            foreach (var part in markup.Parts)
+            foreach (var token in markup.Tokens)
             {
                 if (needsIndent)
                 {
                     // Add indentation
-                    parts.Add(new MarkupPart(MarkupPartKind.Whitespace, new string(' ', 4 * indent)));
+                    AddIndentation(tokens, indent);
                     needsIndent = false;
                 }
 
-                parts.Add(part);
+                tokens.Add(token);
 
-                if (part.Kind == MarkupPartKind.Whitespace && part.Text is "\n" or "\r" or "\r\n")
+                if (token.Kind == MarkupTokenKind.LineBreak)
                     needsIndent = true;
             }
 
-            parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
+            tokens.Add(new MarkupToken(MarkupTokenKind.LineBreak));
 
             indent++;
         }
@@ -105,12 +105,18 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         for (var i = markups.Count - 1 - 1; i >= 0; i--)
         {
             if (i > 0)
-                parts.Add(new MarkupPart(MarkupPartKind.Whitespace, new string(' ', 4 * i)));
-            parts.Add(new MarkupPart(MarkupPartKind.Punctuation, "}"));
-            parts.Add(new MarkupPart(MarkupPartKind.Whitespace, Environment.NewLine));
+                AddIndentation(tokens, i);
+            tokens.Add(new MarkupToken(MarkupTokenKind.CloseBraceToken));
+            tokens.Add(new MarkupToken(MarkupTokenKind.LineBreak));
         }
 
-        return new Markup(parts);
+        return new Markup(tokens);
+
+        static void AddIndentation(List<MarkupToken> tokens, int indent)
+        {
+            for (var i = 0; i < indent * 4; i++)
+                tokens.Add(new MarkupToken(MarkupTokenKind.Space));
+        }
     }
 
     public bool IsOverride()
@@ -134,8 +140,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         if (canBeOverriden)
         {
             var markup = GetMyMarkup();
-            return markup.Parts.Any(p => p.Kind == MarkupPartKind.Keyword &&
-                                         p.Text == "override");
+            return markup.Tokens.Any(t => t.Kind == MarkupTokenKind.OverrideKeyword);
         }
 
         return false;

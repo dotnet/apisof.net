@@ -82,6 +82,12 @@ public sealed class PlatformAnnotationContext
         var frameworkAssemblies = Catalog.Frameworks
                                          .Single(fx => string.Equals(fx.Name, frameworkName, StringComparison.OrdinalIgnoreCase))
                                          .Assemblies.ToHashSet();
+        
+        var supportedOsPlatformGuard = Catalog.AllApis.Where(a => a.Name == "SupportedOSPlatformGuardAttribute" &&
+                                                                  a.Parent?.GetFullName() == "System.Runtime.Versioning")
+                                                      .Select(a => (Guid?)a.Guid)
+                                                      .SingleOrDefault();
+        
 
         var operatingSystemType = GetOperatingSystemType();
         if (operatingSystemType is not null)
@@ -95,23 +101,23 @@ public sealed class PlatformAnnotationContext
                     {
                         var markup = declaration.GetMyMarkup();
 
-                        for (var i = 0; i < markup.Parts.Length - 6; i++)
+                        for (var i = 0; i < markup.Tokens.Length - 6; i++)
                         {
-                            var p1 = markup.Parts[i];
-                            var p2 = markup.Parts[i + 1];
-                            var p3 = markup.Parts[i + 2];
-                            var p4 = markup.Parts[i + 3];
-                            var p5 = markup.Parts[i + 4];
-                            var p6 = markup.Parts[i + 5];
+                            var t1 = markup.Tokens[i];
+                            var t2 = markup.Tokens[i + 1];
+                            var t3 = markup.Tokens[i + 2];
+                            var t4 = markup.Tokens[i + 3];
+                            var t5 = markup.Tokens[i + 4];
+                            var t6 = markup.Tokens[i + 5];
 
-                            if (p1.Kind == MarkupPartKind.Punctuation && p1.Text == "[" &&
-                                p2.Kind == MarkupPartKind.Reference && p2.Text == "SupportedOSPlatformGuard" &&
-                                p3.Kind == MarkupPartKind.Punctuation && p3.Text == "(" &&
-                                p4.Kind == MarkupPartKind.LiteralString &&
-                                p5.Kind == MarkupPartKind.Punctuation && p5.Text == ")" &&
-                                p6.Kind == MarkupPartKind.Punctuation && p6.Text == "]")
+                            if (t1.Kind == MarkupTokenKind.OpenBracketToken &&
+                                t2.Kind == MarkupTokenKind.ReferenceToken && t2.Reference == supportedOsPlatformGuard &&
+                                t3.Kind == MarkupTokenKind.OpenParenToken &&
+                                t4.Kind == MarkupTokenKind.LiteralString &&
+                                t5.Kind == MarkupTokenKind.CloseParenToken &&
+                                t6.Kind == MarkupTokenKind.CloseBracketToken)
                             {
-                                var literalWithoutQuotes = p4.Text.Substring(1, p4.Text.Length - 2);
+                                var literalWithoutQuotes = t4.Text.Substring(1, t4.Text.Length - 2);
                                 var impliedPlatformName = literalWithoutQuotes;
                                 yield return (platformName, impliedPlatformName);
                             }

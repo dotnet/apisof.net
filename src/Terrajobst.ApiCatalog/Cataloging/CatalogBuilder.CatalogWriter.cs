@@ -804,22 +804,24 @@ public sealed partial class CatalogBuilder
                                            StringHeap stringHeap,
                                            IReadOnlyDictionary<Guid, IntermediaApi> apiByFingerprint)
             {
-                var markup = Markup.Parse(syntax);
+                var markup = Markup.FromXml(syntax);
 
                 var result = SeekEnd();
-                Memory.WriteInt32(markup.Parts.Length);
+                Memory.WriteInt32(markup.Tokens.Length);
 
-                foreach (var part in markup.Parts)
+                foreach (var token in markup.Tokens)
                 {
-                    var kind = (byte)part.Kind;
-                    var text = stringHeap.Store(part.Text);
+                    var kind = (byte)token.Kind;
+                    var text = stringHeap.Store(token.Text);
+                    var hasIntrinsicText = token.Kind.GetTokenText() is not null;
 
                     Memory.WriteByte(kind);
-                    Memory.WriteStringOffset(text);
+                    if (!hasIntrinsicText)
+                        Memory.WriteStringOffset(text);
 
-                    if (part.Kind == MarkupPartKind.Reference)
+                    if (token.Kind == MarkupTokenKind.ReferenceToken)
                     {
-                        if (part.Reference is not null && apiByFingerprint.TryGetValue(part.Reference.Value, out var api))
+                        if (token.Reference is not null && apiByFingerprint.TryGetValue(token.Reference.Value, out var api))
                             WriteApiPatchup(api);
                         else
                             Memory.WriteInt32(-1);

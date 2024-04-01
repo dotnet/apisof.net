@@ -158,6 +158,10 @@
     color: black;
 }
 
+.syntax-view .reference {
+    color: black;
+}
+
 .syntax-view .reference-current {
     font-weight: 800
 }
@@ -213,6 +217,10 @@
         }
 
         .syntax-view .reference a {
+            color: rgb(220, 220, 220);
+        }
+
+        .syntax-view .reference {
             color: rgb(220, 220, 220);
         }
 }
