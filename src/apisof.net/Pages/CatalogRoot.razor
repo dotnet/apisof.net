@@ -3,7 +3,7 @@
 <div class="container-fluid px-0">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><img height="16" width="16" src="/img/Database.svg" /> <a href="/catalog">Catalog</a></li>
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="/catalog">Catalog</a></li>
         </ol>
     </nav>
 </div>
@@ -12,13 +12,13 @@
 
     <ul class="list-unstyled">
         <li>
-            <img height="16" width="16" src="/img/Database.svg" /> <span class="font-weight-bold">Catalog</span>
+            <Glyph Kind="GlyphKind.Database" /> <span class="font-weight-bold">Catalog</span>
 
             <ul class="list-unstyled pl-4">
                 @foreach (var child in CatalogService.Catalog.RootApis.OrderBy(x => x)) // TODO: Ideally the catalog is pre-sorted
                 {
                     <li>
-                        <ApiIcon Kind="@child.Kind" /> <a href="/catalog/@child.Guid">@child.Name</a>
+                        <Glyph Kind="@child.Kind.GetGlyph()" /> <a href="/catalog/@child.Guid">@child.Name</a>
                     </li>
                 }
             </ul>

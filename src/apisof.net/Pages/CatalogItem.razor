@@ -11,17 +11,17 @@ else
     <div class="container-fluid px-0">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><img height="16" width="16" src="/img/Database.svg" /> <a href="/catalog">Catalog</a></li>
+                <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="/catalog">Catalog</a></li>
 
                 @foreach (var api in Breadcrumbs)
                 {
                     if (api == Api)
                     {
-                        <li class="breadcrumb-item active" aria-current="page"><ApiIcon Kind="@api.Kind" /> @api.Name</li>
+                        <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" /> @api.Name</li>
                     }
                     else
                     {
-                        <li class="breadcrumb-item"><ApiIcon Kind="@api.Kind" /> <a href="/catalog/@api.Guid">@api.Name</a></li>
+                        <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="/catalog/@api.Guid">@api.Name</a></li>
                     }
                 }
             </ol>
@@ -38,11 +38,11 @@ else
 
                     @if (Parent == Api)
                     {
-                        <ApiIcon Kind="@Parent.Kind" /> <span class="font-weight-bold @rootUnsupportedClass">@Parent.Name</span>
+                        <Glyph Kind="@Parent.Kind.GetGlyph()" /> <span class="font-weight-bold @rootUnsupportedClass">@Parent.Name</span>
                     }
                     else
                     {
-                        <ApiIcon Kind="@Parent.Kind" /> <a class="@rootUnsupportedClass" href="/catalog/@Parent.Guid">@Parent.Name</a>
+                        <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@rootUnsupportedClass" href="/catalog/@Parent.Guid">@Parent.Name</a>
                     }
 
                     <ul class="list-unstyled pl-4">
@@ -53,11 +53,11 @@ else
                             <li>
                                 @if (child == Api)
                                 {
-                                    <ApiIcon Kind="@child.Kind" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                                    <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
                                 }
                                 else
                                 {
-                                    <ApiIcon Kind="@child.Kind" /> <a class="@childUnsupportedClass" href="/catalog/@child.Guid">@child.Name</a>
+                                    <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childUnsupportedClass" href="/catalog/@child.Guid">@child.Name</a>
                                 }
                             </li>
                         }
@@ -70,11 +70,11 @@ else
                             <li>
                                 @if (extensionMethod == ExtensionMethod)
                                 {
-                                    <img height="16" width="16" src="/img/ExtensionMethod.svg" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                                    <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
                                 }
                                 else
                                 {
-                                    <img height="16" width="16" src="/img/ExtensionMethod.svg" /> <a class="@childUnsupportedClass" href="/catalog/@extensionMethod.Guid">@child.Name</a>
+                                    <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@childUnsupportedClass" href="/catalog/@extensionMethod.Guid">@child.Name</a>
                                 }
                             </li>
                         }

@@ -20,7 +20,7 @@
                         {
                             var selectedClass = result == SelectedResult ? "selected" : "";
                             <li class="search-result-row @selectedClass" @onclick="_ => SelectAndAccept(result)">
-                                <ApiIcon Kind="result.Kind" />&nbsp;@result.GetFullName()
+                                <Glyph Kind="@result.Kind.GetGlyph()" />&nbsp;@result.GetFullName()
                             </li>
                         }
                     </ul>

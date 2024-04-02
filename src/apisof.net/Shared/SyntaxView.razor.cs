@@ -16,9 +16,6 @@ public partial class SyntaxView
     public CatalogService CatalogService { get; set; }
 
     [Inject]
-    public IconService IconService { get; set; }
-
-    [Inject]
     public HtmlEncoder HtmlEncoder { get; set; }
 
     [Parameter]
@@ -114,7 +111,7 @@ public partial class SyntaxView
 
     private string GeneratedTooltip(ApiModel current)
     {
-        var iconUrl = IconService.GetIcon(current.Kind);
+        var iconUrl = current.Kind.GetGlyph().ToUrl();
 
         var sb = new StringBuilder();
         sb.Append($"<img src=\"{iconUrl}\" heigth=\"16\" width=\"16\" /> ");

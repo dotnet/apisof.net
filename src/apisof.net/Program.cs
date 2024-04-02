@@ -6,7 +6,6 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllers();
 builder.Services.AddSingleton<CatalogService>();
-builder.Services.AddSingleton<IconService>();
 builder.Services.AddSingleton<DocumentationResolverService>();
 builder.Services.AddHttpClient<DocumentationResolverService>();
 builder.Services.AddSingleton<SourceResolverService>();
