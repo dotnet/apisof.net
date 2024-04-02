@@ -21,7 +21,7 @@ else
                     }
                     else
                     {
-                        <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="/catalog/@api.Guid">@api.Name</a></li>
+                        <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="@Link.For(api)">@api.Name</a></li>
                     }
                 }
             </ol>
@@ -42,7 +42,7 @@ else
                     }
                     else
                     {
-                        <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@rootUnsupportedClass" href="/catalog/@Parent.Guid">@Parent.Name</a>
+                        <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@rootUnsupportedClass" href="@Link.For(@Parent)">@Parent.Name</a>
                     }
 
                     <ul class="list-unstyled pl-4">
@@ -57,7 +57,7 @@ else
                                 }
                                 else
                                 {
-                                    <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childUnsupportedClass" href="/catalog/@child.Guid">@child.Name</a>
+                                    <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childUnsupportedClass" href="@Link.For(child)">@child.Name</a>
                                 }
                             </li>
                         }
@@ -74,7 +74,7 @@ else
                                 }
                                 else
                                 {
-                                    <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@childUnsupportedClass" href="/catalog/@extensionMethod.Guid">@child.Name</a>
+                                    <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@childUnsupportedClass" href="@Link.For(extensionMethod)">@child.Name</a>
                                 }
                             </li>
                         }

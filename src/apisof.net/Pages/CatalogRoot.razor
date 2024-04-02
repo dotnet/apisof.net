@@ -18,7 +18,7 @@
                 @foreach (var child in CatalogService.Catalog.RootApis.OrderBy(x => x)) // TODO: Ideally the catalog is pre-sorted
                 {
                     <li>
-                        <Glyph Kind="@child.Kind.GetGlyph()" /> <a href="/catalog/@child.Guid">@child.Name</a>
+                        <Glyph Kind="@child.Kind.GetGlyph()" /> <a href="@Link.For(child)">@child.Name</a>
                     </li>
                 }
             </ul>

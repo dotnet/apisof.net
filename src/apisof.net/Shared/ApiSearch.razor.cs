@@ -118,7 +118,7 @@ public partial class ApiSearch
     {
         if (SelectedResult != default)
         {
-            NavigationManager.NavigateTo($"/catalog/{SelectedResult.Guid}");
+            NavigationManager.NavigateTo(Link.For(SelectedResult));
             Close();
         }
     }
