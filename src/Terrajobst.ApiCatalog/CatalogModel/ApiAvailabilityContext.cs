@@ -14,13 +14,13 @@ public sealed class ApiAvailabilityContext
 
     private readonly ApiCatalogModel _catalog;
     private readonly FrozenDictionary<NuGetFramework, int> _frameworkIds;
-    private readonly FrozenDictionary<int, HashSet<int>> _frameworkAssemblies;
-    private readonly FrozenDictionary<int, IReadOnlyList<PackageFolder>> _packageFolders;
+    private readonly FrozenDictionary<int, FrozenSet<int>> _frameworkAssemblies;
+    private readonly FrozenDictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>> _packageAssemblies;
 
     private ApiAvailabilityContext(ApiCatalogModel catalog)
     {
         _catalog = catalog;
-        _frameworkAssemblies = catalog.Frameworks.Select(fx => (fx.Id, Assemblies: fx.Assemblies.Select(a => a.Id).ToHashSet()))
+        _frameworkAssemblies = catalog.Frameworks.Select(fx => (fx.Id, Assemblies: fx.Assemblies.Select(a => a.Id).ToFrozenSet()))
                                                  .ToFrozenDictionary(t => t.Id, t => t.Assemblies);
 
         var frameworkIds = new Dictionary<NuGetFramework, int>();
@@ -60,11 +60,53 @@ public sealed class ApiAvailabilityContext
                 packageFolders.Add(package.Id, folders.Values.ToArray());
         }
 
+        // Package assemblies
+        
         _frameworkIds = frameworkIds.ToFrozenDictionary();
-        _packageFolders = packageFolders.ToFrozenDictionary();
+        
+        var packageAssemblies = new Dictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>>();
+
+        foreach (var framework in frameworkIds.Keys)
+        {
+            var frameworkId = frameworkIds[framework];
+            var assemblies = new Dictionary<int, (int, int)>();
+            
+            foreach (var (packageId, packageFolder) in packageFolders)
+            {
+                var folder = NuGetFrameworkUtility.GetNearest(packageFolder, framework);
+                if (folder is not null)
+                {
+                    foreach (var assembly in folder.Assemblies)
+                    {
+                        var packageFrameworkId = frameworkIds[folder.TargetFramework];
+                        assemblies.TryAdd(assembly.Id, (packageId, packageFrameworkId));
+                    }
+                }
+            }
+            
+            packageAssemblies.Add(frameworkId, assemblies.ToFrozenDictionary());
+        }
+
+        _packageAssemblies = packageAssemblies.ToFrozenDictionary();
     }
 
     public ApiCatalogModel Catalog => _catalog;
+
+    public bool IsAvailable(ApiModel api, NuGetFramework framework)
+    {
+        var frameworkId = _frameworkIds[framework];
+        var frameworkAssemblies = _frameworkAssemblies[frameworkId];
+        var packageAssemblies = _packageAssemblies[frameworkId];
+
+        foreach (var declaration in api.Declarations)
+        {
+            var assemblyId = declaration.Assembly.Id;
+            if (frameworkAssemblies.Contains(assemblyId) || packageAssemblies.ContainsKey(assemblyId))
+                return true;
+        }
+
+        return false;
+    }
 
     public ApiAvailability GetAvailability(ApiModel api)
     {
@@ -82,10 +124,10 @@ public sealed class ApiAvailabilityContext
 
     public ApiFrameworkAvailability GetAvailability(ApiModel api, NuGetFramework nugetFramework)
     {
-        // Try to resolve an in-box assembly
-
         if (_frameworkIds.TryGetValue(nugetFramework, out var frameworkId))
         {
+            // Try to resolve an in-box assembly
+
             if (_frameworkAssemblies.TryGetValue(frameworkId, out var frameworkAssemblies))
             {
                 foreach (var declaration in api.Declarations)
@@ -96,19 +138,20 @@ public sealed class ApiAvailabilityContext
                     }
                 }
             }
-        }
 
-        // Try to resolve an assembly in a package for the given framework
+            // Try to resolve an assembly in a package for the given framework
 
-        foreach (var declaration in api.Declarations)
-        {
-            foreach (var (package, _) in declaration.Assembly.Packages)
+            if (_packageAssemblies.TryGetValue(frameworkId, out var packageAssemblies))
             {
-                if (_packageFolders.TryGetValue(package.Id, out var folders))
+                foreach (var declaration in api.Declarations)
                 {
-                    var folder = NuGetFrameworkUtility.GetNearest(folders, nugetFramework);
-                    if (folder is not null && folder.Assemblies.Contains(declaration.Assembly))
-                        return new ApiFrameworkAvailability(nugetFramework, declaration, package, folder.TargetFramework);
+                    if (packageAssemblies.TryGetValue(declaration.Assembly.Id, out var packageInfo))
+                    {
+                        var package = new PackageModel(_catalog, packageInfo.PackageId);
+                        var packageFramework = new FrameworkModel(_catalog, packageInfo.FrameworkId);
+                        var nugetPackageFramework = NuGetFramework.Parse(packageFramework.Name);
+                        return new ApiFrameworkAvailability(nugetFramework, declaration, package, nugetPackageFramework);
+                    }
                 }
             }
         }
