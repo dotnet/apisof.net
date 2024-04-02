@@ -1,0 +1,346 @@
+﻿<div class="container-fluid px-0">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="/catalog">Catalog</a></li>
+
+            @foreach (var api in Breadcrumbs)
+            {
+                if (api == Api)
+                {
+                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" /> @api.Name</li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="@Link.For(api)">@api.Name</a></li>
+                }
+            }
+        </ol>
+    </nav>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right">
+            <li>
+                @{
+                    var rootUnsupportedClass = ApiView.IsSupported(@Parent) ? "" : "text-muted";
+                }
+
+                @if (Parent == Api)
+                {
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <span class="font-weight-bold @rootUnsupportedClass">@Parent.Name</span>
+                }
+                else
+                {
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@rootUnsupportedClass" href="@Link.For(@Parent)">@Parent.Name</a>
+                }
+
+                <ul class="list-unstyled pl-4">
+                    @foreach (var child in Parent.Children.OrderBy(x => x)) // TODO: Ideally the catalog is pre-sorted
+                    {
+                        var childUnsupportedClass = ApiView.IsSupported(child) ? "" : "text-muted";
+
+                        <li>
+                            @if (child == Api)
+                            {
+                                <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                            }
+                            else
+                            {
+                                <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childUnsupportedClass" href="@Link.For(child)">@child.Name</a>
+                            }
+                        </li>
+                    }
+
+                    @foreach (var extensionMethod in Parent.ExtensionMethods.OrderBy(em => em.ExtensionMethod))
+                    {
+                        var child = extensionMethod.ExtensionMethod;
+                        var childUnsupportedClass = ApiView.IsSupported(child) ? "" : "text-muted";
+
+                        <li>
+                            @if (extensionMethod == ExtensionMethod)
+                            {
+                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                            }
+                            else
+                            {
+                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@childUnsupportedClass" href="@Link.For(extensionMethod)">@child.Name</a>
+                            }
+                        </li>
+                    }
+                </ul>
+            </li>
+        </ul>
+
+        <div class="col-md-9">
+
+            @if (SelectedMarkup is not null)
+            {
+                <SyntaxView Markup="@SelectedMarkup" Current="@Api" />
+            }
+
+            <table class="table my-3">
+                @foreach (var usage in Api.Usages)
+                {
+                    var value = usage.Percentage * 100;
+                    var title = $"Usage on {usage.Source.Name} is {usage.Percentage:P5} (as of {usage.Source.Date})";
+
+                    <tr title="@title">
+                        <th>
+                            @usage.Source.Name
+                        </th>
+                        <td>
+                            <div class="row align-items-center">
+                                <div class="col col-md-5 col-xl-3">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: @(value)%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    @usage.Percentage.ToString("P1")
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                @if (SelectedAvailability is not null)
+                {
+                    var assembly = SelectedAvailability.Declaration.Assembly;
+                    <tr>
+                        <th style="width: 185px">Assembly</th>
+                        <td>
+                            @assembly.Name <span class="small text-muted">, Version=@assembly.Version, PublicKeyToken=@assembly.PublicKeyToken</span>
+                        </td>
+                    </tr>
+                }
+
+                @if (SelectedAvailability is { IsInBox: false })
+                {
+                    var package = SelectedAvailability.Package!.Value;
+                    var folder = SelectedAvailability.PackageFramework.GetShortFolderName();
+                    <tr>
+                        <th>Package</th>
+                        <td>
+                            <a href="https://nuget.org/packages/@package.Name">@package.Name</a> <span class="small text-muted">@folder</span>
+                        </td>
+                    </tr>
+                }
+
+                @if (SelectedAvailability?.Declaration.Obsoletion is not null)
+                {
+                    var o = SelectedAvailability.Declaration.Obsoletion.Value;
+                    var message = string.IsNullOrEmpty(o.Message)
+                                    ? "This API is obsolete."
+                                    : o.Message;
+
+                    if (!string.IsNullOrEmpty(o.DiagnosticId))
+                        message = $"{o.DiagnosticId}: {message}";
+
+                    <tr>
+                        <th>Obsolete</th>
+                        <td>
+                            @if (o.Url is not null)
+                            {
+                                <a href="@o.Url">@message</a>
+                            }
+                            else
+                            {
+                                <text>@message</text>
+                            }
+                        </td>
+                    </tr>
+                }
+
+                @if (SelectedPreviewDescription is not null)
+                {
+                    var preview = SelectedPreviewDescription.Value;
+                    <tr>
+                        <th>Preview</th>
+                        <td>
+                            <span class="text-warning oi oi-warning mr-1"></span>
+                            @preview.Description
+                            @if (preview.Url is not null)
+                            {
+                                <a class="pl-2" href="@preview.Url">(more details)</a>
+                            }
+                        </td>
+                    </tr>
+                }
+
+                @if (!string.IsNullOrEmpty(SourceUrl))
+                {
+                    <tr>
+                        <th>Implementation</th>
+                        <td>
+                            <a href="@SourceUrl" target="_blank">Source</a>
+                        </td>
+                    </tr>
+                }
+
+                @if (!string.IsNullOrEmpty(HelpUrl))
+                {
+                    <tr>
+                        <th>Help</th>
+                        <td>
+                            <a href="@HelpUrl" target="_blank">Documentation</a>
+                        </td>
+                    </tr>
+                }
+
+                @{
+                    var inboxApiTitle = "The API is built into the target framework.";
+                    var packageApiTitle = "The API requires a package to be referenced.";
+                }
+
+                @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
+                                                                       .OrderBy(g => g.Key))
+                {
+                    <tr>
+                        <th>@frameworkGroup.Key</th>
+                        <td>
+                            <span class="d-flex flex-row flex-wrap align-content-between">
+                                @foreach (var group in frameworkGroup.GroupBy(fx => fx.Framework)
+                                                                     .OrderBy(g => g.Key.Version)
+                                                                     .ThenBy(g => g.Key.Platform)
+                                                                     .ThenBy(g => g.Key.PlatformVersion)
+                                                                     .ThenBy(g => g.Key.Profile))
+                                {
+                                    var availability = group.First();
+                                    var versionFramework = availability.Framework.GetShortFolderName();
+                                    var isSelectedVersion = availability.Framework == ApiView.Framework;
+                                    var versionClass = availability.IsInBox
+                                             ? "fx-version-inbox"
+                                             : "fx-version-package";
+                                    var title = availability.IsInBox
+                                             ? inboxApiTitle
+                                             : packageApiTitle;
+
+                                    var activeClass = isSelectedVersion
+                                         ? "active"
+                                         : "";
+
+                                    <span class="fx-version @versionClass @activeClass m-1" title="@title">
+                                        <SetQueryParameter Key="fx" Value="@versionFramework">@availability.Framework.GetVersionDisplayString()</SetQueryParameter>
+                                    </span>
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+                @if (Api.Kind == ApiKind.Property)
+                {
+                    var getter = GetAccessor(ApiKind.PropertyGetter);
+                    var setter = GetAccessor(ApiKind.PropertySetter);
+
+                    var getterAnnotation = getter is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(getter.Value);
+                    var setterAnnotation = setter is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(setter.Value);
+                    var annotation = getterAnnotation ?? setterAnnotation;
+                    if (annotation is not null)
+                    {
+                        <tr>
+                            <th>OS Platforms</th>
+                            <td>
+                                @if (annotation.Value.Kind == PlatformAnnotationKind.None)
+                                {
+                                    WritePlatformAnnotation("this API", annotation.Value);
+                                }
+                                else
+                                {
+                                    if (getterAnnotation is not null)
+                                        WritePlatformAnnotation("the property getter", getterAnnotation.Value);
+
+                                    if (setterAnnotation is not null)
+                                        WritePlatformAnnotation("the property setter", setterAnnotation.Value);
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else if (Api.Kind == ApiKind.Event)
+                {
+                    var adder = GetAccessor(ApiKind.EventAdder);
+                    var remover = GetAccessor(ApiKind.EventRemover);
+
+                    var adderAnnotation = adder is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(adder.Value);
+                    var removerAnnotation = remover is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(remover.Value);
+                    var annotation = adderAnnotation ?? removerAnnotation;
+                    if (annotation is not null)
+                    {
+                        <tr>
+                            <th>OS Platforms</th>
+                            <td>
+                                @if (annotation.Value.Kind == PlatformAnnotationKind.None)
+                                {
+                                    WritePlatformAnnotation("this API", annotation.Value);
+                                }
+                                else
+                                {
+                                    if (adderAnnotation is not null)
+                                        WritePlatformAnnotation("the event adder", adderAnnotation.Value);
+
+                                    if (removerAnnotation is not null)
+                                        WritePlatformAnnotation("the event remover", removerAnnotation.Value);
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else if (Api.Kind != ApiKind.Namespace)
+                {
+                    var annotation = PlatformAnnotationContext.GetPlatformAnnotation(Api);
+                    <tr>
+                        <th>OS Platforms</th>
+                        <td>
+                            @{ WritePlatformAnnotation("this API", annotation); }
+                        </td>
+                    </tr>
+                }
+            </table>
+            <ul class="list-inline small">
+                <li class="list-inline-item">
+                    <span class="fx-version fx-version-inbox" title="@inboxApiTitle">Built-in API</span>
+                </li>
+                <li class="list-inline-item">
+                    <span class="fx-version fx-version-package" title="@packageApiTitle">Package-provided API</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@{
+    void WritePlatformAnnotation(string apiName, PlatformAnnotation annotation)
+    {
+        if (annotation.Kind == PlatformAnnotationKind.None)
+        {
+            <p class="text-muted">The selected framework does not have platform annotations.</p>
+        }
+        else if (annotation.Kind == PlatformAnnotationKind.Unrestricted)
+        {
+            <p>For the selected framework @apiName is supported on all OS platforms.</p>
+        }
+        else if (annotation.Kind == PlatformAnnotationKind.RestrictedTo)
+        {
+            <p>For the selected framework @apiName is only supported on the following OS platforms:</p>
+            WritePlatformEntries(annotation);
+        }
+        else if (annotation.Kind == PlatformAnnotationKind.UnrestrictedExceptFor)
+        {
+            <p>For the selected framework @apiName is supported on any platform execept for these:</p>
+            WritePlatformEntries(annotation);
+        }
+    }
+
+    void WritePlatformEntries(PlatformAnnotation annotation)
+    {
+        <ul>
+            @foreach (var e in annotation.Entries)
+            {
+                <li>
+                    @e
+                </li>
+            }
+        </ul>
+    }
+}

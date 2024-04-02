@@ -13,13 +13,13 @@ namespace ApisOfDotNet.Shared;
 public partial class SyntaxView
 {
     [Inject]
-    public CatalogService CatalogService { get; set; }
+    public required CatalogService CatalogService { get; set; }
 
     [Inject]
-    public HtmlEncoder HtmlEncoder { get; set; }
+    public required HtmlEncoder HtmlEncoder { get; set; }
 
     [Parameter]
-    public Markup Markup { get; set; }
+    public required Markup Markup { get; set; }
 
     [Parameter]
     public ApiModel Current { get; set; }

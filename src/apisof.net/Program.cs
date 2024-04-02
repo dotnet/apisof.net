@@ -1,4 +1,5 @@
-﻿using ApisOfDotNet.Services;
+﻿using ApisOfDotNet.Pages;
+using ApisOfDotNet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddHttpClient<DocumentationResolverService>();
 builder.Services.AddSingleton<SourceResolverService>();
 builder.Services.AddHttpClient<SourceResolverService>();
 builder.Services.AddHostedService<CatalogServiceWarmUp>();
+builder.Services.AddScoped<QueryManager>();
 
 var app = builder.Build();
 
