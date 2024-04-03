@@ -4,6 +4,11 @@ namespace ApisOfDotNet.Shared;
 
 public static class Link
 {
+    public static string ForCatalog()
+    {
+        return "/catalog";
+    }
+
     public static string For(ApiModel api)
     {
         return ForApi(api.Guid);

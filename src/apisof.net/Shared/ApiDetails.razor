@@ -1,7 +1,7 @@
 ﻿<div class="container-fluid px-0">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="/catalog">Catalog</a></li>
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
 
             @foreach (var api in Breadcrumbs)
             {
