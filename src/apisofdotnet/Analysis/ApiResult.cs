@@ -5,7 +5,7 @@ internal readonly struct ApiResult
     public ApiResult(ApiModel api,
                      IReadOnlyList<FrameworkResult> frameworkResults)
     {
-        ArgumentNullException.ThrowIfNull(frameworkResults);
+        ThrowIfNull(frameworkResults);
 
         Api = api;
         FrameworkResults = frameworkResults;

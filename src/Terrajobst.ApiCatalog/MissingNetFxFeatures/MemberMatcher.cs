@@ -4,9 +4,9 @@ public sealed class MemberMatcher : ApiMatcher
 {
     public MemberMatcher(string namespaceName, string typeName, string memberName)
     {
-        ArgumentNullException.ThrowIfNull(namespaceName);
-        ArgumentNullException.ThrowIfNull(typeName);
-        ArgumentNullException.ThrowIfNull(memberName);
+        ThrowIfNull(namespaceName);
+        ThrowIfNull(typeName);
+        ThrowIfNull(memberName);
 
         NamespaceName = namespaceName;
         TypeName = typeName;

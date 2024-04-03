@@ -4,7 +4,7 @@ public sealed class NamespaceMatcher : ApiMatcher
 {
     public NamespaceMatcher(string namespaceName)
     {
-        ArgumentNullException.ThrowIfNull(namespaceName);
+        ThrowIfNull(namespaceName);
 
         NamespaceName = namespaceName;
 

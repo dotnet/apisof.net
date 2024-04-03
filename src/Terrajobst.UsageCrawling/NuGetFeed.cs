@@ -15,7 +15,7 @@ public sealed class NuGetFeed
 
     public NuGetFeed(string feedUrl)
     {
-        ArgumentNullException.ThrowIfNull(feedUrl);
+        ThrowIfNull(feedUrl);
 
         FeedUrl = feedUrl;
     }
@@ -99,7 +99,7 @@ public sealed class NuGetFeed
 
     public async Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)
     {
-        ArgumentNullException.ThrowIfNull(identity);
+        ThrowIfNull(identity);
 
         var url = await GetPackageUrlAsync(identity);
 
@@ -110,7 +110,7 @@ public sealed class NuGetFeed
 
     private async Task<string> GetPackageUrlAsync(PackageIdentity identity)
     {
-        ArgumentNullException.ThrowIfNull(identity);
+        ThrowIfNull(identity);
 
         var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
         var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();

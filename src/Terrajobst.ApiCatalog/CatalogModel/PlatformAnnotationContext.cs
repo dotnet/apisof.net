@@ -6,8 +6,8 @@ public sealed class PlatformAnnotationContext
 {
     public static PlatformAnnotationContext Create(ApiAvailabilityContext availabilityContext, string framework)
     {
-        ArgumentNullException.ThrowIfNull(availabilityContext);
-        ArgumentNullException.ThrowIfNull(framework);
+        ThrowIfNull(availabilityContext);
+        ThrowIfNull(framework);
 
         var catalog = availabilityContext.Catalog;
         if (!catalog.Frameworks.Any(fx => string.Equals(fx.Name, framework, StringComparison.OrdinalIgnoreCase)))

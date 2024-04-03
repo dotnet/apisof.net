@@ -7,7 +7,7 @@ public sealed class FileSystemCrawlerStore : CrawlerStore
 
     public FileSystemCrawlerStore(string directory)
     {
-        ArgumentNullException.ThrowIfNull(directory);
+        ThrowIfNull(directory);
 
         _directory = directory;
         _outDirectory = Path.Join(directory, "out");

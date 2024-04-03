@@ -14,7 +14,7 @@ public sealed class AssemblyCrawler
 
     public void Crawl(IAssembly assembly)
     {
-        ArgumentNullException.ThrowIfNull(assembly);
+        ThrowIfNull(assembly);
 
         CrawlAttributes(assembly.Attributes);
         CrawlAttributes(assembly.ModuleAttributes);

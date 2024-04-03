@@ -7,7 +7,7 @@ public sealed class ApiAvailabilityContext
 {
     public static ApiAvailabilityContext Create(ApiCatalogModel catalog)
     {
-        ArgumentNullException.ThrowIfNull(catalog);
+        ThrowIfNull(catalog);
 
         return new ApiAvailabilityContext(catalog);
     }

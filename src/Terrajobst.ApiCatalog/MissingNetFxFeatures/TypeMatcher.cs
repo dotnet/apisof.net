@@ -4,8 +4,8 @@ public sealed class TypeMatcher : ApiMatcher
 {
     public TypeMatcher(string namespaceName, string typeName)
     {
-        ArgumentNullException.ThrowIfNull(namespaceName);
-        ArgumentNullException.ThrowIfNull(typeName);
+        ThrowIfNull(namespaceName);
+        ThrowIfNull(typeName);
 
         NamespaceName = namespaceName;
         TypeName = typeName;

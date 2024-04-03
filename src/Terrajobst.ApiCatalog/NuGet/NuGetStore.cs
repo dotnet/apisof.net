@@ -11,8 +11,8 @@ public class NuGetStore
 
     public NuGetStore(string packagesCachePath, params NuGetFeed[] feeds)
     {
-        ArgumentException.ThrowIfNullOrEmpty(packagesCachePath);
-        ArgumentNullException.ThrowIfNull(feeds);
+        ThrowIfNullOrEmpty(packagesCachePath);
+        ThrowIfNull(feeds);
 
         if (feeds.Length == 0)
             throw new ArgumentException("must have at least one feed", nameof(feeds));

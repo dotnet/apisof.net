@@ -9,7 +9,7 @@ public sealed class FilePackageListCrawler : PackageListCrawler
 
     public FilePackageListCrawler(string fileName)
     {
-        ArgumentNullException.ThrowIfNull(fileName);
+        ThrowIfNull(fileName);
 
         _fileName = fileName;
     }

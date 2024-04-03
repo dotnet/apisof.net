@@ -2,8 +2,8 @@
 {
     public ObsoletionResult(string message, string url)
     {
-        ArgumentNullException.ThrowIfNull(message);
-        ArgumentNullException.ThrowIfNull(url);
+        ThrowIfNull(message);
+        ThrowIfNull(url);
 
         Message = message;
         Url = url;

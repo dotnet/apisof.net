@@ -4,7 +4,7 @@
                            ObsoletionResult? obsoletion,
                            IReadOnlyList<PlatformResult?> platforms)
     {
-        ArgumentNullException.ThrowIfNull(platforms);
+        ThrowIfNull(platforms);
 
         Availability = availability;
         Obsoletion = obsoletion;

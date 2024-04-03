@@ -16,4 +16,10 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+        <Using Include="System.ArgumentException" Static="true" />
+        <Using Include="System.ArgumentOutOfRangeException" Static="true" />
+        <Using Include="System.ArgumentNullException" Static="true" />
+    </ItemGroup>
+
 </Project>

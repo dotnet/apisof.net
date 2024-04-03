@@ -4,7 +4,7 @@ public sealed class AssemblyMatcher : ApiMatcher
 {
     public AssemblyMatcher(string assemblyName)
     {
-        ArgumentNullException.ThrowIfNull(assemblyName);
+        ThrowIfNull(assemblyName);
 
         AssemblyName = assemblyName;
 

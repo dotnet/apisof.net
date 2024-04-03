@@ -8,7 +8,7 @@ namespace Terrajobst.UsageCrawling
     {
         public ApiKey(string documentationId)
         {
-            ArgumentNullException.ThrowIfNull(documentationId);
+            ThrowIfNull(documentationId);
 
             Guid = ComputeGuid(documentationId);
             DocumentationId = documentationId;

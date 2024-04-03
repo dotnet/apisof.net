@@ -8,7 +8,7 @@ public sealed class NuGetPackageListCrawler : PackageListCrawler
 
     public NuGetPackageListCrawler(NuGetFeed feed)
     {
-        ArgumentNullException.ThrowIfNull(feed);
+        ThrowIfNull(feed);
 
         _feed = feed;
     }
