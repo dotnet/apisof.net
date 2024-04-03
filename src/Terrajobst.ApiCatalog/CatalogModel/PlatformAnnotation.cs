@@ -81,7 +81,7 @@ public readonly struct PlatformAnnotation : IEquatable<PlatformAnnotation>
                Entries.SequenceEqual(other.Entries);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is PlatformAnnotation other &&
                Equals(other);

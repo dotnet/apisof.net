@@ -47,7 +47,7 @@ public readonly struct PlatformAnnotationEntry : IEquatable<PlatformAnnotationEn
                Range.Equals(other.Range);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is PlatformAnnotationEntry other &&
                Equals(other);

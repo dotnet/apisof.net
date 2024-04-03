@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
 public sealed class MarkupToken(MarkupTokenKind kind, string? text = null, Guid? reference = null)
 {

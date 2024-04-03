@@ -14,10 +14,10 @@ public sealed class PlatformSupportEntry
         UnsupportedPlatforms = unsupportedPlatforms;
     }
 
-    public static PlatformSupportEntry Create(ISymbol symbol)
+    public static PlatformSupportEntry? Create(ISymbol symbol)
     {
-        var supportedPlatforms = (List<string>)null;
-        var unsupportedPlatforms = (List<string>)null;
+        var supportedPlatforms = (List<string>?)null;
+        var unsupportedPlatforms = (List<string>?)null;
 
         foreach (var attribute in symbol.GetAttributes())
         {

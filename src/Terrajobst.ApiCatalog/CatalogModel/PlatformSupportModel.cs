@@ -17,7 +17,7 @@ public readonly struct PlatformSupportModel : IEquatable<PlatformSupportModel>
 
     public bool IsSupported => ApiCatalogSchema.PlatformIsSupportedTuple.IsSupported.Read(_catalog, _offset);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is ApiUsageModel model && Equals(model);
     }

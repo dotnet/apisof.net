@@ -125,7 +125,7 @@ internal static class CSharpDeclarationWriter
         var hasBaseType = type.BaseType is not null &&
                               type.BaseType.SpecialType != SpecialType.System_Object;
 
-        var implementsInterfaces = type.Interfaces.Where(t => t.IsIncludedInCatalog()).Any();
+        var implementsInterfaces = type.Interfaces.Any(t => t.IsIncludedInCatalog());
 
         if (hasBaseType || implementsInterfaces)
         {
@@ -135,7 +135,7 @@ internal static class CSharpDeclarationWriter
             if (hasBaseType)
             {
                 writer.WriteSpace();
-                WriteTypeReference(type.BaseType, writer);
+                WriteTypeReference(type.BaseType!, writer);
             }
 
             if (implementsInterfaces)
@@ -335,7 +335,7 @@ internal static class CSharpDeclarationWriter
         writer.WriteSpace();
         writer.Write(EqualsToken);
         writer.WriteSpace();
-        WriteEnum(field.ContainingType, field.ConstantValue, isForEnumDeclaration: true, writer);
+        WriteEnum(field.ContainingType, field.ConstantValue!, isForEnumDeclaration: true, writer);
     }
 
     private static void WriteMethodDeclaration(IMethodSymbol method, SyntaxWriter writer)
@@ -671,11 +671,11 @@ internal static class CSharpDeclarationWriter
             }
 
             const string AttributeSuffix = "Attribute";
-            var typeName = attribute.AttributeClass.Name;
+            var typeName = attribute.AttributeClass!.Name;
             if (typeName.EndsWith(AttributeSuffix))
                 typeName = typeName.Substring(0, typeName.Length - AttributeSuffix.Length);
 
-            writer.WriteReference(attribute.AttributeConstructor, typeName);
+            writer.WriteReference(attribute.AttributeConstructor!, typeName);
 
             var hasArguments = attribute.ConstructorArguments.Any() ||
                                attribute.NamedArguments.Any();
@@ -721,7 +721,7 @@ internal static class CSharpDeclarationWriter
                         .GetMembers(arg.Key)
                         .FirstOrDefault();
 
-                    writer.WriteReference(propertyOrField, arg.Key);
+                    writer.WriteReference(propertyOrField!, arg.Key);
                     writer.WriteSpace();
                     writer.Write(EqualsToken);
                     writer.WriteSpace();
@@ -763,7 +763,7 @@ internal static class CSharpDeclarationWriter
                 case TypedConstantKind.Type:
                     writer.Write(TypeofKeyword);
                     writer.Write(OpenParenToken);
-                    WriteTypeReference((ITypeSymbol)constant.Value, writer);
+                    WriteTypeReference((ITypeSymbol)constant.Value!, writer);
                     writer.Write(CloseParenToken);
                     break;
                 case TypedConstantKind.Array:
@@ -793,7 +793,7 @@ internal static class CSharpDeclarationWriter
                     break;
                 case TypedConstantKind.Enum:
                 case TypedConstantKind.Primitive:
-                    WriteConstant(constant.Type, constant.Value, writer);
+                    WriteConstant(constant.Type!, constant.Value, writer);
                     break;
                 case TypedConstantKind.Error:
                 default:
@@ -802,7 +802,7 @@ internal static class CSharpDeclarationWriter
         }
     }
 
-    private static void WriteConstant(ITypeSymbol type, object value, SyntaxWriter writer)
+    private static void WriteConstant(ITypeSymbol type, object? value, SyntaxWriter writer)
     {
         if (value is null)
         {
@@ -1402,7 +1402,7 @@ internal static class CSharpDeclarationWriter
         if (IsFlagsEnum(enumType))
             WriteFlagsEnumConstantValue(enumType, constantValue, isForEnumDeclaration, writer);
         else if (isForEnumDeclaration)
-            WriteConstant(enumType.EnumUnderlyingType, constantValue, writer);
+            WriteConstant(enumType.EnumUnderlyingType!, constantValue, writer);
         else
             WriteNonFlagsEnumConstantValue(enumType, constantValue, writer);
     }
@@ -1486,7 +1486,7 @@ internal static class CSharpDeclarationWriter
                     writer.WriteSpace();
                 }
 
-                WriteEnumFieldReference((IFieldSymbol)usedFieldsAndValues[i].IdentityOpt, isForEnumDeclaration, writer);
+                WriteEnumFieldReference((IFieldSymbol)usedFieldsAndValues[i].IdentityOpt!, isForEnumDeclaration, writer);
             }
         }
         else
@@ -1501,7 +1501,7 @@ internal static class CSharpDeclarationWriter
                 ? EnumField.FindValue(allFieldsAndValues, 0)
                 : default;
             if (!zeroField.IsDefault)
-                WriteEnumFieldReference((IFieldSymbol)zeroField.IdentityOpt, isForEnumDeclaration: false, writer);
+                WriteEnumFieldReference((IFieldSymbol)zeroField.IdentityOpt!, isForEnumDeclaration: false, writer);
             else
                 WriteExplicitlyCastedLiteralValue(enumType, constantValue, writer);
         }
@@ -1518,7 +1518,7 @@ internal static class CSharpDeclarationWriter
         var match = EnumField.FindValue(enumFields, constantValueULong);
 
         if (!match.IsDefault)
-            WriteEnumFieldReference((IFieldSymbol)match.IdentityOpt, isForEnumDeclaration: false, writer);
+            WriteEnumFieldReference((IFieldSymbol)match.IdentityOpt!, isForEnumDeclaration: false, writer);
         else
             WriteExplicitlyCastedLiteralValue(enumType, constantValue, writer);
     }
@@ -1588,9 +1588,9 @@ internal static class CSharpDeclarationWriter
 
         public readonly string Name;
         public readonly ulong Value;
-        public readonly object IdentityOpt;
+        public readonly object? IdentityOpt;
 
-        public EnumField(string name, ulong value, object identityOpt = null)
+        public EnumField(string name, ulong value, object? identityOpt = null)
         {
             this.Name = name;
             this.Value = value;

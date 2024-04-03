@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Linq;
 
 using Microsoft.CodeAnalysis;

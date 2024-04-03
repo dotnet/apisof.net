@@ -180,7 +180,7 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         return assembly.Experimental;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is ApiDeclarationModel model && Equals(model);
     }

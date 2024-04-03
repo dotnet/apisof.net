@@ -17,7 +17,7 @@ public readonly struct PlatformModel : IEquatable<PlatformModel>
 
     public string Name => ApiCatalogSchema.PlatformRow.Name.Read(_catalog, _offset);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is PlatformModel model && Equals(model);
     }

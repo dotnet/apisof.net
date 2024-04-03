@@ -122,7 +122,7 @@ public sealed class ApiAvailabilityContext
         return new ApiAvailability(result.ToArray());
     }
 
-    public ApiFrameworkAvailability GetAvailability(ApiModel api, NuGetFramework nugetFramework)
+    public ApiFrameworkAvailability? GetAvailability(ApiModel api, NuGetFramework nugetFramework)
     {
         if (_frameworkIds.TryGetValue(nugetFramework, out var frameworkId))
         {

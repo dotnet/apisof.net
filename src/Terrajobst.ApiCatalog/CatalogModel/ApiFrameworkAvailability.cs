@@ -5,8 +5,10 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class ApiFrameworkAvailability
 {
-    public ApiFrameworkAvailability(NuGetFramework framework, ApiDeclarationModel declaration, PackageModel? package, NuGetFramework packageFramework)
+    public ApiFrameworkAvailability(NuGetFramework framework, ApiDeclarationModel declaration, PackageModel? package, NuGetFramework? packageFramework)
     {
+        ThrowIfNull(framework);
+        
         Framework = framework;
         Declaration = declaration;
         Package = package;
@@ -18,5 +20,5 @@ public sealed class ApiFrameworkAvailability
     public NuGetFramework Framework { get; }
     public ApiDeclarationModel Declaration { get; }
     public PackageModel? Package { get; }
-    public NuGetFramework PackageFramework { get; }
+    public NuGetFramework? PackageFramework { get; }
 }

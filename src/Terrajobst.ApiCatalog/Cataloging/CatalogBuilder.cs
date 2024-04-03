@@ -1,5 +1,3 @@
-#nullable enable
-
 using System.Collections.Frozen;
 using System.Xml.Linq;
 
@@ -21,6 +19,8 @@ public sealed partial class CatalogBuilder
 
     public void Index(string indexPath)
     {
+        ThrowIfNullOrWhiteSpace(indexPath);
+        
         var files = Directory.GetFiles(indexPath, "*.xml");
 
         foreach (var path in files)
@@ -33,6 +33,8 @@ public sealed partial class CatalogBuilder
 
     public void IndexDocument(XDocument doc)
     {
+        ThrowIfNull(doc);
+
         if (doc.Root is null or { IsEmpty: true })
             return;
 
@@ -183,12 +185,16 @@ public sealed partial class CatalogBuilder
 
     public void Build(string path)
     {
+        ThrowIfNullOrWhiteSpace(path);
+
         using var stream = File.Create(path);
         Build(stream);
     }
 
     public void Build(Stream stream)
     {
+        ThrowIfNull(stream);
+
         ResolveExtensions();
         var writer = new CatalogWriter(this);
         writer.Write(stream);

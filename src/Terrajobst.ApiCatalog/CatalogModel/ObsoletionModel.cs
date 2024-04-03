@@ -31,7 +31,7 @@ public readonly struct ObsoletionModel : IEquatable<ObsoletionModel>
         }
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is ObsoletionModel model && Equals(model);
     }

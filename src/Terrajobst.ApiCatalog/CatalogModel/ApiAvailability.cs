@@ -4,6 +4,8 @@ public sealed class ApiAvailability
 {
     internal ApiAvailability(IEnumerable<ApiFrameworkAvailability> frameworks)
     {
+        ThrowIfNull(frameworks);
+        
         Frameworks = frameworks.ToArray();
     }
 

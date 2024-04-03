@@ -5,14 +5,14 @@ namespace Terrajobst.ApiCatalog;
 public sealed class PackBasedFrameworkLocator : FrameworkLocator
 {
     private readonly string _frameworksPath;
-    private Dictionary<string, string[]> _mappings;
+    private Dictionary<string, string[]>? _mappings;
 
     public PackBasedFrameworkLocator(string frameworksPath)
     {
         _frameworksPath = frameworksPath;
     }
 
-    public override string[] Locate(NuGetFramework framework)
+    public override string[]? Locate(NuGetFramework framework)
     {
         if (_mappings is null)
         {

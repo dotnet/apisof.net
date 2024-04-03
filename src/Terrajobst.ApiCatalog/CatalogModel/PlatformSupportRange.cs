@@ -1,8 +1,10 @@
-﻿namespace Terrajobst.ApiCatalog;
+﻿using System.Diagnostics;
+
+namespace Terrajobst.ApiCatalog;
 
 public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
 {
-    private readonly Version _head;
+    private readonly Version? _head;
     private readonly bool _headIsSupported;
     private readonly (Version Version, bool IsSupported)[] _tail;
 
@@ -62,7 +64,7 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
 
     public bool IsAllowList => _headIsSupported;
 
-    public IEnumerable<(Version StartInclusive, Version EndExclusive)> GetVersions()
+    public IEnumerable<(Version? StartInclusive, Version? EndExclusive)> GetVersions()
     {
         if (IsEmpty)
             yield break;
@@ -90,7 +92,7 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
         for (var i = 0; i < Count; i++)
         {
             var current = this[i];
-            var next = i == Count - 1 ? ((Version Version, bool IsSupported)?)null : this[i + 1];
+            var next = i == Count - 1 ? ((Version? Version, bool IsSupported)?)null : this[i + 1];
 
             if (current.Version > version)
                 break;
@@ -102,7 +104,7 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
         return !IsAllowList;
     }
 
-    public (Version Version, bool IsSupported) this[int index]
+    public (Version? Version, bool IsSupported) this[int index]
     {
         get
         {
@@ -125,7 +127,7 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
                _tail.SequenceEqual(other._tail);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is PlatformSupportRange other &&
                Equals(other);
@@ -161,16 +163,22 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
         var versions = GetVersions();
         return string.Join(", ", versions.Select(t => Prettify(t.StartInclusive, t.EndExclusive)));
 
-        static string Prettify(Version startInclusive, Version endExclusive)
+        static string Prettify(Version? startInclusive, Version? endExclusive)
         {
             if (startInclusive is null && endExclusive is null)
                 return "any";
 
             if (startInclusive is null)
+            {
+                Debug.Assert(endExclusive is not null);
                 return $"< {FormatVersion(endExclusive)}";
+            }
 
             if (endExclusive is null)
+            {
+                Debug.Assert(startInclusive is not null);
                 return $">= {FormatVersion(startInclusive)}";
+            }
 
             return $"{FormatVersion(startInclusive)} - {FormatVersion(endExclusive)}";
         }

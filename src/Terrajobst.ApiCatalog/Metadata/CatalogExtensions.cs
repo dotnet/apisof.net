@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
+using NuGet.Protocol.Plugins;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -20,7 +21,7 @@ internal static class CatalogExtensions
         return id is null ? Guid.Empty : GetCatalogGuid(id);
     }
 
-    public static string GetCatalogDocumentationCommentId(this ISymbol symbol)
+    public static string? GetCatalogDocumentationCommentId(this ISymbol symbol)
     {
         if (symbol is ITypeParameterSymbol)
             return null;
@@ -67,7 +68,7 @@ internal static class CatalogExtensions
     public static string GetCatalogName(this ISymbol symbol)
     {
         if (symbol is INamespaceSymbol)
-            return symbol.ToString();
+            return symbol.ToString()!;
 
         if (symbol is INamedTypeSymbol type && type.IsTupleType)
         {
@@ -165,8 +166,11 @@ internal static class CatalogExtensions
         }
     }
 
-    public static bool IsIncludedInCatalog(this ISymbol symbol)
+    public static bool IsIncludedInCatalog(this ISymbol? symbol)
     {
+        if (symbol is null)
+            return false;
+        
         if (symbol.DeclaredAccessibility != Accessibility.Public &&
             symbol.DeclaredAccessibility != Accessibility.Protected &&
             symbol.DeclaredAccessibility != Accessibility.ProtectedOrInternal)
@@ -200,7 +204,7 @@ internal static class CatalogExtensions
         }
     }
 
-    public static ImmutableArray<AttributeData> GetCatalogAttributes(this IMethodSymbol method)
+    public static ImmutableArray<AttributeData> GetCatalogAttributes(this IMethodSymbol? method)
     {
         if (method is null)
             return ImmutableArray<AttributeData>.Empty;
@@ -236,7 +240,7 @@ internal static class CatalogExtensions
 
     public static IEnumerable<AttributeData> Ordered(this IEnumerable<AttributeData> attributes)
     {
-        return attributes.OrderBy(a => a.AttributeClass.Name)
+        return attributes.OrderBy(a => a.AttributeClass!.Name)
             .ThenBy(a => a.ConstructorArguments.Length)
             .ThenBy(a => a.NamedArguments.Length);
     }
@@ -246,12 +250,12 @@ internal static class CatalogExtensions
         return namedArguments.OrderBy(kv => kv.Key);
     }
 
-    public static string GetSingleArgumentAsString(this AttributeData attribute)
+    public static string? GetSingleArgumentAsString(this AttributeData attribute)
     {
         return attribute.ConstructorArguments is [{ Value: string result }] ? result : null;
     }
 
-    public static string GetNamedArgument(this AttributeData attribute, string name)
+    public static string? GetNamedArgument(this AttributeData attribute, string name)
     {
         foreach (var (key, argument) in attribute.NamedArguments)
         {
@@ -262,7 +266,7 @@ internal static class CatalogExtensions
         return null;
     }
 
-    public static bool MatchesName(this INamedTypeSymbol symbol, string namespace1, string typeName)
+    public static bool MatchesName(this INamedTypeSymbol? symbol, string namespace1, string typeName)
     {
         return symbol is not null &&
                symbol.Name == typeName &&
@@ -270,7 +274,7 @@ internal static class CatalogExtensions
                symbol.ContainingNamespace?.ContainingNamespace?.IsGlobalNamespace == true;
     }
 
-    public static bool MatchesName(this INamedTypeSymbol symbol, string namespace1, string namespace2, string namespace3, string typeName)
+    public static bool MatchesName(this INamedTypeSymbol? symbol, string namespace1, string namespace2, string namespace3, string typeName)
     {
         return symbol is not null &&
                symbol.Name == typeName &&

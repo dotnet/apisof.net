@@ -8,9 +8,9 @@ namespace Terrajobst.ApiCatalog;
 public sealed class AssemblyEntry
 {
     private AssemblyEntry(AssemblyIdentity identity,
-                          PlatformSupportEntry platformSupportEntry,
-                          PreviewRequirementEntry previewRequirementEntry,
-                          ExperimentalEntry experimentalEntry,
+                          PlatformSupportEntry? platformSupportEntry,
+                          PreviewRequirementEntry? previewRequirementEntry,
+                          ExperimentalEntry? experimentalEntry,
                           List<ApiEntry> apis,
                           List<ExtensionEntry> extensions)
     {
@@ -25,9 +25,9 @@ public sealed class AssemblyEntry
 
     public Guid Fingerprint { get; }
     public AssemblyIdentity Identity { get; }
-    public PlatformSupportEntry PlatformSupportEntry { get; }
-    public PreviewRequirementEntry PreviewRequirementEntry { get; }
-    public ExperimentalEntry ExperimentalEntry { get; }
+    public PlatformSupportEntry? PlatformSupportEntry { get; }
+    public PreviewRequirementEntry? PreviewRequirementEntry { get; }
+    public ExperimentalEntry? ExperimentalEntry { get; }
     public List<ApiEntry> Apis { get; }
     public List<ExtensionEntry> Extensions { get; }
 
@@ -51,7 +51,7 @@ public sealed class AssemblyEntry
 
         foreach (var namespaceGroup in types)
         {
-            var entry = ApiEntry.Create(namespaceGroup.Key);
+            var entry = ApiEntry.Create(namespaceGroup.Key!);
             result.Add(entry);
 
             foreach (var type in namespaceGroup)
@@ -133,7 +133,7 @@ public sealed class AssemblyEntry
         }
     }
 
-    private static void AddOptionalAccessor(IMethodSymbol accessor, ApiEntry parent)
+    private static void AddOptionalAccessor(IMethodSymbol? accessor, ApiEntry parent)
     {
         if (accessor is null)
             return;

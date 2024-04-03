@@ -30,10 +30,10 @@ public sealed class ApiCatalogModel
     private readonly TableRange _previewRequirementTableRange;
     private readonly TableRange _experimentalTableRange;
 
-    private FrozenDictionary<Guid, int> _apiOffsetByGuid;
-    private FrozenDictionary<Guid, int> _extensionMethodOffsetByGuid;
-    private FrozenDictionary<int, int> _forwardedApis;
-    private FrozenSet<int> _previewFrameworks;
+    private FrozenDictionary<Guid, int>? _apiOffsetByGuid;
+    private FrozenDictionary<Guid, int>? _extensionMethodOffsetByGuid;
+    private FrozenDictionary<int, int>? _forwardedApis;
+    private FrozenSet<int>? _previewFrameworks;
 
     private readonly struct TableRange(int offset, int length)
     {
@@ -269,7 +269,7 @@ public sealed class ApiCatalogModel
             var kind = (MarkupTokenKind)span[0];
             span = span[1..];
 
-            string text;
+            string? text;
 
             if (kind.GetTokenText() is not null)
             {

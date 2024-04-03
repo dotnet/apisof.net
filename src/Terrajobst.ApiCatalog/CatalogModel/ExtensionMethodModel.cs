@@ -23,7 +23,7 @@ public readonly struct ExtensionMethodModel : IEquatable<ExtensionMethodModel>
 
     public ApiModel ExtensionMethod => ApiCatalogSchema.ExtensionMethodRow.ExtensionMethod.Read(_catalog, _offset);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is ExtensionMethodModel model && Equals(model);
     }

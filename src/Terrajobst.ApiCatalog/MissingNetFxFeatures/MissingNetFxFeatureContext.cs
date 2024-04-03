@@ -8,7 +8,7 @@ public sealed class MissingNetFxFeatureContext
 {
     public static MissingNetFxFeatureContext Create() => new();
 
-    private readonly Dictionary<int, MissingNetFxFeature> _mappings = new();
+    private readonly Dictionary<int, MissingNetFxFeature?> _mappings = new();
     private readonly HashSet<ApiMatcher> _usedMatchers = new();
 
     private MissingNetFxFeatureContext()
@@ -177,7 +177,7 @@ public sealed class MissingNetFxFeatureContext
         }
     }
 
-    public MissingNetFxFeature Get(ApiDeclarationModel declaration)
+    public MissingNetFxFeature? Get(ApiDeclarationModel declaration)
     {
         var apiId = declaration.Api.Id;
 
@@ -190,7 +190,7 @@ public sealed class MissingNetFxFeatureContext
         return result;
     }
 
-    private MissingNetFxFeature GetNoCache(ApiDeclarationModel declaration)
+    private MissingNetFxFeature? GetNoCache(ApiDeclarationModel declaration)
     {
         var api = declaration.Api;
         var result = LookupFeature(declaration, api);
@@ -207,7 +207,7 @@ public sealed class MissingNetFxFeatureContext
 
         return result;
 
-        MissingNetFxFeature LookupFeature(ApiDeclarationModel declaration, ApiModel api)
+        MissingNetFxFeature? LookupFeature(ApiDeclarationModel declaration, ApiModel api)
         {
             var assemblyName = declaration.Assembly.Name;
             var namespaceName = api.GetNamespaceName();

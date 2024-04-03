@@ -1,5 +1,4 @@
-﻿#nullable enable
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 
 namespace Terrajobst.ApiCatalog;
 

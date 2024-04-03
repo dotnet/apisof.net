@@ -14,7 +14,7 @@ public sealed class ExperimentalEntry
     public string DiagnosticId { get; }
     public string UrlFormat { get; }
 
-    public static ExperimentalEntry Create(ISymbol symbol)
+    public static ExperimentalEntry? Create(ISymbol symbol)
     {
         foreach (var attribute in symbol.GetAttributes())
         {

@@ -1,4 +1,3 @@
-#nullable enable
 namespace Terrajobst.ApiCatalog;
 
 public static class MarkupFacts

@@ -18,6 +18,20 @@ public sealed class ApiCatalogStatistics
                                 int numberOfUsageSources,
                                 IReadOnlyCollection<(string TableName, int Bytes, int Rows)> tableSizes)
     {
+        ThrowIfNegative(sizeCompressed);
+        ThrowIfNegative(sizeUncompressed);
+        ThrowIfNegative(numberOfApis);
+        ThrowIfNegative(numberOfExtensionMethods);
+        ThrowIfNegative(numberOfDeclarations);
+        ThrowIfNegative(numberOfAssemblies);
+        ThrowIfNegative(numberOfFrameworks);
+        ThrowIfNegative(numberOfFrameworkAssemblies);
+        ThrowIfNegative(numberOfPackages);
+        ThrowIfNegative(numberOfPackageVersions);
+        ThrowIfNegative(numberOfPackageAssemblies);
+        ThrowIfNegative(numberOfUsageSources);
+        ThrowIfNull(tableSizes);
+
         SizeCompressed = sizeCompressed;
         SizeUncompressed = sizeUncompressed;
         NumberOfApis = numberOfApis;

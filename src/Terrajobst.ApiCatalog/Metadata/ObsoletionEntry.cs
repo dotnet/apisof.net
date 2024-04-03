@@ -4,7 +4,7 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class ObsoletionEntry
 {
-    private ObsoletionEntry(string message, bool isError, string diagnosticId, string urlFormat)
+    private ObsoletionEntry(string? message, bool isError, string? diagnosticId, string? urlFormat)
     {
         Message = message;
         IsError = isError;
@@ -12,18 +12,18 @@ public sealed class ObsoletionEntry
         UrlFormat = urlFormat;
     }
 
-    public string Message { get; }
+    public string? Message { get; }
     public bool IsError { get; }
-    public string DiagnosticId { get; }
-    public string UrlFormat { get; }
+    public string? DiagnosticId { get; }
+    public string? UrlFormat { get; }
 
-    public static ObsoletionEntry Create(ISymbol symbol)
+    public static ObsoletionEntry? Create(ISymbol symbol)
     {
         foreach (var attribute in symbol.GetAttributes())
         {
             if (attribute.AttributeClass.MatchesName(nameof(System), nameof(ObsoleteAttribute)))
             {
-                var message = (string)null;
+                var message = (string?)null;
                 var isError = false;
 
                 if (attribute.ConstructorArguments is [{ Value: string arg1_0 }])

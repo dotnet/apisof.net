@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Authentication;
@@ -43,7 +44,7 @@ public sealed class NuGetFeed
         using var httpClient = new HttpClient(handler);
 
         var indexString = await httpClient.GetStringAsync(catalogIndexUrl);
-        var index = JsonConvert.DeserializeObject<CatalogIndex>(indexString);
+        var index = JsonConvert.DeserializeObject<CatalogIndex>(indexString)!;
 
         // Find all pages in the catalog index.
         var pageItems = new ConcurrentBag<CatalogPage>(index.Items);
@@ -62,7 +63,7 @@ public sealed class NuGetFeed
                 {
                     // Download the catalog page and deserialize it.
                     var pageString = await httpClient.GetStringAsync(pageItem.Url);
-                    var page = JsonConvert.DeserializeObject<CatalogPage>(pageString);
+                    var page = JsonConvert.DeserializeObject<CatalogPage>(pageString)!;
 
                     foreach (var pageLeafItem in page.Items)
                     {
@@ -109,19 +110,19 @@ public sealed class NuGetFeed
         {
             var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
             var data = await client.GetStreamAsync(url);
-            var document = JsonNode.Parse(data);
+            var document = JsonNode.Parse(data)!;
 
-            var count = document["count"].GetValue<int>();
+            var count = document["count"]!.GetValue<int>();
             if (count == 0)
                 break;
 
-            foreach (var element in document["value"].AsArray())
+            foreach (var element in document["value"]!.AsArray())
             {
-                var name = element["name"].GetValue<string>();
+                var name = element!["name"]!.GetValue<string>();
 
-                foreach (var versionElement in element["versions"].AsArray())
+                foreach (var versionElement in element["versions"]!.AsArray())
                 {
-                    var versionText = versionElement["version"].GetValue<string>();
+                    var versionText = versionElement!["version"]!.GetValue<string>();
                     var version = NuGetVersion.Parse(versionText);
                     var identity = new PackageIdentity(name, version);
                     result.Add(identity);
@@ -147,7 +148,7 @@ public sealed class NuGetFeed
         return versions.ToArray();
     }
 
-    public async Task<PackageIdentity> ResolvePackageAsync(string packageId, VersionRange range)
+    public async Task<PackageIdentity?> ResolvePackageAsync(string packageId, VersionRange range)
     {
         var cache = NullSourceCacheContext.Instance;
         var logger = NullLogger.Instance;
@@ -221,10 +222,13 @@ public sealed class NuGetFeed
 
         var httpClient = new HttpClient();
         var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-017/owners/owners.v2.json";
-        return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
+        return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url)!;
     }
 
-    private static bool TryGetAzureDevOpsFeed(string url, out string organization, out string project, out string feed)
+    private static bool TryGetAzureDevOpsFeed(string url,
+                                              [MaybeNullWhen(false)] out string organization,
+                                              [MaybeNullWhen(false)] out string project,
+                                              [MaybeNullWhen(false)] out string feed)
     {
         var match = Regex.Match(url, """
             https\://pkgs\.dev\.azure\.com/(?<Organization>[^/]+)/(?<Project>[^/]+)/_packaging/(?<Feed>[^/]+)/nuget/v3/index\.json
@@ -239,9 +243,9 @@ public sealed class NuGetFeed
         }
         else
         {
-            organization = null;
-            project = null;
-            feed = null;
+            organization = default;
+            project = default;
+            feed = default;
             return false;
         }
     }
@@ -249,31 +253,31 @@ public sealed class NuGetFeed
     private abstract class CatalogEntity
     {
         [JsonProperty("@id")]
-        public string Url { get; set; }
+        public required string Url { get; set; }
 
         [JsonProperty("commitTimeStamp")]
-        public DateTime CommitTimeStamp { get; set; }
+        public required DateTime CommitTimeStamp { get; set; }
     }
 
     private sealed class CatalogIndex : CatalogEntity
     {
-        public List<CatalogPage> Items { get; set; }
+        public required List<CatalogPage> Items { get; set; }
     }
 
     private sealed class CatalogPage : CatalogEntity
     {
-        public List<CatalogLeaf> Items { get; set; }
+        public required List<CatalogLeaf> Items { get; set; }
     }
 
     private sealed class CatalogLeaf : CatalogEntity
     {
         [JsonProperty("nuget:id")]
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [JsonProperty("nuget:version")]
-        public string Version { get; set; }
+        public required string Version { get; set; }
 
         [JsonProperty("@type")]
-        public string Type { get; set; }
+        public required string Type { get; set; }
     }
 }

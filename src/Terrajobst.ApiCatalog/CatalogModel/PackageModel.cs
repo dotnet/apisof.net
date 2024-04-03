@@ -32,7 +32,7 @@ public readonly struct PackageModel : IEquatable<PackageModel>
         }
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is FrameworkModel model && Equals(model);
     }

@@ -121,36 +121,34 @@ public sealed class NuGetFeed
         return $"{packageBaseAddress}{id}/{version}/{id}.{version}.nupkg";
     }
 
-#nullable disable
-
     private abstract class CatalogEntity
     {
         [JsonProperty("@id")]
-        public string Url { get; set; }
+        public required string Url { get; set; }
 
         [JsonProperty("commitTimeStamp")]
-        public DateTime CommitTimeStamp { get; set; }
+        public required DateTime CommitTimeStamp { get; set; }
     }
 
     private sealed class CatalogIndex : CatalogEntity
     {
-        public List<CatalogPage> Items { get; set; }
+        public required List<CatalogPage> Items { get; set; }
     }
 
     private sealed class CatalogPage : CatalogEntity
     {
-        public List<CatalogLeaf> Items { get; set; }
+        public required List<CatalogLeaf> Items { get; set; }
     }
 
     private sealed class CatalogLeaf : CatalogEntity
     {
         [JsonProperty("nuget:id")]
-        public string Id { get; set; }
+        public required string Id { get; set; }
 
         [JsonProperty("nuget:version")]
-        public string Version { get; set; }
+        public required string Version { get; set; }
 
         [JsonProperty("@type")]
-        public string Type { get; set; }
+        public required string Type { get; set; }
     }
 }

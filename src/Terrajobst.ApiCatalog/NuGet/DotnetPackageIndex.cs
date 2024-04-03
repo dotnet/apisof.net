@@ -39,7 +39,7 @@ public static class DotnetPackageIndex
             root.Add(e);
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(packageListPath));
+        Directory.CreateDirectory(Path.GetDirectoryName(packageListPath)!);
         packageDocument.Save(packageListPath);
     }
 

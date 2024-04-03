@@ -113,7 +113,7 @@ public readonly struct PreviewDescription
         }
     }
 
-    public PreviewDescription(PreviewReason reason, string description, string url)
+    public PreviewDescription(PreviewReason reason, string description, string? url)
     {
         Reason = reason;
         Description = description;
@@ -122,7 +122,7 @@ public readonly struct PreviewDescription
 
     public PreviewReason Reason { get; }
     public string Description { get; }
-    public string Url { get; }
+    public string? Url { get; }
 
     public override string ToString()
     {

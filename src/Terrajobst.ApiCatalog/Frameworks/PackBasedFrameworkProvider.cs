@@ -45,7 +45,7 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
             yield return (entry.FrameworkName, files);
         }
 
-        static NuGetFramework GetBaseFramework(NuGetFramework fx)
+        static NuGetFramework? GetBaseFramework(NuGetFramework fx)
         {
             var hasPlatform = fx.HasPlatform;
             var hasNetCoreApp3Profile = string.Equals(fx.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&

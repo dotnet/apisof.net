@@ -11,7 +11,7 @@ public sealed class PclFrameworkLocator : FrameworkLocator
         _archiveFolder = archiveFolder;
     }
 
-    public override string[] Locate(NuGetFramework framework)
+    public override string[]? Locate(NuGetFramework framework)
     {
         var portablePath = Path.Combine(_archiveFolder, framework.Framework);
 

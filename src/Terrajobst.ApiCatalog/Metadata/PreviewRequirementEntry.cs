@@ -5,7 +5,7 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class PreviewRequirementEntry
 {
-    private PreviewRequirementEntry(string message, string url)
+    private PreviewRequirementEntry(string message, string? url)
     {
         Message = message;
         Url = url;
@@ -13,9 +13,9 @@ public sealed class PreviewRequirementEntry
 
     public string Message { get; }
 
-    public string Url { get; }
+    public string? Url { get; }
 
-    public static PreviewRequirementEntry Create(ISymbol symbol)
+    public static PreviewRequirementEntry? Create(ISymbol symbol)
     {
         foreach (var attribute in symbol.GetAttributes())
         {
@@ -24,7 +24,7 @@ public sealed class PreviewRequirementEntry
                                                      nameof(System.Runtime.Versioning),
                                                      nameof(RequiresPreviewFeaturesAttribute)))
             {
-                var message = attribute.GetSingleArgumentAsString();
+                var message = attribute.GetSingleArgumentAsString() ?? string.Empty;
                 var url = attribute.GetNamedArgument(nameof(RequiresPreviewFeaturesAttribute.Url));
 
                 return new PreviewRequirementEntry(message, url);

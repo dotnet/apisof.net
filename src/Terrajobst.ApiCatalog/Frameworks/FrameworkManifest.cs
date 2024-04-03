@@ -29,6 +29,6 @@ public sealed class FrameworkManifest
         var settings = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
         using var stream = File.OpenRead(path);
-        return JsonSerializer.Deserialize<FrameworkManifest>(stream, settings);
+        return JsonSerializer.Deserialize<FrameworkManifest>(stream, settings)!;
     }
 }

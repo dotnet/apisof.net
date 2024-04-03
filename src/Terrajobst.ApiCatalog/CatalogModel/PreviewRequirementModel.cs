@@ -17,7 +17,7 @@ public readonly struct PreviewRequirementModel
 
     public string Url => ApiCatalogSchema.PreviewRequirementRow.Url.Read(_catalog, _offset);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is PreviewRequirementModel model && Equals(model);
     }

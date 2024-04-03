@@ -32,7 +32,7 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
         }
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is FrameworkModel model && Equals(model);
     }

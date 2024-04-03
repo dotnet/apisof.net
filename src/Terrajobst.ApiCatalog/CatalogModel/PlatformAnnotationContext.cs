@@ -1,4 +1,5 @@
-﻿using NuGet.Frameworks;
+﻿using System.Diagnostics.CodeAnalysis;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -128,7 +129,7 @@ public sealed class PlatformAnnotationContext
         }
     }
 
-    private static bool TryGetPlatformFromIsPlatformMethod(ApiModel operatingSystemMember, out string platformName)
+    private static bool TryGetPlatformFromIsPlatformMethod(ApiModel operatingSystemMember, [MaybeNullWhen(false)] out string platformName)
     {
         const string prefix = "Is";
         const string suffix = "()";
@@ -142,7 +143,7 @@ public sealed class PlatformAnnotationContext
             return true;
         }
 
-        platformName = null;
+        platformName = default;
         return false;
     }
 

@@ -8,5 +8,5 @@ namespace Terrajobst.ApiCatalog;
 /// </summary>
 public abstract class FrameworkLocator
 {
-    public abstract string[] Locate(NuGetFramework framework);
+    public abstract string[]? Locate(NuGetFramework framework);
 }

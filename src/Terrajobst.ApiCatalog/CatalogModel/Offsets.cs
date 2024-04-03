@@ -36,7 +36,7 @@ internal readonly struct Offset<T>(int value) : IEquatable<Offset<T>>
         return Value == other.Value;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is Offset<T> other && Equals(other);
     }

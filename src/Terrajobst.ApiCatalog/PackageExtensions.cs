@@ -20,7 +20,7 @@ internal static class PackageExtensions
         }
     }
 
-    public static FrameworkSpecificGroup GetCatalogReferenceGroup(this PackageArchiveReader root, NuGetFramework current)
+    public static FrameworkSpecificGroup? GetCatalogReferenceGroup(this PackageArchiveReader root, NuGetFramework current)
     {
         var referenceItems = root.GetCatalogReferenceGroups();
         var referenceGroup = NuGetFrameworkUtility.GetNearest(referenceItems, current);

@@ -21,7 +21,7 @@ public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
 
     public DateOnly Date => ApiCatalogSchema.UsageSourceRow.Date.Read(_catalog, _offset);
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is AssemblyModel model && Equals(model);
     }

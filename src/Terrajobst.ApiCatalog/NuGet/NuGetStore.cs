@@ -59,7 +59,7 @@ public class NuGetStore
         return new PackageArchiveReader(path);
     }
 
-    public async Task<PackageArchiveReader> ResolvePackageAsync(string id, VersionRange range)
+    public async Task<PackageArchiveReader?> ResolvePackageAsync(string id, VersionRange range)
     {
         var versions = await GetVersionsAsync(id);
 

@@ -168,7 +168,7 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
                 : string.Empty;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is ApiModel model && Equals(model);
     }

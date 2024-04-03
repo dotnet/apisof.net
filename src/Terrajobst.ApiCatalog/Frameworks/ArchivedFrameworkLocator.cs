@@ -11,7 +11,7 @@ public sealed class ArchivedFrameworkLocator : FrameworkLocator
         _frameworksPath = frameworksPath;
     }
 
-    public override string[] Locate(NuGetFramework framework)
+    public override string[]? Locate(NuGetFramework framework)
     {
         var shortFolderName = GetFolderName(framework);
         var path = Path.Combine(_frameworksPath, shortFolderName);

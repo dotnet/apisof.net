@@ -194,13 +194,13 @@ public sealed class SuffixTreeBuilder
 
     private class Node
     {
-        private string _text;
-        private List<Node> _children;
-        private List<(int Offset, int Value)> _values;
+        private string? _text;
+        private List<Node>? _children;
+        private List<(int Offset, int Value)>? _values;
 
         public string Text { get => _text ?? string.Empty; set => _text = value; }
-        public IReadOnlyList<Node> Children => (IReadOnlyList<Node>)_children ?? Array.Empty<Node>();
-        public IReadOnlyList<(int Offset, int Value)> Values => (IReadOnlyList<(int, int)>)_values ?? Array.Empty<(int, int)>();
+        public IReadOnlyList<Node> Children => (IReadOnlyList<Node>?)_children ?? Array.Empty<Node>();
+        public IReadOnlyList<(int Offset, int Value)> Values => (IReadOnlyList<(int, int)>?)_values ?? Array.Empty<(int, int)>();
 
         public void InsertChild(int index, Node node)
         {

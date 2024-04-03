@@ -6,13 +6,13 @@ public sealed class ApiEntry
 {
     private ApiEntry(Guid guid,
                      ApiKind kind,
-                     ApiEntry parent,
+                     ApiEntry? parent,
                      string name,
                      string syntax,
-                     ObsoletionEntry obsoletionEntry,
-                     PlatformSupportEntry platformSupportEntry,
-                     PreviewRequirementEntry previewRequirementEntry,
-                     ExperimentalEntry experimentalEntry)
+                     ObsoletionEntry? obsoletionEntry,
+                     PlatformSupportEntry? platformSupportEntry,
+                     PreviewRequirementEntry? previewRequirementEntry,
+                     ExperimentalEntry? experimentalEntry)
     {
         Fingerprint = guid;
         Kind = kind;
@@ -25,7 +25,7 @@ public sealed class ApiEntry
         ExperimentalEntry = experimentalEntry;
     }
 
-    public static ApiEntry Create(ISymbol symbol, ApiEntry parent = null)
+    public static ApiEntry Create(ISymbol symbol, ApiEntry? parent = null)
     {
         var guid = symbol.GetCatalogGuid();
         var kind = symbol.GetApiKind();
@@ -40,12 +40,12 @@ public sealed class ApiEntry
 
     public Guid Fingerprint { get; }
     public ApiKind Kind { get; }
-    public ApiEntry Parent { get; }
+    public ApiEntry? Parent { get; }
     public string Name { get; }
     public string Syntax { get; }
-    public ObsoletionEntry ObsoletionEntry { get; }
-    public PlatformSupportEntry PlatformSupportEntry { get; }
-    public PreviewRequirementEntry PreviewRequirementEntry { get; }
-    public ExperimentalEntry ExperimentalEntry { get; }
+    public ObsoletionEntry? ObsoletionEntry { get; }
+    public PlatformSupportEntry? PlatformSupportEntry { get; }
+    public PreviewRequirementEntry? PreviewRequirementEntry { get; }
+    public ExperimentalEntry? ExperimentalEntry { get; }
     public List<ApiEntry> Children { get; } = new();
 }

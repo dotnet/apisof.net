@@ -18,7 +18,7 @@ public sealed class PackageIndexer
         _frameworkLocators = frameworkLocators.ToArray();
     }
 
-    public async Task<PackageEntry> Index(string id, string version)
+    public async Task<PackageEntry?> Index(string id, string version)
     {
         var dependencies = new Dictionary<string, PackageArchiveReader>();
         var frameworkEntries = new List<FrameworkEntry>();
@@ -154,7 +154,8 @@ public sealed class PackageIndexer
             {
                 if (packages.TryGetValue(d.Id, out var existingPackage))
                 {
-                    if (d.VersionRange.MinVersion > existingPackage.NuspecReader.GetVersion())
+                    if (d.VersionRange.MinVersion is not null &&
+                        d.VersionRange.MinVersion > existingPackage.NuspecReader.GetVersion())
                     {
                         existingPackage.Dispose();
                         packages.Remove(d.Id);
@@ -178,7 +179,7 @@ public sealed class PackageIndexer
         }
     }
 
-    private string[] GetPlatformSet(NuGetFramework framework)
+    private string[]? GetPlatformSet(NuGetFramework framework)
     {
         foreach (var l in _frameworkLocators)
         {

@@ -76,7 +76,7 @@ internal static class XmlEntryFormat
         document.Save(stream);
     }
 
-    private static void AddAssembly(XContainer parent, AssemblyEntry assembly, string frameworkName = null)
+    private static void AddAssembly(XContainer parent, AssemblyEntry assembly, string? frameworkName = null)
     {
         var assemblyElement = new XElement("assembly",
             frameworkName is null ? null : new XAttribute("fx", frameworkName),
@@ -151,7 +151,7 @@ internal static class XmlEntryFormat
         parent.Add(obsoletionElement);
     }
 
-    private static void AddPlatformSupport(XContainer parent, PlatformSupportEntry platformSupport, string apiFingerprint = null)
+    private static void AddPlatformSupport(XContainer parent, PlatformSupportEntry platformSupport, string? apiFingerprint = null)
     {
         foreach (var supported in platformSupport.SupportedPlatforms)
         {
@@ -172,7 +172,7 @@ internal static class XmlEntryFormat
         }
     }
 
-    private static void AddPreviewRequirement(XContainer parent, PreviewRequirementEntry previewRequirement, string apiFingerprint = null)
+    private static void AddPreviewRequirement(XContainer parent, PreviewRequirementEntry previewRequirement, string? apiFingerprint = null)
     {
         var previewRequirementElement = new XElement("previewRequirement",
             apiFingerprint is null ? null : new XAttribute("id", apiFingerprint)
@@ -187,7 +187,7 @@ internal static class XmlEntryFormat
         parent.Add(previewRequirementElement);
     }
 
-    private static void AddExperimental(XContainer parent, ExperimentalEntry experimentalEntry, string apiFingerprint = null)
+    private static void AddExperimental(XContainer parent, ExperimentalEntry experimentalEntry, string? apiFingerprint = null)
     {
         var experimentalElement = new XElement("experimental",
             apiFingerprint is null ? null : new XAttribute("id", apiFingerprint)
