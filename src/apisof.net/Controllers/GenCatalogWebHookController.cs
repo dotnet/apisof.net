@@ -16,6 +16,9 @@ public sealed class GenCatalogWebHookController : Controller
 
     public GenCatalogWebHookController(IConfiguration configuration, CatalogService catalogService)
     {
+        ThrowIfNull(configuration);
+        ThrowIfNull(catalogService);
+
         _configuration = configuration;
         _catalogService = catalogService;
     }

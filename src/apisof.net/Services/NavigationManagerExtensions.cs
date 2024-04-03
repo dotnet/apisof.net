@@ -5,8 +5,11 @@ namespace ApisOfDotNet.Services;
 
 public static class NavigationManagerExtensions
 {
-    public static string GetQueryParameter(this NavigationManager navigationManager, string key)
+    public static string? GetQueryParameter(this NavigationManager navigationManager, string key)
     {
+        ThrowIfNull(navigationManager);
+        ThrowIfNullOrWhiteSpace(key);
+        
         var uri = new Uri(navigationManager.Uri);
         var parameters = QueryHelpers.ParseQuery(uri.Query);
         if (parameters.TryGetValue(key, out var values))
@@ -15,16 +18,19 @@ public static class NavigationManagerExtensions
         return null;
     }
 
-    public static string SetQueryParameter(this NavigationManager navigationManager, string key, string value)
+    public static string SetQueryParameter(this NavigationManager navigationManager, string key, string? value)
     {
+        ThrowIfNull(navigationManager);
+        ThrowIfNullOrWhiteSpace(key);
+
         var uri = new UriBuilder(navigationManager.Uri);
         var parameters = QueryHelpers.ParseQuery(uri.Query);
         uri.Query = null;
         parameters.Remove(key);
         parameters.Add(key, value);
 
-        var newParameters = parameters.SelectMany(kvp => kvp.Value, (kvp, v) => KeyValuePair.Create<string, string>(kvp.Key, v))
-            .ToDictionary(kv => kv.Key, kv => kv.Value);
+        var newParameters = parameters.SelectMany(kvp => kvp.Value, (kvp, v) => KeyValuePair.Create(kvp.Key, v))
+                                      .ToDictionary(kv => kv.Key, kv => kv.Value);
 
         return QueryHelpers.AddQueryString(uri.ToString(), newParameters);
     }

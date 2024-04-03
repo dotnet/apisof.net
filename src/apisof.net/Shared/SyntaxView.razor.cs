@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
 
 using ApisOfDotNet.Services;

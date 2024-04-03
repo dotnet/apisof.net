@@ -36,7 +36,7 @@
                 }
 
                 <ul class="list-unstyled pl-4">
-                    @foreach (var child in Parent.Children.OrderBy(x => x)) // TODO: Ideally the catalog is pre-sorted
+                    @foreach (var child in Parent.Children.OrderBy(x => x))
                     {
                         var childUnsupportedClass = ApiView.IsSupported(child) ? "" : "text-muted";
 
@@ -118,7 +118,7 @@
                 @if (SelectedAvailability is { IsInBox: false })
                 {
                     var package = SelectedAvailability.Package!.Value;
-                    var folder = SelectedAvailability.PackageFramework.GetShortFolderName();
+                    var folder = SelectedAvailability.PackageFramework!.GetShortFolderName();
                     <tr>
                         <th>Package</th>
                         <td>

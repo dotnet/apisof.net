@@ -6,6 +6,8 @@ public sealed class CatalogServiceWarmUp : IHostedService
 
     public CatalogServiceWarmUp(CatalogService catalogService)
     {
+        ThrowIfNull(catalogService);
+
         _catalogService = catalogService;
     }
 

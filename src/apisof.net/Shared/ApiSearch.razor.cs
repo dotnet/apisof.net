@@ -11,37 +11,13 @@ namespace ApisOfDotNet.Shared;
 
 public partial class ApiSearch
 {
+    private readonly Timer _debounceTimer;
     private ElementReference _inputElement;
     private string _modalDisplay = "none;";
     private string _modalClass = "";
-    private Timer _debounceTimer;
-    private string _searchText;
+    private string _searchText = "";
 
-    private string SearchText
-    {
-        get => _searchText;
-        set
-        {
-            _searchText = value;
-            RestartDebounce();
-        }
-    }
-
-    private ApiModel[] SearchResults { get; set; }
-    private ApiModel SelectedResult { get; set; }
-
-    [Inject]
-    private CatalogService CatalogService { get; set; }
-
-    [Inject]
-    private NavigationManager NavigationManager { get; set; }
-
-    [Parameter]
-    public EventCallback OnClose { get; set; }
-
-    public bool IsOpen { get; private set; }
-
-    protected override void OnInitialized()
+    public ApiSearch()
     {
         // Allow the user to type, and only perform the auto complete search after some milliseconds.
         // This limits the number of actual searches and let's the user type a bit before searching.
@@ -52,6 +28,30 @@ public partial class ApiSearch
         };
         _debounceTimer.Elapsed += OnDebounceTimerElapsed;
     }
+    
+    private string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            _searchText = value;
+            RestartDebounce();
+        }
+    }
+
+    private ApiModel[] SearchResults { get; set; } = Array.Empty<ApiModel>();
+    private ApiModel SelectedResult { get; set; }
+
+    [Inject]
+    public required CatalogService CatalogService { get; set; }
+
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    public bool IsOpen { get; private set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -73,7 +73,7 @@ public partial class ApiSearch
         }
     }
 
-    private async void OnDebounceTimerElapsed(object sender, EventArgs args)
+    private async void OnDebounceTimerElapsed(object? sender, EventArgs args)
     {
         _debounceTimer.Stop();
 
@@ -160,7 +160,7 @@ public partial class ApiSearch
         await InvokeAsync(StateHasChanged);
     }
 
-    public class NextAndPreviousHelper
+    public sealed class NextAndPreviousHelper
     {
         private readonly Action _showSearch;
         private readonly Action _previous;

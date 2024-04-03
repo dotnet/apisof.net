@@ -7,7 +7,7 @@ namespace ApisOfDotNet.Pages;
 public partial class Index
 {
     [Inject]
-    public CatalogService CatalogService { get; set; }
+    public required CatalogService CatalogService { get; set; }
 
     public ApiCatalogStatistics Statistics => CatalogService.CatalogStatistics;
 }

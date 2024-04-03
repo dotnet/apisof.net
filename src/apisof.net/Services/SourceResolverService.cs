@@ -1,5 +1,3 @@
-#nullable enable
-
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Services;
@@ -15,11 +13,15 @@ public sealed class SourceResolverService
 
     public SourceResolverService(HttpClient client)
     {
+        ThrowIfNull(client);
+
         _client = client;
     }
 
     public async Task<string?> ResolveAsync(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         var serverId = GetSourceServerId(api.Guid);
 
         foreach (var server in KnownSourceServers)

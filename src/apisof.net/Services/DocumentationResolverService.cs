@@ -12,11 +12,15 @@ public sealed class DocumentationResolverService
 
     public DocumentationResolverService(HttpClient client)
     {
+        ThrowIfNull(client);
+        
         _client = client;
     }
 
     public async Task<string?> ResolveAsync(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         var helpLink = GetHelpLink(api);
         using var response = await _client.GetAsync(helpLink);
         return response.StatusCode == HttpStatusCode.OK ? helpLink : null;

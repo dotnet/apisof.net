@@ -1,8 +1,8 @@
 ﻿namespace ApisOfDotNet.Services;
 
-public class CatalogJobInfo
+public sealed class CatalogJobInfo
 {
-    public DateTimeOffset Date { get; set; }
-    public bool Success { get; set; }
-    public string DetailsUrl { get; set; }
+    public required DateTimeOffset Date { get; set; }
+    public required bool Success { get; set; }
+    public required string DetailsUrl { get; set; }
 }

@@ -1,5 +1,4 @@
-﻿using ApisOfDotNet.Pages;
-using ApisOfDotNet.Services;
+﻿using ApisOfDotNet.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

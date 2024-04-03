@@ -13,16 +13,21 @@ public sealed class CatalogService
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<CatalogService> _logger;
 
-    private CatalogJobInfo _jobInfo;
-    private ApiCatalogModel _catalog;
-    private ApiAvailabilityContext _availabilityContext;
-    private SuffixTree _suffixTree;
-    private ApiCatalogStatistics _statistics;
+    // We ensure these fields are initialized before anyone can access them
+    private CatalogJobInfo _jobInfo = null!;
+    private ApiCatalogModel _catalog = null!;
+    private ApiAvailabilityContext _availabilityContext = null!;
+    private SuffixTree _suffixTree = null!;
+    private ApiCatalogStatistics _statistics = null!;
 
     public CatalogService(IConfiguration configuration,
                           IWebHostEnvironment environment,
                           ILogger<CatalogService> logger)
     {
+        ThrowIfNull(configuration);
+        ThrowIfNull(environment);
+        ThrowIfNull(logger);
+        
         _configuration = configuration;
         _environment = environment;
         _logger = logger;

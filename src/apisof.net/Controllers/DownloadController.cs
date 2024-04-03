@@ -13,6 +13,8 @@ public sealed class DownloadController : Controller
 
     public DownloadController(IConfiguration configuration)
     {
+        ThrowIfNull(configuration);
+
         _configuration = configuration;
     }
 

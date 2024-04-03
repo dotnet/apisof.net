@@ -1,5 +1,4 @@
-﻿#nullable enable
-using ApisOfDotNet.Services;
+﻿using ApisOfDotNet.Services;
 using ApisOfDotNet.Shared;
 using Microsoft.AspNetCore.Components;
 using Terrajobst.ApiCatalog;

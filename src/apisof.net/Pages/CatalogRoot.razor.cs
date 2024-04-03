@@ -6,5 +6,5 @@ namespace ApisOfDotNet.Pages;
 public partial class CatalogRoot
 {
     [Inject]
-    public CatalogService CatalogService { get; set; }
+    public required CatalogService CatalogService { get; set; }
 }

@@ -1,4 +1,3 @@
-#nullable enable
 using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
@@ -10,6 +9,9 @@ public sealed class ApiView
 
     public ApiView(ApiAvailabilityContext context, string framework)
     {
+        ThrowIfNull(context);
+        ThrowIfNullOrWhiteSpace(framework);
+        
         _context = context;
         Framework = NuGetFramework.Parse(framework);
     }
@@ -18,6 +20,8 @@ public sealed class ApiView
     
     public bool IsSupported(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         return _context.IsAvailable(api, Framework);
     }
 }

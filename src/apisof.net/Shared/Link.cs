@@ -11,11 +11,15 @@ public static class Link
 
     public static string For(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         return ForApi(api.Guid);
     }
 
     public static string For(ExtensionMethodModel extensionMethod)
     {
+        ThrowIfDefault(extensionMethod);
+
         return ForApi(extensionMethod.Guid);
     }
 

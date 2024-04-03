@@ -79,7 +79,7 @@ public partial class Glyph
     [Parameter]
     public GlyphKind Kind { get; set; }
 
-    public string Url { get; set; }
+    public string Url { get; set; } = "";
 
     protected override void OnParametersSet()
     {

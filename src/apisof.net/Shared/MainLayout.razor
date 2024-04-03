@@ -43,52 +43,22 @@
 
 <hr />
 
-@if (CatalogJobInfo is not null)
-{
-    <div class="container-fluid">
-        @if (CatalogJobInfo.Success)
-        {
-            <span class="mr-1 oi oi-circle-check text-success"></span>
-        }
-        else
-        {
-            <span class="mr-1 oi oi-circle-x text-danger"></span>
-        }
-
-        @if (string.IsNullOrEmpty(CatalogJobInfo.DetailsUrl))
-        {
-            @CatalogJobInfo.Date.Date.ToShortDateString()
-        }
-        else
-        {
-            <a href="@CatalogJobInfo.DetailsUrl">@CatalogJobInfo.Date.Date.ToShortDateString()</a>
-        }
-    </div>
-}
-
-@code {
-    private ElementReference _bodyDiv;
-    private ApiSearch _apiSearch;
-
-    public CatalogJobInfo CatalogJobInfo => CatalogService.JobInfo;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+<div class="container-fluid">
+    @if (CatalogJobInfo.Success)
     {
-        await _bodyDiv.FocusAsync();
+        <span class="mr-1 oi oi-circle-check text-success"></span>
+    }
+    else
+    {
+        <span class="mr-1 oi oi-circle-x text-danger"></span>
     }
 
-    private void KeyDown(KeyboardEventArgs e)
+    @if (string.IsNullOrEmpty(CatalogJobInfo.DetailsUrl))
     {
-        if (e.Key == "/")
-        {
-            if (_apiSearch.IsOpen)
-                _apiSearch.Close();
-            else
-                _apiSearch.Open();
-        }
-        else if (e.Key == "Escape")
-        {
-            _apiSearch.Close();
-        }
+        @CatalogJobInfo.Date.Date.ToShortDateString()
     }
-}
+    else
+    {
+        <a href="@CatalogJobInfo.DetailsUrl">@CatalogJobInfo.Date.Date.ToShortDateString()</a>
+    }
+</div>

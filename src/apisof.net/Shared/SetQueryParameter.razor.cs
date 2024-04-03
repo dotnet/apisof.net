@@ -6,18 +6,18 @@ namespace ApisOfDotNet.Shared;
 public partial class SetQueryParameter
 {
     [Inject]
-    public NavigationManager NavigationManager { get; set; }
+    public required NavigationManager NavigationManager { get; set; }
 
     [Parameter]
-    public string Key { get; set; }
+    public required  string Key { get; set; }
 
     [Parameter]
-    public string Value { get; set; }
+    public required string Value { get; set; }
 
     [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    public required RenderFragment ChildContent { get; set; }
 
-    public string Uri { get; set; }
+    public string Uri { get; set; } = "";
 
     protected override void OnParametersSet()
     {

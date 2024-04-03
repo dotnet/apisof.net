@@ -1,4 +1,3 @@
-#nullable enable
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.WebUtilities;
@@ -12,13 +11,17 @@ public sealed class QueryManager : IDisposable
     
     public QueryManager(NavigationManager navigationManager)
     {
+        ThrowIfNull(navigationManager);
+        
         _navigationManager = navigationManager;
         _navigationManager.LocationChanged += NavigationManagerOnLocationChanged;
         _previousLocation = navigationManager.Uri;
     }
 
-    public string GetQueryParameter(string name)
+    public string? GetQueryParameter(string name)
     {
+        ThrowIfNullOrWhiteSpace(name);
+
         return _navigationManager.GetQueryParameter(name);
     }
     

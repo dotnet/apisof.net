@@ -7,12 +7,7 @@ namespace ApisOfDotNet.Pages;
 public partial class Stats
 {
     [Inject]
-    public CatalogService CatalogService { get; set; }
+    public required CatalogService CatalogService { get; set; }
 
-    public ApiCatalogStatistics Statistics { get; set; }
-
-    protected override void OnInitialized()
-    {
-        Statistics = CatalogService.CatalogStatistics;
-    }
+    public ApiCatalogStatistics Statistics => CatalogService.CatalogStatistics;
 }
