@@ -1,4 +1,5 @@
 ﻿using ApisOfDotNet.Services;
+using ApisOfDotNet.Shared;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +28,9 @@ public sealed class GenCatalogWebHookController : Controller
             secret = (await reader.ReadToEndAsync()).Trim();
 
         var expectedSecret = _configuration["GenCatalogWebHookSecret"].Trim();
+        var matches = FixedTimeComparer.Equals(secret, expectedSecret);
 
-        if (secret != expectedSecret)
+        if (!matches)
             return Unauthorized();
 
         await _catalogService.InvalidateAsync();
