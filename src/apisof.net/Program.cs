@@ -1,6 +1,12 @@
 ﻿using ApisOfDotNet.Services;
+using ApisOfDotNet.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddOptions<ApisOfDotNetOptions>()
+                .BindConfiguration("")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();

@@ -1,38 +1,35 @@
 ﻿using System.IO.Compression;
 using System.Text.Json;
-
+using ApisOfDotNet.Shared;
 using Azure.Storage.Blobs;
-
+using Microsoft.Extensions.Options;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Services;
 
 public sealed class CatalogService
 {
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<ApisOfDotNetOptions> _options;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<CatalogService> _logger;
     private CatalogData _data = CatalogData.Empty;
 
-    public CatalogService(IConfiguration configuration,
+    public CatalogService(IOptions<ApisOfDotNetOptions> options,
                           IWebHostEnvironment environment,
                           ILogger<CatalogService> logger)
     {
-        ThrowIfNull(configuration);
+        ThrowIfNull(options);
         ThrowIfNull(environment);
         ThrowIfNull(logger);
         
-        _configuration = configuration;
+        _options = options;
         _environment = environment;
         _logger = logger;
     }
 
     public async Task InvalidateAsync()
     {
-        var storageConnectionString = _configuration["AzureStorageConnectionString"];
-        if (storageConnectionString is null)
-            throw new Exception("Missing required configuration key 'AzureStorageConnectionString'");
-
+        var storageConnectionString = _options.Value.AzureStorageConnectionString;
         var catalogPath = GetCatalogPath();
         var suffixTreePath = GetSuffixTreePath();
 

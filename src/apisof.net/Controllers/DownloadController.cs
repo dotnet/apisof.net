@@ -1,6 +1,8 @@
-﻿using Azure.Storage.Blobs;
+﻿using ApisOfDotNet.Shared;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ApisOfDotNet.Controllers;
 
@@ -9,19 +11,19 @@ namespace ApisOfDotNet.Controllers;
 [AllowAnonymous]
 public sealed class DownloadController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<ApisOfDotNetOptions> _options;
 
-    public DownloadController(IConfiguration configuration)
+    public DownloadController(IOptions<ApisOfDotNetOptions> options)
     {
-        ThrowIfNull(configuration);
+        ThrowIfNull(_options);
 
-        _configuration = configuration;
+        _options = options;
     }
 
     [HttpGet]
     public async Task<FileStreamResult> Get()
     {
-        var azureConnectionString = _configuration["AzureStorageConnectionString"];
+        var azureConnectionString = _options.Value.AzureStorageConnectionString;
         var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
         var stream = await blobClient.OpenReadAsync();
         return new FileStreamResult(stream, "application/octet-stream") {

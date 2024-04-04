@@ -3,6 +3,7 @@ using ApisOfDotNet.Shared;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ApisOfDotNet.Controllers;
 
@@ -11,15 +12,15 @@ namespace ApisOfDotNet.Controllers;
 [AllowAnonymous]
 public sealed class GenCatalogWebHookController : Controller
 {
-    private readonly IConfiguration _configuration;
+    private readonly IOptions<ApisOfDotNetOptions> _options;
     private readonly CatalogService _catalogService;
 
-    public GenCatalogWebHookController(IConfiguration configuration, CatalogService catalogService)
+    public GenCatalogWebHookController(IOptions<ApisOfDotNetOptions> options, CatalogService catalogService)
     {
-        ThrowIfNull(configuration);
+        ThrowIfNull(options);
         ThrowIfNull(catalogService);
 
-        _configuration = configuration;
+        _options = options;
         _catalogService = catalogService;
     }
 
@@ -30,7 +31,7 @@ public sealed class GenCatalogWebHookController : Controller
         using (var reader = new StreamReader(Request.Body))
             secret = (await reader.ReadToEndAsync()).Trim();
 
-        var expectedSecret = _configuration["GenCatalogWebHookSecret"].Trim();
+        var expectedSecret = _options.Value.GenCatalogWebHookSecret.Trim();
         var matches = FixedTimeComparer.Equals(secret, expectedSecret);
 
         if (!matches)
