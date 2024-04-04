@@ -9,6 +9,8 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class ApiCatalogModel
 {
+    public static ApiCatalogModel Empty { get; } = new();
+
     public static string Url => "https://apisof.net/catalog/download";
 
     private readonly int _formatVersion;
@@ -47,6 +49,11 @@ public sealed class ApiCatalogModel
         }
     }
 
+    private ApiCatalogModel()
+        : this(ApiCatalogSchema.FormatVersion, 0, Array.Empty<byte>(), new int[ApiCatalogSchema.NumberOfTables])
+    {
+    }
+        
     private ApiCatalogModel(int formatVersion, int compressedSize, byte[] buffer, int[] tableSizes)
     {
         Debug.Assert(tableSizes.Length == ApiCatalogSchema.NumberOfTables);

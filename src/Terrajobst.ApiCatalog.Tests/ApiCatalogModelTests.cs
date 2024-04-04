@@ -7,6 +7,56 @@ namespace Terrajobst.ApiCatalog.Tests;
 public class ApiCatalogModelTests
 {
     [Fact]
+    public void Empty_Version_NonZero()
+    {
+        Assert.True(ApiCatalogModel.Empty.FormatVersion > 0);
+    }
+
+    [Fact]
+    public void Empty_Statistics_Zero()
+    {
+        var statistics = ApiCatalogModel.Empty.GetStatistics();
+        
+        Assert.Equal(0, statistics.SizeCompressed);
+        Assert.Equal(0, statistics.SizeUncompressed);
+        Assert.Equal(0, statistics.NumberOfApis);
+        Assert.Equal(0, statistics.NumberOfExtensionMethods);
+        Assert.Equal(0, statistics.NumberOfDeclarations);
+        Assert.Equal(0, statistics.NumberOfAssemblies);
+        Assert.Equal(0, statistics.NumberOfFrameworks);
+        Assert.Equal(0, statistics.NumberOfFrameworkAssemblies);
+        Assert.Equal(0, statistics.NumberOfPackages);
+        Assert.Equal(0, statistics.NumberOfPackageVersions);
+        Assert.Equal(0, statistics.NumberOfPackageAssemblies);
+        Assert.Equal(0, statistics.NumberOfUsageSources);
+
+        foreach (var row in statistics.TableSizes)
+        {
+            Assert.Equal(0, row.Bytes);
+
+            if (row.TableName is "String Heap" or "Blob Heap")
+                Assert.Equal(-1, row.Rows);
+            else
+                Assert.Equal(0, row.Rows);
+        }
+    }
+
+    [Fact]
+    public void Empty_Collections_Empty()
+    {
+        var catalog = ApiCatalogModel.Empty;
+
+        Assert.Empty(catalog.Frameworks);
+        Assert.Empty(catalog.Platforms);
+        Assert.Empty(catalog.Packages);
+        Assert.Empty(catalog.Assemblies);
+        Assert.Empty(catalog.UsageSources);
+        Assert.Empty(catalog.RootApis);
+        Assert.Empty(catalog.AllApis);
+        Assert.Empty(catalog.ExtensionMethods);
+    }
+
+    [Fact]
     public async Task Read_Empty_Throws()
     {
         await using var stream = new MemoryStream();

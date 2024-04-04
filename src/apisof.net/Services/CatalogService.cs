@@ -12,13 +12,7 @@ public sealed class CatalogService
     private readonly IConfiguration _configuration;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<CatalogService> _logger;
-
-    // We ensure these fields are initialized before anyone can access them
-    private CatalogJobInfo _jobInfo = null!;
-    private ApiCatalogModel _catalog = null!;
-    private ApiAvailabilityContext _availabilityContext = null!;
-    private SuffixTree _suffixTree = null!;
-    private ApiCatalogStatistics _statistics = null!;
+    private CatalogData _data = CatalogData.Empty;
 
     public CatalogService(IConfiguration configuration,
                           IWebHostEnvironment environment,
@@ -35,70 +29,77 @@ public sealed class CatalogService
 
     public async Task InvalidateAsync()
     {
-        if (!_environment.IsDevelopment())
+        var storageConnectionString = _configuration["AzureStorageConnectionString"];
+        if (storageConnectionString is null)
+            throw new Exception("Missing required configuration key 'AzureStorageConnectionString'");
+
+        var catalogPath = GetCatalogPath();
+        var suffixTreePath = GetSuffixTreePath();
+
+        _data = await LoadCatalogDataAsync(_environment, _logger, storageConnectionString, catalogPath, suffixTreePath);
+    }
+
+    private static async Task<CatalogData> LoadCatalogDataAsync(IHostEnvironment environment,
+                                                                ILogger logger,
+                                                                string storageConnectionString,
+                                                                string catalogPath,
+                                                                string suffixTreePath)
+    {
+        if (!environment.IsDevelopment())
         {
-            File.Delete(GetCatalogPath());
-            File.Delete(GetSuffixTreePath());
+            File.Delete(catalogPath);
+            File.Delete(suffixTreePath);
         }
 
-        var azureConnectionString = _configuration["AzureStorageConnectionString"];
-
-        var databasePath = GetCatalogPath();
-        if (File.Exists(databasePath))
+        if (File.Exists(catalogPath))
         {
-            _logger.LogInformation("Found catalog on disk. Skipping download.");
+            logger.LogInformation("Found catalog on disk. Skipping download.");
         }
         else
         {
-            _logger.LogInformation("Downloading catalog...");
+            logger.LogInformation("Downloading catalog...");
 
-            var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
-            await blobClient.DownloadToAsync(databasePath);
+            var blobClient = new BlobClient(storageConnectionString, "catalog", "apicatalog.dat");
+            await blobClient.DownloadToAsync(catalogPath);
 
-            _logger.LogInformation("Downloading catalog complete.");
+            logger.LogInformation("Downloading catalog complete.");
         }
 
-        _logger.LogInformation("Loading catalog...");
+        logger.LogInformation("Loading catalog...");
 
-        var catalog = await ApiCatalogModel.LoadAsync(databasePath);
-        var availabilityContext = ApiAvailabilityContext.Create(catalog);
+        var catalog = await ApiCatalogModel.LoadAsync(catalogPath);
 
-        _logger.LogInformation("Loading catalog complete.");
+        logger.LogInformation("Loading catalog complete.");
 
-        var suffixTreePath = GetSuffixTreePath();
         if (File.Exists(suffixTreePath))
         {
-            _logger.LogInformation("Found suffix tree on disk. Skipping download.");
+            logger.LogInformation("Found suffix tree on disk. Skipping download.");
         }
         else
         {
-            _logger.LogInformation("Downloading suffix tree...");
+            logger.LogInformation("Downloading suffix tree...");
 
             // TODO: Ideally the underlying file format uses compression. This seems weird.
-            var blobClient = new BlobClient(azureConnectionString, "catalog", "suffixtree.dat.deflate");
-            using var blobStream = await blobClient.OpenReadAsync();
-            using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
-            using var fileStream = File.Create(suffixTreePath);
+            var blobClient = new BlobClient(storageConnectionString, "catalog", "suffixtree.dat.deflate");
+            await using var blobStream = await blobClient.OpenReadAsync();
+            await using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
+            await using var fileStream = File.Create(suffixTreePath);
             await deflateStream.CopyToAsync(fileStream);
 
-            _logger.LogInformation("Download suffix tree complete.");
+            logger.LogInformation("Download suffix tree complete.");
         }
 
-        _logger.LogInformation("Loading suffix tree...");
+        logger.LogInformation("Loading suffix tree...");
 
         var suffixTree = SuffixTree.Load(suffixTreePath);
 
-        _logger.LogInformation("Loading suffix tree complete.");
+        logger.LogInformation("Loading suffix tree complete.");
 
-        var jobBlobClient = new BlobClient(azureConnectionString, "catalog", "job.json");
-        using var jobStream = await jobBlobClient.OpenReadAsync();
-        var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream);
+        var jobBlobClient = new BlobClient(storageConnectionString, "catalog", "job.json");
+        await using var jobStream = await jobBlobClient.OpenReadAsync();
+        var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream) ?? CatalogJobInfo.Empty;
 
-        _catalog = catalog;
-        _availabilityContext = availabilityContext;
-        _statistics = catalog.GetStatistics();
-        _suffixTree = suffixTree;
-        _jobInfo = jobInfo;
+        return new CatalogData(jobInfo, catalog, suffixTree);
     }
 
     private string GetCatalogPath()
@@ -116,22 +117,53 @@ public sealed class CatalogService
         return Path.Combine(directory, "suffixTree.dat");
     }
 
-    public ApiCatalogModel Catalog => _catalog;
+    public ApiCatalogModel Catalog => _data.Catalog;
 
-    public ApiAvailabilityContext AvailabilityContext => _availabilityContext;
+    public ApiAvailabilityContext AvailabilityContext => _data.AvailabilityContext;
 
-    public ApiCatalogStatistics CatalogStatistics => _statistics;
+    public ApiCatalogStatistics CatalogStatistics => _data.Statistics;
 
-    public CatalogJobInfo JobInfo => _jobInfo;
+    public CatalogJobInfo JobInfo => _data.JobInfo;
 
     public IEnumerable<ApiModel> Search(string query)
     {
         // TODO: Ideally, we'd limit the search results from inside, rather than ToArray()-ing and then limiting.
         // TODO: We should include positions.
-        return _suffixTree.Lookup(query)
+        return _data.SuffixTree.Lookup(query)
             .ToArray()
-            .Select(t => _catalog.GetApiById(t.Value))
+            .Select(t => _data.Catalog.GetApiById(t.Value))
             .Distinct()
             .Take(200);
+    }
+
+    private sealed class CatalogData
+    {
+        public static CatalogData Empty { get; } = new();
+
+        private CatalogData()
+            : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, SuffixTree.Empty)
+        {
+        }
+        
+        public CatalogData(CatalogJobInfo jobInfo,
+                           ApiCatalogModel catalog,
+                           SuffixTree suffixTree)
+        {
+            JobInfo = jobInfo;
+            Catalog = catalog;
+            SuffixTree = suffixTree;
+            AvailabilityContext = ApiAvailabilityContext.Create(catalog);
+            Statistics = catalog.GetStatistics();
+        }
+
+        public CatalogJobInfo JobInfo { get; }
+
+        public ApiCatalogModel Catalog { get; }
+
+        public SuffixTree SuffixTree { get; }
+
+        public ApiAvailabilityContext AvailabilityContext { get; }
+
+        public ApiCatalogStatistics Statistics { get; }
     }
 }

@@ -7,6 +7,8 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class SuffixTree
 {
+    public static SuffixTree Empty { get; } = new();
+    
     internal const ushort Version = 1;
     internal static readonly byte[] MagicNumbers = "STFB"u8.ToArray();
 
@@ -17,12 +19,17 @@ public sealed class SuffixTree
     private readonly int _nodesLength;
     private readonly int _rootOffset;
 
+    private SuffixTree()
+        : this(Array.Empty<byte>(), 0, 0, 0, 0, -1)
+    {
+    }
+    
     public SuffixTree(byte[] buffer,
-        int stringsStart,
-        int stringsLength,
-        int nodesStart,
-        int nodesLength,
-        int rootOffset)
+                      int stringsStart,
+                      int stringsLength,
+                      int nodesStart,
+                      int nodesLength,
+                      int rootOffset)
     {
         _buffer = buffer;
         _stringsStart = stringsStart;
@@ -123,7 +130,8 @@ public sealed class SuffixTree
         var keyBytes = new ReadOnlySpan<byte>(Encoding.UTF8.GetBytes(key.ToLowerInvariant()));
 
         var remainingNodes = new Queue<(int NodeOffset, int KeyIndex)>();
-        remainingNodes.Enqueue((_rootOffset, 0));
+        if (_rootOffset > 0)
+            remainingNodes.Enqueue((_rootOffset, 0));
 
         while (remainingNodes.Count > 0)
         {
@@ -195,7 +203,8 @@ public sealed class SuffixTree
         var idByNode = new Dictionary<int, string>();
 
         var stack = new Stack<int>();
-        stack.Push(_rootOffset);
+        if (_rootOffset > 0)
+            stack.Push(_rootOffset);
 
         while (stack.Count > 0)
         {
@@ -213,7 +222,8 @@ public sealed class SuffixTree
 
         writer.WriteLine("digraph {");
 
-        stack.Push(_rootOffset);
+        if (_rootOffset > 0)
+            stack.Push(_rootOffset);
 
         while (stack.Count > 0)
         {
@@ -311,7 +321,8 @@ public sealed class SuffixTree
         }
 
         var stack = new Stack<int>();
-        stack.Push(_rootOffset);
+        if (_rootOffset > 0)
+            stack.Push(_rootOffset);
 
         while (stack.Count > 0)
         {
