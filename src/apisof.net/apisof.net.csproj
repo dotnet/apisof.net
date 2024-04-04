@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" />
+    <PackageReference Include="Toolbelt.Blazor.HotKeys2" />
   </ItemGroup>
 
   <ItemGroup>

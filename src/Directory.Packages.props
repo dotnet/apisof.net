@@ -27,6 +27,7 @@
     <PackageVersion Include="NuGet.Protocol" version="6.7.0" Version="6.9.1" />
     <PackageVersion Include="SharpVectors.Wpf" Version="1.8.4" />
     <PackageVersion Include="Spectre.Console" Version="0.48.0" />
+    <PackageVersion Include="Toolbelt.Blazor.HotKeys2" Version="4.0.0" />
     <PackageVersion Include="xunit" Version="2.6.6" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.6" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using ApisOfDotNet.Services;
 using ApisOfDotNet.Shared;
+using Toolbelt.Blazor.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Services.AddOptions<ApisOfDotNetOptions>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllers();
+builder.Services.AddHotKeys2(); 
 builder.Services.AddSingleton<CatalogService>();
 builder.Services.AddSingleton<DocumentationResolverService>();
 builder.Services.AddHttpClient<DocumentationResolverService>();

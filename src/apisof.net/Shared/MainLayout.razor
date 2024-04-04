@@ -1,6 +1,4 @@
-﻿@using ApisOfDotNet.Services
-@inherits LayoutComponentBase
-@inject CatalogService CatalogService
+﻿@inherits LayoutComponentBase
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dotnet">
     <a class="navbar-brand" href="/">.NET API Catalog</a>
@@ -15,7 +13,7 @@
                 </NavLink>
             </li>
             <li>
-                <a class="nav-link" href="javascript:window.showSearch()">
+                <a class="nav-link" href="#" @onclick="() => ApiSearch.Open()">
                     <span class="oi oi-magnifying-glass pr-1"></span> Search
                 </a>
             </li>
@@ -35,10 +33,11 @@
     </div>
 </nav>
 
-<div class="nofocus" @ref="_bodyDiv" @onkeydown="KeyDown" tabindex="0">
+<div class="nofocus" tabindex="0">
+    <CascadingValue Value="this">
     @Body
-
-    <ApiSearch @ref="_apiSearch" OnClose="() => _bodyDiv.FocusAsync()"></ApiSearch>
+    </CascadingValue>
+    <ApiSearch @ref="ApiSearch"/>
 </div>
 
 <hr />

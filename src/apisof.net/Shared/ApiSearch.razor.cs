@@ -1,20 +1,21 @@
 ﻿using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Web;
 
 using Terrajobst.ApiCatalog;
+
+using Toolbelt.Blazor.HotKeys2;
 
 using Timer = System.Timers.Timer;
 
 namespace ApisOfDotNet.Shared;
 
-public partial class ApiSearch
+public sealed partial class ApiSearch : IDisposable
 {
     private readonly Timer _debounceTimer;
+    private HotKeysContext? _hotKeysContext;
     private ElementReference _inputElement;
-    private string _modalDisplay = "none;";
-    private string _modalClass = "";
     private string _searchText = "";
 
     public ApiSearch()
@@ -29,6 +30,12 @@ public partial class ApiSearch
         _debounceTimer.Elapsed += OnDebounceTimerElapsed;
     }
     
+    public void Dispose()
+    {
+        _debounceTimer.Dispose();
+        _hotKeysContext?.Dispose();
+    }
+
     private string SearchText
     {
         get => _searchText;
@@ -48,29 +55,21 @@ public partial class ApiSearch
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
 
-    [Parameter]
-    public EventCallback OnClose { get; set; }
+    [Inject]
+    public required HotKeys HotKeys { get; set; }
 
     public bool IsOpen { get; private set; }
+
+    protected override void OnInitialized()
+    {
+        _hotKeysContext = HotKeys.CreateContext()
+                                 .Add(Key.Slash, Open);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (IsOpen)
             await _inputElement.FocusAsync();
-
-        if (firstRender)
-        {
-            var searchText = NavigationManager.GetQueryParameter("q");
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                Open();
-                SearchText = searchText;
-            }
-
-            var helper = new NextAndPreviousHelper(Open, SelectedPrevious, SelectedNext, Accept);
-            var helperReference = DotNetObjectReference.Create(helper);
-            await JSRuntime.InvokeVoidAsync("registerSearchInputKeyDown", _inputElement, helperReference);
-        }
     }
 
     private async void OnDebounceTimerElapsed(object? sender, EventArgs args)
@@ -78,6 +77,28 @@ public partial class ApiSearch
         _debounceTimer.Stop();
 
         await UpdateSearchResults();
+    }
+
+    private void SearchTextKeyDown(KeyboardEventArgs e)
+    {
+        if (e.CtrlKey || e.MetaKey || e.ShiftKey || e.AltKey)
+            return;
+
+        switch (e.Key)
+        {
+            case "ArrowUp":
+                SelectedPrevious();
+                break;
+            case "ArrowDown":
+                SelectedNext();
+                break;
+            case "Escape":
+                Close();
+                break;
+            case "Enter":
+                Accept();
+                break;
+        }
     }
 
     private void SelectedPrevious()
@@ -125,8 +146,6 @@ public partial class ApiSearch
 
     public void Open()
     {
-        _modalDisplay = "block;";
-        _modalClass = "Show";
         SearchText = "";
         SearchResults = Array.Empty<ApiModel>();
         SelectedResult = default;
@@ -134,12 +153,9 @@ public partial class ApiSearch
         StateHasChanged();
     }
 
-    public async void Close()
+    private void Close()
     {
-        _modalDisplay = "none";
-        _modalClass = "";
         IsOpen = false;
-        await OnClose.InvokeAsync();
     }
 
     private void RestartDebounce()
@@ -158,33 +174,5 @@ public partial class ApiSearch
         SelectedResult = results.FirstOrDefault();
 
         await InvokeAsync(StateHasChanged);
-    }
-
-    public sealed class NextAndPreviousHelper
-    {
-        private readonly Action _showSearch;
-        private readonly Action _previous;
-        private readonly Action _next;
-        private readonly Action _accept;
-
-        public NextAndPreviousHelper(Action showSearch, Action previous, Action next, Action accept)
-        {
-            _showSearch = showSearch;
-            _previous = previous;
-            _next = next;
-            _accept = accept;
-        }
-
-        [JSInvokable]
-        public void ShowSearch() => _showSearch.Invoke();
-
-        [JSInvokable]
-        public void SelectPrevious() => _previous.Invoke();
-
-        [JSInvokable]
-        public void SelectNext() => _next.Invoke();
-
-        [JSInvokable]
-        public void Accept() => _accept.Invoke();
     }
 }

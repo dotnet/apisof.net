@@ -64,6 +64,14 @@
 
 /* Search */
 
+.modal {
+    display: none;
+}
+
+.modal.show {
+    display: block;
+}
+
 .modal-dialog.modal-full {
     max-width: unset !important;
     margin-top: 30px auto;

@@ -55,25 +55,6 @@
             childList: true,
             attributes: true
         });
-        window.registerSearchInputKeyDown = (element, helper) => {
-            window.showSearch = () => {
-                helper.invokeMethodAsync('ShowSearch');
-            }
-            $(element).keydown(function (e) {
-                if (e.keyCode == 38) {
-                    helper.invokeMethodAsync('SelectPrevious');
-                    e.preventDefault();
-                }
-                else if (e.keyCode == 40) {
-                    helper.invokeMethodAsync('SelectNext');
-                    e.preventDefault();
-                }
-                else if (e.keyCode == 13) {
-                    helper.invokeMethodAsync('Accept');
-                    e.preventDefault();
-                }
-            });
-        }
     </script>
 </body>
 </html>

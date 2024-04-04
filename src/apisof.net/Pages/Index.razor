@@ -7,7 +7,7 @@
 
         <div class="btn-group" role="group">
             <a type="button" class="btn btn-lg btn-primary" href="@Link.ForCatalog()">Browse</a>
-            <button type="button" class="btn btn-lg btn-info" onclick="window.showSearch()">Search</button>
+            <button type="button" class="btn btn-lg btn-info" @onclick="() => MainLayout.ApiSearch.Open()">Search</button>
         </div>
     </div>
 </div>
