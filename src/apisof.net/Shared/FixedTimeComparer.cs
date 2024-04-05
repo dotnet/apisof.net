@@ -16,7 +16,7 @@ internal static class FixedTimeComparer
 
         var xBytes = MemoryMarshal.AsBytes(x.AsSpan());
         var yBytes = MemoryMarshal.AsBytes(y.AsSpan());
-       
+
         return CryptographicOperations.FixedTimeEquals(xBytes, yBytes);
     }
 }

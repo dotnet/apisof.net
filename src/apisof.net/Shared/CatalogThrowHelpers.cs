@@ -11,7 +11,7 @@ public static class CatalogThrowHelpers
         if (argument == default)
             throw new ArgumentException("Uninitialized API isn't valid", paramName);
     }
-    
+
     public static void ThrowIfDefault(ExtensionMethodModel argument, [CallerArgumentExpression(nameof(argument))] string? paramName = null)
     {
         if (argument == default)

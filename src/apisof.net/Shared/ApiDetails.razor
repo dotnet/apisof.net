@@ -1,17 +1,24 @@
 ﻿<div class="container-fluid px-0">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
-
+            @if (BrowsingContext is FrameworkDiffBrowsingContext diffContext)
+            {
+                var left = diffContext.Left.GetShortFolderName();
+                var right = diffContext.Right.GetShortFolderName();
+                <li class="breadcrumb-item">
+                    @left vs @right
+                </li>
+            }
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database"/> <a href="@Link.ForCatalog()">Catalog</a></li>
             @foreach (var api in Breadcrumbs)
             {
                 if (api == Api)
                 {
-                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" /> @api.Name</li>
+                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()"/> @api.Name</li>
                 }
                 else
                 {
-                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="@Link.For(api)">@api.Name</a></li>
+                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()"/> <a href="@Link.For(api)">@api.Name</a></li>
                 }
             }
         </ol>
@@ -23,48 +30,61 @@
         <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right">
             <li>
                 @{
-                    var rootUnsupportedClass = ApiView.IsSupported(@Parent) ? "" : "text-muted";
+                    var parentBrowsingData = BrowsingContext.GetData(Parent);
+                    var parentCssClasses = parentBrowsingData?.CssClasses;
+                    var parentMarkup = parentBrowsingData?.AdditionalMarkup;
                 }
 
                 @if (Parent == Api)
                 {
-                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <span class="font-weight-bold @rootUnsupportedClass">@Parent.Name</span>
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <span class="font-weight-bold @parentCssClasses">@Parent.Name</span> @parentMarkup
                 }
                 else
                 {
-                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@rootUnsupportedClass" href="@Link.For(@Parent)">@Parent.Name</a>
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@parentCssClasses" href="@Link.For(Parent)">@Parent.Name</a> @parentMarkup
                 }
 
                 <ul class="list-unstyled pl-4">
                     @foreach (var child in Parent.Children.OrderBy(x => x))
                     {
-                        var childUnsupportedClass = ApiView.IsSupported(child) ? "" : "text-muted";
+                        var childBrowsingData = BrowsingContext.GetData(child);
+                        var childExcluded = childBrowsingData?.Excluded ?? false;
+                        var childCssClasses = childBrowsingData?.CssClasses;
+                        var childMarkup = childBrowsingData?.AdditionalMarkup;
+
+                        if (childExcluded)
+                            continue;
 
                         <li>
                             @if (child == Api)
                             {
-                                <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                                <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childCssClasses">@child.Name</span> @childMarkup
                             }
                             else
                             {
-                                <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childUnsupportedClass" href="@Link.For(child)">@child.Name</a>
+                                <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
                             }
                         </li>
                     }
 
                     @foreach (var extensionMethod in Parent.ExtensionMethods.OrderBy(em => em.ExtensionMethod))
                     {
-                        var child = extensionMethod.ExtensionMethod;
-                        var childUnsupportedClass = ApiView.IsSupported(child) ? "" : "text-muted";
+                        var extensionBrowsingData = BrowsingContext.GetData(extensionMethod);
+                        var extensionExcluded = extensionBrowsingData?.Excluded ?? false;
+                        var extensionCssClasses = extensionBrowsingData?.CssClasses;
+                        var extensionMarkup = extensionBrowsingData?.AdditionalMarkup;
+
+                        if (extensionExcluded)
+                            continue;
 
                         <li>
                             @if (extensionMethod == ExtensionMethod)
                             {
-                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @childUnsupportedClass">@child.Name</span>
+                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @extensionCssClasses">@extensionMethod.ExtensionMethod.Name</span> @extensionMarkup
                             }
                             else
                             {
-                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@childUnsupportedClass" href="@Link.For(extensionMethod)">@child.Name</a>
+                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@extensionCssClasses" href="@Link.For(extensionMethod)">@extensionMethod.ExtensionMethod.Name</a> @extensionMarkup
                             }
                         </li>
                     }
@@ -74,10 +94,7 @@
 
         <div class="col-md-9">
 
-            @if (SelectedMarkup is not null)
-            {
-                <SyntaxView Markup="@SelectedMarkup" Current="@Api" />
-            }
+            <SyntaxView Current="@Api" BrowsingContext="@BrowsingContext" />
 
             <table class="table my-3">
                 @foreach (var usage in Api.Usages)
@@ -206,9 +223,12 @@
                                                                      .ThenBy(g => g.Key.PlatformVersion)
                                                                      .ThenBy(g => g.Key.Profile))
                                 {
+                                    var framework = group.First().Framework;
+                                    var isSelectedVersion = IsSelectedFramework(framework);
+                                    var isDiffLift = IsLeftFramework(framework);
+                                    var isDiffRight = IsRightFramework(framework);
+
                                     var availability = group.First();
-                                    var versionFramework = availability.Framework.GetShortFolderName();
-                                    var isSelectedVersion = availability.Framework == ApiView.Framework;
                                     var versionClass = availability.IsInBox
                                              ? "fx-version-inbox"
                                              : "fx-version-package";
@@ -216,12 +236,17 @@
                                              ? inboxApiTitle
                                              : packageApiTitle;
 
-                                    var activeClass = isSelectedVersion
-                                         ? "active"
-                                         : "";
+                                    var selectedClass = isSelectedVersion
+                                        ? "fx-selected"
+                                        : "";
+                                    var diffClass = isDiffLift
+                                         ? "fx-left"
+                                         : isDiffRight
+                                            ? "fx-right"
+                                            : "";
 
-                                    <span class="fx-version @versionClass @activeClass m-1" title="@title">
-                                        <SetQueryParameter Key="fx" Value="@versionFramework">@availability.Framework.GetVersionDisplayString()</SetQueryParameter>
+                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                        @availability.Framework.GetVersionDisplayString()
                                     </span>
                                 }
                             </span>

@@ -4,7 +4,9 @@ using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging.Abstractions;
+using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Shared;
@@ -20,6 +22,12 @@ public partial class ApiDetails
     [Inject]
     public required DocumentationResolverService DocumentationResolver { get; set; }
 
+    [Inject]
+    public required LinkService Link { get; set; }
+
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+
     [Parameter]
     public ApiModel Api { get; set; }
 
@@ -27,8 +35,8 @@ public partial class ApiDetails
     public ExtensionMethodModel? ExtensionMethod { get; set; }
 
     [Parameter]
-    public required ApiView ApiView { get; set; }
-    
+    public required ApiBrowsingContext BrowsingContext { get; set; }
+
     public required IEnumerable<ApiModel> Breadcrumbs { get; set; }
 
     public required ApiModel Parent { get; set; }
@@ -40,8 +48,6 @@ public partial class ApiDetails
     public required PlatformAnnotationContext PlatformAnnotationContext { get; set; }
 
     public required PreviewDescription? SelectedPreviewDescription { get; set; }
-
-    private Markup? SelectedMarkup { get; set; }
 
     private string? SourceUrl { get; set; }
 
@@ -55,9 +61,9 @@ public partial class ApiDetails
     private async Task UpdateSyntaxAsync()
     {
         Availability = CatalogService.AvailabilityContext.GetAvailability(Api);
-        SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == ApiView.Framework) ??
-                               Availability.Frameworks.FirstOrDefault();
-        PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, ApiView.Framework.GetShortFolderName());
+        SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
+                               Availability.Frameworks.First();
+        PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedAvailability.Framework.GetShortFolderName());
         SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(Api);
 
         if (ExtensionMethod is not null)
@@ -81,13 +87,11 @@ public partial class ApiDetails
             }
         }
 
-        SelectedMarkup = SelectedAvailability?.Declaration.GetMarkup();
-
         var results = await Task.WhenAll(
             SourceResolver.ResolveAsync(Api),
             DocumentationResolver.ResolveAsync(Api)
         );
-        
+
         SourceUrl = results[0];
         HelpUrl = results[1];
     }
@@ -143,5 +147,77 @@ public partial class ApiDetails
         }
 
         return assembly.Experimental;
+    }
+
+    private bool IsSelectedFramework(NuGetFramework framework)
+    {
+        return BrowsingContext.SelectedFramework == framework;
+    }
+
+    private bool IsLeftFramework(NuGetFramework framework)
+    {
+        return BrowsingContext is FrameworkDiffBrowsingContext diff && diff.Left == framework;
+    }
+
+    private bool IsRightFramework(NuGetFramework framework)
+    {
+        return BrowsingContext is FrameworkDiffBrowsingContext diff && diff.Right == framework;
+    }
+
+    private void VersionClick(MouseEventArgs e, NuGetFramework framework)
+    {
+        NuGetFramework? GetSelectedFramework()
+        {
+            return BrowsingContext.SelectedFramework;
+        }
+
+        NuGetFramework? GetLeftFramework()
+        {
+            return BrowsingContext switch {
+                FrameworkBrowsingContext frameworkBrowsingContext => frameworkBrowsingContext.Framework,
+                FrameworkDiffBrowsingContext diffBrowsingContext => diffBrowsingContext.Left,
+                _ => null
+            };
+        }
+
+        NuGetFramework? GetRightFramework()
+        {
+            return BrowsingContext switch {
+                FrameworkBrowsingContext frameworkBrowsingContext => frameworkBrowsingContext.Framework,
+                FrameworkDiffBrowsingContext diffBrowsingContext => diffBrowsingContext.Right,
+                _ => null
+            };
+        }
+
+        var setSelected = e is { CtrlKey: false, AltKey: false };
+        var setDiffLeft = e.CtrlKey;
+        var setDiffRight = e.AltKey;
+
+        var selected = setSelected
+            ? framework
+            : GetSelectedFramework();
+
+        var left = setDiffLeft
+                    ? framework
+                    : GetLeftFramework();
+
+        var right = setDiffRight
+                    ? framework
+                    : GetRightFramework();
+
+        if (left is not null && right is not null)
+        {
+            var link = ExtensionMethod is not null
+                ? Link.For(ExtensionMethod.Value, left, right, selected)
+                : Link.For(Api, left, right, selected);
+            NavigationManager.NavigateTo(link);
+        }
+        else
+        {
+            var link = ExtensionMethod is not null
+                ? Link.For(ExtensionMethod.Value, selected)
+                : Link.For(Api, selected);
+            NavigationManager.NavigateTo(link);
+        }
     }
 }

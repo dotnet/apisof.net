@@ -1,0 +1,44 @@
+﻿@page "/diff"
+
+<div class="mt-3 container-fluid">
+    <div class="mx-auto col-md-5">
+        <p>
+            Select which frameworks you want to compare:
+        </p>
+        <div class="form-group">
+            <label>Left</label>
+            <FrameworkPicker @bind-Selected="@Left"/>
+        </div>
+        <div class="form-group">
+            <label>Right</label>
+            <FrameworkPicker @bind-Selected="@Right"/>
+        </div>
+        <div class="my-3">
+            @{
+                var buttonDisabled = Left is null || Right is null;
+            }
+            <button class="ml-auto btn btn-primary" @onclick="Browse" disabled="@buttonDisabled">Browse</button>
+
+            @if (HasDiff)
+            {
+                <button class="ml-3 btn btn-outline-danger" @onclick="DisableDiff">Turn Off Diff</button>
+            }
+
+            @if (Left is not null && Right is not null)
+            {
+                <a class="ml-3 btn btn-secondary" href="@Link.ForDiffDownload(Left, Right)">Download</a>
+            }
+        </div>
+        <div class="my-4 alert alert-secondary">
+            <h5 class="alert-heading">Tip</h5>
+            <p>
+                You can also start a diff right from the API page by clicking on the versions:
+            </p>
+            <ul>
+                <li>Clicking while holding <kbd>Ctrl</kbd> will set the left side.</li>
+                <li>Clicking while holding <kbd>Alt</kbd> will set the right side.</li>
+                <li>Diffing can be turned off by setting left and right to the same version.</li>
+            </ul>
+        </div>
+    </div>
+</div>

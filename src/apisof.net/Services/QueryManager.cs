@@ -8,11 +8,11 @@ public sealed class QueryManager : IDisposable
 {
     private readonly NavigationManager _navigationManager;
     private string _previousLocation;
-    
+
     public QueryManager(NavigationManager navigationManager)
     {
         ThrowIfNull(navigationManager);
-        
+
         _navigationManager = navigationManager;
         _navigationManager.LocationChanged += NavigationManagerOnLocationChanged;
         _previousLocation = navigationManager.Uri;
@@ -24,7 +24,7 @@ public sealed class QueryManager : IDisposable
 
         return _navigationManager.GetQueryParameter(name);
     }
-    
+
     public void Dispose()
     {
         _navigationManager.LocationChanged -= NavigationManagerOnLocationChanged;
@@ -40,7 +40,7 @@ public sealed class QueryManager : IDisposable
         var previousWithoutQuery = new UriBuilder(new Uri(_previousLocation)) {
             Query = null
         }.ToString();
-        
+
         var newWithoutQuery = new UriBuilder(new Uri(newLocation)) {
             Query = null
         }.ToString();
@@ -63,13 +63,13 @@ public sealed class QueryManager : IDisposable
             if (!newQuery.TryGetValue(key, out var newValue) || previousValue != newValue)
                 changedParameters.Add(key);
         }
-        
+
         foreach (var key in newQuery.Keys)
         {
             if (!previousQuery.ContainsKey(key))
                 changedParameters.Add(key);
         }
-        
+
         if (changedParameters.Any())
             QueryChanged?.Invoke(this, changedParameters);
     }

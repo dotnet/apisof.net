@@ -1,6 +1,6 @@
 ﻿@page "/catalog/{GuidText}"
 
-@if (Api is null || ApiView is null)
+@if (Api is null)
 {
     <div class="container-fluid">
         <div class="row">
@@ -14,5 +14,5 @@
 }
 else
 {
-    <ApiDetails Api="Api.Value" ExtensionMethod="ExtensionMethod" ApiView="ApiView" />
+    <ApiDetails Api="Api.Value" ExtensionMethod="ExtensionMethod" BrowsingContext="BrowsingContext" />
 }

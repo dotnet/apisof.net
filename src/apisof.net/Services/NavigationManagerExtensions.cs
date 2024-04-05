@@ -9,7 +9,7 @@ public static class NavigationManagerExtensions
     {
         ThrowIfNull(navigationManager);
         ThrowIfNullOrWhiteSpace(key);
-        
+
         var uri = new Uri(navigationManager.Uri);
         var parameters = QueryHelpers.ParseQuery(uri.Query);
         if (parameters.TryGetValue(key, out var values))

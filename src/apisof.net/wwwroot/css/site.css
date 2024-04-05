@@ -100,6 +100,55 @@
         background-color: #007bff;
     }
 
+/* Diff */
+
+.diff-details {
+    margin-left: 5px;
+    color: rebeccapurple;
+}
+
+.diff-added {
+    border-radius: 3px;
+    background: darkseagreen;
+    color: darkgreen;
+}
+
+.diff-removed {
+    border-radius: 3px;
+    background: pink;
+    color: darkred;
+}
+
+.diff-changed {
+    border-radius: 3px;
+    background: palegoldenrod;
+    color: darkgoldenrod;
+}
+
+@media (prefers-color-scheme: dark) {
+    .diff-details {
+        color: dodgerblue;
+    }
+
+    .diff-added {
+        border-radius: unset;
+        background: unset;
+        color: forestgreen;
+    }
+
+    .diff-removed {
+        border-radius: unset;
+        background: unset;
+        color: rgba(255, 0, 0, 0.66);
+    }
+
+    .diff-changed {
+        border-radius: unset;
+        background: unset;
+        color: orange;
+    }
+}
+
 /* Code */
 
 .syntax-view {
@@ -108,6 +157,22 @@
     background-color: #e9ecef;
     border-radius: 0.25rem;
     padding: 1rem;
+    position: relative;
+}
+
+.syntax-view .fx-version.fx-version-inbox,
+.syntax-view .fx-version.fx-version-package {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.syntax-view.diff-added, .syntax-view .diff-added {
+    background: rgba(46, 139, 87, 0.2);
+}
+
+.syntax-view.diff-removed, .syntax-view .diff-removed {
+    background: rgba(178, 34, 34, 0.2);
 }
 
 .syntax-view pre {
@@ -179,6 +244,14 @@
         background-color: rgb(40, 40, 40);
     }
 
+    .syntax-view.diff-added, .syntax-view .diff-added {
+        background: rgba(46, 139, 87, 0.3);
+    }
+
+    .syntax-view.diff-removed, .syntax-view .diff-removed {
+        background: rgba(178, 34, 34, 0.3);
+    }
+
         .syntax-view pre {
             color: rgb(220, 220, 220);
         }
@@ -243,18 +316,13 @@
     padding-bottom: .10rem;
     font-size: smaller;
     text-wrap: none;
+    cursor: pointer !important;
+    position: relative;
 }
-
-.fx-version.active {
-    background-color: #007bff !important;
-}
-
-    .fx-version.active a:link, .fx-version.active a:visited {
-        color: white !important;
-    }
 
 .fx-version.fx-version-inbox {
-    background-color: #28a745;
+    background-color: #512CD4;
+    color: white;
 }
 
     .fx-version.fx-version-inbox a:link, .fx-version.fx-version-inbox a:visited {
@@ -262,13 +330,48 @@
     }
 
 .fx-version.fx-version-package {
-    background-color: #ffc107;
+    background-color: hsl(253, 56%, 80%);
     color: black;
 }
 
     .fx-version.fx-version-package a:link, .fx-version.fx-version-package a:visited {
         color: black;
     }
+
+.fx-version.fx-selected {
+    font-weight: bolder;
+    text-decoration-line: underline;
+}
+
+.fx-version.fx-left::after {
+    position: absolute;
+    content: "";
+    border-radius: 0 0 3px 3px;
+    border-style: solid;
+    border-color: slategray;
+    border-width: 1px;
+    border-top-color: transparent;
+    bottom: -3px;
+    height: 10px;
+    left: -3px;
+    right: -3px;
+    z-index: -1;
+}
+
+.fx-version.fx-right::before {
+    position: absolute;
+    content: "";
+    border-radius: 3px 3px 0 0;
+    border-style: solid;
+    border-color: slategray;
+    border-width: 1px;
+    border-bottom-color: transparent;
+    top: -3px;
+    height: 10px;
+    left: -3px;
+    right: -3px;
+    z-index: -1;
+}
 
 .popover {
     max-width: 100%;

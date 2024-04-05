@@ -1,1 +1,8 @@
-﻿<code class="code syntax-view"><pre>@Output</pre></code>
+﻿@{
+    var frameworkClass = Availability.IsInBox ? "fx-version-inbox" : "fx-version-package";
+    var framework = Availability.Framework.GetShortFolderName();
+}
+<code class="code syntax-view @SyntaxClass">
+    <span class="fx-version @frameworkClass">@framework</span>
+    <pre>@SyntaxMarkup</pre>
+</code>

@@ -1,0 +1,22 @@
+﻿<div class="row no-gutters">
+    <div class="col-7">
+        <select class="custom-select" @bind="SelectedFamily">
+            @foreach (var family in FrameworkFamilies)
+            {
+                <option selected="@(SelectedFamily == family)">@family</option>
+            }
+        </select>
+    </div>
+    <div class="col-5">
+        <select class="ml-2 custom-select" @bind="@SelectedFrameworkName">
+            @if (!string.IsNullOrEmpty(SelectedFamily) &&
+                 FrameworksByFamily.TryGetValue(SelectedFamily, out var frameworks))
+            {
+                @foreach (var framework in frameworks)
+                {
+                    <option selected="@(Selected == framework)" value="@framework.GetShortFolderName()">@framework.GetVersionDisplayString()</option>
+                }
+            }
+        </select>
+    </div>
+</div>

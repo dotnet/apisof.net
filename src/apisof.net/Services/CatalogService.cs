@@ -21,7 +21,7 @@ public sealed class CatalogService
         ThrowIfNull(options);
         ThrowIfNull(environment);
         ThrowIfNull(logger);
-        
+
         _options = options;
         _environment = environment;
         _logger = logger;
@@ -103,7 +103,7 @@ public sealed class CatalogService
     {
         var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
         var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
-        var directory = environmentPath ?? applicationPath;  
+        var directory = environmentPath ?? applicationPath;
         return Path.Combine(directory, "apicatalog.dat");
     }
 
@@ -141,7 +141,7 @@ public sealed class CatalogService
             : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, SuffixTree.Empty)
         {
         }
-        
+
         public CatalogData(CatalogJobInfo jobInfo,
                            ApiCatalogModel catalog,
                            SuffixTree suffixTree)

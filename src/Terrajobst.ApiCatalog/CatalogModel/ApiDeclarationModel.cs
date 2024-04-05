@@ -51,6 +51,8 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
         }
     }
 
+    public int MarkupId => ApiCatalogSchema.ApiDeclarationStructure.SyntaxOffset.Read(_api.Catalog, _offset);
+
     public Markup GetMyMarkup()
     {
         var markupOffset = ApiCatalogSchema.ApiDeclarationStructure.SyntaxOffset.Read(_api.Catalog, _offset);

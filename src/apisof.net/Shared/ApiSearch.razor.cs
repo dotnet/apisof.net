@@ -29,7 +29,7 @@ public sealed partial class ApiSearch : IDisposable
         };
         _debounceTimer.Elapsed += OnDebounceTimerElapsed;
     }
-    
+
     public void Dispose()
     {
         _debounceTimer.Dispose();
@@ -54,6 +54,9 @@ public sealed partial class ApiSearch : IDisposable
 
     [Inject]
     public required NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    public required LinkService Link { get; set; }
 
     [Inject]
     public required HotKeys HotKeys { get; set; }

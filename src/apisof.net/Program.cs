@@ -12,7 +12,7 @@ builder.Services.AddOptions<ApisOfDotNetOptions>()
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllers();
-builder.Services.AddHotKeys2(); 
+builder.Services.AddHotKeys2();
 builder.Services.AddSingleton<CatalogService>();
 builder.Services.AddSingleton<DocumentationResolverService>();
 builder.Services.AddHttpClient<DocumentationResolverService>();
@@ -20,6 +20,7 @@ builder.Services.AddSingleton<SourceResolverService>();
 builder.Services.AddHttpClient<SourceResolverService>();
 builder.Services.AddHostedService<CatalogServiceWarmUp>();
 builder.Services.AddScoped<QueryManager>();
+builder.Services.AddScoped<LinkService>();
 
 var app = builder.Build();
 

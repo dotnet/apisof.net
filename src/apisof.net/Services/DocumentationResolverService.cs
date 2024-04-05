@@ -11,7 +11,7 @@ public sealed class DocumentationResolverService
     public DocumentationResolverService(HttpClient client)
     {
         ThrowIfNull(client);
-        
+
         _client = client;
     }
 
@@ -23,7 +23,7 @@ public sealed class DocumentationResolverService
         using var response = await _client.GetAsync(helpLink);
         return response.StatusCode == HttpStatusCode.OK ? helpLink : null;
     }
-    
+
     private static string GetHelpLink(ApiModel api)
     {
         var segments = api.AncestorsAndSelf().Reverse();

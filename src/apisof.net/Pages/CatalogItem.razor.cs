@@ -1,6 +1,7 @@
 ﻿using ApisOfDotNet.Services;
 using ApisOfDotNet.Shared;
 using Microsoft.AspNetCore.Components;
+using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Pages;
@@ -13,14 +14,17 @@ public partial class CatalogItem
     [Inject]
     public required QueryManager QueryManager { get; set; }
 
+    [Inject]
+    public required NavigationManager NavigationManager { get; set; }
+
     [Parameter]
     public string? GuidText { get; set; }
-
-    public ApiView? ApiView { get; set; }
 
     public ApiModel? Api { get; set; }
 
     public ExtensionMethodModel? ExtensionMethod { get; set; }
+
+    public ApiBrowsingContext BrowsingContext { get; set; } = ApiBrowsingContext.Empty;
 
     protected override void OnInitialized()
     {
@@ -34,7 +38,6 @@ public partial class CatalogItem
 
     private void UpdateApi()
     {
-        ApiView = null;
         Api = null;
         ExtensionMethod = null;
 
@@ -61,40 +64,60 @@ public partial class CatalogItem
 
         if (Api is not null)
         {
-            var framework = QueryManager.GetQueryParameter("fx");
-            var apiAvailability = CatalogService.AvailabilityContext.GetAvailability(Api.Value);
-            framework = SelectFramework(apiAvailability, framework);
-            ApiView = new ApiView(CatalogService.AvailabilityContext, framework);
+            var query = BrowsingQuery.Get(CatalogService.AvailabilityContext, NavigationManager);
+
+            var framework = query.Fx?.Framework;
+
+            if (framework is not null && !CatalogService.AvailabilityContext.IsAvailable(Api.Value, framework))
+                framework = null;
+
+            if (query.Diff is null)
+            {
+                framework ??= SelectFramework(CatalogService.AvailabilityContext, Api.Value);
+                BrowsingContext = ApiBrowsingContext.ForFramework(CatalogService.AvailabilityContext, framework);
+            }
+            else
+            {
+                var left = query.Diff.Value.Left;
+                var right = query.Diff.Value.Right;
+
+                if (framework is null)
+                {
+                    if (CatalogService.AvailabilityContext.IsAvailable(Api.Value, right))
+                        framework = right;
+                    else if (CatalogService.AvailabilityContext.IsAvailable(Api.Value, left))
+                        framework = left;
+                    else
+                        framework = SelectFramework(CatalogService.AvailabilityContext, Api.Value);
+                }
+
+                BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.AvailabilityContext, left, right, framework);
+            }
         }
     }
 
-    private static string SelectFramework(ApiAvailability availability, string? selectedFramework)
+    private static NuGetFramework SelectFramework(ApiAvailabilityContext context, ApiModel model)
     {
-        var result = selectedFramework;
-        
-        // Let's first reset the selected framework in case the current API doesn't support it
-
-        if (!availability.Frameworks.Any(fx => string.Equals(fx.Framework.GetShortFolderName(), result, StringComparison.OrdinalIgnoreCase)))
-            result = null;
+        var availability = context.GetAvailability(model);
 
         // First we try to pick the highest .NET Core framework
 
-        result ??= availability.Frameworks.Where(fx => fx.Framework.Framework == ".NETCoreApp")
-            .OrderByDescending(fx => fx.Framework.Version)
-            .ThenBy(fx => fx.Framework.HasPlatform)
-            .Select(fx => fx.Framework.GetShortFolderName())
-            .FirstOrDefault();
+        var result = availability.Frameworks.Where(fx => fx.Framework.Framework == ".NETCoreApp")
+                                            .OrderByDescending(fx => fx.Framework.Version)
+                                            .ThenBy(fx => fx.Framework.HasPlatform)
+                                            .Select(fx => fx.Framework)
+                                            .FirstOrDefault();
 
         // If we couldn't find any, pick the highest version of any framework
 
         result ??= availability.Frameworks.OrderBy(f => f.Framework.Framework)
-            .ThenByDescending(f => f.Framework.Version)
-            .Select(fx => fx.Framework.GetShortFolderName())
-            .First();
+                                          .ThenByDescending(f => f.Framework.Version)
+                                          .Select(fx => fx.Framework)
+                                          .First();
 
         return result;
     }
-    
+
     private void QueryManagerOnQueryChanged(object? sender, IReadOnlySet<string> e)
     {
         UpdateApi();

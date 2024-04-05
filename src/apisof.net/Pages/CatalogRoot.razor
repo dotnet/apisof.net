@@ -3,6 +3,14 @@
 <div class="container-fluid px-0">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
+            @if (BrowsingContext is FrameworkDiffBrowsingContext diffContext)
+            {
+                var left = diffContext.Left.GetShortFolderName();
+                var right = diffContext.Right.GetShortFolderName();
+                <li class="breadcrumb-item">
+                    @left vs @right
+                </li>
+            }
             <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
         </ol>
     </nav>
@@ -15,10 +23,18 @@
             <Glyph Kind="GlyphKind.Database" /> <span class="font-weight-bold">Catalog</span>
 
             <ul class="list-unstyled pl-4">
-                @foreach (var child in CatalogService.Catalog.RootApis.OrderBy(x => x)) // TODO: Ideally the catalog is pre-sorted
+                @foreach (var child in CatalogService.Catalog.RootApis.Order())
                 {
+                    var childData = BrowsingContext.GetData(child);
+                    var childIsExcluded = childData?.Excluded ?? false;
+                    var childCssClasses = childData?.CssClasses ?? string.Empty;
+                    var childMarkup = childData?.AdditionalMarkup;
+
+                    if (childIsExcluded)
+                        continue;
+
                     <li>
-                        <Glyph Kind="@child.Kind.GetGlyph()" /> <a href="@Link.For(child)">@child.Name</a>
+                        <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
                     </li>
                 }
             </ul>

@@ -92,6 +92,14 @@ public sealed class ApiAvailabilityContext
 
     public ApiCatalogModel Catalog => _catalog;
 
+    public bool IsKnownFramework(NuGetFramework? framework)
+    {
+        if (framework is null)
+            return false;
+
+        return _frameworkIds.ContainsKey(framework);
+    }
+
     public bool IsAvailable(ApiModel api, NuGetFramework framework)
     {
         var frameworkId = _frameworkIds[framework];
@@ -106,6 +114,21 @@ public sealed class ApiAvailabilityContext
         }
 
         return false;
+    }
+
+    public ApiDeclarationModel? GetDefinition(ApiModel api, NuGetFramework framework)
+    {
+        var frameworkId = _frameworkIds[framework];
+        var frameworkAssemblies = _frameworkAssemblies[frameworkId];
+
+        foreach (var declaration in api.Declarations)
+        {
+            var assemblyId = declaration.Assembly.Id;
+            if (frameworkAssemblies.Contains(assemblyId))
+                return declaration;
+        }
+
+        return null;
     }
 
     public ApiAvailability GetAvailability(ApiModel api)

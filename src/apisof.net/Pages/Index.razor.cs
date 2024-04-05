@@ -10,8 +10,11 @@ public partial class Index
     [Inject]
     public required CatalogService CatalogService { get; set; }
 
+    [Inject]
+    public required LinkService Link { get; set; }
+
     [CascadingParameter]
     public required MainLayout MainLayout { get; set; }
-   
+
     public ApiCatalogStatistics Statistics => CatalogService.CatalogStatistics;
 }
