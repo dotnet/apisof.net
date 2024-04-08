@@ -40,12 +40,15 @@ public static class DiffExtensions
         ThrowIfNull(left);
         ThrowIfNull(right);
 
+        if (!api.CanHaveChildren())
+            return;
+
         foreach (var child in api.Children)
         {
             if (child.Kind.IsAccessor())
                 continue;
 
-            var diffKind = context.GetDiffKind(left, right, api);
+            var diffKind = context.GetDiffKind(left, right, child);
             if (diffKind is null)
                 continue;
 
@@ -75,15 +78,9 @@ public static class DiffExtensions
         ThrowIfNull(left);
         ThrowIfNull(right);
 
-        var defLeft = context.GetDefinition(api, left);
-        var defRight = context.GetDefinition(api, right);
-
-        if (defLeft is null && defRight is null)
-            return false;
-
-        var hasDifference = defLeft is null ||
-                            defRight is null ||
-                            defLeft.Value.MarkupId != defRight.Value.MarkupId;
+        var diffKind = context.GetDiffKind(left, right, api);
+        var hasDifference = diffKind is not null &&
+                            diffKind.Value != DiffKind.None;
 
         if (hasDifference)
             return true;
@@ -92,6 +89,9 @@ public static class DiffExtensions
         {
             foreach (var child in api.Children)
             {
+                if (child.Kind.IsAccessor())
+                    continue;
+                
                 if (ContainsDifferences(context, left, right, child))
                     return true;
             }
