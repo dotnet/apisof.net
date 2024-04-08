@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Components;
 using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
@@ -8,17 +9,23 @@ public sealed class LinkService
 {
     private readonly CatalogService _catalogService;
     private readonly NavigationManager _navigationManager;
+    private readonly UrlEncoder _urlEncoder;
 
-    public LinkService(CatalogService catalogService, NavigationManager navigationManager)
+    public LinkService(CatalogService catalogService, NavigationManager navigationManager, UrlEncoder urlEncoder)
     {
+        ThrowIfNull(catalogService);
+        ThrowIfNull(navigationManager);
+        ThrowIfNull(urlEncoder);
+
         _catalogService = catalogService;
         _navigationManager = navigationManager;
+        _urlEncoder = urlEncoder;
     }
 
     public string ForCatalog(bool useBlankQuery = false)
     {
         var query = useBlankQuery ? "" : GetQuery();
-        return $"/catalog{query}";
+        return ForCatalog(query);
     }
 
     public string ForCatalog(NuGetFramework left, NuGetFramework right)
@@ -27,12 +34,33 @@ public sealed class LinkService
         ThrowIfNull(right);
 
         var query = new BrowsingQuery(new DiffParameter(left, right), null);
-        return $"/catalog{query}";
+        return ForCatalog(query.ToString());
+    }
+
+    private string ForCatalog(string? query)
+    {
+        var returnUrlParameter = ReturnUrlParameter.Get(_navigationManager);
+        var destination = returnUrlParameter?.ReturnUrl ?? "/catalog";
+        return $"{destination}{query}";
     }
 
     public object ForDiff()
     {
+        var includeReturnUrl = new Uri(_navigationManager.Uri).AbsolutePath.StartsWith("/catalog");
+
         var query = GetQuery();
+
+        if (includeReturnUrl)
+        {
+            var queryOp = string.IsNullOrEmpty(query) ? "?" : "&";
+
+            var encodedReturnUrl = _urlEncoder.Encode(new UriBuilder(_navigationManager.Uri) {
+                Query = null
+            }.ToString());
+
+            query = $"{query}{queryOp}returnUrl={encodedReturnUrl}";
+        }
+
         return $"/diff{query}";
     }
 

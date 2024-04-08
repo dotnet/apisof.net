@@ -95,3 +95,16 @@ public readonly record struct DiffParameter(NuGetFramework Left, NuGetFramework 
         return $"diff={l}-vs-{r}";
     }
 }
+
+public readonly record struct ReturnUrlParameter(string ReturnUrl)
+{
+    public static ReturnUrlParameter? Get(NavigationManager navigationManager)
+    {
+        ThrowIfNull(navigationManager);
+
+        var returnUrl = navigationManager.GetQueryParameter("returnUrl");
+        return string.IsNullOrEmpty(returnUrl)
+            ? null
+            : new ReturnUrlParameter(returnUrl);
+    }
+}
