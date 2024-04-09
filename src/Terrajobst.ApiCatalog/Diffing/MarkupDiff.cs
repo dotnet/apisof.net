@@ -16,7 +16,35 @@ public static class MarkupDiff
         ThrowIfNull(left);
         ThrowIfNull(right);
 
-        return MarkupDiffer.Default.CalculateDiff(left, right);
+        var startOfLine = true;
+
+        foreach (var t in MarkupDiffer.Default.CalculateDiff(left, right))
+        {
+            var token = t;
+
+            switch (token.Token.Kind)
+            {
+                case MarkupTokenKind.LineBreak:
+                    startOfLine = true;
+                    break;
+                case MarkupTokenKind.Space:
+                {
+                    if (startOfLine)
+                    {
+                        token = token with {
+                            Diff = MarkupTokenDiffKind.None
+                        };
+                    }
+
+                    break;
+                }
+                default:
+                    startOfLine = false;
+                    break;
+            }
+
+            yield return token;
+        }
     }
 
     private sealed class MarkupDiffer : LongestCommonSubsequence<Markup>
