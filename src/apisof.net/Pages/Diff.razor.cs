@@ -23,7 +23,7 @@ public partial class Diff
 
     protected override void OnInitialized()
     {
-        var query = BrowsingQuery.Get(CatalogService.AvailabilityContext, NavigationManager);
+        var query = BrowsingQuery.Get(CatalogService.Catalog, NavigationManager);
 
         if (query.Diff is not null)
         {
@@ -35,7 +35,7 @@ public partial class Diff
         {
             HasDiff = false;
             var latestTwoCoreVersions = CatalogService.Catalog.Frameworks
-                .Select(fx => NuGetFramework.Parse(fx.Name))
+                .Select(fx => fx.NuGetFramework)
                 .Where(fx => string.Equals(fx.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
                              !fx.HasPlatform)
                 .OrderByDescending(fx => fx.Version)

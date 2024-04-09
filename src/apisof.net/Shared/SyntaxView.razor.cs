@@ -42,33 +42,33 @@ public partial class SyntaxView
         if (BrowsingContext is FrameworkDiffBrowsingContext diff &&
             (selectedFramework == diff.Left || selectedFramework == diff.Right))
         {
-            var left = CatalogService.AvailabilityContext.GetDefinition(Current, diff.Left);
-            var right = CatalogService.AvailabilityContext.GetDefinition(Current, diff.Right);
+            var left = Current.GetDefinition(diff.Left);
+            var right = Current.GetDefinition(diff.Right);
 
             if (left is null)
             {
                 Debug.Assert(right is not null);
                 apiDiff = MarkupTokenDiffKind.Added;
                 tokenDiff = GetTokensWithoutDiff(right.Value);
-                Availability = CatalogService.AvailabilityContext.GetAvailability(Current, diff.Right)!;
+                Availability = Current.GetAvailability(diff.Right)!;
             }
             else if (right is null)
             {
                 apiDiff = MarkupTokenDiffKind.Removed;
                 tokenDiff = GetTokensWithoutDiff(left.Value);
-                Availability = CatalogService.AvailabilityContext.GetAvailability(Current, diff.Left)!;
+                Availability = Current.GetAvailability(diff.Left)!;
             }
             else
             {
                 apiDiff = MarkupTokenDiffKind.None;
                 tokenDiff = MarkupDiff.Diff(left.Value.GetMarkup(), right.Value.GetMarkup());
-                Availability = CatalogService.AvailabilityContext.GetAvailability(Current, diff.Right)!;
+                Availability = Current.GetAvailability(diff.Right)!;
             }
         }
         else
         {
             apiDiff = MarkupTokenDiffKind.None;
-            Availability = CatalogService.AvailabilityContext.GetAvailability(Current, selectedFramework)!;
+            Availability = Current.GetAvailability(selectedFramework)!;
             tokenDiff = GetTokensWithoutDiff(Availability.Declaration);
         }
 

@@ -64,17 +64,17 @@ public partial class CatalogItem
 
         if (Api is not null)
         {
-            var query = BrowsingQuery.Get(CatalogService.AvailabilityContext, NavigationManager);
+            var query = BrowsingQuery.Get(CatalogService.Catalog, NavigationManager);
 
             var framework = query.Fx?.Framework;
 
-            if (framework is not null && !CatalogService.AvailabilityContext.IsAvailable(Api.Value, framework))
+            if (framework is not null && !Api.Value.IsAvailable(framework))
                 framework = null;
 
             if (query.Diff is null)
             {
-                framework ??= SelectFramework(CatalogService.AvailabilityContext, Api.Value);
-                BrowsingContext = ApiBrowsingContext.ForFramework(CatalogService.AvailabilityContext, framework);
+                framework ??= SelectFramework(Api.Value);
+                BrowsingContext = ApiBrowsingContext.ForFramework(framework);
             }
             else
             {
@@ -83,22 +83,22 @@ public partial class CatalogItem
 
                 if (framework is null)
                 {
-                    if (CatalogService.AvailabilityContext.IsAvailable(Api.Value, right))
+                    if (Api.Value.IsAvailable(right))
                         framework = right;
-                    else if (CatalogService.AvailabilityContext.IsAvailable(Api.Value, left))
+                    else if (Api.Value.IsAvailable(left))
                         framework = left;
                     else
-                        framework = SelectFramework(CatalogService.AvailabilityContext, Api.Value);
+                        framework = SelectFramework(Api.Value);
                 }
 
-                BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.AvailabilityContext, left, right, framework);
+                BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.Catalog, left, right, framework);
             }
         }
     }
 
-    private static NuGetFramework SelectFramework(ApiAvailabilityContext context, ApiModel model)
+    private static NuGetFramework SelectFramework(ApiModel model)
     {
-        var availability = context.GetAvailability(model);
+        var availability = model.GetAvailability();
 
         // First we try to pick the highest .NET Core framework
 

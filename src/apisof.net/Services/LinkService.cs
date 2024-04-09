@@ -119,7 +119,7 @@ public sealed class LinkService
 
     private string GetQuery(NuGetFramework? selected = null)
     {
-        var query = BrowsingQuery.Get(_catalogService.AvailabilityContext, _navigationManager);
+        var query = BrowsingQuery.Get(_catalogService.Catalog, _navigationManager);
 
         if (selected is not null)
             query = query with { Fx = new FxParameter(selected) };
@@ -133,7 +133,7 @@ public sealed class LinkService
             ? new DiffParameter(leftFramework, rightFramework)
             : (DiffParameter?)null;
 
-        var query = BrowsingQuery.Get(_catalogService.AvailabilityContext, _navigationManager) with
+        var query = BrowsingQuery.Get(_catalogService.Catalog, _navigationManager) with
         {
             Diff = newDiff
         };

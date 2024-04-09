@@ -19,18 +19,18 @@ public partial class CatalogRoot
 
     protected override void OnInitialized()
     {
-        var query = BrowsingQuery.Get(CatalogService.AvailabilityContext, NavigationManager);
+        var query = BrowsingQuery.Get(CatalogService.Catalog, NavigationManager);
         var framework = query.Fx?.Framework;
 
         if (query.Diff is null)
         {
-            BrowsingContext = ApiBrowsingContext.ForFramework(CatalogService.AvailabilityContext, framework);
+            BrowsingContext = ApiBrowsingContext.ForFramework(framework);
         }
         else
         {
             var left = query.Diff.Value.Left;
             var right = query.Diff.Value.Right;
-            BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.AvailabilityContext, left, right, framework);
+            BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.Catalog, left, right, framework);
         }
     }
 }

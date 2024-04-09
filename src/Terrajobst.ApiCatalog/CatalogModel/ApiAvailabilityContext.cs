@@ -3,23 +3,20 @@ using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
-public sealed class ApiAvailabilityContext
+internal sealed class ApiAvailabilityContext
 {
-    public static ApiAvailabilityContext Create(ApiCatalogModel catalog)
-    {
-        ThrowIfNull(catalog);
-
-        return new ApiAvailabilityContext(catalog);
-    }
-
     private readonly ApiCatalogModel _catalog;
+    private readonly FrozenDictionary<int, NuGetFramework> _frameworkById; 
     private readonly FrozenDictionary<NuGetFramework, int> _frameworkIds;
     private readonly FrozenDictionary<int, FrozenSet<int>> _frameworkAssemblies;
     private readonly FrozenDictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>> _packageAssemblies;
 
-    private ApiAvailabilityContext(ApiCatalogModel catalog)
+    public ApiAvailabilityContext(ApiCatalogModel catalog)
     {
+        ThrowIfNull(catalog);
+
         _catalog = catalog;
+        _frameworkById = catalog.Frameworks.ToFrozenDictionary(fx => fx.Id, fx => NuGetFramework.Parse(fx.Name));
         _frameworkAssemblies = catalog.Frameworks.Select(fx => (fx.Id, Assemblies: fx.Assemblies.Select(a => a.Id).ToFrozenSet()))
                                                  .ToFrozenDictionary(t => t.Id, t => t.Assemblies);
 
@@ -28,7 +25,7 @@ public sealed class ApiAvailabilityContext
 
         foreach (var fx in catalog.Frameworks)
         {
-            var nugetFramework = NuGetFramework.Parse(fx.Name);
+            var nugetFramework = _frameworkById[fx.Id];
             if (nugetFramework.IsPCL || fx.Name is "monotouch" or "xamarinios10")
                 continue;
 
@@ -90,14 +87,14 @@ public sealed class ApiAvailabilityContext
         _packageAssemblies = packageAssemblies.ToFrozenDictionary();
     }
 
-    public ApiCatalogModel Catalog => _catalog;
+    public NuGetFramework GetNuGetFramework(int frameworkId) => _frameworkById[frameworkId];
 
-    public bool IsKnownFramework(NuGetFramework? framework)
+    public FrameworkModel? GetFramework(NuGetFramework framework)
     {
-        if (framework is null)
-            return false;
+        if (_frameworkIds.TryGetValue(framework, out var id))
+            return new FrameworkModel(_catalog, id);
 
-        return _frameworkIds.ContainsKey(framework);
+        return null;
     }
 
     public bool IsAvailable(ApiModel api, NuGetFramework framework)

@@ -18,7 +18,7 @@ internal sealed class ListFrameworksCommand : Command
     public override async Task ExecuteAsync()
     {
         var catalog = await _catalogService.LoadCatalogAsync();
-        var frameworks = catalog.Frameworks.Select(fx => NuGetFramework.Parse(fx.Name))
+        var frameworks = catalog.Frameworks.Select(fx => fx.NuGetFramework)
                                            .Select(fx => (DisplayName: GetDisplayName(fx), Framework: fx))
                                            .Where(t => t.DisplayName is not null)
                                            .GroupBy(fx => fx.DisplayName, fx => fx.Framework)

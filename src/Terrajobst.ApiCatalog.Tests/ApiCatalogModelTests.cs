@@ -738,8 +738,7 @@ public class ApiCatalogModelTests
             .BuildAsync();
 
         var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
-        var availabilityContext = ApiAvailabilityContext.Create(catalog);
-        var availability = availabilityContext.GetAvailability(api);
+        var availability = api.GetAvailability();
 
         // .NET Standard 2.0 applies to .NET Framework 4.6.1. However, since the framework includes
         // the API, we expect this to be considered in-box.

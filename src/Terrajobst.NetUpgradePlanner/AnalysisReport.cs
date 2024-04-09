@@ -44,12 +44,11 @@ public sealed class AnalysisReport
                 apiByGuid[api.Guid] = forwardedApi.Value;
         }
 
-        var availabilityContext = ApiAvailabilityContext.Create(catalog);
         var missingFeatureContext = MissingNetFxFeatureContext.Create();
 
         var desiredFrameworks = assemblySet.Entries.Select(e => assemblyConfiguration.GetDesiredFramework(e))
                                                    .Distinct();
-        var platformContextByDesiredFramework = desiredFrameworks.ToDictionary(f => f, f => PlatformAnnotationContext.Create(availabilityContext, f));
+        var platformContextByDesiredFramework = desiredFrameworks.ToDictionary(f => f, f => PlatformAnnotationContext.Create(catalog, f));
 
         var analyzedAssemblies = new ConcurrentBag<AnalyzedAssembly>();
 
@@ -80,7 +79,7 @@ public sealed class AnalysisReport
                 if (!apiByGuid.TryGetValue(guid, out var api))
                     continue;
 
-                var netFrameworkAvailability = availabilityContext.GetAvailability(api, assemblyFramework);
+                var netFrameworkAvailability = api.GetAvailability(assemblyFramework);
 
                 // We only care about .NET Framework APIs
                 if (netFrameworkAvailability is null)
@@ -94,7 +93,7 @@ public sealed class AnalysisReport
                 // APIs or references to packages.
                 numberOfUsedPlatformApis++;
 
-                var netCoreAvailability = availabilityContext.GetAvailability(api, desiredFramework);
+                var netCoreAvailability = api.GetAvailability(desiredFramework);
                 if (netCoreAvailability is null)
                 {
                     var missingFeature = missingFeatureContext.Get(netFrameworkAvailability.Declaration);

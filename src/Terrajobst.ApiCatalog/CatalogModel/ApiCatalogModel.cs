@@ -4,6 +4,7 @@ using System.Collections.Frozen;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -36,6 +37,7 @@ public sealed class ApiCatalogModel
     private FrozenDictionary<Guid, int>? _extensionMethodOffsetByGuid;
     private FrozenDictionary<int, int>? _forwardedApis;
     private FrozenSet<int>? _previewFrameworks;
+    private readonly ApiAvailabilityContext _availabilityContext;
 
     private readonly struct TableRange(int offset, int length)
     {
@@ -80,6 +82,7 @@ public sealed class ApiCatalogModel
 
         _buffer = buffer;
         _compressedSize = compressedSize;
+        _availabilityContext = new ApiAvailabilityContext(this);
     }
 
     public int FormatVersion => _formatVersion;
@@ -112,6 +115,8 @@ public sealed class ApiCatalogModel
 
     internal ReadOnlySpan<byte> ExperimentalTable => _experimentalTableRange.GetBytes(_buffer);
 
+    internal ApiAvailabilityContext AvailabilityContext => _availabilityContext;
+    
     public FrameworkEnumerator Frameworks
     {
         get
@@ -176,6 +181,13 @@ public sealed class ApiCatalogModel
         }
     }
 
+    public FrameworkModel? GetFramework(NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        return _availabilityContext.GetFramework(framework);
+    }
+    
     public ApiModel GetApiById(int id)
     {
         return new ApiModel(this, id);

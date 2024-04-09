@@ -9,17 +9,17 @@ public abstract class ApiBrowsingContext
 {
     public static ApiBrowsingContext Empty { get; } = new EmptyApiBrowsingContext();
 
-    public static ApiBrowsingContext ForFramework(ApiAvailabilityContext context, NuGetFramework? selected)
+    public static ApiBrowsingContext ForFramework(NuGetFramework? selected)
     {
         if (selected is null)
             return Empty;
 
-        return new FrameworkBrowsingContext(context, selected);
+        return new FrameworkBrowsingContext(selected);
     }
 
-    public static FrameworkDiffBrowsingContext ForFrameworkDiff(ApiAvailabilityContext context, NuGetFramework left, NuGetFramework right, NuGetFramework? selected)
+    public static FrameworkDiffBrowsingContext ForFrameworkDiff(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right, NuGetFramework? selected)
     {
-        return new FrameworkDiffBrowsingContext(context, left, right, selected);
+        return new FrameworkDiffBrowsingContext(catalog, left, right, selected);
     }
 
     public virtual NuGetFramework? SelectedFramework => null;
@@ -48,12 +48,10 @@ public readonly struct ApiBrowsingData
 
 public sealed class FrameworkBrowsingContext : ApiBrowsingContext
 {
-    private readonly ApiAvailabilityContext _context;
     private readonly NuGetFramework _framework;
 
-    public FrameworkBrowsingContext(ApiAvailabilityContext context, NuGetFramework framework)
+    public FrameworkBrowsingContext(NuGetFramework framework)
     {
-        _context = context;
         _framework = framework;
     }
 
@@ -66,21 +64,21 @@ public sealed class FrameworkBrowsingContext : ApiBrowsingContext
 
     public override ApiBrowsingData? GetData(ApiModel api)
     {
-        var cssClasses = _context.GetDefinition(api, _framework) is null ? "text-muted" : null;
+        var cssClasses = api.GetDefinition(_framework) is null ? "text-muted" : null;
         return new ApiBrowsingData { CssClasses = cssClasses };
     }
 }
 
 public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
 {
-    private readonly ApiAvailabilityContext _context;
+    private readonly ApiCatalogModel _catalog;
     private readonly NuGetFramework _left;
     private readonly NuGetFramework _right;
     private readonly NuGetFramework? _selectedFramework;
 
-    public FrameworkDiffBrowsingContext(ApiAvailabilityContext context, NuGetFramework left, NuGetFramework right, NuGetFramework? selectedFramework)
+    public FrameworkDiffBrowsingContext(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right, NuGetFramework? selectedFramework)
     {
-        _context = context;
+        _catalog = catalog;
         _left = left;
         _right = right;
         _selectedFramework = selectedFramework;
@@ -103,7 +101,7 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
 
     public override ApiBrowsingData? GetData(ApiModel api)
     {
-        var diffKind = _context.GetDiffKind(_left, _right, api);
+        var diffKind = api.GetDiffKind(_left, _right);
         if (diffKind is null)
             return new ApiBrowsingData { Excluded = true };
 
@@ -123,7 +121,7 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
         var added = 0;
         var removed = 0;
         var modified = 0;
-        _context.GetDiffCount(_left, _right, api, ref added, ref removed, ref modified);
+        api.GetDiffCount(_left, _right, ref added, ref removed, ref modified);
 
         var anyChanges = added + removed + modified > 0;
         if (anyChanges)

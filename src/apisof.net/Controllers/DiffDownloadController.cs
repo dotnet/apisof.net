@@ -24,20 +24,19 @@ public sealed class DiffDownloadController : Controller
     [HttpGet]
     public ActionResult Get([FromQuery] string diff)
     {
-        var context = _catalogService.AvailabilityContext;
+        var catalog = _catalogService.Catalog;
 
-        var diffParameter = DiffParameter.Parse(context, diff);
+        var diffParameter = DiffParameter.Parse(catalog, diff);
         if (diffParameter is null)
             return new BadRequestResult();
 
         var left = diffParameter.Value.Left;
         var right = diffParameter.Value.Right;
-        var catalog = _catalogService.Catalog;
         var name = $"{left.GetShortFolderName()}-vs-{right.GetShortFolderName()}.diff";
 
         return new FileCallbackResult(new MediaTypeHeaderValue("plain/text"), async (outputStream, _) =>
         {
-            var diffWriter = new DiffWriter(catalog, context, left, right);
+            var diffWriter = new DiffWriter(catalog, left, right);
             await diffWriter.WriteToAsync(outputStream);
         })
         {

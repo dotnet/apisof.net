@@ -107,7 +107,7 @@ public readonly struct PreviewDescription
                 return false;
 
             // For the sake of stability we only consider .NET Framework and .NET Core.
-            var nugetFramework = NuGetFramework.Parse(fx.Name);
+            var nugetFramework = fx.NuGetFramework;
             return string.Equals(nugetFramework.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(nugetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase);
         }

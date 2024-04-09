@@ -60,10 +60,10 @@ public partial class ApiDetails
 
     private async Task UpdateSyntaxAsync()
     {
-        Availability = CatalogService.AvailabilityContext.GetAvailability(Api);
+        Availability = Api.GetAvailability();
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
                                Availability.Frameworks.First();
-        PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.AvailabilityContext, SelectedAvailability.Framework.GetShortFolderName());
+        PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.Catalog, SelectedAvailability.Framework.GetShortFolderName());
         SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(Api);
 
         if (ExtensionMethod is not null)

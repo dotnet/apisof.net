@@ -74,7 +74,7 @@ public partial class FrameworkPicker
 
     protected override void OnParametersSet()
     {
-        var frameworks = CatalogService.Catalog.Frameworks.Select(fx => NuGetFramework.Parse(fx.Name)).ToArray();
+        var frameworks = CatalogService.Catalog.Frameworks.Select(fx => fx.NuGetFramework).ToArray();
 
         FrameworkFamilies = frameworks.Select(fx => fx.GetFrameworkDisplayString()).ToHashSet().Order().ToArray();
         FrameworksByFamily = frameworks.GroupBy(fx => fx.GetFrameworkDisplayString())

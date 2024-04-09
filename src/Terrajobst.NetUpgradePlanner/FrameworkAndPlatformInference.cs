@@ -121,7 +121,7 @@ public sealed class FrameworkAndPlatformInference
     private static string GetLatestFramework(ApiCatalogModel catalog, string frameworkIdentifier, string? platformSuffix = null)
     {
         var framework = catalog.Frameworks
-                               .Select(f => NuGetFramework.Parse(f.Name))
+                               .Select(f => f.NuGetFramework)
                                .Where(f => string.Equals(f.Framework, frameworkIdentifier, StringComparison.OrdinalIgnoreCase))
                                .Where(f => !f.HasPlatform && platformSuffix is null ||
                                            f.HasPlatform && platformSuffix is not null && string.Equals(f.Platform, platformSuffix, StringComparison.OrdinalIgnoreCase))

@@ -5,19 +5,16 @@ namespace Terrajobst.ApiCatalog;
 public sealed class DiffWriter
 {
     private readonly ApiCatalogModel _catalog;
-    private readonly ApiAvailabilityContext _context;
     private readonly NuGetFramework _left;
     private readonly NuGetFramework _right;
 
-    public DiffWriter(ApiCatalogModel catalog, ApiAvailabilityContext context, NuGetFramework left, NuGetFramework right)
+    public DiffWriter(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right)
     {
         ThrowIfNull(catalog);
-        ThrowIfNull(context);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
         _catalog = catalog;
-        _context = context;
         _left = left;
         _right = right;
     }
@@ -43,13 +40,13 @@ public sealed class DiffWriter
         if (api.Kind.IsAccessor())
             return;
 
-        var defLeft = _context.GetDefinition(api, _left);
-        var defRight = _context.GetDefinition(api, _right);
+        var defLeft = api.GetDefinition(_left);
+        var defRight = api.GetDefinition(_right);
 
         if (defLeft is null && defRight is null)
             return;
 
-        if (!_context.ContainsDifferences(_left, _right, api))
+        if (!api.ContainsDifferences(_left, _right))
             return;
 
         var blockDiffMarker = " ";

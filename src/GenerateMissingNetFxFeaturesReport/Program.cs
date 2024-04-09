@@ -12,8 +12,7 @@ if (!File.Exists(catalogFileName))
 
 var catalog = await ApiCatalogModel.LoadAsync(catalogFileName);
 
-var frameworks = catalog.Frameworks.Select(x => NuGetFramework.Parse(x.Name))
-                                   .ToArray();
+var frameworks = catalog.Frameworks.Select(x => x.NuGetFramework).ToArray();
 
 var latestNetFx = frameworks.Where(fx => !fx.HasProfile && string.Equals(fx.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase))
                             .MaxBy(fx => fx.Version);
@@ -27,7 +26,6 @@ Debug.Assert(latestNetCore is not null);
 
 var includeMatched = true;
 
-var availabilityContext = ApiAvailabilityContext.Create(catalog);
 var featureContext = MissingNetFxFeatureContext.Create();
 
 using var writer = new CsvWriter(reportFileName);
@@ -46,8 +44,8 @@ foreach (var api in catalog.AllApis)
     if (api.Kind == ApiKind.Namespace)
         continue;
 
-    var netFxAvailability = availabilityContext.GetAvailability(api, latestNetFx);
-    var netCoreAvailability = availabilityContext.GetAvailability(api, latestNetCore);
+    var netFxAvailability = api.GetAvailability(latestNetFx);
+    var netCoreAvailability = api.GetAvailability(latestNetCore);
 
     if (netFxAvailability is null ||
         !netFxAvailability.IsInBox ||

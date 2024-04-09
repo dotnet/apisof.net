@@ -6,13 +6,13 @@ namespace ApisOfDotNet.Services;
 
 public readonly record struct BrowsingQuery(DiffParameter? Diff, FxParameter? Fx)
 {
-    public static BrowsingQuery Get(ApiAvailabilityContext context, NavigationManager navigationManager)
+    public static BrowsingQuery Get(ApiCatalogModel catalog, NavigationManager navigationManager)
     {
-        ThrowIfNull(context);
+        ThrowIfNull(catalog);
         ThrowIfNull(navigationManager);
 
-        var diff = DiffParameter.Get(context, navigationManager);
-        var fx = FxParameter.Get(context, navigationManager);
+        var diff = DiffParameter.Get(catalog, navigationManager);
+        var fx = FxParameter.Get(catalog, navigationManager);
         return new BrowsingQuery(diff, fx);
     }
 
@@ -29,9 +29,9 @@ public readonly record struct BrowsingQuery(DiffParameter? Diff, FxParameter? Fx
 
 public readonly record struct FxParameter(NuGetFramework Framework)
 {
-    public static FxParameter? Get(ApiAvailabilityContext context, NavigationManager navigationManager)
+    public static FxParameter? Get(ApiCatalogModel catalog, NavigationManager navigationManager)
     {
-        ThrowIfNull(context);
+        ThrowIfNull(catalog);
         ThrowIfNull(navigationManager);
 
         var fx = navigationManager.GetQueryParameter("fx");
@@ -39,7 +39,7 @@ public readonly record struct FxParameter(NuGetFramework Framework)
             return null;
 
         var framework = NuGetFramework.Parse(fx);
-        if (!context.IsKnownFramework(framework))
+        if (catalog.GetFramework(framework) is null)
             return null;
 
         return new FxParameter(framework);
@@ -53,17 +53,19 @@ public readonly record struct FxParameter(NuGetFramework Framework)
 
 public readonly record struct DiffParameter(NuGetFramework Left, NuGetFramework Right)
 {
-    public static DiffParameter? Get(ApiAvailabilityContext context, NavigationManager navigationManager)
+    public static DiffParameter? Get(ApiCatalogModel catalog, NavigationManager navigationManager)
     {
-        ThrowIfNull(context);
+        ThrowIfNull(catalog);
         ThrowIfNull(navigationManager);
 
         var diff = navigationManager.GetQueryParameter("diff");
-        return Parse(context, diff);
+        return Parse(catalog, diff);
     }
 
-    public static DiffParameter? Parse(ApiAvailabilityContext context, string? diff)
+    public static DiffParameter? Parse(ApiCatalogModel catalog, string? diff)
     {
+        ThrowIfNull(catalog);
+
         if (string.IsNullOrEmpty(diff))
             return null;
 
@@ -81,8 +83,8 @@ public readonly record struct DiffParameter(NuGetFramework Left, NuGetFramework 
         var left = NuGetFramework.Parse(l);
         var right = NuGetFramework.Parse(r);
 
-        if (!context.IsKnownFramework(left) ||
-            !context.IsKnownFramework(right))
+        if (catalog.GetFramework(left) is null ||
+            catalog.GetFramework(right) is null)
             return null;
 
         return new DiffParameter(left, right);

@@ -16,9 +16,8 @@ internal static class ApiChecker
                            Action<AssemblyResult> resultReceiver)
     {
         var apiByGuid = catalog.AllApis.ToDictionary(a => a.Guid);
-        var availabilityContext = ApiAvailabilityContext.Create(catalog);
 
-        var platformContexts = frameworks.Select(fx => PlatformAnnotationContext.Create(availabilityContext, fx.GetShortFolderName()))
+        var platformContexts = frameworks.Select(fx => PlatformAnnotationContext.Create(catalog, fx.GetShortFolderName()))
                                          .ToDictionary(pc => pc.Framework);
 
         foreach (var api in catalog.AllApis)
@@ -68,7 +67,7 @@ internal static class ApiChecker
                 {
                     if (apiByGuid.TryGetValue(apiKey.Guid, out var api))
                     {
-                        var availability = apiAvailability.GetOrAdd(api, a => availabilityContext.GetAvailability(a));
+                        var availability = apiAvailability.GetOrAdd(api, a => a.GetAvailability());
 
                         frameworkResultBuilder.Clear();
 
@@ -111,7 +110,7 @@ internal static class ApiChecker
 
                                 if (assemblyFramework is not null)
                                 {
-                                    var compiledAvailability = availabilityContext.GetAvailability(api, assemblyFramework);
+                                    var compiledAvailability = api.GetAvailability(assemblyFramework);
                                     if (compiledAvailability?.Declaration.Obsoletion is not null)
                                         compiledAgainstObsoleteApi = true;
                                 }

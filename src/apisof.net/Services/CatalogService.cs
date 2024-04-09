@@ -116,8 +116,6 @@ public sealed class CatalogService
 
     public ApiCatalogModel Catalog => _data.Catalog;
 
-    public ApiAvailabilityContext AvailabilityContext => _data.AvailabilityContext;
-
     public ApiCatalogStatistics CatalogStatistics => _data.Statistics;
 
     public CatalogJobInfo JobInfo => _data.JobInfo;
@@ -149,7 +147,6 @@ public sealed class CatalogService
             JobInfo = jobInfo;
             Catalog = catalog;
             SuffixTree = suffixTree;
-            AvailabilityContext = ApiAvailabilityContext.Create(catalog);
             Statistics = catalog.GetStatistics();
         }
 
@@ -158,8 +155,6 @@ public sealed class CatalogService
         public ApiCatalogModel Catalog { get; }
 
         public SuffixTree SuffixTree { get; }
-
-        public ApiAvailabilityContext AvailabilityContext { get; }
 
         public ApiCatalogStatistics Statistics { get; }
     }

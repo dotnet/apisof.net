@@ -5,35 +5,32 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class PlatformAnnotationContext
 {
-    public static PlatformAnnotationContext Create(ApiAvailabilityContext availabilityContext, string framework)
+    public static PlatformAnnotationContext Create(ApiCatalogModel catalog, string framework)
     {
-        ThrowIfNull(availabilityContext);
+        ThrowIfNull(catalog);
         ThrowIfNull(framework);
 
-        var catalog = availabilityContext.Catalog;
         if (!catalog.Frameworks.Any(fx => string.Equals(fx.Name, framework, StringComparison.OrdinalIgnoreCase)))
             throw new ArgumentException($"invalid framework: '{framework}'", nameof(framework));
 
         var nuGetFramework = NuGetFramework.Parse(framework);
-        return new PlatformAnnotationContext(availabilityContext, nuGetFramework);
+        return new PlatformAnnotationContext(catalog, nuGetFramework);
     }
 
-    private readonly ApiAvailabilityContext _availabilityContext;
+    private readonly ApiCatalogModel _catalog;
     private readonly NuGetFramework _framework;
     private readonly IReadOnlyList<string> _platforms;
     private readonly IReadOnlyList<(string Platform, string ImpliedPlatform)> _impliedPlatforms;
 
-    private PlatformAnnotationContext(ApiAvailabilityContext availabilityContext, NuGetFramework framework)
+    private PlatformAnnotationContext(ApiCatalogModel catalog, NuGetFramework framework)
     {
-        _availabilityContext = availabilityContext;
+        _catalog = catalog;
         _framework = framework;
         _platforms = GetKnownPlatforms().OrderBy(p => p).ToArray();
         _impliedPlatforms = GetImpliedPlatforms().OrderBy(t => t.Platform).ToArray();
     }
 
-    public ApiCatalogModel Catalog => _availabilityContext.Catalog;
-
-    public ApiAvailabilityContext AvailabilityContext => _availabilityContext;
+    public ApiCatalogModel Catalog => _catalog;
 
     public NuGetFramework Framework => _framework;
 
@@ -149,7 +146,7 @@ public sealed class PlatformAnnotationContext
 
     public PlatformAnnotation GetPlatformAnnotation(ApiModel api)
     {
-        var frameworkAvailability = _availabilityContext.GetAvailability(api, _framework);
+        var frameworkAvailability = api.GetAvailability(_framework);
         if (frameworkAvailability is null)
             throw new ArgumentException($"The API '{api.GetFullName()}' doesn't have a declaration for '{_framework}'.", nameof(api));
 
@@ -177,7 +174,7 @@ public sealed class PlatformAnnotationContext
 
         if (_framework.Framework == ".NETCoreApp" && _framework.Version.Major >= 5)
         {
-            var fullAvailability = _availabilityContext.GetAvailability(api);
+            var fullAvailability = api.GetAvailability();
             var platformSpecific = true;
             var platforms = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 

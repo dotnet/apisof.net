@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -22,6 +23,8 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
     public string Name => ApiCatalogSchema.FrameworkRow.Name.Read(_catalog, _offset);
 
     public bool IsPreview => _catalog.IsPreviewFramework(this);
+
+    public NuGetFramework NuGetFramework => _catalog.AvailabilityContext.GetNuGetFramework(_offset);
 
     public AssemblyEnumerator Assemblies
     {

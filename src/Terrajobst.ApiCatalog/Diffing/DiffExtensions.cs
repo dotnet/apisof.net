@@ -4,17 +4,15 @@ namespace Terrajobst.ApiCatalog;
 
 public static class DiffExtensions
 {
-    public static DiffKind? GetDiffKind(this ApiAvailabilityContext context,
+    public static DiffKind? GetDiffKind(this ApiModel api,
                                         NuGetFramework left,
-                                        NuGetFramework right,
-                                        ApiModel api)
+                                        NuGetFramework right)
     {
-        ThrowIfNull(context);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
-        var defLeft = context.GetDefinition(api, left);
-        var defRight = context.GetDefinition(api, right);
+        var defLeft = api.GetDefinition(left);
+        var defRight = api.GetDefinition(right);
 
         if (defLeft is null && defRight is null)
             return null;
@@ -28,15 +26,13 @@ public static class DiffExtensions
         return defLeft.Value.MarkupId == defRight.Value.MarkupId ? DiffKind.None : DiffKind.Changed;
     }
 
-    public static void GetDiffCount(this ApiAvailabilityContext context,
+    public static void GetDiffCount(this ApiModel api,
                                     NuGetFramework left,
                                     NuGetFramework right,
-                                    ApiModel api,
                                     ref int added,
                                     ref int removed,
                                     ref int modified)
     {
-        ThrowIfNull(context);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
@@ -48,7 +44,7 @@ public static class DiffExtensions
             if (child.Kind.IsAccessor())
                 continue;
 
-            var diffKind = context.GetDiffKind(left, right, child);
+            var diffKind = child.GetDiffKind(left, right);
             if (diffKind is null)
                 continue;
 
@@ -65,20 +61,18 @@ public static class DiffExtensions
                     break;
             }
 
-            GetDiffCount(context, left, right, child, ref added, ref removed, ref modified);
+            child.GetDiffCount(left, right, ref added, ref removed, ref modified);
         }
     }
 
-    public static bool ContainsDifferences(this ApiAvailabilityContext context,
+    public static bool ContainsDifferences(this ApiModel api,
                                            NuGetFramework left,
-                                           NuGetFramework right,
-                                           ApiModel api)
+                                           NuGetFramework right)
     {
-        ThrowIfNull(context);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
-        var diffKind = context.GetDiffKind(left, right, api);
+        var diffKind = api.GetDiffKind(left, right);
         var hasDifference = diffKind is not null &&
                             diffKind.Value != DiffKind.None;
 
@@ -92,7 +86,7 @@ public static class DiffExtensions
                 if (child.Kind.IsAccessor())
                     continue;
                 
-                if (ContainsDifferences(context, left, right, child))
+                if (child.ContainsDifferences(left, right))
                     return true;
             }
         }

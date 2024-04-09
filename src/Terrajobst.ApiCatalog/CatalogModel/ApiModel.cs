@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Text;
+using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -166,6 +167,32 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         return Kind.IsMember()
                 ? Name
                 : string.Empty;
+    }
+
+    public bool IsAvailable(NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        return _catalog.AvailabilityContext.IsAvailable(this, framework);
+    }
+
+    public ApiDeclarationModel? GetDefinition(NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        return _catalog.AvailabilityContext.GetDefinition(this, framework);
+    }
+
+    public ApiAvailability GetAvailability()
+    {
+        return _catalog.AvailabilityContext.GetAvailability(this);
+    }
+
+    public ApiFrameworkAvailability? GetAvailability(NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        return _catalog.AvailabilityContext.GetAvailability(this, framework);
     }
 
     public override bool Equals(object? obj)
