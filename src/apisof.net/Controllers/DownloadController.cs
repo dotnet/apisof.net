@@ -16,7 +16,7 @@ public sealed class DownloadController : Controller
 
     public DownloadController(IOptions<ApisOfDotNetOptions> options)
     {
-        ThrowIfNull(_options);
+        ThrowIfNull(options);
 
         _options = options;
     }
