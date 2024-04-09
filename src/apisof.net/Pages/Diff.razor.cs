@@ -19,6 +19,8 @@ public partial class Diff
 
     public NuGetFramework? Right { get; set; }
 
+    public bool ExcludeUnchanged { get; set; }
+
     public bool HasDiff { get; set; }
 
     protected override void OnInitialized()
@@ -30,6 +32,7 @@ public partial class Diff
             HasDiff = true;
             Left = query.Diff.Value.Left;
             Right = query.Diff.Value.Right;
+            ExcludeUnchanged = query.ExcludeUnchanged is not null;
         }
         else
         {
@@ -50,12 +53,12 @@ public partial class Diff
         }
     }
 
-    private void Browse()
+    private void ApplyDiff()
     {
         if (Left is null || Right is null)
             return;
 
-        var link = Link.ForCatalog(Left, Right);
+        var link = Link.ForCatalog(Left, Right, ExcludeUnchanged);
         NavigationManager.NavigateTo(link);
     }
 

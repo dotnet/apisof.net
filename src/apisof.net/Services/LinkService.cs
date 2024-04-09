@@ -28,12 +28,12 @@ public sealed class LinkService
         return ForCatalog(query);
     }
 
-    public string ForCatalog(NuGetFramework left, NuGetFramework right)
+    public string ForCatalog(NuGetFramework left, NuGetFramework right, bool excludeUnchanged = false)
     {
         ThrowIfNull(left);
         ThrowIfNull(right);
 
-        var query = new BrowsingQuery(new DiffParameter(left, right), null);
+        var query = new BrowsingQuery(new DiffParameter(left, right), ExcludeUnchangedParameter.Get(excludeUnchanged), null);
         return ForCatalog(query.ToString());
     }
 
@@ -64,12 +64,12 @@ public sealed class LinkService
         return $"/diff{query}";
     }
 
-    public string ForDiffDownload(NuGetFramework left, NuGetFramework right)
+    public string ForDiffDownload(NuGetFramework left, NuGetFramework right, bool excludeUnchanged = false)
     {
         ThrowIfNull(left);
         ThrowIfNull(right);
 
-        var query = new BrowsingQuery(new DiffParameter(left, right), null);
+        var query = new BrowsingQuery(new DiffParameter(left, right), ExcludeUnchangedParameter.Get(excludeUnchanged), null);
         return $"/catalog/download/diff{query}";
     }
 

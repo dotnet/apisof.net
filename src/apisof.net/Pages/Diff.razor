@@ -13,11 +13,17 @@
             <label>Right</label>
             <FrameworkPicker @bind-Selected="@Right"/>
         </div>
+        <div class="form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="ExcludeUnchanged" id="excludeUnchangedCheck" />
+            <label class="form-check-label" for="excludeUnchangedCheck">
+                Exclude Unchanged
+            </label>
+        </div>
         <div class="my-3">
             @{
                 var buttonDisabled = Left is null || Right is null;
             }
-            <button class="ml-auto btn btn-primary" @onclick="Browse" disabled="@buttonDisabled">Browse</button>
+            <button class="ml-auto btn btn-primary" @onclick="ApplyDiff" disabled="@buttonDisabled">Apply</button>
 
             @if (HasDiff)
             {
@@ -26,7 +32,7 @@
 
             @if (Left is not null && Right is not null)
             {
-                <a class="ml-3 btn btn-secondary" href="@Link.ForDiffDownload(Left, Right)">Download</a>
+                <a class="ml-3 btn btn-secondary" href="@Link.ForDiffDownload(Left, Right, ExcludeUnchanged)">Download</a>
             }
         </div>
         <div class="my-4 alert alert-secondary">

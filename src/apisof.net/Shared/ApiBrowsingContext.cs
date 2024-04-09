@@ -17,9 +17,9 @@ public abstract class ApiBrowsingContext
         return new FrameworkBrowsingContext(selected);
     }
 
-    public static FrameworkDiffBrowsingContext ForFrameworkDiff(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right, NuGetFramework? selected)
+    public static FrameworkDiffBrowsingContext ForFrameworkDiff(NuGetFramework left, NuGetFramework right, bool excludeUnchanged, NuGetFramework? selected)
     {
-        return new FrameworkDiffBrowsingContext(catalog, left, right, selected);
+        return new FrameworkDiffBrowsingContext(left, right, excludeUnchanged, selected);
     }
 
     public virtual NuGetFramework? SelectedFramework => null;
@@ -71,16 +71,19 @@ public sealed class FrameworkBrowsingContext : ApiBrowsingContext
 
 public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
 {
-    private readonly ApiCatalogModel _catalog;
     private readonly NuGetFramework _left;
     private readonly NuGetFramework _right;
+    private readonly bool _excludeUnchanged;
     private readonly NuGetFramework? _selectedFramework;
 
-    public FrameworkDiffBrowsingContext(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right, NuGetFramework? selectedFramework)
+    public FrameworkDiffBrowsingContext(NuGetFramework left,
+                                        NuGetFramework right,
+                                        bool excludeUnchanged,
+                                        NuGetFramework? selectedFramework)
     {
-        _catalog = catalog;
         _left = left;
         _right = right;
+        _excludeUnchanged = excludeUnchanged;
         _selectedFramework = selectedFramework;
     }
 
@@ -97,6 +100,11 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
     public NuGetFramework Right
     {
         get { return _right; }
+    }
+
+    public bool ExcludeUnchanged
+    {
+        get { return _excludeUnchanged; }
     }
 
     public override ApiBrowsingData? GetData(ApiModel api)
@@ -124,6 +132,10 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
         api.GetDiffCount(_left, _right, ref added, ref removed, ref modified);
 
         var anyChanges = added + removed + modified > 0;
+
+        if (diffKind == DiffKind.None && !anyChanges && _excludeUnchanged)
+            return new ApiBrowsingData { Excluded = true };
+
         if (anyChanges)
         {
             var sb = new StringBuilder();

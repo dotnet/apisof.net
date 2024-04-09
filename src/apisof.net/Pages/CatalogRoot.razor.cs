@@ -30,7 +30,8 @@ public partial class CatalogRoot
         {
             var left = query.Diff.Value.Left;
             var right = query.Diff.Value.Right;
-            BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.Catalog, left, right, framework);
+            var excludeUnchanged = query.ExcludeUnchanged is not null;
+            BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(left, right, excludeUnchanged, framework);
         }
     }
 }

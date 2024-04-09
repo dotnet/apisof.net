@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text;
+using Microsoft.AspNetCore.Components;
 using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Services;
 
-public readonly record struct BrowsingQuery(DiffParameter? Diff, FxParameter? Fx)
+public readonly record struct BrowsingQuery(DiffParameter? Diff, ExcludeUnchangedParameter? ExcludeUnchanged, FxParameter? Fx)
 {
     public static BrowsingQuery Get(ApiCatalogModel catalog, NavigationManager navigationManager)
     {
@@ -12,18 +13,38 @@ public readonly record struct BrowsingQuery(DiffParameter? Diff, FxParameter? Fx
         ThrowIfNull(navigationManager);
 
         var diff = DiffParameter.Get(catalog, navigationManager);
+        var excludeUnchanged = ExcludeUnchangedParameter.Get(navigationManager);
         var fx = FxParameter.Get(catalog, navigationManager);
-        return new BrowsingQuery(diff, fx);
+        return new BrowsingQuery(diff, excludeUnchanged, fx);
     }
 
     public override string ToString()
     {
-        return (Diff, Fx) switch {
-            (not null, not null) => $"?{Diff}&{Fx}",
-            (not null, null) => $"?{Diff}",
-            (null, not null) => $"?{Fx}",
-            _ => ""
-        };
+        var builder = new QueryBuilder();
+        builder.Add(Diff);
+        builder.Add(ExcludeUnchanged);
+        builder.Add(Fx);
+        return builder.ToString();
+    }
+
+    private readonly struct QueryBuilder()
+    {
+        private readonly StringBuilder _sb = new();
+
+        public void Add<T>(T? value)
+            where T: struct
+        {
+            if (value is null)
+                return;
+
+            _sb.Append(_sb.Length == 0 ? '?' : '&');
+            _sb.Append(value);
+        }
+
+        public override string ToString()
+        {
+            return _sb.ToString();
+        }
     }
 }
 
@@ -95,6 +116,28 @@ public readonly record struct DiffParameter(NuGetFramework Left, NuGetFramework 
         var l = Left.GetShortFolderName();
         var r = Right.GetShortFolderName();
         return $"diff={l}-vs-{r}";
+    }
+}
+
+public readonly record struct ExcludeUnchangedParameter
+{
+    public static ExcludeUnchangedParameter? Get(NavigationManager navigationManager)
+    {
+        ThrowIfNull(navigationManager);
+
+        var valueText = navigationManager.GetQueryParameter("no-unchanged");
+        var value = bool.TryParse(valueText, out var b) && b;
+        return Get(value);
+    }
+
+    public static ExcludeUnchangedParameter? Get(bool value)
+    {
+        return value ? new ExcludeUnchangedParameter() : null;
+    }
+
+    public override string ToString()
+    {
+        return "no-unchanged=true";
     }
 }
 

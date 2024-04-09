@@ -80,6 +80,7 @@ public partial class CatalogItem
             {
                 var left = query.Diff.Value.Left;
                 var right = query.Diff.Value.Right;
+                var excludeUnchanged = query.ExcludeUnchanged is not null;
 
                 if (framework is null)
                 {
@@ -91,7 +92,7 @@ public partial class CatalogItem
                         framework = SelectFramework(Api.Value);
                 }
 
-                BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(CatalogService.Catalog, left, right, framework);
+                BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(left, right, excludeUnchanged, framework);
             }
         }
     }

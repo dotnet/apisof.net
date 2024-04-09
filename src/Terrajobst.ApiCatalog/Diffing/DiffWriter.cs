@@ -7,8 +7,9 @@ public sealed class DiffWriter
     private readonly ApiCatalogModel _catalog;
     private readonly NuGetFramework _left;
     private readonly NuGetFramework _right;
+    private readonly bool _excludeUnchanged;
 
-    public DiffWriter(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right)
+    public DiffWriter(ApiCatalogModel catalog, NuGetFramework left, NuGetFramework right, bool excludeUnchanged)
     {
         ThrowIfNull(catalog);
         ThrowIfNull(left);
@@ -17,6 +18,7 @@ public sealed class DiffWriter
         _catalog = catalog;
         _left = left;
         _right = right;
+        _excludeUnchanged = excludeUnchanged;
     }
 
     public async Task WriteToAsync(TextWriter writer)
@@ -46,7 +48,7 @@ public sealed class DiffWriter
         if (defLeft is null && defRight is null)
             return;
 
-        if (!api.ContainsDifferences(_left, _right))
+        if (_excludeUnchanged && !api.ContainsDifferences(_left, _right))
             return;
 
         var blockDiffMarker = " ";

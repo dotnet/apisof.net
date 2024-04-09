@@ -22,7 +22,7 @@ public sealed class DiffDownloadController : Controller
     }
 
     [HttpGet]
-    public ActionResult Get([FromQuery] string diff)
+    public ActionResult Get([FromQuery] string diff, [FromQuery(Name = "no-unchanged")] bool excludeUnchanged = false)
     {
         var catalog = _catalogService.Catalog;
 
@@ -36,7 +36,7 @@ public sealed class DiffDownloadController : Controller
 
         return new FileCallbackResult(new MediaTypeHeaderValue("plain/text"), async (outputStream, _) =>
         {
-            var diffWriter = new DiffWriter(catalog, left, right);
+            var diffWriter = new DiffWriter(catalog, left, right, excludeUnchanged);
             await diffWriter.WriteToAsync(outputStream);
         })
         {
