@@ -36,8 +36,8 @@ public partial class SyntaxView
     {
         var selectedFramework = BrowsingContext.SelectedFramework!;
 
-        IEnumerable<MarkupDiff.MarkupTokenWithDiff> tokenDiff;
-        MarkupDiff.DiffKind apiDiff;
+        IEnumerable<MarkupTokenWithDiff> tokenDiff;
+        MarkupTokenDiffKind apiDiff;
 
         if (BrowsingContext is FrameworkDiffBrowsingContext diff &&
             (selectedFramework == diff.Left || selectedFramework == diff.Right))
@@ -48,38 +48,38 @@ public partial class SyntaxView
             if (left is null)
             {
                 Debug.Assert(right is not null);
-                apiDiff = MarkupDiff.DiffKind.Added;
+                apiDiff = MarkupTokenDiffKind.Added;
                 tokenDiff = GetTokensWithoutDiff(right.Value);
                 Availability = CatalogService.AvailabilityContext.GetAvailability(Current, diff.Right)!;
             }
             else if (right is null)
             {
-                apiDiff = MarkupDiff.DiffKind.Removed;
+                apiDiff = MarkupTokenDiffKind.Removed;
                 tokenDiff = GetTokensWithoutDiff(left.Value);
                 Availability = CatalogService.AvailabilityContext.GetAvailability(Current, diff.Left)!;
             }
             else
             {
-                apiDiff = MarkupDiff.DiffKind.None;
+                apiDiff = MarkupTokenDiffKind.None;
                 tokenDiff = MarkupDiff.Diff(left.Value.GetMarkup(), right.Value.GetMarkup());
                 Availability = CatalogService.AvailabilityContext.GetAvailability(Current, diff.Right)!;
             }
         }
         else
         {
-            apiDiff = MarkupDiff.DiffKind.None;
+            apiDiff = MarkupTokenDiffKind.None;
             Availability = CatalogService.AvailabilityContext.GetAvailability(Current, selectedFramework)!;
             tokenDiff = GetTokensWithoutDiff(Availability.Declaration);
         }
 
         Debug.Assert(Availability is not null);
 
-        IEnumerable<MarkupDiff.MarkupTokenWithDiff> GetTokensWithoutDiff(ApiDeclarationModel declaration)
+        IEnumerable<MarkupTokenWithDiff> GetTokensWithoutDiff(ApiDeclarationModel declaration)
         {
             return declaration
                 .GetMarkup()
                 .Tokens
-                .Select(t => new MarkupDiff.MarkupTokenWithDiff(t, MarkupDiff.DiffKind.None));
+                .Select(t => new MarkupTokenWithDiff(t, MarkupTokenDiffKind.None));
         }
 
         var markupBuilder = new StringBuilder();
@@ -107,8 +107,8 @@ public partial class SyntaxView
         foreach (var (token, tokenDiffKind) in tokenDiff)
         {
             var diffClass = tokenDiffKind switch {
-                MarkupDiff.DiffKind.Added => "diff-added",
-                MarkupDiff.DiffKind.Removed => "diff-removed",
+                MarkupTokenDiffKind.Added => "diff-added",
+                MarkupTokenDiffKind.Removed => "diff-removed",
                 _ => null
             };
 
@@ -168,9 +168,9 @@ public partial class SyntaxView
                 markupBuilder.Append("</span>");
         }
 
-        SyntaxClass = apiDiff == MarkupDiff.DiffKind.Added
+        SyntaxClass = apiDiff == MarkupTokenDiffKind.Added
                         ? "diff-added"
-                        : apiDiff == MarkupDiff.DiffKind.Removed
+                        : apiDiff == MarkupTokenDiffKind.Removed
                             ? "diff-removed"
                             : "";
         SyntaxMarkup = new MarkupString(markupBuilder.ToString().Trim());

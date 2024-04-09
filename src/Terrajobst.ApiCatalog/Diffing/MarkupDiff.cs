@@ -1,18 +1,16 @@
-﻿using Terrajobst.ApiCatalog;
+﻿namespace Terrajobst.ApiCatalog;
 
-namespace ApisOfDotNet.Shared;
-
-internal static class MarkupDiff
+public enum MarkupTokenDiffKind
 {
-    public enum DiffKind
-    {
-        None,
-        Added,
-        Removed
-    }
+    None,
+    Added,
+    Removed
+}
 
-    public record struct MarkupTokenWithDiff(MarkupToken Token, DiffKind Diff);
+public record struct MarkupTokenWithDiff(MarkupToken Token, MarkupTokenDiffKind Diff);
 
+public static class MarkupDiff
+{
     public static IEnumerable<MarkupTokenWithDiff> Diff(Markup left, Markup right)
     {
         ThrowIfNull(left);
@@ -37,20 +35,20 @@ internal static class MarkupDiff
                 switch (edit.Kind)
                 {
                     case EditKind.None:
-                        yield return new MarkupTokenWithDiff(sequenceA.Tokens[edit.IndexA], DiffKind.None);
+                        yield return new MarkupTokenWithDiff(sequenceA.Tokens[edit.IndexA], MarkupTokenDiffKind.None);
                         break;
 
                     case EditKind.Delete:
-                        yield return new MarkupTokenWithDiff(sequenceA.Tokens[edit.IndexA], DiffKind.Removed);
+                        yield return new MarkupTokenWithDiff(sequenceA.Tokens[edit.IndexA], MarkupTokenDiffKind.Removed);
                         break;
 
                     case EditKind.Insert:
-                        yield return new MarkupTokenWithDiff(sequenceB.Tokens[edit.IndexB], DiffKind.Added);
+                        yield return new MarkupTokenWithDiff(sequenceB.Tokens[edit.IndexB], MarkupTokenDiffKind.Added);
                         break;
 
                     case EditKind.Update:
-                        yield return new MarkupTokenWithDiff(sequenceA.Tokens[edit.IndexA], DiffKind.Removed);
-                        yield return new MarkupTokenWithDiff(sequenceB.Tokens[edit.IndexB], DiffKind.Added);
+                        yield return new MarkupTokenWithDiff(sequenceA.Tokens[edit.IndexA], MarkupTokenDiffKind.Removed);
+                        yield return new MarkupTokenWithDiff(sequenceB.Tokens[edit.IndexB], MarkupTokenDiffKind.Added);
                         break;
                 }
             }
