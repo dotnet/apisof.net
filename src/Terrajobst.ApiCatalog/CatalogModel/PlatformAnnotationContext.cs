@@ -80,12 +80,14 @@ public sealed class PlatformAnnotationContext
         var frameworkAssemblies = Catalog.Frameworks
                                          .Single(fx => string.Equals(fx.Name, frameworkName, StringComparison.OrdinalIgnoreCase))
                                          .Assemblies.ToHashSet();
+
+        var supportedOsPlatformGuard = Catalog.AllApis
+                                              .Where(a => a.Name == "SupportedOSPlatformGuardAttribute" &&
+                                                          a.Parent?.GetFullName() ==  "System.Runtime.Versioning")
+                                              .Cast<ApiModel?>()
+                                              .SingleOrDefault();
         
-        var supportedOsPlatformGuard = Catalog.AllApis.Where(a => a.Name == "SupportedOSPlatformGuardAttribute" &&
-                                                                  a.Parent?.GetFullName() == "System.Runtime.Versioning")
-                                                      .Select(a => (Guid?)a.Guid)
-                                                      .SingleOrDefault();
-        
+        var supportedOsPlatformGuardCtor = supportedOsPlatformGuard?.Children.SingleOrDefault(c => c.Kind == ApiKind.Constructor);
 
         var operatingSystemType = GetOperatingSystemType();
         if (operatingSystemType is not null)
@@ -109,7 +111,7 @@ public sealed class PlatformAnnotationContext
                             var t6 = markup.Tokens[i + 5];
 
                             if (t1.Kind == MarkupTokenKind.OpenBracketToken &&
-                                t2.Kind == MarkupTokenKind.ReferenceToken && t2.Reference == supportedOsPlatformGuard &&
+                                t2.Kind == MarkupTokenKind.ReferenceToken && t2.Reference == supportedOsPlatformGuardCtor?.Guid &&
                                 t3.Kind == MarkupTokenKind.OpenParenToken &&
                                 t4.Kind == MarkupTokenKind.LiteralString &&
                                 t5.Kind == MarkupTokenKind.CloseParenToken &&
