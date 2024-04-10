@@ -1,4 +1,4 @@
-namespace Terrajobst.UsageCrawling;
+namespace GenUsageNuGet.Infra;
 
 public abstract class CrawlerStore
 {

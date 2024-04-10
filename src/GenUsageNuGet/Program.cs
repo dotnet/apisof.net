@@ -1,12 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using GenUsageNuGet.Infra;
 using Microsoft.Extensions.Configuration;
 using Mono.Options;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Terrajobst.ApiCatalog;
-using Terrajobst.UsageCrawling;
-using NuGetFeed = Terrajobst.UsageCrawling.NuGetFeed;
+using NuGetFeed = GenUsageNuGet.Infra.NuGetFeed;
 
 namespace GenUsageNuGet;
 

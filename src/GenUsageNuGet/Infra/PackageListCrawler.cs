@@ -1,6 +1,6 @@
 using NuGet.Packaging.Core;
 
-namespace Terrajobst.UsageCrawling;
+namespace GenUsageNuGet.Infra;
 
 public abstract class PackageListCrawler
 {

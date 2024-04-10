@@ -8,10 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Azure.Storage.Blobs" />
+        <PackageReference Include="Dapper" />
         <PackageReference Include="Microsoft.Data.Sqlite" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
         <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
         <PackageReference Include="Mono.Options" />
+        <PackageReference Include="NuGet.Protocol" />
     </ItemGroup>
 
     <ItemGroup>

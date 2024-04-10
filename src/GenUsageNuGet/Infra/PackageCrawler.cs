@@ -1,7 +1,8 @@
 ﻿using Microsoft.Cci.Extensions;
 using NuGet.Packaging.Core;
+using Terrajobst.UsageCrawling;
 
-namespace Terrajobst.UsageCrawling;
+namespace GenUsageNuGet.Infra;
 
 public static class PackageCrawler
 {

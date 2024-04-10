@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace Terrajobst.UsageCrawling;
+namespace GenUsageNuGet.Infra;
 
 public sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
     where T : notnull

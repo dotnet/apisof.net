@@ -1,7 +1,7 @@
 using Azure.Core;
 using Azure.Storage.Blobs;
 
-namespace Terrajobst.UsageCrawling;
+namespace GenUsageNuGet.Infra;
 
 public sealed class BlobStorageCrawlerStore : CrawlerStore
 {

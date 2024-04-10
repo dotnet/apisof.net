@@ -1,7 +1,7 @@
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 
-namespace Terrajobst.UsageCrawling;
+namespace GenUsageNuGet.Infra;
 
 public sealed class FilePackageListCrawler : PackageListCrawler
 {
