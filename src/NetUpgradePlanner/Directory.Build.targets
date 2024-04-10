@@ -36,4 +36,10 @@
     <Copy SourceFiles="@(GraphVizFile)" DestinationFolder="$(PublishDir)\GraphViz" />
   </Target>
 
+  <Target Name="ExcludeLocalizationResources" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <ResourceCopyLocalItems Remove="@(ResourceCopyLocalItems)" />
+    </ItemGroup>
+  </Target>
+
 </Project>
