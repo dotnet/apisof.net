@@ -49,14 +49,6 @@ internal static class CatalogExtensions
         return new Guid(hashBytes);
     }
 
-    public static string GetCatalogSyntax(this ISymbol symbol)
-    {
-        var writer = new MarkupStringWriter();
-        var w = new SyntaxWriter(writer);
-        CSharpDeclarationWriter.WriteDeclaration(symbol, w);
-        return writer.ToString();
-    }
-
     public static string GetCatalogSyntaxMarkup(this ISymbol symbol)
     {
         var writer = new MarkupXmlWriter();

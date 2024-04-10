@@ -234,37 +234,19 @@ public sealed class ApiCatalogModel
 
         static FrozenSet<int> GetPreviewFrameworks(ApiCatalogModel apiCatalogModel)
         {
-            var previewFrameworkNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var latestNetCoreAppVersion = apiCatalogModel.Frameworks
+                .Where(fx => string.Equals(fx.NuGetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase))
+                .Select(fx => fx.NuGetFramework.Version)
+                .Max();
+            
+            if (latestNetCoreAppVersion is null)
+                return FrozenSet<int>.Empty;
 
-            foreach (var framework in FrameworkDefinition.All)
-            {
-                if (!framework.IsPreview)
-                    continue;
-
-                previewFrameworkNames.Add(framework.Name);
-
-                foreach (var pack in framework.BuiltInPacks.Concat(framework.WorkloadPacks))
-                {
-                    foreach (var platform in pack.Platforms)
-                    {
-                        if (string.IsNullOrEmpty(platform))
-                            continue;
-
-                        var platformFramework = $"{framework.Name}-{platform}";
-                        previewFrameworkNames.Add(platformFramework);
-                    }
-                }
-            }
-
-            var result = new List<int>();
-
-            foreach (var framework in apiCatalogModel.Frameworks)
-            {
-                if (previewFrameworkNames.Contains(framework.Name))
-                    result.Add(framework.Id);
-            }
-
-            return result.ToFrozenSet();
+            return apiCatalogModel.Frameworks
+                .Where(fx => string.Equals(fx.NuGetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
+                             fx.NuGetFramework.Version == latestNetCoreAppVersion)
+                .Select(fx => fx.Id)
+                .ToFrozenSet();
         }
     }
 

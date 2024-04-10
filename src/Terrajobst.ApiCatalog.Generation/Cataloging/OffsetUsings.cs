@@ -1,0 +1,9 @@
+global using StringOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.String>;
+global using BlobOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.Blob>;
+global using FrameworkOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.Framework>;
+global using PackageOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.Package>;
+global using AssemblyOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.Assembly>;
+global using UsageSourceOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.UsageSource>;
+global using ApiOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.Api>;
+global using ApiDeclarationOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.ApiDeclaration>;
+global using ApiUsageOffset = Terrajobst.ApiCatalog.Offset<Terrajobst.ApiCatalog.OffsetTag.ApiUsage>;
