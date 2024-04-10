@@ -20,14 +20,5 @@ namespace Terrajobst.UsageCrawling
             foreach (var key in Data.Keys.OrderBy(k => k))
                 await writer.WriteLineAsync(key.Guid.ToString("N"));
         }
-
-        public string GetGuidsText()
-        {
-            using var writer = new StringWriter();
-            foreach (var key in Data.Keys.OrderBy(k => k))
-                writer.WriteLine(key.Guid.ToString("N"));
-
-            return writer.ToString();
-        }
     }
 }
