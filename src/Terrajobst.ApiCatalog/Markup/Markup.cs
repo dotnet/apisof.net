@@ -10,6 +10,8 @@ public class Markup
 {
     public Markup(IEnumerable<MarkupToken> tokens)
     {
+        ThrowIfNull(tokens);
+
         Tokens = tokens.ToImmutableArray();
     }
 
@@ -17,6 +19,8 @@ public class Markup
 
     public static Markup FromXml(string xml)
     {
+        ThrowIfNull(xml);
+
         var settings = new XmlReaderSettings
         {
             ConformanceLevel = ConformanceLevel.Auto

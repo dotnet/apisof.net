@@ -9,6 +9,8 @@ public readonly struct PreviewDescription
 {
     public static PreviewDescription? Create(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         FrameworkModel? apiPreviewFramework = null;
         PreviewRequirementModel? apiPreviewRequirement = null;
         ExperimentalModel? apiExperimental = null;
@@ -115,6 +117,8 @@ public readonly struct PreviewDescription
 
     public PreviewDescription(PreviewReason reason, string description, string? url)
     {
+        ThrowIfNullOrEmpty(description);
+
         Reason = reason;
         Description = description;
         Url = url;

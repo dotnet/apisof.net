@@ -22,6 +22,11 @@ public sealed class MemberMatcher : ApiMatcher
                                  string typeName,
                                  string memberName)
     {
+        ThrowIfNull(assemblyName);
+        ThrowIfNull(namespaceName);
+        ThrowIfNull(typeName);
+        ThrowIfNull(memberName);
+
         return string.Equals(memberName, MemberName, StringComparison.Ordinal) &&
                string.Equals(typeName, TypeName, StringComparison.Ordinal) &&
                string.Equals(namespaceName, NamespaceName, StringComparison.Ordinal);

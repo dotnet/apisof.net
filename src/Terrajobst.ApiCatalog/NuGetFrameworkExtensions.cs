@@ -6,6 +6,8 @@ public static class NuGetFrameworkExtensions
 {
     public static string GetVersionDisplayString(this Version version)
     {
+        ThrowIfNull(version);
+
         var fieldCount = 4;
         if (version.Revision == 0)
         {
@@ -19,6 +21,8 @@ public static class NuGetFrameworkExtensions
 
     public static string GetVersionDisplayString(this NuGetFramework framework)
     {
+        ThrowIfNull(framework);
+
         if (framework.IsPCL)
             return framework.GetShortFolderName();
 
@@ -38,6 +42,8 @@ public static class NuGetFrameworkExtensions
 
     public static string GetFrameworkDisplayString(this NuGetFramework framework)
     {
+        ThrowIfNull(framework);
+
         switch (framework.Framework)
         {
             case ".NETFramework":

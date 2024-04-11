@@ -7,6 +7,11 @@ public sealed class MissingNetFxFeature
                                string url,
                                IEnumerable<ApiMatcher> appliesTo)
     {
+        ThrowIfNull(name);
+        ThrowIfNull(description);
+        ThrowIfNull(url);
+        ThrowIfNull(appliesTo);
+        
         Name = name;
         Description = description;
         Url = url;

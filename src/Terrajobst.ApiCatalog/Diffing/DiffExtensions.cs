@@ -8,6 +8,7 @@ public static class DiffExtensions
                                         NuGetFramework left,
                                         NuGetFramework right)
     {
+        ThrowIfDefault(api);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
@@ -33,6 +34,7 @@ public static class DiffExtensions
                                     ref int removed,
                                     ref int modified)
     {
+        ThrowIfDefault(api);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
@@ -69,6 +71,7 @@ public static class DiffExtensions
                                            NuGetFramework left,
                                            NuGetFramework right)
     {
+        ThrowIfDefault(api);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
@@ -96,6 +99,8 @@ public static class DiffExtensions
 
     public static bool CanHaveChildren(this ApiModel api)
     {
+        ThrowIfDefault(api);
+
         return api.Kind == ApiKind.Namespace ||
                api.Kind.IsType() && api.Kind != ApiKind.Delegate;
     }

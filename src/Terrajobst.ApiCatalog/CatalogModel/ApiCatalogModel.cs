@@ -511,6 +511,8 @@ public sealed class ApiCatalogModel
 
     public ApiModel? GetForwardedApi(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         if (_forwardedApis is null)
         {
             var forwardedApis = ComputeForwardedApis();
@@ -563,6 +565,8 @@ public sealed class ApiCatalogModel
 
     public static async Task DownloadFromWebAsync(string fileName)
     {
+        ThrowIfNullOrEmpty(fileName);
+
         using var client = new HttpClient();
         await using var networkStream = await client.GetStreamAsync(Url);
         await using var fileStream = File.Create(fileName);
@@ -571,12 +575,16 @@ public sealed class ApiCatalogModel
 
     public static async Task<ApiCatalogModel> LoadAsync(string path)
     {
+        ThrowIfNullOrEmpty(path);
+
         await using var stream = File.OpenRead(path);
         return await LoadAsync(stream);
     }
 
     public static async Task<ApiCatalogModel> LoadAsync(Stream stream)
     {
+        ThrowIfNull(stream);
+
         var start = stream.Position;
 
         using var reader = new BinaryReader(stream);

@@ -7,7 +7,8 @@ public readonly struct PreviewRequirementModel
 
     internal PreviewRequirementModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.PreviewRequirementTable, ApiCatalogSchema.PreviewRequirementRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.PreviewRequirementTable, ApiCatalogSchema.PreviewRequirementRow.Size);
 
         _catalog = catalog;
         _offset = offset;

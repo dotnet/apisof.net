@@ -8,7 +8,8 @@ public sealed class ApiFrameworkAvailability
     public ApiFrameworkAvailability(NuGetFramework framework, ApiDeclarationModel declaration, PackageModel? package, NuGetFramework? packageFramework)
     {
         ThrowIfNull(framework);
-        
+        ThrowIfDefault(declaration);
+
         Framework = framework;
         Declaration = declaration;
         Package = package;

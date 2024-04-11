@@ -4,6 +4,8 @@ public readonly struct PlatformAnnotationEntry : IEquatable<PlatformAnnotationEn
 {
     public PlatformAnnotationEntry(string name, PlatformSupportRange range)
     {
+        ThrowIfNullOrEmpty(name);
+
         Name = name;
         Range = range;
     }

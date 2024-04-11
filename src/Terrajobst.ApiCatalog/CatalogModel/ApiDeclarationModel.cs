@@ -7,7 +7,8 @@ public readonly struct ApiDeclarationModel : IEquatable<ApiDeclarationModel>
 
     internal ApiDeclarationModel(ApiModel api, int offset)
     {
-        ApiCatalogSchema.EnsureValidBlobOffset(api.Catalog, offset);
+        ThrowIfDefault(api);
+        ThrowIfBlobOffsetOutOfRange(offset, api.Catalog);
 
         _api = api;
         _offset = offset;

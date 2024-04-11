@@ -179,6 +179,8 @@ public sealed class MissingNetFxFeatureContext
 
     public MissingNetFxFeature? Get(ApiDeclarationModel declaration)
     {
+        ThrowIfDefault(declaration);
+
         var apiId = declaration.Api.Id;
 
         if (!_mappings.TryGetValue(apiId, out var result))

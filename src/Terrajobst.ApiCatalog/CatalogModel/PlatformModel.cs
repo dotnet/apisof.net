@@ -7,7 +7,8 @@ public readonly struct PlatformModel : IEquatable<PlatformModel>
 
     internal PlatformModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.PlatformTable, ApiCatalogSchema.PlatformRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.PlatformTable, ApiCatalogSchema.PlatformRow.Size);
 
         _catalog = catalog;
         _offset = offset;

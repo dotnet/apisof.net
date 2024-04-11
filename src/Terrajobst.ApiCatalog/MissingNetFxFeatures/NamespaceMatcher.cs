@@ -24,13 +24,17 @@ public sealed class NamespaceMatcher : ApiMatcher
                                  string typeName,
                                  string memberName)
     {
+        ThrowIfNull(assemblyName);
+        ThrowIfNull(namespaceName);
+        ThrowIfNull(typeName);
+        ThrowIfNull(memberName);
+
         if (string.Equals(namespaceName, NamespaceName, StringComparison.Ordinal))
             return true;
 
         if (IsWildcard)
         {
-            if (namespaceName is not null &&
-                namespaceName.Length > NamespaceName.Length &&
+            if (namespaceName.Length > NamespaceName.Length &&
                 namespaceName.StartsWith(NamespaceName, StringComparison.OrdinalIgnoreCase) &&
                 namespaceName[NamespaceName.Length] == '.')
             {

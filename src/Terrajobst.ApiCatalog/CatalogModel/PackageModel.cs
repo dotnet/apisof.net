@@ -9,7 +9,8 @@ public readonly struct PackageModel : IEquatable<PackageModel>
 
     internal PackageModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.PackageTable, ApiCatalogSchema.PackageRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.PackageTable, ApiCatalogSchema.PackageRow.Size);
 
         _catalog = catalog;
         _offset = offset;

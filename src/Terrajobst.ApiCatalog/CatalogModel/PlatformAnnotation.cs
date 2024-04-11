@@ -16,6 +16,8 @@ public readonly struct PlatformAnnotation : IEquatable<PlatformAnnotation>
 
     public PlatformAnnotation(IReadOnlyList<PlatformAnnotationEntry> entries)
     {
+        ThrowIfNull(entries);
+
         var isAllowList = entries.Any(t => t.Range.IsAllowList);
 
         Kind = isAllowList ? PlatformAnnotationKind.RestrictedTo : PlatformAnnotationKind.UnrestrictedExceptFor;

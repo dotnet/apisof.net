@@ -9,7 +9,8 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
 
     internal AssemblyModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.AssemblyTable, ApiCatalogSchema.AssemblyRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.AssemblyTable, ApiCatalogSchema.AssemblyRow.Size);
 
         _catalog = catalog;
         _offset = offset;

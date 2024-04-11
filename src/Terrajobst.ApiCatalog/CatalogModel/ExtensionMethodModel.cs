@@ -7,7 +7,8 @@ public readonly struct ExtensionMethodModel : IEquatable<ExtensionMethodModel>
 
     internal ExtensionMethodModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.ExtensionMethodTable, ApiCatalogSchema.ExtensionMethodRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.ExtensionMethodTable, ApiCatalogSchema.ExtensionMethodRow.Size);
 
         _catalog = catalog;
         _offset = offset;

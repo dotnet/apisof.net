@@ -19,6 +19,11 @@ public sealed class TypeMatcher : ApiMatcher
                                  string typeName,
                                  string memberName)
     {
+        ThrowIfNull(assemblyName);
+        ThrowIfNull(namespaceName);
+        ThrowIfNull(typeName);
+        ThrowIfNull(memberName);
+
         return string.Equals(typeName, TypeName, StringComparison.Ordinal) &&
                string.Equals(namespaceName, NamespaceName, StringComparison.Ordinal);
     }

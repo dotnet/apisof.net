@@ -148,6 +148,8 @@ public sealed class PlatformAnnotationContext
 
     public PlatformAnnotation GetPlatformAnnotation(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         var frameworkAvailability = api.GetAvailability(_framework);
         if (frameworkAvailability is null)
             throw new ArgumentException($"The API '{api.GetFullName()}' doesn't have a declaration for '{_framework}'.", nameof(api));
@@ -256,6 +258,8 @@ public sealed class PlatformAnnotationContext
 
     public static (string Name, Version Version) ParsePlatform(string nameAndVersion)
     {
+        ThrowIfNullOrEmpty(nameAndVersion);
+
         var framework = NuGetFramework.Parse("net5.0-" + nameAndVersion);
         return (framework.Platform, framework.PlatformVersion);
     }

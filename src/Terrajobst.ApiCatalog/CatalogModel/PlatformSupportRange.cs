@@ -10,6 +10,8 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
 
     public PlatformSupportRange(IEnumerable<(Version Version, bool IsSupported)> versions)
     {
+        ThrowIfNull(versions);
+
         var builder = new List<(Version Version, bool IsSupported)>();
 
         foreach (var (version, isSupported) in versions.OrderBy(t => t.Version)
@@ -89,6 +91,8 @@ public readonly struct PlatformSupportRange : IEquatable<PlatformSupportRange>
 
     public bool IsSupported(Version version)
     {
+        ThrowIfNull(version);
+
         for (var i = 0; i < Count; i++)
         {
             var current = this[i];

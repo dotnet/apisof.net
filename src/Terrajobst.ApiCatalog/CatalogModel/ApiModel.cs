@@ -11,7 +11,8 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
 
     internal ApiModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.ApiTable, ApiCatalogSchema.ApiRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.ApiTable, ApiCatalogSchema.ApiRow.Size);
 
         _catalog = catalog;
         _offset = offset;

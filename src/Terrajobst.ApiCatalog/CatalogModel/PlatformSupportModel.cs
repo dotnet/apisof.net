@@ -7,7 +7,8 @@ public readonly struct PlatformSupportModel : IEquatable<PlatformSupportModel>
 
     internal PlatformSupportModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidBlobOffset(catalog, offset);
+        ThrowIfNull(catalog);
+        ThrowIfBlobOffsetOutOfRange(offset, catalog);
 
         _catalog = catalog;
         _offset = offset;

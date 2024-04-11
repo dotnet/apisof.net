@@ -7,7 +7,8 @@ public readonly struct ObsoletionModel : IEquatable<ObsoletionModel>
 
     internal ObsoletionModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.ObsoletionTable, ApiCatalogSchema.ObsoletionRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.ObsoletionTable, ApiCatalogSchema.ObsoletionRow.Size);
 
         _catalog = catalog;
         _offset = offset;

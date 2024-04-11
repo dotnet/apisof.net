@@ -10,7 +10,8 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
 
     internal FrameworkModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.FrameworkTable, ApiCatalogSchema.FrameworkRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.FrameworkTable, ApiCatalogSchema.FrameworkRow.Size);
 
         _catalog = catalog;
         _offset = offset;

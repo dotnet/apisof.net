@@ -91,6 +91,8 @@ internal sealed class ApiAvailabilityContext
 
     public FrameworkModel? GetFramework(NuGetFramework framework)
     {
+        ThrowIfNull(framework);
+
         if (_frameworkIds.TryGetValue(framework, out var id))
             return new FrameworkModel(_catalog, id);
 
@@ -99,6 +101,9 @@ internal sealed class ApiAvailabilityContext
 
     public bool IsAvailable(ApiModel api, NuGetFramework framework)
     {
+        ThrowIfDefault(api);
+        ThrowIfNull(framework);
+
         var frameworkId = _frameworkIds[framework];
         var frameworkAssemblies = _frameworkAssemblies[frameworkId];
         var packageAssemblies = _packageAssemblies[frameworkId];
@@ -115,6 +120,9 @@ internal sealed class ApiAvailabilityContext
 
     public ApiDeclarationModel? GetDefinition(ApiModel api, NuGetFramework framework)
     {
+        ThrowIfDefault(api);
+        ThrowIfNull(framework);
+
         var frameworkId = _frameworkIds[framework];
         var frameworkAssemblies = _frameworkAssemblies[frameworkId];
 
@@ -130,6 +138,8 @@ internal sealed class ApiAvailabilityContext
 
     public ApiAvailability GetAvailability(ApiModel api)
     {
+        ThrowIfDefault(api);
+
         var result = new List<ApiFrameworkAvailability>();
 
         foreach (var nugetFramework in _frameworkIds.Keys)
@@ -144,6 +154,9 @@ internal sealed class ApiAvailabilityContext
 
     public ApiFrameworkAvailability? GetAvailability(ApiModel api, NuGetFramework nugetFramework)
     {
+        ThrowIfDefault(api);
+        ThrowIfNull(nugetFramework);
+
         if (_frameworkIds.TryGetValue(nugetFramework, out var frameworkId))
         {
             // Try to resolve an in-box assembly

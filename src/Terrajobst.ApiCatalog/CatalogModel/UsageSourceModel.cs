@@ -7,7 +7,8 @@ public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
 
     internal UsageSourceModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.UsageSourceTable, ApiCatalogSchema.UsageSourceRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.UsageSourceTable, ApiCatalogSchema.UsageSourceRow.Size);
 
         _catalog = catalog;
         _offset = offset;

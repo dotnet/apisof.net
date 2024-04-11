@@ -4,21 +4,6 @@ namespace Terrajobst.ApiCatalog;
 
 internal static partial class ApiCatalogSchema
 {
-    internal static void EnsureValidOffset(ReadOnlySpan<byte> table, int rowSize, int offset)
-    {
-        if (offset < 0 ||
-            offset >= table.Length ||
-            offset % rowSize > 0)
-            throw new InvalidDataException($"The offset {offset} is invalid.");
-    }
-
-    internal static void EnsureValidBlobOffset(ApiCatalogModel catalog, int offset)
-    {
-        if (offset < 0 ||
-            offset >= catalog.BlobHeap.Length)
-            throw new InvalidDataException($"The offset {offset} is invalid.");
-    }
-
     internal delegate ReadOnlySpan<byte> MemorySelector(ApiCatalogModel catalog);
 
     internal abstract class Layout

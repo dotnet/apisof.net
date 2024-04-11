@@ -7,7 +7,8 @@ public readonly struct ExperimentalModel
 
     internal ExperimentalModel(ApiCatalogModel catalog, int offset)
     {
-        ApiCatalogSchema.EnsureValidOffset(catalog.ExperimentalTable, ApiCatalogSchema.ExperimentalRow.Size, offset);
+        ThrowIfNull(catalog);
+        ThrowIfRowIndexOutOfRange(offset, catalog.ExperimentalTable, ApiCatalogSchema.ExperimentalRow.Size);
 
         _catalog = catalog;
         _offset = offset;
