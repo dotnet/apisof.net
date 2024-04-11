@@ -88,7 +88,7 @@ public static class DiffExtensions
             {
                 if (child.Kind.IsAccessor())
                     continue;
-                
+
                 if (child.ContainsDifferences(left, right))
                     return true;
             }

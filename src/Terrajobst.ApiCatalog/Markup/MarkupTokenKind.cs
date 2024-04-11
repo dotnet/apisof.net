@@ -49,7 +49,7 @@ public enum MarkupTokenKind : byte
     SemicolonToken,
     SlashToken,
     TildeToken,
-    
+
     // Keywords
     AbstractKeyword,
     AddKeyword,

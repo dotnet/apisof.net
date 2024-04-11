@@ -10,14 +10,14 @@ public static class MarkupFacts
             // Whitespace
             MarkupTokenKind.LineBreak => Environment.NewLine,
             MarkupTokenKind.Space => " ",
-            
+
             // Literals
             MarkupTokenKind.LiteralString => null,
             MarkupTokenKind.LiteralNumber => null,
-            
+
             // Name
             MarkupTokenKind.ReferenceToken => null,
-            
+
             // Punctuation
             MarkupTokenKind.AmpersandToken => "&",
             MarkupTokenKind.AsteriskToken => "*",
@@ -52,7 +52,7 @@ public static class MarkupFacts
             MarkupTokenKind.SemicolonToken => ";",
             MarkupTokenKind.SlashToken => "/",
             MarkupTokenKind.TildeToken => "~",
-            
+
             // Keywords
             MarkupTokenKind.AbstractKeyword => "abstract",
             MarkupTokenKind.AddKeyword => "add",
@@ -161,7 +161,7 @@ public static class MarkupFacts
             ";" => MarkupTokenKind.SemicolonToken,
             "/" => MarkupTokenKind.SlashToken,
             "~" => MarkupTokenKind.TildeToken,
-            
+
             // Keywords
             "Cdecl" => MarkupTokenKind.CdeclKeyword,
             "Fastcall" => MarkupTokenKind.FastcallKeyword,
@@ -227,7 +227,7 @@ public static class MarkupFacts
             "where" => MarkupTokenKind.WhereKeyword,
 
             _ => MarkupTokenKind.None
-        };        
+        };
     }
 
     public static bool IsKeyword(this MarkupTokenKind kind)

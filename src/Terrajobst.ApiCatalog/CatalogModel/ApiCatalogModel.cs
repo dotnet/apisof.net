@@ -55,7 +55,7 @@ public sealed class ApiCatalogModel
         : this(ApiCatalogSchema.FormatVersion, 0, Array.Empty<byte>(), new int[ApiCatalogSchema.NumberOfTables])
     {
     }
-        
+
     private ApiCatalogModel(int formatVersion, int compressedSize, byte[] buffer, int[] tableSizes)
     {
         Debug.Assert(tableSizes.Length == ApiCatalogSchema.NumberOfTables);
@@ -116,7 +116,7 @@ public sealed class ApiCatalogModel
     internal ReadOnlySpan<byte> ExperimentalTable => _experimentalTableRange.GetBytes(_buffer);
 
     internal ApiAvailabilityContext AvailabilityContext => _availabilityContext;
-    
+
     public FrameworkEnumerator Frameworks
     {
         get
@@ -187,7 +187,7 @@ public sealed class ApiCatalogModel
 
         return _availabilityContext.GetFramework(framework);
     }
-    
+
     public ApiModel GetApiById(int id)
     {
         return new ApiModel(this, id);
@@ -238,7 +238,7 @@ public sealed class ApiCatalogModel
                 .Where(fx => string.Equals(fx.NuGetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase))
                 .Select(fx => fx.NuGetFramework.Version)
                 .Max();
-            
+
             if (latestNetCoreAppVersion is null)
                 return FrozenSet<int>.Empty;
 

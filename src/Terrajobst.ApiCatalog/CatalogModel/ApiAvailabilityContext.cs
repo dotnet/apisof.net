@@ -6,7 +6,7 @@ namespace Terrajobst.ApiCatalog;
 internal sealed class ApiAvailabilityContext
 {
     private readonly ApiCatalogModel _catalog;
-    private readonly FrozenDictionary<int, NuGetFramework> _frameworkById; 
+    private readonly FrozenDictionary<int, NuGetFramework> _frameworkById;
     private readonly FrozenDictionary<NuGetFramework, int> _frameworkIds;
     private readonly FrozenDictionary<int, FrozenSet<int>> _frameworkAssemblies;
     private readonly FrozenDictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>> _packageAssemblies;
@@ -58,16 +58,16 @@ internal sealed class ApiAvailabilityContext
         }
 
         // Package assemblies
-        
+
         _frameworkIds = frameworkIds.ToFrozenDictionary();
-        
+
         var packageAssemblies = new Dictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>>();
 
         foreach (var framework in frameworkIds.Keys)
         {
             var frameworkId = frameworkIds[framework];
             var assemblies = new Dictionary<int, (int, int)>();
-            
+
             foreach (var (packageId, packageFolder) in packageFolders)
             {
                 var folder = NuGetFrameworkUtility.GetNearest(packageFolder, framework);
@@ -80,7 +80,7 @@ internal sealed class ApiAvailabilityContext
                     }
                 }
             }
-            
+
             packageAssemblies.Add(frameworkId, assemblies.ToFrozenDictionary());
         }
 

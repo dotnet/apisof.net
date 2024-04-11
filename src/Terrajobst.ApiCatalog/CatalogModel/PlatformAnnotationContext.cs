@@ -86,7 +86,7 @@ public sealed class PlatformAnnotationContext
                                                           a.Parent?.GetFullName() ==  "System.Runtime.Versioning")
                                               .Cast<ApiModel?>()
                                               .SingleOrDefault();
-        
+
         var supportedOsPlatformGuardCtor = supportedOsPlatformGuard?.Children.SingleOrDefault(c => c.Kind == ApiKind.Constructor);
 
         var operatingSystemType = GetOperatingSystemType();
