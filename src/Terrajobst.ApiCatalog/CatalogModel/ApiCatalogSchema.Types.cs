@@ -133,10 +133,11 @@ internal static partial class ApiCatalogSchema
         public T Read(ApiCatalogModel catalog, int rowOffset)
         {
             var memory = MemorySelector(catalog);
-            return Read(catalog, memory, rowOffset);
+            var offset = rowOffset + Start;
+            return Read(catalog, memory, offset);
         }
 
-        protected abstract T Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset);
+        protected abstract T Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset);
     }
 
     public sealed class GuidField(MemorySelector memorySelector, int start)
@@ -144,9 +145,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 16;
 
-        protected override Guid Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override Guid Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            return memory.ReadGuid(rowOffset + Start);
+            return memory.ReadGuid(offset);
         }
     }
 
@@ -155,9 +156,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override float Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override float Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            return memory.ReadSingle(rowOffset + Start);
+            return memory.ReadSingle(offset);
         }
     }
 
@@ -166,9 +167,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override int Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override int Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            return memory.ReadInt32(rowOffset + Start);
+            return memory.ReadInt32(offset);
         }
     }
 
@@ -177,9 +178,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 1;
 
-        protected override bool Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override bool Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            return memory.ReadByte(rowOffset + Start) == 1;
+            return memory.ReadByte(offset) == 1;
         }
     }
 
@@ -188,10 +189,10 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override string Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override string Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var stringOffset = memory.ReadInt32(rowOffset + Start);
-            return catalog.GetString(stringOffset);
+            var handle = memory.ReadInt32(offset);
+            return catalog.GetString(handle);
         }
     }
 
@@ -200,9 +201,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override DateOnly Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override DateOnly Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var dayNumber = memory.ReadInt32(rowOffset + Start);
+            var dayNumber = memory.ReadInt32(offset);
             return DateOnly.FromDayNumber(dayNumber);
         }
     }
@@ -212,9 +213,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 1;
 
-        protected override ApiKind Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override ApiKind Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var value = memory.ReadByte(rowOffset + Start);
+            var value = memory.ReadByte(offset);
             return (ApiKind)value;
         }
     }
@@ -228,10 +229,10 @@ internal static partial class ApiCatalogSchema
 
         public override int Length => 4;
 
-        protected override FrameworkModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override FrameworkModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var offset = memory.ReadInt32(rowOffset + Start);
-            return new FrameworkModel(catalog, offset);
+            var handle = memory.ReadInt32(offset);
+            return new FrameworkModel(catalog, handle);
         }
     }
 
@@ -240,10 +241,10 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override PackageModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override PackageModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var offset = memory.ReadInt32(rowOffset + Start);
-            return new PackageModel(catalog, offset);
+            var handle = memory.ReadInt32(offset);
+            return new PackageModel(catalog, handle);
         }
     }
 
@@ -257,10 +258,10 @@ internal static partial class ApiCatalogSchema
 
         public override int Length => 4;
 
-        protected override AssemblyModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override AssemblyModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var assemblyOffset = memory.ReadInt32(rowOffset + Start);
-            return new AssemblyModel(catalog, assemblyOffset);
+            var handle = memory.ReadInt32(offset);
+            return new AssemblyModel(catalog, handle);
         }
     }
 
@@ -269,10 +270,10 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override UsageSourceModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override UsageSourceModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var assemblyOffset = memory.ReadInt32(rowOffset + Start);
-            return new UsageSourceModel(catalog, assemblyOffset);
+            var handle = memory.ReadInt32(offset);
+            return new UsageSourceModel(catalog, handle);
         }
     }
 
@@ -285,10 +286,10 @@ internal static partial class ApiCatalogSchema
 
         public override int Length => 4;
 
-        protected override ApiModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override ApiModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var apiOffset = memory.ReadInt32(rowOffset + Start);
-            return new ApiModel(catalog, apiOffset);
+            var handle = memory.ReadInt32(offset);
+            return new ApiModel(catalog, handle);
         }
     }
 
@@ -297,13 +298,13 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override ApiModel? Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override ApiModel? Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            var apiOffset = memory.ReadInt32(rowOffset + Start);
-            if (apiOffset == -1)
+            var handle = memory.ReadInt32(offset);
+            if (handle == -1)
                 return null;
 
-            return new ApiModel(catalog, apiOffset);
+            return new ApiModel(catalog, handle);
         }
     }
 
@@ -313,9 +314,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override ArrayEnumerator<T> Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override ArrayEnumerator<T> Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            return new ArrayEnumerator<T>(catalog, elementDefinition, MemorySelector, rowOffset + Start);
+            return new ArrayEnumerator<T>(catalog, elementDefinition, MemorySelector, offset);
         }
     }
 
@@ -325,9 +326,9 @@ internal static partial class ApiCatalogSchema
     {
         public override int Length => 4;
 
-        protected override ArrayOfStructuresEnumerator<T> Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int rowOffset)
+        protected override ArrayOfStructuresEnumerator<T> Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
         {
-            return new ArrayOfStructuresEnumerator<T>(catalog, layout, MemorySelector, rowOffset + Start);
+            return new ArrayOfStructuresEnumerator<T>(catalog, layout, MemorySelector, offset);
         }
     }
 
