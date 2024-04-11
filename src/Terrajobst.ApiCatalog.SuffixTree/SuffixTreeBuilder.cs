@@ -8,6 +8,8 @@ public sealed class SuffixTreeBuilder
 
     public void Add(string key, int value)
     {
+        ThrowIfNullOrEmpty(key);
+
         var tokens = Tokenizer.Tokenize(key).ToArray();
 
         for (var i = 0; i < tokens.Length; i++)
@@ -42,6 +44,8 @@ public sealed class SuffixTreeBuilder
 
     public ReadOnlySpan<int> Lookup(string key)
     {
+        ThrowIfNull(key);
+
         var tokens = Tokenizer.Tokenize(key).ToArray();
 
         var node = _root;
@@ -61,6 +65,8 @@ public sealed class SuffixTreeBuilder
 
     public void WriteDot(TextWriter writer)
     {
+        ThrowIfNull(writer);
+
         var idByNode = new Dictionary<Node, string>();
         var stack = new Stack<Node>();
         stack.Push(_root);
@@ -99,6 +105,8 @@ public sealed class SuffixTreeBuilder
 
     public void WriteSuffixTree(Stream stream)
     {
+        ThrowIfNull(stream);
+
         // header
         //   magic value = int[4]
         //   version = ushort

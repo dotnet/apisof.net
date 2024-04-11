@@ -4,6 +4,8 @@ public static class Tokenizer
 {
     public static IEnumerable<string> Tokenize(string text)
     {
+        ThrowIfNull(text);
+
         if (text.Contains("("))
             text = text.Substring(0, text.IndexOf('('));
 

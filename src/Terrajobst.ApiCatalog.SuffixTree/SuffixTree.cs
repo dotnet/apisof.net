@@ -31,6 +31,8 @@ public sealed class SuffixTree
                       int nodesLength,
                       int rootOffset)
     {
+        ThrowIfNull(buffer);
+
         _buffer = buffer;
         _stringsStart = stringsStart;
         _stringsLength = stringsLength;
@@ -122,6 +124,8 @@ public sealed class SuffixTree
 
     public ReadOnlySpan<(int Offset, int Value)> Lookup(string key)
     {
+        ThrowIfNull(key);
+
         if (key.Length == 0)
             return ReadOnlySpan<(int Offset, int Value)>.Empty;
 
@@ -200,6 +204,8 @@ public sealed class SuffixTree
 
     public void WriteDot(TextWriter writer)
     {
+        ThrowIfNull(writer);
+
         var idByNode = new Dictionary<int, string>();
 
         var stack = new Stack<int>();
@@ -244,6 +250,8 @@ public sealed class SuffixTree
 
     public static SuffixTree Create(IEnumerable<KeyValuePair<string, int>> keysAndValues)
     {
+        ThrowIfNull(keysAndValues);
+
         var builder = new SuffixTreeBuilder();
         foreach (var (key, value) in keysAndValues)
             builder.Add(key, value);
@@ -253,12 +261,16 @@ public sealed class SuffixTree
 
     public static SuffixTree Load(string path)
     {
+        ThrowIfNullOrEmpty(path);
+
         var buffer = File.ReadAllBytes(path);
         return Load(buffer);
     }
 
     public static SuffixTree Load(byte[] buffer)
     {
+        ThrowIfNull(buffer);
+        
         // header
         //   magic value = byte[4]
         //   version = short
@@ -375,6 +387,8 @@ public sealed class SuffixTree
 
         public void WriteTo(TextWriter writer)
         {
+            ThrowIfNull(writer);
+
             writer.WriteLine("Strings............................. {0:N0}", Strings);
             writer.WriteLine("Nodes............................... {0:N0}", Nodes);
             writer.WriteLine("No children, no values.............. {0:N0}", Nodes_NoChildren_NoValues);
