@@ -573,11 +573,11 @@ public sealed class ApiCatalogModel
         await networkStream.CopyToAsync(fileStream);
     }
 
-    public static async Task<ApiCatalogModel> LoadAsync(string path)
+    public static async Task<ApiCatalogModel> LoadAsync(string fileName)
     {
-        ThrowIfNullOrEmpty(path);
+        ThrowIfNullOrEmpty(fileName);
 
-        await using var stream = File.OpenRead(path);
+        await using var stream = File.OpenRead(fileName);
         return await LoadAsync(stream);
     }
 
