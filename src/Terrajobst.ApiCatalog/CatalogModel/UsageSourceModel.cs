@@ -14,9 +14,9 @@ public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
-
     public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
 
     public string Name => ApiCatalogSchema.UsageSourceRow.Name.Read(_catalog, _offset);
 

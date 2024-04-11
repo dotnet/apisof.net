@@ -17,9 +17,9 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
-
     public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
 
     public string Name => ApiCatalogSchema.FrameworkRow.Name.Read(_catalog, _offset);
 

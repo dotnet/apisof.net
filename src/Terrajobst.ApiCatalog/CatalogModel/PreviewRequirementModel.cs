@@ -14,6 +14,10 @@ public readonly struct PreviewRequirementModel
         _offset = offset;
     }
 
+    public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
+
     public string Message => ApiCatalogSchema.PreviewRequirementRow.Message.Read(_catalog, _offset);
 
     public string Url => ApiCatalogSchema.PreviewRequirementRow.Url.Read(_catalog, _offset);

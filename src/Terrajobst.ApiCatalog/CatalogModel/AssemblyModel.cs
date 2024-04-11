@@ -16,9 +16,9 @@ public readonly struct AssemblyModel : IEquatable<AssemblyModel>
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
-
     public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
 
     public Guid Guid => ApiCatalogSchema.AssemblyRow.Guid.Read(_catalog, _offset);
 

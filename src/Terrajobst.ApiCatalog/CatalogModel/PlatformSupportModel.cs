@@ -14,6 +14,10 @@ public readonly struct PlatformSupportModel : IEquatable<PlatformSupportModel>
         _offset = offset;
     }
 
+    public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
+
     public string PlatformName => ApiCatalogSchema.PlatformIsSupportedTuple.Platform.Read(_catalog, _offset);
 
     public bool IsSupported => ApiCatalogSchema.PlatformIsSupportedTuple.IsSupported.Read(_catalog, _offset);

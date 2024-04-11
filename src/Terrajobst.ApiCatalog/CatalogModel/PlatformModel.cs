@@ -14,6 +14,8 @@ public readonly struct PlatformModel : IEquatable<PlatformModel>
         _offset = offset;
     }
 
+    public int Id => _offset;
+
     public ApiCatalogModel Catalog => _catalog;
 
     public string Name => ApiCatalogSchema.PlatformRow.Name.Read(_catalog, _offset);

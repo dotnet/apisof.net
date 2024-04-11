@@ -14,9 +14,9 @@ public readonly struct ExtensionMethodModel : IEquatable<ExtensionMethodModel>
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
-
     public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
 
     public Guid Guid => ApiCatalogSchema.ExtensionMethodRow.Guid.Read(_catalog, _offset);
 

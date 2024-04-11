@@ -16,9 +16,9 @@ public readonly struct PackageModel : IEquatable<PackageModel>
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
-
     public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
 
     public string Name => ApiCatalogSchema.PackageRow.Name.Read(_catalog, _offset);
 

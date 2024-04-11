@@ -14,6 +14,10 @@ public readonly struct ObsoletionModel : IEquatable<ObsoletionModel>
         _offset = offset;
     }
 
+    public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
+
     public string Message => ApiCatalogSchema.ObsoletionRow.Message.Read(_catalog, _offset);
 
     public bool IsError => ApiCatalogSchema.ObsoletionRow.IsError.Read(_catalog, _offset);

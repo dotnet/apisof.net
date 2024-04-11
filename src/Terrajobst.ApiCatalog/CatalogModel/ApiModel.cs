@@ -18,9 +18,9 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         _offset = offset;
     }
 
-    public ApiCatalogModel Catalog => _catalog;
-
     public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
 
     public Guid Guid => ApiCatalogSchema.ApiRow.Guid.Read(_catalog, _offset);
 

@@ -14,6 +14,10 @@ public readonly struct ExperimentalModel
         _offset = offset;
     }
 
+    public int Id => _offset;
+
+    public ApiCatalogModel Catalog => _catalog;
+
     public string DiagnosticId => ApiCatalogSchema.ExperimentalRow.DiagnosticId.Read(_catalog, _offset);
 
     public string UrlFormat => ApiCatalogSchema.ExperimentalRow.UrlFormat.Read(_catalog, _offset);
