@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using System.Diagnostics.CodeAnalysis;
 using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
 using NuGet.Frameworks;
@@ -16,6 +17,7 @@ public partial class FrameworkPicker
     public required CatalogService CatalogService { get; set; }
 
     [Parameter]
+    [SuppressMessage("Usage", "BL0007:Component parameters should be auto properties")]
     public NuGetFramework? Selected
     {
         get

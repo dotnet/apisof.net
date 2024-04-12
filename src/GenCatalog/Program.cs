@@ -363,14 +363,15 @@ internal static class Program
         builder.WriteSuffixTree(stream);
     }
 
-    private static async Task CloneApiReviewsAsync(string reviewRepoPath)
+    private static Task CloneApiReviewsAsync(string reviewRepoPath)
     {
         if (Directory.Exists(reviewRepoPath))
-            return;
+            return Task.CompletedTask;
 
         var url = "https://github.com/dotnet/apireviews";
         Console.WriteLine($"Cloning {url}...");
         Repository.Clone(url, reviewRepoPath);
+        return Task.CompletedTask;
     }
 
     private static async Task GenerateDesignNotesAsync(string reviewRepoPath, string catalogModelPath, string designNotesPath)
