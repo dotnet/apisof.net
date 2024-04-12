@@ -205,6 +205,23 @@
                     </tr>
                 }
 
+                @if (DesignReviews.Any())
+                {
+                    <tr>
+                        <th>Design Reviews</th>
+                        <td>
+                            <ul class="list-unstyled">
+                                @foreach (var designReview in DesignReviews.OrderByDescending(r => r.Date))
+                                {
+                                    <li>
+                                        <a href="@designReview.Url" target="_blank">@designReview.UrlText</a> <span class="text-muted">@designReview.Date.Humanize() (@designReview.Context)</span>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+                    </tr>
+                }
+
                 @{
                     var inboxApiTitle = "The API is built into the target framework.";
                     var packageApiTitle = "The API requires a package to be referenced.";

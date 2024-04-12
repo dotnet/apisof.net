@@ -4,6 +4,7 @@ using ApisOfDotNet.Shared;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
 using Terrajobst.ApiCatalog;
+using Terrajobst.ApiCatalog.DesignNotes;
 
 namespace ApisOfDotNet.Services;
 
@@ -32,20 +33,23 @@ public sealed class CatalogService
         var storageConnectionString = _options.Value.AzureStorageConnectionString;
         var catalogPath = GetCatalogPath();
         var suffixTreePath = GetSuffixTreePath();
+        var designNotesPath = GetDesignNotesPath();
 
-        _data = await LoadCatalogDataAsync(_environment, _logger, storageConnectionString, catalogPath, suffixTreePath);
+        _data = await LoadCatalogDataAsync(_environment, _logger, storageConnectionString, catalogPath, suffixTreePath, designNotesPath);
     }
 
     private static async Task<CatalogData> LoadCatalogDataAsync(IHostEnvironment environment,
                                                                 ILogger logger,
                                                                 string storageConnectionString,
                                                                 string catalogPath,
-                                                                string suffixTreePath)
+                                                                string suffixTreePath,
+                                                                string designNotesPath)
     {
         if (!environment.IsDevelopment())
         {
             File.Delete(catalogPath);
             File.Delete(suffixTreePath);
+            File.Delete(designNotesPath);
         }
 
         if (File.Exists(catalogPath))
@@ -92,11 +96,31 @@ public sealed class CatalogService
 
         logger.LogInformation("Loading suffix tree complete.");
 
+        if (File.Exists(designNotesPath))
+        {
+            logger.LogInformation("Found design notes on disk. Skipping download.");
+        }
+        else
+        {
+            logger.LogInformation("Downloading design notes...");
+
+            var blobClient = new BlobClient(storageConnectionString, "catalog", "designNotes.dat");
+            await blobClient.DownloadToAsync(designNotesPath);
+
+            logger.LogInformation("Downloading desing notes complete.");
+        }
+
+        logger.LogInformation("Loading design notes...");
+
+        var reviewLinks = DesignNoteDatabase.Load(designNotesPath);
+
+        logger.LogInformation("Loading design notes complete.");
+
         var jobBlobClient = new BlobClient(storageConnectionString, "catalog", "job.json");
         await using var jobStream = await jobBlobClient.OpenReadAsync();
         var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream) ?? CatalogJobInfo.Empty;
 
-        return new CatalogData(jobInfo, catalog, suffixTree);
+        return new CatalogData(jobInfo, catalog, suffixTree, reviewLinks);
     }
 
     private string GetCatalogPath()
@@ -114,11 +138,20 @@ public sealed class CatalogService
         return Path.Combine(directory, "suffixTree.dat");
     }
 
+    private string GetDesignNotesPath()
+    {
+        var databasePath = GetCatalogPath();
+        var directory = Path.GetDirectoryName(databasePath)!;
+        return Path.Combine(directory, "designNotes.dat");
+    }
+
     public ApiCatalogModel Catalog => _data.Catalog;
 
     public ApiCatalogStatistics CatalogStatistics => _data.Statistics;
 
     public CatalogJobInfo JobInfo => _data.JobInfo;
+
+    public DesignNoteDatabase DesignNoteDatabase => _data.DesignNotes;
 
     public IEnumerable<ApiModel> Search(string query)
     {
@@ -136,17 +169,16 @@ public sealed class CatalogService
         public static CatalogData Empty { get; } = new();
 
         private CatalogData()
-            : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, SuffixTree.Empty)
+            : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, SuffixTree.Empty, DesignNoteDatabase.Empty)
         {
         }
 
-        public CatalogData(CatalogJobInfo jobInfo,
-                           ApiCatalogModel catalog,
-                           SuffixTree suffixTree)
+        public CatalogData(CatalogJobInfo jobInfo, ApiCatalogModel catalog, SuffixTree suffixTree, DesignNoteDatabase designNotes)
         {
             JobInfo = jobInfo;
             Catalog = catalog;
             SuffixTree = suffixTree;
+            DesignNotes = designNotes;
             Statistics = catalog.GetStatistics();
         }
 
@@ -155,6 +187,8 @@ public sealed class CatalogService
         public ApiCatalogModel Catalog { get; }
 
         public SuffixTree SuffixTree { get; }
+
+        public DesignNoteDatabase DesignNotes { get; }
 
         public ApiCatalogStatistics Statistics { get; }
     }

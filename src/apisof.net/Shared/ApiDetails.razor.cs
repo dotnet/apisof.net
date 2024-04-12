@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using ApisOfDotNet.Pages;
 using ApisOfDotNet.Services;
 
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging.Abstractions;
 using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
+using Terrajobst.ApiCatalog.DesignNotes;
 
 namespace ApisOfDotNet.Shared;
 
@@ -53,12 +55,14 @@ public partial class ApiDetails
 
     private string? HelpUrl { get; set; }
 
+    private ImmutableArray<DesignNote> DesignReviews { get; set; } = ImmutableArray<DesignNote>.Empty;
+
     protected override async Task OnParametersSetAsync()
     {
-        await UpdateSyntaxAsync();
+        await UpdateApiAsync();
     }
 
-    private async Task UpdateSyntaxAsync()
+    private async Task UpdateApiAsync()
     {
         Availability = Api.GetAvailability();
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
@@ -86,6 +90,10 @@ public partial class ApiDetails
                 Parent = Api;
             }
         }
+
+        DesignReviews = CatalogService.DesignNoteDatabase.LinkByApiId.TryGetValue(Api.Id, out var reviewLinks)
+            ? reviewLinks
+            : ImmutableArray<DesignNote>.Empty;
 
         var results = await Task.WhenAll(
             SourceResolver.ResolveAsync(Api),

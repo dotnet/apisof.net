@@ -4,8 +4,10 @@ using System.Text.Json;
 using System.Xml.Linq;
 using Azure.Core;
 using Azure.Storage.Blobs;
+using LibGit2Sharp;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Terrajobst.ApiCatalog;
+using Terrajobst.ApiCatalog.Generation.DesignNotes;
 
 namespace GenCatalog;
 
@@ -68,8 +70,10 @@ internal static class Program
         var nugetUsagesPath = Path.Combine(apiUsagesPath, "nuget.org.tsv");
         var plannerUsagesPath = Path.Combine(apiUsagesPath, "Upgrade Planner.tsv");
         var netfxCompatLabPath = Path.Combine(apiUsagesPath, "NetFx Compat Lab.tsv");
+        var reviewRepoPath = Path.Combine(rootPath, "apireviews");
         var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
         var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
+        var designNotesPath = Path.Combine(rootPath, "designNotes.dat");
 
         var stopwatch = Stopwatch.StartNew();
 
@@ -83,8 +87,11 @@ internal static class Program
         await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
         await GenerateCatalogAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, catalogModelPath);
         await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
+        await CloneApiReviewsAsync(reviewRepoPath);
+        await GenerateDesignNotesAsync(reviewRepoPath, catalogModelPath, designNotesPath);
         await UploadCatalogModelAsync(catalogModelPath);
         await UploadSuffixTreeAsync(suffixTreePath);
+        await UploadDesignNotesAsync(designNotesPath);
 
         Console.WriteLine($"Completed in {stopwatch.Elapsed}");
         Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
@@ -356,6 +363,28 @@ internal static class Program
         builder.WriteSuffixTree(stream);
     }
 
+    private static async Task CloneApiReviewsAsync(string reviewRepoPath)
+    {
+        if (Directory.Exists(reviewRepoPath))
+            return;
+
+        var url = "https://github.com/dotnet/apireviews";
+        Console.WriteLine($"Cloning {url}...");
+        Repository.Clone(url, reviewRepoPath);
+    }
+
+    private static async Task GenerateDesignNotesAsync(string reviewRepoPath, string catalogModelPath, string designNotesPath)
+    {
+        if (File.Exists(designNotesPath))
+            return;
+
+        Console.WriteLine("Generating design notes...");
+        var reviewDatabase = ReviewDatabase.Load(reviewRepoPath);
+        var catalog = await ApiCatalogModel.LoadAsync(catalogModelPath);
+        var linkDatabase = DesignNoteBuilder.Build(reviewDatabase, catalog);
+        linkDatabase.Save(designNotesPath);
+    }
+
     private static async Task UploadCatalogModelAsync(string catalogModelPath)
     {
         Console.WriteLine("Uploading catalog model...");
@@ -379,6 +408,15 @@ internal static class Program
         var container = "catalog";
         var blobClient = new BlobClient(connectionString, container, "suffixtree.dat.deflate", options: GetBlobOptions());
         await blobClient.UploadAsync(compressedFileName, overwrite: true);
+    }
+
+    private static async Task UploadDesignNotesAsync(string designNotesPath)
+    {
+        Console.WriteLine("Uploading design notes...");
+        var connectionString = GetAzureStorageConnectionString();
+        var container = "catalog";
+        var blobClient = new BlobClient(connectionString, container, "designNotes.data", options: GetBlobOptions());
+        await blobClient.UploadAsync(designNotesPath, overwrite: true);
     }
 
     private static async Task PostToGenCatalogWebHook()

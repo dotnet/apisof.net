@@ -9,6 +9,8 @@
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="Dapper" Version="2.1.28" />
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.0.1" />
+    <PackageVersion Include="Humanizer.Core" Version="3.0.0-beta.13" />
+    <PackageVersion Include="LibGit2Sharp" Version="0.30.0" />
     <PackageVersion Include="Meziantou.Xunit.ParallelTestFramework" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="1.21.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.1.0" />
