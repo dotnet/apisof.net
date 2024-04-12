@@ -11,7 +11,7 @@ public sealed class MissingNetFxFeature
         ThrowIfNull(description);
         ThrowIfNull(url);
         ThrowIfNull(appliesTo);
-        
+
         Name = name;
         Description = description;
         Url = url;

@@ -20,7 +20,7 @@ public sealed partial class CatalogBuilder
     public void Index(string indexPath)
     {
         ThrowIfNullOrWhiteSpace(indexPath);
-        
+
         var files = Directory.GetFiles(indexPath, "*.xml");
 
         foreach (var path in files)

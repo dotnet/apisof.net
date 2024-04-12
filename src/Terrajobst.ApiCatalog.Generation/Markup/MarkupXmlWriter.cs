@@ -22,7 +22,7 @@ internal sealed class MarkupXmlWriter : MarkupWriter
         _xmlWriter.WriteStartAttribute("k");
         _xmlWriter.WriteValue((int)kind);
         _xmlWriter.WriteEndAttribute();
-        
+
         var guid = symbol?.GetCatalogGuid() ?? Guid.Empty;
         if (guid != default)
         {
@@ -37,7 +37,7 @@ internal sealed class MarkupXmlWriter : MarkupWriter
             _xmlWriter.WriteValue(text);
             _xmlWriter.WriteEndAttribute();
         }
-        
+
         _xmlWriter.WriteEndElement();
     }
 

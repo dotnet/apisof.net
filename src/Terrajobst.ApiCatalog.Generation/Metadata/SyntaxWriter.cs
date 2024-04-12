@@ -51,7 +51,7 @@ internal sealed class SyntaxWriter
         }
 
         _writer.Write(kind, text, symbol);
-        
+
         if (kind == MarkupTokenKind.LineBreak)
             _startOfLine = true;
     }

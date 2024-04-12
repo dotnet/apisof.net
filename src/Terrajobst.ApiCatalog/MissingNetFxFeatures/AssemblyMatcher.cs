@@ -28,7 +28,7 @@ public sealed class AssemblyMatcher : ApiMatcher
         ThrowIfNull(namespaceName);
         ThrowIfNull(typeName);
         ThrowIfNull(memberName);
-        
+
         if (string.Equals(assemblyName, AssemblyName, StringComparison.OrdinalIgnoreCase))
             return true;
 

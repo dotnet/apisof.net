@@ -162,7 +162,7 @@ internal static class CatalogExtensions
     {
         if (symbol is null)
             return false;
-        
+
         if (symbol.DeclaredAccessibility != Accessibility.Public &&
             symbol.DeclaredAccessibility != Accessibility.Protected &&
             symbol.DeclaredAccessibility != Accessibility.ProtectedOrInternal)

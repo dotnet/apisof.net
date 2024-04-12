@@ -797,7 +797,7 @@ public sealed partial class CatalogBuilder
 
                 return DeduplicatedMemory.Commit();
             }
-            
+
             private BlobOffset StoreSyntax(string syntax,
                                            StringHeap stringHeap,
                                            IReadOnlyDictionary<Guid, IntermediaApi> apiByFingerprint)
