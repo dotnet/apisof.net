@@ -416,7 +416,7 @@ internal static class Program
         Console.WriteLine("Uploading design notes...");
         var connectionString = GetAzureStorageConnectionString();
         var container = "catalog";
-        var blobClient = new BlobClient(connectionString, container, "designNotes.data", options: GetBlobOptions());
+        var blobClient = new BlobClient(connectionString, container, "designNotes.dat", options: GetBlobOptions());
         await blobClient.UploadAsync(designNotesPath, overwrite: true);
     }
 
