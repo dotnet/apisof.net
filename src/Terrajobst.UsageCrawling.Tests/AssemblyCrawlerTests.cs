@@ -16,10 +16,11 @@ public class AssemblyCrawlerTests
     [Fact]
     public void Attributes_Assembly()
     {
-        const string Source = @"
+        const string source =
+            """
             using System.Reflection;
-            [assembly: AssemblyMetadata(""key"", ""value"")]
-        ";
+            [assembly: AssemblyMetadata("key", "value")]
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -27,16 +28,17 @@ public class AssemblyCrawlerTests
             { "M:System.Reflection.AssemblyMetadataAttribute.#ctor(System.String,System.String)", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Module()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             [module: CLSCompliant(false)]
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -44,17 +46,18 @@ public class AssemblyCrawlerTests
             { "M:System.CLSCompliantAttribute.#ctor(System.Boolean)", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Type()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
-            [Obsolete(DiagnosticId = ""x"")]
+            [Obsolete(DiagnosticId = "x")]
             class Test { }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -67,19 +70,20 @@ public class AssemblyCrawlerTests
             { "P:System.ObsoleteAttribute.DiagnosticId", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Constructor()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 [Obsolete]
                 Test() { }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -90,19 +94,20 @@ public class AssemblyCrawlerTests
             { "M:System.ObsoleteAttribute.#ctor", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Method()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 [Obsolete]
                 void DoStuff() { }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -113,19 +118,20 @@ public class AssemblyCrawlerTests
             { "M:System.ObsoleteAttribute.#ctor", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Field()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 [Obsolete]
                 int _member;
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -137,19 +143,20 @@ public class AssemblyCrawlerTests
             { "M:System.ObsoleteAttribute.#ctor", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Property()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 [Obsolete]
                 int P { get; set; }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -161,19 +168,20 @@ public class AssemblyCrawlerTests
             { "M:System.ObsoleteAttribute.#ctor", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Attributes_Event()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 [Obsolete]
                 event EventHandler E;
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -187,15 +195,16 @@ public class AssemblyCrawlerTests
             { "M:System.ObsoleteAttribute.#ctor", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Type_BaseType()
     {
-        const string Source = @"
+        const string source =
+            """
             class Test { }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -204,18 +213,19 @@ public class AssemblyCrawlerTests
             { "T:System.Void", 1 },         // Constructor
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Type_InterfaceImplementation()
     {
-        const string Source = @"
+        const string source =
+            """
             using System.Collections;
             class Test : IEnumerable {
                 public IEnumerator GetEnumerator() => null;
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -226,20 +236,21 @@ public class AssemblyCrawlerTests
             { "T:System.Void", 1 }          // Constructor
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Method()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 public void M() {
-                    int.Parse(""x"");
+                    int.Parse("x");
                 }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -249,20 +260,21 @@ public class AssemblyCrawlerTests
             { "M:System.Int32.Parse(System.String)", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Property_Get()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 public void M() {
-                    var x = ""x"".Length;
+                    var x = "x".Length;
                 }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -272,22 +284,23 @@ public class AssemblyCrawlerTests
             { "M:System.String.get_Length", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Property_Set()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             class Test {
                 public void M() {
                     new ObsoleteAttribute {
-                        DiagnosticId = ""x""
+                        DiagnosticId = "x"
                     };
                 }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -298,13 +311,14 @@ public class AssemblyCrawlerTests
             { "M:System.ObsoleteAttribute.set_DiagnosticId(System.String)", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Event_Add()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             static class Test {
                 static void M() {
@@ -312,7 +326,7 @@ public class AssemblyCrawlerTests
                 }
                 static void Handler(object args, UnhandledExceptionEventArgs e) {}
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -325,13 +339,14 @@ public class AssemblyCrawlerTests
             { "T:System.UnhandledExceptionEventArgs", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Event_Remove()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             static class Test {
                 static void M() {
@@ -339,7 +354,7 @@ public class AssemblyCrawlerTests
                 }
                 static void Handler(object args, UnhandledExceptionEventArgs e) {}
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -352,20 +367,21 @@ public class AssemblyCrawlerTests
             { "T:System.UnhandledExceptionEventArgs", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Field_Read()
     {
-        const string Source = @"
+        const string source =
+            """
             using System.IO;
             static class Test {
                 static void M() {
                     var x = Path.PathSeparator;
                 }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -374,20 +390,21 @@ public class AssemblyCrawlerTests
             { "F:System.IO.Path.PathSeparator", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Field_Write()
     {
-        const string Source = @"
+        const string source =
+            """
             using System.Runtime.InteropServices;
             static class Test {
                 static void M() {
-                    new MarshalAsAttribute((short)0) { MarshalType = """" };
+                    new MarshalAsAttribute((short)0) { MarshalType = "" };
                 }
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -397,18 +414,19 @@ public class AssemblyCrawlerTests
             { "F:System.Runtime.InteropServices.MarshalAsAttribute.MarshalType", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Type_Generic()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             static class Test {
                 static void M(Func<string, int> p) {}
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -419,18 +437,19 @@ public class AssemblyCrawlerTests
             { "T:System.Int32", 1 },
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     [Fact]
     public void Type_Array()
     {
-        const string Source = @"
+        const string source =
+            """
             using System;
             static class Test {
                 static void M(string[] p) {}
             }
-        ";
+            """;
 
         var usages = new Dictionary<string, int>
         {
@@ -439,7 +458,7 @@ public class AssemblyCrawlerTests
             { "T:System.String", 1 }
         };
 
-        Check(Source, usages);
+        Check(source, usages);
     }
 
     // TODO: Pointers
