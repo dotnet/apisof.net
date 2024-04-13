@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -6,15 +6,16 @@
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <RootNamespace>GenUsageNuGet.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Basic.Reference.Assemblies.Net70" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+        <PackageReference Include="Dapper" />
+        <PackageReference Include="Microsoft.Data.Sqlite" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Terrajobst.UsageCrawling\Terrajobst.UsageCrawling.csproj" />
+        <ProjectReference Include="..\Terrajobst.UsageCrawling.Storage\Terrajobst.UsageCrawling.Storage.csproj" />
     </ItemGroup>
 
 </Project>

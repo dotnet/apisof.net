@@ -37,6 +37,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.ApiCatalog.Suffi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.ApiCatalog.Generation", "Terrajobst.ApiCatalog.Generation\Terrajobst.ApiCatalog.Generation.csproj", "{9ECA9FB2-4256-4C4D-89A5-2EAA5584788C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.UsageCrawling.Storage.Tests", "Terrajobst.UsageCrawling.Storage.Tests\Terrajobst.UsageCrawling.Storage.Tests.csproj", "{05123972-B752-4817-BABF-8DB793881F93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.UsageCrawling.Storage", "Terrajobst.UsageCrawling.Storage\Terrajobst.UsageCrawling.Storage.csproj", "{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +115,14 @@ Global
 		{9ECA9FB2-4256-4C4D-89A5-2EAA5584788C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9ECA9FB2-4256-4C4D-89A5-2EAA5584788C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9ECA9FB2-4256-4C4D-89A5-2EAA5584788C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05123972-B752-4817-BABF-8DB793881F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05123972-B752-4817-BABF-8DB793881F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05123972-B752-4817-BABF-8DB793881F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05123972-B752-4817-BABF-8DB793881F93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

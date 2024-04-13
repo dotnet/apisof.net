@@ -6,16 +6,10 @@ using Mono.Options;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Terrajobst.ApiCatalog;
+using Terrajobst.UsageCrawling.Collectors;
 using NuGetFeed = GenUsageNuGet.Infra.NuGetFeed;
 
 namespace GenUsageNuGet;
-
-// TODO: Come up with a way to deal with updates in the indexer format.
-//       For starters, we should store an indexer version in the packages table. Also, we should store the nuget.org
-//       commit date. Instead of having to re-index the entire world, we could improve this logic by always indexing
-//       all missing packages and re-index a fixed number of packages when their indexer version is older, starting
-//       from with packages that were uploaded longer ago. The reason being that more recent packages are more likely
-//       to have future uploads which we'd update anyway.
 
 internal sealed class Program
 {
@@ -25,7 +19,7 @@ internal sealed class Program
         {
             return await MainAsync(args);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
             Console.Error.WriteLine(ex);
             return 1;
@@ -238,15 +232,11 @@ internal sealed class Program
 
         await crawlerStore.DownloadDatabaseAsync(databasePath);
 
-        using var usageDatabase = await UsageDatabase.OpenOrCreateAsync(databasePath);
-
-        Console.WriteLine("Discovering existing APIs...");
-
-        var apiMap = await usageDatabase.ReadApisAsync();
+        using var usageDatabase = await NuGetUsageDatabase.OpenOrCreateAsync(databasePath);
 
         Console.WriteLine("Discovering existing packages...");
 
-        var packageIdMap = await usageDatabase.ReadPackagesAsync();
+        var packagesWithVersions = (await usageDatabase.GetReferenceUnitsAsync()).ToArray();
 
         Console.WriteLine("Discovering latest packages...");
 
@@ -260,20 +250,24 @@ internal sealed class Program
 
         Console.WriteLine($"Found {packages.Count:N0} package(s) after collapsing to latest stable & latest preview.");
 
-        var indexedPackages = new HashSet<PackageIdentity>(packageIdMap.Values);
+        var indexedPackages = new HashSet<PackageIdentity>(packagesWithVersions.Select(p => p.ReferenceUnit));
         var currentPackages = new HashSet<PackageIdentity>(packages);
 
         var packagesToBeDeleted = indexedPackages.Where(p => !currentPackages.Contains(p)).ToArray();
         var packagesToBeIndexed = currentPackages.Where(p => !indexedPackages.Contains(p)).ToArray();
+        var packagesToBeReIndexed = packagesWithVersions.Where(pv => !packagesToBeDeleted.Contains(pv.ReferenceUnit) && pv.CollectorVersion < UsageCollectorSet.CurrentVersion)
+            .Select(pv => pv.ReferenceUnit)
+            .ToArray();
 
         Console.WriteLine($"Found {indexedPackages.Count:N0} package(s) in the index.");
         Console.WriteLine($"Found {packagesToBeDeleted.Length:N0} package(s) to remove from the index.");
         Console.WriteLine($"Found {packagesToBeIndexed.Length:N0} package(s) to add to the index.");
+        Console.WriteLine($"Found {packagesToBeReIndexed.Length:N0} package(s) to be re-indexed.");
 
         Console.WriteLine($"Deleting packages...");
 
         stopwatch.Restart();
-        await usageDatabase.DeletePackagesAsync(packagesToBeDeleted.Select(p => packageIdMap.GetId(p)));
+        await usageDatabase.DeleteReferenceUnitsAsync(packagesToBeDeleted);
 
         Console.WriteLine($"Finished deleting packages. Took {stopwatch.Elapsed}");
 
@@ -286,7 +280,12 @@ internal sealed class Program
         using var crawlingCancellationTokenSource = new CancellationTokenSource(crawlingTimeout);
         var crawlingCancellationToken = crawlingCancellationTokenSource.Token;
 
-        var inputQueue = new ConcurrentQueue<PackageIdentity>(packagesToBeIndexed);
+        var reIndex = false;
+        var packagesToBeProcessed = reIndex
+            ? packagesToBeIndexed.Concat(packagesToBeReIndexed)
+            : packagesToBeIndexed;
+
+        var inputQueue = new ConcurrentQueue<PackageIdentity>(packagesToBeProcessed);
 
         var outputQueue = new BlockingCollection<PackageResults>();
 
@@ -294,7 +293,7 @@ internal sealed class Program
                                 .Select(i => Task.Run(() => CrawlWorker(i, inputQueue, outputQueue, crawlingCancellationToken)))
                                 .ToArray();
 
-        var outputWorker = Task.Run(() => OutputWorker(usageDatabase, apiMap, packageIdMap, outputQueue));
+        var outputWorker = Task.Run(() => OutputWorker(usageDatabase, outputQueue));
 
         await Task.WhenAll(workers);
 
@@ -302,16 +301,12 @@ internal sealed class Program
         await outputWorker;
 
         if (crawlingCancellationToken.IsCancellationRequested)
+        {
             Console.WriteLine($"Crawling interrupted because timeout of {crawlingTimeout} was exceeded.");
+            Console.WriteLine($"There are {inputQueue.Count:N0} items left to index.");
+        }
 
         Console.WriteLine($"Finished crawling. Took {stopwatch.Elapsed}");
-
-        Console.WriteLine("Inserting missing APIs...");
-
-        stopwatch.Restart();
-        await usageDatabase.InsertMissingApisAsync(apiMap);
-
-        Console.WriteLine($"Finished inserting missing APIs. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Vacuuming database...");
 
@@ -324,19 +319,54 @@ internal sealed class Program
 
         Console.WriteLine($"Uploading database...");
 
+        stopwatch.Restart();
         await crawlerStore.UploadDatabaseAsync(databasePath);
 
-        Console.WriteLine($"Aggregating results...");
-
-        stopwatch.Restart();
+        Console.WriteLine($"Finished uploading database. Took {stopwatch.Elapsed}");
 
         await usageDatabase.OpenAsync();
 
+        Console.WriteLine($"Generating relevant features...");
+
+        stopwatch.Restart();
+
+        var catalogFeatures = ApiCatalogFeatures.GetCatalogFeatures(apiCatalog);
+
+        Console.WriteLine($"Finished generating relevant features. Took {stopwatch.Elapsed}");
+
+        var irrelevantFeatures = (await usageDatabase.GetFeaturesAsync()).Where(f => !catalogFeatures.ContainsKey(f.Feature)).Select(f => f.Feature).ToArray();
+        Console.WriteLine($"Found {irrelevantFeatures.Length:N0} irrelevant features to delete.");
+        await usageDatabase.DeleteFeaturesAsync(irrelevantFeatures);
+
+        Console.WriteLine($"Deleting irrelevant features...");
+
+        stopwatch.Restart();
+
+        Console.WriteLine($"Finished deleting irrelevant features. Took {stopwatch.Elapsed}");
+
+        Console.WriteLine($"Inserting API ancestors...");
+
+        stopwatch.Restart();
+
         var ancestors = apiCatalog.AllApis
                                   .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
-        await usageDatabase.InsertApiAncestorsAndExportUsagesAsync(apiMap, ancestors, usagesPath);
 
-        Console.WriteLine($"Finished aggregating results. Took {stopwatch.Elapsed}");
+        foreach (var (child, parent) in ancestors)
+        {
+            // APIs are available since V0
+            await usageDatabase.TryAddFeatureAsync(parent, collectorVersion: 0);
+            await usageDatabase.AddParentFeatureAsync(child, parent);
+        }
+
+        Console.WriteLine($"Finished inserting API ancestors. Took {stopwatch.Elapsed}");
+
+        Console.WriteLine($"Exporting usages...");
+
+        stopwatch.Restart();
+
+        await usageDatabase.ExportUsagesAsync(usagesPath);
+
+        Console.WriteLine($"Finished exporting usages. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Uploading usages...");
 
@@ -358,11 +388,11 @@ internal sealed class Program
                         break;
 
                     var log = await RunPackageCrawlerAsync(packageId, fileName);
-                    var apis = File.Exists(fileName)
-                        ? File.ReadLines(fileName).Select(Guid.Parse).ToArray()
-                        : Array.Empty<Guid>();
+                    var collectionResults = File.Exists(fileName)
+                        ? await CollectionSetResults.LoadAsync(fileName)
+                        : CollectionSetResults.Empty;
 
-                    var results = new PackageResults(packageId, log, apis);
+                    var results = new PackageResults(packageId, log, collectionResults);
                     outputQueue.Add(results);
 
                     File.Delete(fileName);
@@ -377,34 +407,26 @@ internal sealed class Program
             }
         }
 
-        static async Task OutputWorker(UsageDatabase database,
-                                       IdMap<Guid> apiMap,
-                                       IdMap<PackageIdentity> packageMap,
+        static async Task OutputWorker(NuGetUsageDatabase database,
                                        BlockingCollection<PackageResults> queue)
         {
             try
             {
-                using var writer = database.CreatePackageUsageWriter();
-
-                foreach (var (packageIdentity, logLines, apis) in queue.GetConsumingEnumerable())
+                foreach (var (packageIdentity, logLines, collectionSetResults) in queue.GetConsumingEnumerable())
                 {
                     foreach (var line in logLines)
                         Console.WriteLine($"[Crawler] {line}");
 
-                    var packageId = packageMap.Add(packageIdentity);
-                    await writer.WritePackageAsync(packageId, packageIdentity);
+                    await database.DeleteReferenceUnitsAsync([packageIdentity]);
+                    await database.AddReferenceUnitAsync(packageIdentity, UsageCollectorSet.CurrentVersion);
 
-                    foreach (var api in apis)
+                    foreach (var featureSet in collectionSetResults.FeatureSets)
+                    foreach (var feature in featureSet.Features)
                     {
-                        if (!apiMap.Contains(api))
-                            continue;
-
-                        var apiId = apiMap.GetId(api);
-                        await writer.WriteUsageAsync(packageId, apiId);
+                        await database.TryAddFeatureAsync(feature, featureSet.Version);
+                        await database.AddUsageAsync(packageIdentity, feature);
                     }
                 }
-
-                await writer.SaveAsync();
 
                 Console.WriteLine("Output Worker has finished.");
             }
@@ -487,10 +509,66 @@ internal sealed class Program
         Console.WriteLine($"Crawling {packageId}...");
 
         var results = await PackageCrawler.CrawlAsync(NuGetFeed.NuGetOrg, packageId);
-        await results.WriteGuidsAsync(fileName);
+        await results.SaveAsync(fileName);
     }
 
     private record PackageResults(PackageIdentity PackageIdentity,
                                   IReadOnlyCollection<string> Log,
-                                  IReadOnlyCollection<Guid> Apis);
+                                  CollectionSetResults CollectionSetResults);
+}
+
+// TODO: This needs to live somewhere where we can share with the website.
+//
+//       The trick is to solve the dependency issue. We could probably say that Terrajobst.UsageCrawling depends
+//       on Terrajobst.ApiCatalog. Then we could push the GUIDs down and make the collectors use those. We could then
+//       say that the catalog owns the feature definition.
+//
+//       Now, there is still a logical dependency issues whereby ApiCatalogFeatures has to predict the possible set
+//       of features. However, there is probably no good way to solve this so we'll have to accept that.
+
+public enum FeatureKind
+{
+    DefinesAnyRefStructs,
+    DefinesAnyDefaultInterfaceMembers,
+    DefinesAnyVirtualStaticInterfaceMembers,
+    ApiUsage,
+    DimUsage
+}
+
+public static class ApiCatalogFeatures
+{
+    public static Dictionary<Guid, FeatureKind> GetCatalogFeatures(ApiCatalogModel catalog)
+    {
+        ThrowIfNull(catalog);
+
+        var result = new Dictionary<Guid, FeatureKind>();
+        GetGlobalFeatures(result);
+
+        foreach (var api in catalog.AllApis)
+            GetApiFeatures(api, result);
+
+        return result;
+    }
+
+    public static void GetGlobalFeatures(Dictionary<Guid, FeatureKind> receiver)
+    {
+        ThrowIfNull(receiver);
+
+        receiver.Add(UsageMetric.DefinesAnyRefStructs.Guid, FeatureKind.DefinesAnyRefStructs);
+        receiver.Add(UsageMetric.DefinesAnyDefaultInterfaceMembers.Guid, FeatureKind.DefinesAnyDefaultInterfaceMembers);
+        receiver.Add(UsageMetric.DefinesAnyVirtualStaticInterfaceMembers.Guid, FeatureKind.DefinesAnyVirtualStaticInterfaceMembers);
+    }
+
+    public static void GetApiFeatures(ApiModel api, Dictionary<Guid, FeatureKind> receiver)
+    {
+        ThrowIfNull(receiver);
+
+        receiver.Add(api.Guid, FeatureKind.ApiUsage);
+
+        if (api.Kind.IsMember() && api.Parent?.Kind == ApiKind.Interface)
+        {
+            var dim = UsageMetric.CreateGuidForDimUsage(api.Guid);
+            receiver.Add(dim, FeatureKind.DimUsage);
+        }
+    }
 }

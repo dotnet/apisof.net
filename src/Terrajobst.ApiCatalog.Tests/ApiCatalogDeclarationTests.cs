@@ -4,8 +4,6 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-using Xunit;
-
 namespace Terrajobst.ApiCatalog.Tests;
 
 public class ApiCatalogDeclarationTests

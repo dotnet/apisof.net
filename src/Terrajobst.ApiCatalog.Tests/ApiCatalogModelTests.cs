@@ -1,7 +1,5 @@
 ﻿using System.Text;
 
-using Xunit;
-
 namespace Terrajobst.ApiCatalog.Tests;
 
 public class ApiCatalogModelTests

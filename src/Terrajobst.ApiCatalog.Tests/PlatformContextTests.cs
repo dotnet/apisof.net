@@ -1,6 +1,4 @@
-﻿using Xunit;
-
-namespace Terrajobst.ApiCatalog.Tests;
+﻿namespace Terrajobst.ApiCatalog.Tests;
 
 public class PlatformContextTests
 {

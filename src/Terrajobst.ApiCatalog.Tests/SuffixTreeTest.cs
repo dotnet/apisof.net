@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Terrajobst.ApiCatalog.Tests;
 
 public class SuffixTreeTest

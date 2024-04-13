@@ -1,14 +1,14 @@
 ﻿using Microsoft.Cci.Extensions;
 using NuGet.Packaging.Core;
-using Terrajobst.UsageCrawling;
+using Terrajobst.UsageCrawling.Collectors;
 
 namespace GenUsageNuGet.Infra;
 
 public static class PackageCrawler
 {
-    public static async Task<CrawlerResults> CrawlAsync(NuGetFeed feed, PackageIdentity packageId)
+    public static async Task<CollectionSetResults> CrawlAsync(NuGetFeed feed, PackageIdentity packageId)
     {
-        var crawler = new AssemblyCrawler();
+        var collectorSet = new UsageCollectorSet();
         var reader = await feed.GetPackageAsync(packageId);
 
         foreach (var packagePath in reader.GetFiles())
@@ -24,9 +24,9 @@ public static class PackageCrawler
             if (assembly is null)
                 continue;
 
-            crawler.Crawl(assembly);
+            collectorSet.Collect(assembly);
         }
 
-        return crawler.GetResults();
+        return collectorSet.GetResults();
     }
 }

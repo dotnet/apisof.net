@@ -1,8 +1,8 @@
 using System.Collections;
 
-namespace GenUsageNuGet.Infra;
+namespace Terrajobst.UsageCrawling.Storage;
 
-public sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
+internal sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
     where T : notnull
 {
     private readonly Dictionary<T, int> _idByValue = new();
@@ -34,6 +34,11 @@ public sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
     public int GetId(T value)
     {
         return _idByValue[value];
+    }
+
+    public bool TryGetId(T value, out int id)
+    {
+        return _idByValue.TryGetValue(value, out id);
     }
 
     public T GetValue(int id)
