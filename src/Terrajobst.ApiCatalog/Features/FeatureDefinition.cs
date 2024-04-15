@@ -8,11 +8,13 @@ public abstract class FeatureDefinition
     public static GlobalFeatureDefinition DefinesAnyRefStructs { get; } = new DefinesAnyRefStructsDefinition();
     public static GlobalFeatureDefinition DefinesAnyDefaultInterfaceMembers { get; } = new DefinesAnyDefaultInterfaceMembersDefinition();
     public static GlobalFeatureDefinition DefinesAnyVirtualStaticInterfaceMembers { get; } = new DefinesAnyVirtualStaticInterfaceMembersDefinition();
+    public static GlobalFeatureDefinition UsesNullableReferenceTypes { get; } = new UsesNullableReferenceTypesDefinition();
 
     public static IReadOnlyList<GlobalFeatureDefinition> GlobalFeatures { get; } = [
         DefinesAnyRefStructs,
         DefinesAnyDefaultInterfaceMembers,
         DefinesAnyVirtualStaticInterfaceMembers,
+        UsesNullableReferenceTypes
     ];
 
     public static ParameterizedFeatureDefinition<Guid> ApiUsage { get; } = new ApiUsageDefinition();
@@ -80,6 +82,15 @@ public abstract class FeatureDefinition
         public override string Name => "Define any virtual static interface members";
 
         public override string Description => "Percentage of applications/packages that defined any virtual static interface members";
+    }
+
+    private sealed class UsesNullableReferenceTypesDefinition : GlobalFeatureDefinition
+    {
+        public override Guid FeatureId { get; } = Guid.Parse("b7977f35-478e-4fef-bc22-9a4984a69a48");
+
+        public override string Name => "Was compiled with nullable reference types";
+
+        public override string Description => "Percentage of applications/packages that compiled with nullable reference types";
     }
 
     private sealed class ApiUsageDefinition : ParameterizedFeatureDefinition<Guid>

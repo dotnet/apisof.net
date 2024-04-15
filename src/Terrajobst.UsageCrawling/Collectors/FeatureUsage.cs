@@ -74,6 +74,8 @@ public readonly struct FeatureUsage : IEquatable<FeatureUsage>
 
     public static FeatureUsage DefinesAnyVirtualStaticInterfaceMembers { get; } = ForGlobal(FeatureDefinition.DefinesAnyVirtualStaticInterfaceMembers);
 
+    public static FeatureUsage UsesNullableReferenceTypes { get; }= ForGlobal(FeatureDefinition.UsesNullableReferenceTypes);
+
     public static FeatureUsage ForApi(ApiKey api) => ForParameterized(FeatureDefinition.ApiUsage, api.Guid, api.DocumentationId);
 
     public static FeatureUsage ForApi(string documentationId) => ForApi(new ApiKey(documentationId));

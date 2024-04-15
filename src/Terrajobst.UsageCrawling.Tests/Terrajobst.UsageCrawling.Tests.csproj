@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Basic.Reference.Assemblies.Net80" />
+        <PackageReference Include="Basic.Reference.Assemblies.NetStandard20" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     </ItemGroup>
 
