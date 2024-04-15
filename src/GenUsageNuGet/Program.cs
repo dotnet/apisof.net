@@ -280,10 +280,7 @@ internal sealed class Program
         using var crawlingCancellationTokenSource = new CancellationTokenSource(crawlingTimeout);
         var crawlingCancellationToken = crawlingCancellationTokenSource.Token;
 
-        var reIndex = false;
-        var packagesToBeProcessed = reIndex
-            ? packagesToBeIndexed.Concat(packagesToBeReIndexed)
-            : packagesToBeIndexed;
+        var packagesToBeProcessed = packagesToBeIndexed.Concat(packagesToBeReIndexed);
 
         var inputQueue = new ConcurrentQueue<PackageIdentity>(packagesToBeProcessed);
 
