@@ -522,6 +522,14 @@ internal sealed class Program
 //
 //       Now, there is still a logical dependency issues whereby ApiCatalogFeatures has to predict the possible set
 //       of features. However, there is probably no good way to solve this so we'll have to accept that.
+//
+// TODO: We also need to generalize the generation of parent/child features.
+//
+//       Logically, for every metric that is derived from an API, we also need to derive it for its parent and link
+//       them accordingly.
+//
+//       For example, the metric "DimUsed: IReadOnlyCollection<T>.Count" should be the child of
+//       "DimUsed: IReadOnlyCollection<T>" and "DimUsed: System.Collections.Generic".
 
 public enum FeatureKind
 {
