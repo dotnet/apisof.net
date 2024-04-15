@@ -383,14 +383,14 @@ public class PlatformContextTests
                     public static bool IsIOS() { return false; }
                 }
             }
-            
+
             namespace System.Runtime.Versioning
             {
                 public sealed class SupportedOSPlatformGuardAttribute : OSPlatformAttribute
                 {
                     public SupportedOSPlatformGuardAttribute(string platformName) : base(platformName) { }
                 }
-                
+
                 public abstract class OSPlatformAttribute : Attribute
                 {
                     protected OSPlatformAttribute(string platformName) { }

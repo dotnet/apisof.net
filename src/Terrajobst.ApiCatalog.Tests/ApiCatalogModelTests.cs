@@ -14,7 +14,7 @@ public class ApiCatalogModelTests
     public void Empty_Statistics_Zero()
     {
         var statistics = ApiCatalogModel.Empty.GetStatistics();
-        
+
         Assert.Equal(0, statistics.SizeCompressed);
         Assert.Equal(0, statistics.SizeUncompressed);
         Assert.Equal(0, statistics.NumberOfApis);

@@ -57,7 +57,7 @@ public sealed class WorkloadEnvironment
                 Console.WriteLine($"warning: can't manifest in {workloadDirectory}");
                 continue;
             }
-            
+
             await using var manifestStream = File.OpenRead(manifestPath);
             var manifest = await JsonSerializer.DeserializeAsync<WorkloadManifest>(manifestStream, options);
             if (manifest is not null)
@@ -73,7 +73,7 @@ public sealed class WorkloadEnvironment
             var versionlessPath = Path.Join(workloadDirectory, manifestName);
             if (File.Exists(versionlessPath))
                 return versionlessPath;
-            
+
             var versionDirectories = Directory.GetDirectories(workloadDirectory);
             if (versionDirectories.Length == 0)
             {
@@ -95,7 +95,7 @@ public sealed class WorkloadEnvironment
 
             return null;
         }
-        
+
         static NuGetVersion? ParseVersionOrNull(string path)
         {
             var fileName = Path.GetFileName(path);

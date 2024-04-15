@@ -4,7 +4,7 @@ public abstract class FeatureDefinition
 {
     public abstract string Name { get; }
     public abstract string Description { get; }
-    
+
     public static GlobalFeatureDefinition DefinesAnyRefStructs { get; } = new DefinesAnyRefStructsDefinition();
     public static GlobalFeatureDefinition DefinesAnyDefaultInterfaceMembers { get; } = new DefinesAnyDefaultInterfaceMembersDefinition();
     public static GlobalFeatureDefinition DefinesAnyVirtualStaticInterfaceMembers { get; } = new DefinesAnyVirtualStaticInterfaceMembersDefinition();
@@ -22,7 +22,7 @@ public abstract class FeatureDefinition
         ApiUsage,
         DimUsage
     ];
-    
+
     public static Dictionary<Guid, FeatureDefinition> GetCatalogFeatures(ApiCatalogModel catalog)
     {
         ThrowIfNull(catalog);
@@ -54,13 +54,13 @@ public abstract class FeatureDefinition
             yield return (childFeature, parentParent);
         }
     }
-    
+
     private sealed class DefinesAnyRefStructsDefinition : GlobalFeatureDefinition
     {
         public override Guid FeatureId { get; } = Guid.Parse("740841a3-5c09-426a-b43b-750d21250c01");
 
         public override string Name => "Defines any ref structs";
-        
+
         public override string Description => "Percentage of applications/packages that defined their own ref structs";
     }
 
@@ -69,7 +69,7 @@ public abstract class FeatureDefinition
         public override Guid FeatureId { get; } = Guid.Parse("745807b1-d30a-405c-aa91-209bae5f5ea9");
 
         public override string Name => "Defines any DIMs";
-        
+
         public override string Description => "Percentage of applications/packages that defined any default interface members (DIMs)";
     }
 
@@ -78,7 +78,7 @@ public abstract class FeatureDefinition
         public override Guid FeatureId { get; } = Guid.Parse("580c614a-45e8-4f91-a007-322377dd23a9");
 
         public override string Name => "Defines any virtual static interface members";
-        
+
         public override string Description => "Percentage of applications/packages that defined any virtual static interface members";
     }
 

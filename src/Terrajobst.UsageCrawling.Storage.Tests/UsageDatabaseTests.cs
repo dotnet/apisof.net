@@ -107,7 +107,7 @@ public class UsageDatabaseTests : IDisposable
         var result = Assert.Single(referenceUnits);
 
         Assert.Equal("Test2", result.Identifier);
-        
+
         await db.AddReferenceUnitAsync("Test1");
         await db.AddReferenceUnitAsync("Test3");
 

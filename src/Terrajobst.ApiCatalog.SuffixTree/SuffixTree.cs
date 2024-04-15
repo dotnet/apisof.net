@@ -8,7 +8,7 @@ namespace Terrajobst.ApiCatalog;
 public sealed class SuffixTree
 {
     public static SuffixTree Empty { get; } = new();
-    
+
     internal const ushort Version = 1;
     internal static readonly byte[] MagicNumbers = "STFB"u8.ToArray();
 
@@ -23,7 +23,7 @@ public sealed class SuffixTree
         : this(Array.Empty<byte>(), 0, 0, 0, 0, -1)
     {
     }
-    
+
     public SuffixTree(byte[] buffer,
                       int stringsStart,
                       int stringsLength,
@@ -270,7 +270,7 @@ public sealed class SuffixTree
     public static SuffixTree Load(byte[] buffer)
     {
         ThrowIfNull(buffer);
-        
+
         // header
         //   magic value = byte[4]
         //   version = short

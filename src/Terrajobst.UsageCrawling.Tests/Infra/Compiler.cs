@@ -12,7 +12,7 @@ internal static class Compiler
     {
         return Compile(source, c => c);
     }
-    
+
     public static IAssembly Compile(string source, Func<CSharpCompilation, CSharpCompilation> modifyCompilation)
     {
         var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
