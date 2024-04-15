@@ -16,4 +16,8 @@
         <PackageReference Include="Microsoft.Composition" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+    </ItemGroup>
+
 </Project>

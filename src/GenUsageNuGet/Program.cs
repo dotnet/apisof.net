@@ -6,6 +6,7 @@ using Mono.Options;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
 using Terrajobst.ApiCatalog;
+using Terrajobst.ApiCatalog.Features;
 using Terrajobst.UsageCrawling.Collectors;
 using NuGetFeed = GenUsageNuGet.Infra.NuGetFeed;
 
@@ -327,7 +328,7 @@ internal sealed class Program
 
         stopwatch.Restart();
 
-        var catalogFeatures = ApiCatalogFeatures.GetCatalogFeatures(apiCatalog);
+        var catalogFeatures = FeatureDefinition.GetCatalogFeatures(apiCatalog);
 
         Console.WriteLine($"Finished generating relevant features. Took {stopwatch.Elapsed}");
 
@@ -341,21 +342,22 @@ internal sealed class Program
 
         Console.WriteLine($"Finished deleting irrelevant features. Took {stopwatch.Elapsed}");
 
-        Console.WriteLine($"Inserting API ancestors...");
+        Console.WriteLine($"Inserting parent features...");
 
         stopwatch.Restart();
 
-        var ancestors = apiCatalog.AllApis
-                                  .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
+        var collectorVersionByFeature = (await usageDatabase.GetFeaturesAsync()).ToDictionary(f => f.Feature, f => f.CollectorVersion);
+        var parentFeatures = FeatureDefinition.GetParentFeatures(apiCatalog);
 
-        foreach (var (child, parent) in ancestors)
+        foreach (var (child, parent) in parentFeatures)
         {
-            // APIs are available since V0
-            await usageDatabase.TryAddFeatureAsync(parent, collectorVersion: 0);
+            var childCollectorVersion = collectorVersionByFeature[child];
+            collectorVersionByFeature[parent] = childCollectorVersion;
+            await usageDatabase.TryAddFeatureAsync(parent, childCollectorVersion);
             await usageDatabase.AddParentFeatureAsync(child, parent);
         }
 
-        Console.WriteLine($"Finished inserting API ancestors. Took {stopwatch.Elapsed}");
+        Console.WriteLine($"Finished inserting parent features. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Exporting usages...");
 
@@ -512,68 +514,4 @@ internal sealed class Program
     private record PackageResults(PackageIdentity PackageIdentity,
                                   IReadOnlyCollection<string> Log,
                                   CollectionSetResults CollectionSetResults);
-}
-
-// TODO: This needs to live somewhere where we can share with the website.
-//
-//       The trick is to solve the dependency issue. We could probably say that Terrajobst.UsageCrawling depends
-//       on Terrajobst.ApiCatalog. Then we could push the GUIDs down and make the collectors use those. We could then
-//       say that the catalog owns the feature definition.
-//
-//       Now, there is still a logical dependency issues whereby ApiCatalogFeatures has to predict the possible set
-//       of features. However, there is probably no good way to solve this so we'll have to accept that.
-//
-// TODO: We also need to generalize the generation of parent/child features.
-//
-//       Logically, for every metric that is derived from an API, we also need to derive it for its parent and link
-//       them accordingly.
-//
-//       For example, the metric "DimUsed: IReadOnlyCollection<T>.Count" should be the child of
-//       "DimUsed: IReadOnlyCollection<T>" and "DimUsed: System.Collections.Generic".
-
-public enum FeatureKind
-{
-    DefinesAnyRefStructs,
-    DefinesAnyDefaultInterfaceMembers,
-    DefinesAnyVirtualStaticInterfaceMembers,
-    ApiUsage,
-    DimUsage
-}
-
-public static class ApiCatalogFeatures
-{
-    public static Dictionary<Guid, FeatureKind> GetCatalogFeatures(ApiCatalogModel catalog)
-    {
-        ThrowIfNull(catalog);
-
-        var result = new Dictionary<Guid, FeatureKind>();
-        GetGlobalFeatures(result);
-
-        foreach (var api in catalog.AllApis)
-            GetApiFeatures(api, result);
-
-        return result;
-    }
-
-    public static void GetGlobalFeatures(Dictionary<Guid, FeatureKind> receiver)
-    {
-        ThrowIfNull(receiver);
-
-        receiver.Add(UsageMetric.DefinesAnyRefStructs.Guid, FeatureKind.DefinesAnyRefStructs);
-        receiver.Add(UsageMetric.DefinesAnyDefaultInterfaceMembers.Guid, FeatureKind.DefinesAnyDefaultInterfaceMembers);
-        receiver.Add(UsageMetric.DefinesAnyVirtualStaticInterfaceMembers.Guid, FeatureKind.DefinesAnyVirtualStaticInterfaceMembers);
-    }
-
-    public static void GetApiFeatures(ApiModel api, Dictionary<Guid, FeatureKind> receiver)
-    {
-        ThrowIfNull(receiver);
-
-        receiver.Add(api.Guid, FeatureKind.ApiUsage);
-
-        if (api.Kind.IsMember() && api.Parent?.Kind == ApiKind.Interface)
-        {
-            var dim = UsageMetric.CreateGuidForDimUsage(api.Guid);
-            receiver.Add(dim, FeatureKind.DimUsage);
-        }
-    }
 }
