@@ -33,7 +33,7 @@ public class ApiUsageCollectorTests : CollectorTest<ApiUsageCollector>
 
     private void Check(string source, string expectedIds)
     {
-        Check(source, expectedIds, UsageMetric.Api);
+        Check(source, expectedIds, UsageMetric.ForApi);
     }
 
     protected override bool Include(UsageMetric metric)
