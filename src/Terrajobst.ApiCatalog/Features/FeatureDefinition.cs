@@ -1,4 +1,6 @@
-﻿namespace Terrajobst.ApiCatalog.Features;
+﻿using NuGet.Frameworks;
+
+namespace Terrajobst.ApiCatalog.Features;
 
 public abstract class FeatureDefinition
 {
@@ -25,20 +27,31 @@ public abstract class FeatureDefinition
         DimUsage
     ];
 
+    public static ParameterizedFeatureDefinition<NuGetFramework> TargetFramework { get; } = new TargetFrameworkFeatureDefinition();
+
     public static Dictionary<Guid, FeatureDefinition> GetCatalogFeatures(ApiCatalogModel catalog)
     {
         ThrowIfNull(catalog);
 
         var result = new Dictionary<Guid, FeatureDefinition>();
 
+        // Global features
+
         foreach (var globalFeature in GlobalFeatures)
             result.Add(globalFeature.FeatureId, globalFeature);
+
+        // API features
 
         foreach (var api in catalog.AllApis)
         {
             foreach (var apiFeature in ApiFeatures)
                 result.Add(apiFeature.GetFeatureId(api.Guid), apiFeature);
         }
+
+        // Other parameterized features
+
+        foreach (var framework in catalog.Frameworks)
+            result.Add(TargetFramework.GetFeatureId(framework.NuGetFramework), TargetFramework);
 
         return result;
     }
@@ -47,6 +60,8 @@ public abstract class FeatureDefinition
     {
         ThrowIfNull(catalog);
 
+        // API features
+
         foreach (var child in catalog.AllApis)
         foreach (var parent in child.AncestorsAndSelf())
         foreach (var feature in ApiFeatures)
@@ -54,6 +69,33 @@ public abstract class FeatureDefinition
             var childFeature = feature.GetFeatureId(child.Guid);
             var parentParent = feature.GetFeatureId(parent.Guid);
             yield return (childFeature, parentParent);
+        }
+
+        // Target frameworks
+
+        foreach (var fx in catalog.Frameworks)
+        {
+            var child = fx.NuGetFramework;
+
+            foreach (var parent in GetAncestorsAndSelf(child))
+            {
+                var childFeature = TargetFramework.GetFeatureId(child);
+                var parentParent = TargetFramework.GetFeatureId(parent);
+                yield return (childFeature, parentParent);
+            }
+        }
+    }
+
+    private static IEnumerable<NuGetFramework> GetAncestorsAndSelf(NuGetFramework framework)
+    {
+        yield return framework;
+
+        if (framework.HasPlatform)
+        {
+            if (framework.PlatformVersion != FrameworkConstants.EmptyVersion)
+                yield return new NuGetFramework(framework.Framework, framework.Version, framework.Platform, FrameworkConstants.EmptyVersion);
+
+            yield return new NuGetFramework(framework.Framework, framework.Version);
         }
     }
 
@@ -115,5 +157,20 @@ public abstract class FeatureDefinition
         public override string Name => "Declare a DIM for this API";
 
         public override string Description => "Definition of an interface member with a default implementation (DIM)";
+    }
+
+    private sealed class TargetFrameworkFeatureDefinition : ParameterizedFeatureDefinition<NuGetFramework>
+    {
+        private static readonly Guid TargetFrameworkFeature = Guid.Parse("8fe6904d-e83d-499c-929a-d9dd69fd0b05");
+
+        public override Guid GetFeatureId(NuGetFramework framework)
+        {
+            var folderName = framework.GetShortFolderName();
+            return FeatureId.Create(TargetFrameworkFeature, folderName);
+        }
+
+        public override string Name => "Target Framework Usage";
+
+        public override string Description => "Indicates targeting of a specific framework";
     }
 }

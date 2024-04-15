@@ -83,4 +83,8 @@ public readonly struct FeatureUsage : IEquatable<FeatureUsage>
     public static FeatureUsage ForDim(ApiKey baseInterfaceMember) => ForParameterized(FeatureDefinition.DimUsage, baseInterfaceMember.Guid, baseInterfaceMember.DocumentationId);
 
     public static FeatureUsage ForDim(string documentationId) => ForDim(new ApiKey(documentationId));
+    
+    public static FeatureUsage ForTargetFramework(NuGetFramework framework) => ForParameterized(FeatureDefinition.TargetFramework, framework, framework.GetShortFolderName());
+
+    public static FeatureUsage ForTargetFramework(string framework) => ForTargetFramework(NuGetFramework.Parse(framework));
 }
