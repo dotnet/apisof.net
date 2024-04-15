@@ -10,12 +10,14 @@ public abstract class FeatureDefinition
     public static GlobalFeatureDefinition DefinesAnyRefStructs { get; } = new DefinesAnyRefStructsDefinition();
     public static GlobalFeatureDefinition DefinesAnyDefaultInterfaceMembers { get; } = new DefinesAnyDefaultInterfaceMembersDefinition();
     public static GlobalFeatureDefinition DefinesAnyVirtualStaticInterfaceMembers { get; } = new DefinesAnyVirtualStaticInterfaceMembersDefinition();
+    public static GlobalFeatureDefinition DefinesAnyRefFields { get; } = new DefinesAnyRefFieldsDefinition();
     public static GlobalFeatureDefinition UsesNullableReferenceTypes { get; } = new UsesNullableReferenceTypesDefinition();
 
     public static IReadOnlyList<GlobalFeatureDefinition> GlobalFeatures { get; } = [
         DefinesAnyRefStructs,
         DefinesAnyDefaultInterfaceMembers,
         DefinesAnyVirtualStaticInterfaceMembers,
+        DefinesAnyRefFields,
         UsesNullableReferenceTypes
     ];
 
@@ -124,6 +126,15 @@ public abstract class FeatureDefinition
         public override string Name => "Define any virtual static interface members";
 
         public override string Description => "Percentage of applications/packages that defined any virtual static interface members";
+    }
+
+    private sealed class DefinesAnyRefFieldsDefinition : GlobalFeatureDefinition
+    {
+        public override Guid FeatureId { get; } = Guid.Parse("acb7b28c-c88a-4bc6-b099-08c7e35cc1c1");
+
+        public override string Name => "Defines any ref fields";
+
+        public override string Description => "Percentage of applications/packages that defined any ref fields";
     }
 
     private sealed class UsesNullableReferenceTypesDefinition : GlobalFeatureDefinition
