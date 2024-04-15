@@ -50,6 +50,14 @@ internal sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
     {
         return _idByValue.ContainsKey(value);
     }
+    
+    public void RemoveId(int id)
+    {
+        if (!_valueById.Remove(id, out var value))
+            return;
+
+        _idByValue.Remove(value);
+    }
 
     public IReadOnlyCollection<int> Keys => _valueById.Keys;
 

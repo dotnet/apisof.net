@@ -107,6 +107,12 @@ public class UsageDatabaseTests : IDisposable
         var result = Assert.Single(referenceUnits);
 
         Assert.Equal("Test2", result.Identifier);
+        
+        await db.AddReferenceUnitAsync("Test1");
+        await db.AddReferenceUnitAsync("Test3");
+
+        var actualUnits = (await db.GetReferenceUnitsAsync()).Select(r => r.Identifier).Order();
+        Assert.Equal(["Test1", "Test2", "Test3"], actualUnits);
     }
 
     [Fact]
@@ -135,6 +141,27 @@ public class UsageDatabaseTests : IDisposable
 
         var results = Assert.Single(await db.GetFeaturesAsync());
         Assert.Equal(feature, results.Feature);
+    }
+
+    [Fact]
+    public async Task UsageDatabase_DeleteFeature_RemovesIt()
+    {
+        using var db = await UsageDatabase.OpenOrCreateAsync(_fileName);
+
+        var feature1 = Guid.Parse("0125d657-66c9-434b-b64d-b5bfba69d244");
+        var feature2 = Guid.Parse("4159727d-da9b-4968-987e-5a22cbbc32b8");
+        var feature3 = Guid.Parse("9e56a746-2194-41fa-bd32-f7788e5041c9");
+        Assert.True(await db.TryAddFeatureAsync(feature1));
+        Assert.True(await db.TryAddFeatureAsync(feature2));
+        Assert.True(await db.TryAddFeatureAsync(feature3));
+
+        await db.DeleteFeaturesAsync([feature1, feature3]);
+
+        Assert.True(await db.TryAddFeatureAsync(feature1));
+        Assert.True(await db.TryAddFeatureAsync(feature3));
+
+        var actualFeatures = (await db.GetFeaturesAsync()).Select(f => f.Feature).Order();
+        Assert.Equal([feature1, feature2, feature3], actualFeatures);
     }
 
     [Fact]

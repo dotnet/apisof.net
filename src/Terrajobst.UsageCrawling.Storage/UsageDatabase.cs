@@ -207,6 +207,7 @@ public sealed class UsageDatabase : IDisposable
                 continue;
 
             await _deleteReferenceUnitCommand.ExecuteAsync(referenceUnitId);
+            _referenceUnitIdMap.RemoveId(referenceUnitId);
         }
     }
 
@@ -220,6 +221,7 @@ public sealed class UsageDatabase : IDisposable
                 continue;
 
             await _deleteFeatureCommand.ExecuteAsync(featureId);
+            _featureIdMap.RemoveId(featureId);
         }
     }
 
