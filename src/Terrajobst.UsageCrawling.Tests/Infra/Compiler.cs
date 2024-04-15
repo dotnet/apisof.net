@@ -14,7 +14,7 @@ internal static class Compiler
                                                   optimizationLevel: OptimizationLevel.Release);
         var compilation = CSharpCompilation.Create("dummy",
                                                    [ CSharpSyntaxTree.ParseText(source) ],
-                                                   Net70.References.All,
+                                                   Net80.References.All,
                                                    options);
         using var peStream = new MemoryStream();
         var result = compilation.Emit(peStream);
@@ -48,6 +48,8 @@ internal static class Compiler
         "M:System.Runtime.CompilerServices.RuntimeCompatibilityAttribute.#ctor",
         "F:System.Runtime.CompilerServices.RuntimeCompatibilityAttribute.WrapNonExceptionThrows",
         "P:System.Runtime.CompilerServices.RuntimeCompatibilityAttribute.WrapNonExceptionThrows",
+        "T:System.Runtime.CompilerServices.RefSafetyRulesAttribute",
+        "M:System.Runtime.CompilerServices.RefSafetyRulesAttribute.#ctor(System.Int32)",
         "T:System.Diagnostics.DebuggableAttribute",
         "M:System.Diagnostics.DebuggableAttribute.#ctor(System.Diagnostics.DebuggableAttribute.DebuggingModes)"
     ];
