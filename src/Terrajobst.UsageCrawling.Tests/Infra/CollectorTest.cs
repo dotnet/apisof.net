@@ -1,4 +1,5 @@
 ﻿using Microsoft.Cci;
+using Microsoft.CodeAnalysis.CSharp;
 using Terrajobst.UsageCrawling.Collectors;
 
 namespace Terrajobst.UsageCrawling.Tests.Infra;
@@ -25,7 +26,7 @@ public abstract class CollectorTest<TCollector>
         ThrowIfNull(source);
         ThrowIfNull(expectedMetrics);
 
-        var assembly = Compiler.Compile(source);
+        var assembly = Compiler.Compile(source, ModifyCompilation);
         Check(assembly, expectedMetrics);
     }
 
@@ -42,5 +43,10 @@ public abstract class CollectorTest<TCollector>
     protected virtual bool Include(UsageMetric metric)
     {
         return true;
+    }
+
+    protected virtual CSharpCompilation ModifyCompilation(CSharpCompilation compilation)
+    {
+        return compilation;
     }
 }
