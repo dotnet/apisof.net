@@ -3,7 +3,7 @@ name: Generate Usage NuGet
 on:
   workflow_dispatch:
   schedule:
-    - cron: '21 09 * * *' # every day at 09:21 AM UTC (01:21 AM PT)
+    - cron: '21 */6 * * *' # At :21 in every 6th hour
 
 env:
   DOTNET_NOLOGO: true
