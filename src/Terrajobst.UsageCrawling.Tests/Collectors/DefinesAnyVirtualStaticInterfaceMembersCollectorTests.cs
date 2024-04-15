@@ -68,7 +68,7 @@ public class DefinesAnyVirtualStaticInterfaceMembersCollectorTests : CollectorTe
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyVirtualStaticInterfaceMembers]);
+        Check(source, [FeatureUsage.DefinesAnyVirtualStaticInterfaceMembers]);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class DefinesAnyVirtualStaticInterfaceMembersCollectorTests : CollectorTe
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyVirtualStaticInterfaceMembers]);
+        Check(source, [FeatureUsage.DefinesAnyVirtualStaticInterfaceMembers]);
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class DefinesAnyVirtualStaticInterfaceMembersCollectorTests : CollectorTe
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyVirtualStaticInterfaceMembers]);
+        Check(source, [FeatureUsage.DefinesAnyVirtualStaticInterfaceMembers]);
     }
 
     [Fact]
@@ -107,6 +107,6 @@ public class DefinesAnyVirtualStaticInterfaceMembersCollectorTests : CollectorTe
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyVirtualStaticInterfaceMembers]);
+        Check(source, [FeatureUsage.DefinesAnyVirtualStaticInterfaceMembers]);
     }
 }

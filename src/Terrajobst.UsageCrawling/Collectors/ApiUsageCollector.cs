@@ -15,14 +15,14 @@ public sealed class ApiUsageCollector : UsageCollector
         _crawler.Crawl(assembly);
     }
 
-    public override IEnumerable<UsageMetric> GetResults()
+    public override IEnumerable<FeatureUsage> GetResults()
     {
         var crawlerResults = _crawler.GetResults();
-        var result = new UsageMetric[crawlerResults.Data.Count];
+        var result = new FeatureUsage[crawlerResults.Data.Count];
         var index = 0;
         foreach (var key in crawlerResults.Data.Keys)
         {
-            result[index] = UsageMetric.ForApi(key);
+            result[index] = FeatureUsage.ForApi(key);
             index++;
         }
 

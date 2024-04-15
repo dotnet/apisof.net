@@ -16,7 +16,7 @@ public sealed class DefinesAnyDefaultInterfaceMembersCollector : IncrementalUsag
             {
                 if (member is IMethodDefinition method && method.Body is not Dummy)
                 {
-                    context.Report(UsageMetric.DefinesAnyDefaultInterfaceMembers);
+                    context.Report(FeatureUsage.DefinesAnyDefaultInterfaceMembers);
                     return;
                 }
             }

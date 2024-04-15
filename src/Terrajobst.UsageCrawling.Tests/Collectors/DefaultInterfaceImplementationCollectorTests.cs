@@ -44,6 +44,6 @@ public class DefaultInterfaceImplementationCollectorTests : CollectorTest<Defaul
 
     private void Check(string source, string expectedIds)
     {
-        Check(source, expectedIds, UsageMetric.ForDefaultInterfaceImplementation);
+        Check(source, expectedIds, FeatureUsage.ForDim);
     }
 }

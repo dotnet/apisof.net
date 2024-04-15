@@ -7,9 +7,9 @@ namespace Terrajobst.UsageCrawling.Tests.Infra;
 public abstract class CollectorTest<TCollector>
     where TCollector: UsageCollector, new()
 {
-    protected void Check(string source, string lines, Func<string, UsageMetric> lineToMetricConverter)
+    protected void Check(string source, string lines, Func<string, FeatureUsage> lineToMetricConverter)
     {
-        var metrics = new List<UsageMetric>();
+        var metrics = new List<FeatureUsage>();
 
         foreach (var lineSpan in lines.AsSpan().EnumerateLines())
         {
@@ -21,26 +21,26 @@ public abstract class CollectorTest<TCollector>
         Check(source, metrics);
     }
 
-    protected void Check(string source, IEnumerable<UsageMetric> expectedMetrics)
+    protected void Check(string source, IEnumerable<FeatureUsage> expectedUsages)
     {
         ThrowIfNull(source);
-        ThrowIfNull(expectedMetrics);
+        ThrowIfNull(expectedUsages);
 
         var assembly = Compiler.Compile(source, ModifyCompilation);
-        Check(assembly, expectedMetrics);
+        Check(assembly, expectedUsages);
     }
 
-    private void Check(IAssembly assembly, IEnumerable<UsageMetric> expectedMetrics)
+    private void Check(IAssembly assembly, IEnumerable<FeatureUsage> expectedUsages)
     {
         var collector = new TCollector();
         collector.Collect(assembly);
 
-        var expectedFeaturesOrdered = expectedMetrics.OrderBy(m => m.Guid);
-        var actualResultsOrdered = collector.GetResults().Where(Include).OrderBy(m => m.Guid);
+        var expectedFeaturesOrdered = expectedUsages.OrderBy(u => u.FeatureId);
+        var actualResultsOrdered = collector.GetResults().Where(Include).OrderBy(u => u.FeatureId);
         Assert.Equal(expectedFeaturesOrdered, actualResultsOrdered);
     }
 
-    protected virtual bool Include(UsageMetric metric)
+    protected virtual bool Include(FeatureUsage metric)
     {
         return true;
     }

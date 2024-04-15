@@ -38,7 +38,7 @@ public class DefinesAnyRefStructsCollectorTests : CollectorTest<DefinesAnyRefStr
             public ref struct R { }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyRefStructs]);
+        Check(source, [FeatureUsage.DefinesAnyRefStructs]);
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class DefinesAnyRefStructsCollectorTests : CollectorTest<DefinesAnyRefStr
             internal ref struct R { }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyRefStructs]);
+        Check(source, [FeatureUsage.DefinesAnyRefStructs]);
     }
 
     [Fact]
@@ -62,6 +62,6 @@ public class DefinesAnyRefStructsCollectorTests : CollectorTest<DefinesAnyRefStr
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyRefStructs]);
+        Check(source, [FeatureUsage.DefinesAnyRefStructs]);
     }
 }

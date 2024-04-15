@@ -4,7 +4,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public abstract class IncrementalUsageCollector : UsageCollector
 {
-    private readonly HashSet<UsageMetric> _features = new();
+    private readonly HashSet<FeatureUsage> _features = new();
 
     public sealed override void Collect(IAssembly assembly)
     {
@@ -14,7 +14,7 @@ public abstract class IncrementalUsageCollector : UsageCollector
         CollectFeatures(assembly, context);
     }
 
-    public sealed override IEnumerable<UsageMetric> GetResults()
+    public sealed override IEnumerable<FeatureUsage> GetResults()
     {
         return _features;
     }
@@ -23,16 +23,16 @@ public abstract class IncrementalUsageCollector : UsageCollector
 
     protected readonly struct Context
     {
-        private readonly HashSet<UsageMetric> _receiver;
+        private readonly HashSet<FeatureUsage> _receiver;
 
-        internal Context(HashSet<UsageMetric> receiver)
+        internal Context(HashSet<FeatureUsage> receiver)
         {
             ThrowIfNull(receiver);
 
             _receiver = receiver;
         }
 
-        public void Report(UsageMetric feature)
+        public void Report(FeatureUsage feature)
         {
             ThrowIfNull(feature);
 

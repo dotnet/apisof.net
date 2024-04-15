@@ -8,5 +8,5 @@ public abstract class UsageCollector
 
     public abstract void Collect(IAssembly assembly);
 
-    public abstract IEnumerable<UsageMetric> GetResults();
+    public abstract IEnumerable<FeatureUsage> GetResults();
 }

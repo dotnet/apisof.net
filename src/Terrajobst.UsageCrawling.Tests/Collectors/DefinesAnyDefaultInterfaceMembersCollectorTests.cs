@@ -84,7 +84,7 @@ public class DefinesAnyDefaultInterfaceMembersCollectorTests : CollectorTest<Def
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyDefaultInterfaceMembers]);
+        Check(source, [FeatureUsage.DefinesAnyDefaultInterfaceMembers]);
     }
 
     [Fact]
@@ -97,6 +97,6 @@ public class DefinesAnyDefaultInterfaceMembersCollectorTests : CollectorTest<Def
             }
             """;
 
-        Check(source, [UsageMetric.DefinesAnyDefaultInterfaceMembers]);
+        Check(source, [FeatureUsage.DefinesAnyDefaultInterfaceMembers]);
     }
 }

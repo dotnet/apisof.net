@@ -17,7 +17,7 @@ public sealed class DefaultInterfaceImplementationCollector : IncrementalUsageCo
             {
                 var docId = implementation.ImplementedMethod.UnWrapMember().DocId();
                 var key = new ApiKey(docId);
-                var metric = UsageMetric.ForDefaultInterfaceImplementation(key);
+                var metric = FeatureUsage.ForDim(key);
                 context.Report(metric);
             }
         }

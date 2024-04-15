@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Terrajobst.ApiCatalog.Features;
 
 namespace Terrajobst.UsageCrawling;
 
@@ -10,7 +11,7 @@ public readonly struct ApiKey : IEquatable<ApiKey>, IComparable<ApiKey>, ICompar
     {
         ThrowIfNull(documentationId);
 
-        Guid = ComputeGuid(documentationId);
+        Guid = FeatureId.Create(documentationId);
         DocumentationId = documentationId;
     }
 
@@ -45,36 +46,6 @@ public readonly struct ApiKey : IEquatable<ApiKey>, IComparable<ApiKey>, ICompar
             return CompareTo(other);
 
         return -1;
-    }
-
-    private static Guid ComputeGuid(string documentationId)
-    {
-        const int maxBytesOnStack = 256;
-
-        var encoding = Encoding.UTF8;
-        var maxByteCount = encoding.GetMaxByteCount(documentationId.Length);
-
-        if (maxByteCount <= maxBytesOnStack)
-        {
-            var buffer = (Span<byte>)stackalloc byte[maxBytesOnStack];
-            var written = encoding.GetBytes(documentationId, buffer);
-            var utf8Bytes = buffer[..written];
-            return HashData(utf8Bytes);
-        }
-        else
-        {
-            var utf8Bytes = encoding.GetBytes(documentationId);
-            return HashData(utf8Bytes);
-        }
-    }
-
-    private static Guid HashData(ReadOnlySpan<byte> bytes)
-    {
-        var hashBytes = (Span<byte>)stackalloc byte[16];
-        var written = MD5.HashData(bytes, hashBytes);
-        Debug.Assert(written == hashBytes.Length);
-
-        return new Guid(hashBytes);
     }
 
     public static bool operator ==(ApiKey left, ApiKey right)

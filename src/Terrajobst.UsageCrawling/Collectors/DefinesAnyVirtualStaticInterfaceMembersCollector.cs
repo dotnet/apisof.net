@@ -21,7 +21,7 @@ public sealed class DefinesAnyVirtualStaticInterfaceMembersCollector : Increment
                 if (!method.IsStatic || !method.IsVirtual)
                     continue;
 
-                context.Report(UsageMetric.DefinesAnyVirtualStaticInterfaceMembers);
+                context.Report(FeatureUsage.DefinesAnyVirtualStaticInterfaceMembers);
                 return;
             }
         }

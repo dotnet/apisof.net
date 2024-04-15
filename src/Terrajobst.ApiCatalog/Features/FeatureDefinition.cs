@@ -1,4 +1,6 @@
-﻿namespace Terrajobst.ApiCatalog.Features;
+﻿using NuGet.Frameworks;
+
+namespace Terrajobst.ApiCatalog.Features;
 
 public abstract class FeatureDefinition
 {
@@ -12,13 +14,13 @@ public abstract class FeatureDefinition
     public static IReadOnlyList<GlobalFeatureDefinition> GlobalFeatures { get; } = [
         DefinesAnyRefStructs,
         DefinesAnyDefaultInterfaceMembers,
-        DefinesAnyVirtualStaticInterfaceMembers
+        DefinesAnyVirtualStaticInterfaceMembers,
     ];
 
-    public static ApiFeatureDefinition ApiUsage { get; } = new ApiUsageDefinition();
-    public static ApiFeatureDefinition DimUsage { get; } = new DimUsageDefinition();
+    public static ParameterizedFeatureDefinition<Guid> ApiUsage { get; } = new ApiUsageDefinition();
+    public static ParameterizedFeatureDefinition<Guid> DimUsage { get; } = new DimUsageDefinition();
 
-    public static IReadOnlyList<ApiFeatureDefinition> ApiFeatures { get; } = [
+    public static IReadOnlyList<ParameterizedFeatureDefinition<Guid>> ApiFeatures { get; } = [
         ApiUsage,
         DimUsage
     ];
@@ -82,7 +84,7 @@ public abstract class FeatureDefinition
         public override string Description => "Percentage of applications/packages that defined any virtual static interface members";
     }
 
-    private sealed class ApiUsageDefinition : ApiFeatureDefinition
+    private sealed class ApiUsageDefinition : ParameterizedFeatureDefinition<Guid>
     {
         public override Guid GetFeatureId(Guid api)
         {
@@ -91,14 +93,14 @@ public abstract class FeatureDefinition
 
         public override string Name => "API Usage";
 
-        public override string Description => "Usage of an API in signatures and method bodies";
+        public override string Description => "Usage of an API in signatures or method bodies";
     }
 
-    private sealed class DimUsageDefinition : ApiFeatureDefinition
+    private sealed class DimUsageDefinition : ParameterizedFeatureDefinition<Guid>
     {
         public override Guid GetFeatureId(Guid api)
         {
-            return CombineGuids(DefinesAnyDefaultInterfaceMembers.FeatureId, api);
+            return FeatureId.Create(DefinesAnyDefaultInterfaceMembers.FeatureId, api);
         }
 
         public override string Name => "DIM Usage";

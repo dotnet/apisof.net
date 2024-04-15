@@ -46,8 +46,8 @@ public sealed class UsageCollectorSet
             var metrics = new HashSet<Guid>();
             foreach (var collector in group)
             {
-                foreach (var metric in collector.GetResults())
-                    metrics.Add(metric.Guid);
+                foreach (var featureUsage in collector.GetResults())
+                    metrics.Add(featureUsage.FeatureId);
             }
 
             var versionedSet = new VersionedFeatureSet(version, metrics);

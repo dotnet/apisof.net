@@ -17,7 +17,7 @@ public sealed class DefinesAnyRefStructsCollector : IncrementalUsageCollector
             {
                 if (string.Equals(ca.Type.FullName(), "System.Runtime.CompilerServices.IsByRefLikeAttribute", StringComparison.Ordinal))
                 {
-                    context.Report(UsageMetric.DefinesAnyRefStructs);
+                    context.Report(FeatureUsage.DefinesAnyRefStructs);
                     return;
                 }
             }
