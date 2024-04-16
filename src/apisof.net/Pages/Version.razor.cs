@@ -1,24 +1,28 @@
-﻿using System.Reflection;
+﻿using ApisOfDotNet.Services;
+using Microsoft.AspNetCore.Components;
 
 namespace ApisOfDotNet.Pages;
 
 public partial class Version
 {
-    private string? _commit;
-    private int _catalogVersion;
+    [Inject]
+    public required VersionService VersionService { get; set; }
 
-    protected override void OnInitialized()
+    public string CommitTitle { get; set; } = "";
+
+    public string CommitUrl { get; set; } = "";
+
+    public string CommitHash { get; set; } = "";
+
+    public string CommitHashShort { get; set; } = "";
+
+    public int CatalogVersion { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        var informationalVersion = GetType().Assembly.GetCustomAttributesData()
-                                                     .Where(ca => ca.AttributeType == typeof(AssemblyInformationalVersionAttribute))
-                                                     .SelectMany(ca => ca.ConstructorArguments.Select(a => a.Value as string))
-                                                     .FirstOrDefault(string.Empty)!;
-
-        var indexOfPlus = informationalVersion.IndexOf('+');
-        _commit = indexOfPlus >= 0
-            ? informationalVersion.Substring(indexOfPlus + 1)
-            : null;
-
-        _catalogVersion = CatalogService.Catalog.FormatVersion;
+        (CommitTitle, CommitUrl, CommitHash) = await VersionService.GetCommitAsync();
+        CommitHashShort = CommitHash.Substring(0, int.Min(CommitHash.Length, 7));
+        
+        CatalogVersion = CatalogService.Catalog.FormatVersion;
     }
 }

@@ -1,8 +1,6 @@
 @page "/version"
 
 @inject CatalogService CatalogService;
-
-@using System.Reflection;
 @using System.Runtime.InteropServices;
 @using ApisOfDotNet.Services;
 
@@ -12,13 +10,10 @@
             Deployed Version
         </h3>
         <table class="table table-striped">
-            @if (_commit is not null)
-            {
-                <tr>
-                    <th>Commit</th>
-                    <td><a href="https://github.com/dotnet/apisof.net/commit/@(_commit)">@_commit</a></td>
-                </tr>
-            }
+            <tr>
+                <th>Commit</th>
+                <td><a href="@(CommitUrl)"><code>@CommitHashShort</code> @CommitTitle</a></td>
+            </tr>
             <tr>
                 <th>Framework</th>
                 <td>@RuntimeInformation.FrameworkDescription</td>
@@ -29,7 +24,7 @@
             </tr>
             <tr>
                 <th>Catalog Version</th>
-                <td>@_catalogVersion</td>
+                <td>@CatalogVersion</td>
             </tr>
         </table>
     </div>
