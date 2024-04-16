@@ -26,7 +26,6 @@ public class ApiCatalogModelTests
         Assert.Equal(0, statistics.NumberOfPackages);
         Assert.Equal(0, statistics.NumberOfPackageVersions);
         Assert.Equal(0, statistics.NumberOfPackageAssemblies);
-        Assert.Equal(0, statistics.NumberOfUsageSources);
 
         foreach (var row in statistics.TableSizes)
         {

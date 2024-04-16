@@ -55,7 +55,6 @@ public sealed class ApiCatalogStatistics
     public int NumberOfPackages { get; }
     public int NumberOfPackageVersions { get; }
     public int NumberOfPackageAssemblies { get; }
-    public int NumberOfUsageSources { get; }
     public IReadOnlyCollection<(string TableName, int Bytes, int Rows)> TableSizes { get; }
 
     public override string ToString()
@@ -72,7 +71,6 @@ public sealed class ApiCatalogStatistics
         sb.AppendLine($"Packages                  : {NumberOfPackages,12:N0}");
         sb.AppendLine($"Package versions          : {NumberOfPackageVersions,12:N0}");
         sb.AppendLine($"Package assemblies        : {NumberOfPackageAssemblies,12:N0}");
-        sb.AppendLine($"Usage sources             : {NumberOfUsageSources,12:N0}");
 
         foreach (var tableSize in TableSizes)
         {
