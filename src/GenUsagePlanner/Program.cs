@@ -5,12 +5,9 @@ using GenUsagePlanner.Infra;
 using Microsoft.Extensions.Configuration;
 
 using Terrajobst.ApiCatalog;
+using Terrajobst.UsageCrawling.Storage;
 
 namespace GenUsagePlanner;
-
-// TODO: Reconcile the contents of the Infra folder with Terrajobst.UsageCrawling
-//       Ideally, we want to split the NuGet specific crawling functionality from
-//       the generic notion of associating an API with an application/package/report.
 
 internal class Program
 {
@@ -46,29 +43,25 @@ internal class Program
 
         Console.WriteLine("Downloading previously indexed usages...");
 
-        await store.DownloadDatabaseAsync(databasePath);
+        var (_, lastIndexTimestamp) = await store.DownloadDatabaseAsync(databasePath);
 
         using var usageDatabase = await UsageDatabase.OpenOrCreateAsync(databasePath);
 
-        Console.WriteLine("Discovering existing APIs...");
-
-        var apiMap = await usageDatabase.ReadApisAsync();
-
         Console.WriteLine("Discovering existing planner fingerprints...");
 
-        var referenceUnitIdMap = await usageDatabase.ReadReferenceUnitsAsync();
+        var referenceUnits = (await usageDatabase.GetReferenceUnitsAsync()).Select(r => r.Identifier);
 
         Console.WriteLine("Discovering latest planner fingerprints...");
 
         var stopwatch = Stopwatch.StartNew();
 
-        var lastIndexed = await usageDatabase.GetAndUpdateReferenceDateAsync();
-        var plannerFingerprints = await store.GetPlannerFingerprintsAsync(lastIndexed);
+        var indexTimestamp = DateTime.UtcNow;
+        var plannerFingerprints = await store.GetPlannerFingerprintsAsync(lastIndexTimestamp);
 
         Console.WriteLine($"Finished planner fingerprint discovery. Took {stopwatch.Elapsed}");
         Console.WriteLine($"Found {plannerFingerprints.Count:N0} planner fingerprints(s) to update.");
 
-        var indexedFingerprints = new HashSet<string>(referenceUnitIdMap.Values, StringComparer.OrdinalIgnoreCase);
+        var indexedFingerprints = new HashSet<string>(referenceUnits, StringComparer.OrdinalIgnoreCase);
         var fingerprintsToBeDeleted = plannerFingerprints.Where(f => indexedFingerprints.Contains(f)).ToArray();
 
         Console.WriteLine($"Found {fingerprintsToBeDeleted.Length:N0} fingerprints(s) to remove from the index.");
@@ -77,7 +70,7 @@ internal class Program
         Console.WriteLine($"Deleting planner fingerprints...");
 
         stopwatch.Restart();
-        await usageDatabase.DeleteReferenceUnitsAsync(fingerprintsToBeDeleted.Select(p => referenceUnitIdMap.GetId(p)));
+        await usageDatabase.DeleteReferenceUnitsAsync(fingerprintsToBeDeleted);
 
         Console.WriteLine($"Finished deleting planner fingerprints. Took {stopwatch.Elapsed}");
 
@@ -85,48 +78,20 @@ internal class Program
 
         stopwatch.Restart();
 
-        using (var referenceUnitWriter = usageDatabase.CreateReferenceUnitWriter())
+        foreach (var fingerprint in plannerFingerprints)
         {
-            foreach (var identifier in plannerFingerprints)
-            {
-                var referenceUnitId = referenceUnitIdMap.GetOrAdd(identifier);
-                await referenceUnitWriter.WriteAsync(referenceUnitId, identifier);
-            }
+            await usageDatabase.DeleteReferenceUnitsAsync([fingerprint]);
+            await usageDatabase.AddReferenceUnitAsync(fingerprint);
+            var apis = await store.GetPlannerApisAsync(fingerprint);
 
-            await referenceUnitWriter.SaveAsync();
+            foreach (var api in apis)
+            {
+                await usageDatabase.TryAddFeatureAsync(api);
+                await usageDatabase.AddUsageAsync(fingerprint, api);
+            }
         }
 
         Console.WriteLine($"Finished inserting new planner fingerprints. Took {stopwatch.Elapsed}");
-
-        Console.WriteLine($"Inserting planner usages...");
-
-        stopwatch.Restart();
-
-        using (var writer = usageDatabase.CreateUsageWriter())
-        {
-            foreach (var fingerprint in plannerFingerprints)
-            {
-                var referenceUnitId = referenceUnitIdMap.GetId(fingerprint);
-                var apis = await store.GetPlannerApisAsync(fingerprint);
-
-                foreach (var api in apis)
-                {
-                    var apiId = apiMap.GetOrAdd(api);
-                    await writer.WriteAsync(referenceUnitId, apiId);
-                }
-            }
-
-            await writer.SaveAsync();
-        }
-
-        Console.WriteLine($"Finished inserting planner usages. Took {stopwatch.Elapsed}");
-
-        Console.WriteLine("Inserting missing APIs...");
-
-        stopwatch.Restart();
-        await usageDatabase.InsertMissingApisAsync(apiMap);
-
-        Console.WriteLine($"Finished inserting missing APIs. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Vacuuming database...");
 
@@ -139,19 +104,30 @@ internal class Program
 
         Console.WriteLine($"Uploading database...");
 
-        await store.UploadDatabaseAsync(databasePath);
+        await store.UploadDatabaseAsync(databasePath, indexTimestamp);
 
         await usageDatabase.OpenAsync();
 
-        Console.WriteLine($"Aggregating results...");
+        Console.WriteLine($"Deleting irrelevant features...");
 
         stopwatch.Restart();
+        await usageDatabase.DeleteIrrelevantFeaturesAsync(apiCatalog);
 
-        var ancestors = apiCatalog.AllApis
-                                  .SelectMany(a => a.AncestorsAndSelf(), (api, ancestor) => (api.Guid, ancestor.Guid));
-        await usageDatabase.InsertApiAncestorsAndExportUsagesAsync(apiMap, ancestors, usagesPath);
+        Console.WriteLine($"Finished deleting irrelevant features. Took {stopwatch.Elapsed}");
 
-        Console.WriteLine($"Finished aggregating results. Took {stopwatch.Elapsed}");
+        Console.WriteLine($"Inserting parent features...");
+
+        stopwatch.Restart();
+        await usageDatabase.InsertParentsFeaturesAsync(apiCatalog);
+
+        Console.WriteLine($"Finished inserting parent features. Took {stopwatch.Elapsed}");
+
+        Console.WriteLine($"Exporting usages...");
+
+        stopwatch.Restart();
+        await usageDatabase.ExportUsagesAsync(usagesPath);
+
+        Console.WriteLine($"Finished exporting usages. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Uploading usages...");
 

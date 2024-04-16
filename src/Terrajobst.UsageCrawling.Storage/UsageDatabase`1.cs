@@ -9,6 +9,8 @@ public abstract class UsageDatabase<TReferenceUnit> : IDisposable
         _usageDatabase = usageDatabase;
     }
 
+    internal UsageDatabase UnderlyingDatabase => _usageDatabase;
+
     protected abstract TReferenceUnit ParseReferenceUnit(string referenceIdentifier);
 
     protected abstract string FormatReferenceUnit(TReferenceUnit referenceUnit);

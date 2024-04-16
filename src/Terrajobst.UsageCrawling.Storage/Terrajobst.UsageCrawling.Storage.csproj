@@ -11,4 +11,8 @@
         <PackageReference Include="Microsoft.Data.Sqlite" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+    </ItemGroup>
+
 </Project>

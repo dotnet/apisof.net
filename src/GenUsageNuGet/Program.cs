@@ -8,6 +8,7 @@ using NuGet.Versioning;
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.Features;
 using Terrajobst.UsageCrawling.Collectors;
+using Terrajobst.UsageCrawling.Storage;
 using NuGetFeed = GenUsageNuGet.Infra.NuGetFeed;
 
 namespace GenUsageNuGet;
@@ -324,47 +325,23 @@ internal sealed class Program
 
         await usageDatabase.OpenAsync();
 
-        Console.WriteLine($"Generating relevant features...");
-
-        stopwatch.Restart();
-
-        var catalogFeatures = FeatureDefinition.GetCatalogFeatures(apiCatalog);
-
-        Console.WriteLine($"Finished generating relevant features. Took {stopwatch.Elapsed}");
-
-        var irrelevantFeatures = (await usageDatabase.GetFeaturesAsync()).Where(f => !catalogFeatures.ContainsKey(f.Feature)).Select(f => f.Feature).ToArray();
-        Console.WriteLine($"Found {irrelevantFeatures.Length:N0} irrelevant features to delete.");
-        await usageDatabase.DeleteFeaturesAsync(irrelevantFeatures);
-
         Console.WriteLine($"Deleting irrelevant features...");
 
         stopwatch.Restart();
+        await usageDatabase.DeleteIrrelevantFeaturesAsync(apiCatalog);
 
         Console.WriteLine($"Finished deleting irrelevant features. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Inserting parent features...");
 
         stopwatch.Restart();
-
-        var collectorVersionByFeature = (await usageDatabase.GetFeaturesAsync()).ToDictionary(f => f.Feature, f => f.CollectorVersion);
-        var parentFeatures = FeatureDefinition.GetParentFeatures(apiCatalog);
-
-        foreach (var (child, parent) in parentFeatures)
-        {
-            if (!collectorVersionByFeature.TryGetValue(child, out var childCollectorVersion))
-                continue;
-
-            collectorVersionByFeature[parent] = childCollectorVersion;
-            await usageDatabase.TryAddFeatureAsync(parent, childCollectorVersion);
-            await usageDatabase.AddParentFeatureAsync(child, parent);
-        }
+        await usageDatabase.InsertParentsFeaturesAsync(apiCatalog);
 
         Console.WriteLine($"Finished inserting parent features. Took {stopwatch.Elapsed}");
 
         Console.WriteLine($"Exporting usages...");
 
         stopwatch.Restart();
-
         await usageDatabase.ExportUsagesAsync(usagesPath);
 
         Console.WriteLine($"Finished exporting usages. Took {stopwatch.Elapsed}");

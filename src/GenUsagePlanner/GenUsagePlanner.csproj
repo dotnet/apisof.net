@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+    <ProjectReference Include="..\Terrajobst.UsageCrawling.Storage\Terrajobst.UsageCrawling.Storage.csproj" />
   </ItemGroup>
 
 </Project>

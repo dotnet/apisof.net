@@ -13,6 +13,8 @@ public sealed class PlannerStore
     private const string DatabaseName = "usages-planner.db";
     private const string UsagesName = "usages-planner.tsv";
 
+    private const string BlobMetadataKeyIndexTimestamp = "IndexTimestamp";
+
     private readonly string _connectionString;
 
     public PlannerStore(string connectionString)
@@ -32,22 +34,36 @@ public sealed class PlannerStore
         return blobClient.DownloadToAsync(fileName);
     }
 
-    public async Task<bool> DownloadDatabaseAsync(string fileName)
+    public async Task<(bool, DateTimeOffset?)> DownloadDatabaseAsync(string fileName)
     {
+        var indexTimestamp = (DateTimeOffset?)null;
+
         var blobClient = new BlobClient(_connectionString, UsageContainerName, DatabaseName, GetBlobOptions());
         if (!await blobClient.ExistsAsync())
-            return false;
+            return (false, indexTimestamp);
 
         await blobClient.DownloadToAsync(fileName);
-        return true;
+
+        var properties = await blobClient.GetPropertiesAsync();
+        if (properties.HasValue &&
+            properties.Value.Metadata.TryGetValue(BlobMetadataKeyIndexTimestamp, out var timestampText) &&
+            DateTimeOffset.TryParse(timestampText, out var dateTimeOffset))
+        {
+            indexTimestamp = dateTimeOffset;
+        }
+        
+        return (true, indexTimestamp);
     }
 
-    public async Task UploadDatabaseAsync(string fileName)
+    public async Task UploadDatabaseAsync(string fileName, DateTimeOffset indexTimestamp)
     {
         await EnsureContainerExist();
 
         var blobClient = new BlobClient(_connectionString, UsageContainerName, DatabaseName, GetBlobOptions());
         await blobClient.UploadAsync(fileName, overwrite: true);
+        await blobClient.SetMetadataAsync(new Dictionary<string, string> {
+            [BlobMetadataKeyIndexTimestamp] = indexTimestamp.ToString("O")
+        });
     }
 
     public async Task UploadResultsAsync(string fileName)
