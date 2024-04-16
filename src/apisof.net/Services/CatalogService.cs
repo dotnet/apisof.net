@@ -51,6 +51,7 @@ public sealed class CatalogService
         if (!environment.IsDevelopment())
         {
             File.Delete(catalogPath);
+            File.Delete(usageDataPath);
             File.Delete(suffixTreePath);
             File.Delete(designNotesPath);
         }
