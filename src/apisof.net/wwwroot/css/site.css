@@ -57,6 +57,11 @@
     text-align: right;
 }
 
+.statistics-table tr.no-border-top th,
+.statistics-table tr.no-border-top td {
+    border-top: none;
+}
+
 /* Search */
 
 .modal {
