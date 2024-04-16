@@ -1,5 +1,6 @@
 namespace Terrajobst.ApiCatalog;
 
+// TODO: Now that we have FeatureUsageData, we should remove this
 public readonly struct UsageSourceModel : IEquatable<UsageSourceModel>
 {
     private readonly ApiCatalogModel _catalog;
