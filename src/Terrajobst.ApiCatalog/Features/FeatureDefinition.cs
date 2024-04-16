@@ -24,11 +24,15 @@ public abstract class FeatureDefinition
     public static ParameterizedFeatureDefinition<Guid> ApiUsage { get; } = new ApiUsageDefinition();
     public static ParameterizedFeatureDefinition<Guid> DimUsage { get; } = new DimUsageDefinition();
     public static ParameterizedFeatureDefinition<Guid> DerivesFromUsage { get; } = new DerivesFromUsageDefinition();
+    public static ParameterizedFeatureDefinition<Guid> FieldRead { get; } = new FieldReadDefinition();
+    public static ParameterizedFeatureDefinition<Guid> FieldWrite { get; } = new FieldWriteDefinition();
 
     public static IReadOnlyList<ParameterizedFeatureDefinition<Guid>> ApiFeatures { get; } = [
         ApiUsage,
         DimUsage,
-        DerivesFromUsage
+        DerivesFromUsage,
+        FieldRead,
+        FieldWrite
     ];
 
     public static ParameterizedFeatureDefinition<NuGetFramework> TargetFramework { get; } = new TargetFrameworkFeatureDefinition();
@@ -184,6 +188,34 @@ public abstract class FeatureDefinition
         public override string Name => "Derive from this class or interface";
 
         public override string Description => "Subclassing or interface implementation";
+    }
+
+    private sealed class FieldReadDefinition : ParameterizedFeatureDefinition<Guid>
+    {
+        private static readonly Guid DerivesFromFeature = Guid.Parse("1cfae67f-df1c-42df-9a6e-f3b13bff730e");
+
+        public override Guid GetFeatureId(Guid api)
+        {
+            return FeatureId.Create(DerivesFromFeature, api);
+        }
+
+        public override string Name => "Field read";
+
+        public override string Description => "Reads from this field";
+    }
+
+    private sealed class FieldWriteDefinition : ParameterizedFeatureDefinition<Guid>
+    {
+        private static readonly Guid DerivesFromFeature = Guid.Parse("c014a47a-29d8-4d61-a538-dc7b6ce33ed4");
+
+        public override Guid GetFeatureId(Guid api)
+        {
+            return FeatureId.Create(DerivesFromFeature, api);
+        }
+
+        public override string Name => "Field write";
+
+        public override string Description => "Writes to this field";
     }
 
     private sealed class TargetFrameworkFeatureDefinition : ParameterizedFeatureDefinition<NuGetFramework>

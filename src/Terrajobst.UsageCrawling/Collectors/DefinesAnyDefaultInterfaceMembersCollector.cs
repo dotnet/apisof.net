@@ -14,7 +14,7 @@ public sealed class DefinesAnyDefaultInterfaceMembersCollector : IncrementalUsag
 
             foreach (var member in type.Members)
             {
-                if (member is IMethodDefinition method && method.Body is not Dummy)
+                if (member is IMethodDefinition { Body: not (null or Dummy) })
                 {
                     context.Report(FeatureUsage.DefinesAnyDefaultInterfaceMembers);
                     return;

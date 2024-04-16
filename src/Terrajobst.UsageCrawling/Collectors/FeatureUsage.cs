@@ -90,6 +90,14 @@ public readonly struct FeatureUsage : IEquatable<FeatureUsage>
 
     public static FeatureUsage ForDerivesFrom(string documentationId) => ForDerivesFrom(new ApiKey(documentationId));
 
+    public static FeatureUsage ForFieldRead(ApiKey field) => ForParameterized(FeatureDefinition.FieldRead, field.Guid, field.DocumentationId);
+
+    public static FeatureUsage ForFieldRead(string documentationId) => ForFieldRead(new ApiKey(documentationId));
+
+    public static FeatureUsage ForFieldWrite(ApiKey field) => ForParameterized(FeatureDefinition.FieldWrite, field.Guid, field.DocumentationId);
+
+    public static FeatureUsage ForFieldWrite(string documentationId) => ForFieldWrite(new ApiKey(documentationId));
+
     public static FeatureUsage ForTargetFramework(NuGetFramework framework) => ForParameterized(FeatureDefinition.TargetFramework, framework, framework.GetShortFolderName());
 
     public static FeatureUsage ForTargetFramework(string framework) => ForTargetFramework(NuGetFramework.Parse(framework));
