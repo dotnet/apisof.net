@@ -1,0 +1,40 @@
+﻿@page "/feature-usage"
+
+<div class="mt-3 container-fluid">
+    <div class="mx-auto col-md-5">
+        <h3>
+            Feature Usage
+        </h3>
+        <table class="table">
+            @foreach (var (usageSource, usages) in GetUsages())
+            {
+                <tr>
+                    <th>
+                        @usageSource.Name
+                    </th>
+                    <td>
+                        @foreach (var usage in usages)
+                        {
+                            var value = usage.Percentage * 100;
+                            var title = $"Usage on {usageSource.Name} is {usage.Percentage:P5} (as of {usageSource.Date})";
+
+                            <div class="row align-items-center" title="@title">
+                                <div class="col col-md-5 col-xl-3">
+                                    <div class="progress">
+                                        <div class="progress-bar" role="progressbar" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                <div class="col" style="max-width: 4rem;">
+                                    @usage.Percentage.ToString("P1")
+                                </div>
+                                <div class="col text-muted small">
+                                    <span title="@usage.Feature.Description">@usage.Feature.Name</span>
+                                </div>
+                            </div>
+                        }
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

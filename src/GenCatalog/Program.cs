@@ -7,6 +7,7 @@ using Azure.Storage.Blobs;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Terrajobst.ApiCatalog;
+using Terrajobst.ApiCatalog.Features;
 using Terrajobst.ApiCatalog.Generation.DesignNotes;
 
 namespace GenCatalog;
@@ -73,6 +74,7 @@ internal static class Program
         var reviewRepoPath = Path.Combine(rootPath, "apireviews");
         var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
         var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
+        var usageDataPath = Path.Combine(rootPath, "usageData.dat");
         var designNotesPath = Path.Combine(rootPath, "designNotes.dat");
 
         var stopwatch = Stopwatch.StartNew();
@@ -86,10 +88,12 @@ internal static class Program
         await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
         await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
         await GenerateCatalogAsync(indexFrameworksPath, indexPackagesPath, apiUsagesPath, catalogModelPath);
+        await GenerateUsageDataAsync(usageDataPath, apiUsagesPath);
         await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
         await CloneApiReviewsAsync(reviewRepoPath);
         await GenerateDesignNotesAsync(reviewRepoPath, catalogModelPath, designNotesPath);
         await UploadCatalogModelAsync(catalogModelPath);
+        await UploadUsageData(usageDataPath);
         await UploadSuffixTreeAsync(suffixTreePath);
         await UploadDesignNotesAsync(designNotesPath);
 
@@ -328,11 +332,6 @@ internal static class Program
         var builder = new CatalogBuilder();
         builder.Index(platformsPath);
         builder.Index(packagesPath);
-
-        var usageFiles = GetUsageFiles(usagesPath);
-        foreach (var (path, name, date) in usageFiles)
-            builder.IndexUsages(path, name, date);
-
         builder.Build(catalogModelPath);
 
         var model = await ApiCatalogModel.LoadAsync(catalogModelPath);
@@ -340,6 +339,51 @@ internal static class Program
         Console.WriteLine("Catalog stats:");
         Console.Write(stats);
         await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), stats);
+    }
+
+    private static Task GenerateUsageDataAsync(string usageDataPath, string apiUsagesPath)
+    {
+        if (File.Exists(usageDataPath))
+            return Task.CompletedTask;
+
+        Console.WriteLine($"Generating {Path.GetFileName(usageDataPath)}...");
+
+        var usageFiles = GetUsageFiles(apiUsagesPath);
+        var data = new List<(FeatureUsageSource Source, IReadOnlyList<(Guid FeatureId, float Percentage)> Values)>();
+
+        foreach (var (path, name, date) in usageFiles)
+        {
+            var usageSource = new FeatureUsageSource(name, date);
+            var usageSourceData = ParseFile(path).ToArray();
+            data.Add((usageSource, usageSourceData));
+        }
+
+        var usageData = new FeatureUsageData(data);
+        usageData.Save(usageDataPath);
+
+        return Task.CompletedTask;
+
+        static IEnumerable<(Guid FeatureId, float Percentage)> ParseFile(string path)
+        {
+            using var streamReader = new StreamReader(path);
+
+            while (streamReader.ReadLine() is { } line)
+            {
+                var tabIndex = line.IndexOf('\t');
+                var lastTabIndex = line.LastIndexOf('\t');
+                if (tabIndex > 0 && tabIndex == lastTabIndex)
+                {
+                    var guidTextSpan = line.AsSpan(0, tabIndex);
+                    var percentageSpan = line.AsSpan(tabIndex + 1);
+
+                    if (Guid.TryParse(guidTextSpan, out var featureId) &&
+                        float.TryParse(percentageSpan, out var percentage))
+                    {
+                        yield return (featureId, percentage);
+                    }
+                }
+            }
+        }
     }
 
     private static async Task GenerateSuffixTreeAsync(string catalogModelPath, string suffixTreePath)
@@ -394,6 +438,16 @@ internal static class Program
         var name = Path.GetFileName(catalogModelPath);
         var blobClient = new BlobClient(connectionString, container, name, options: GetBlobOptions());
         await blobClient.UploadAsync(catalogModelPath, overwrite: true);
+    }
+
+    private static async Task UploadUsageData(string usageDataPath)
+    {
+        Console.WriteLine("Uploading usage data...");
+        var connectionString = GetAzureStorageConnectionString();
+        var container = "usage";
+        var name = Path.GetFileName(usageDataPath);
+        var blobClient = new BlobClient(connectionString, container, name, options: GetBlobOptions());
+        await blobClient.UploadAsync(usageDataPath, overwrite: true);
     }
 
     private static async Task UploadSuffixTreeAsync(string suffixTreePath)

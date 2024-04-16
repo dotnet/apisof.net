@@ -5,6 +5,7 @@ using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.DesignNotes;
+using Terrajobst.ApiCatalog.Features;
 
 namespace ApisOfDotNet.Services;
 
@@ -32,16 +33,18 @@ public sealed class CatalogService
     {
         var storageConnectionString = _options.Value.AzureStorageConnectionString;
         var catalogPath = GetCatalogPath();
+        var usageDataPath = GetUsageDataPath();
         var suffixTreePath = GetSuffixTreePath();
         var designNotesPath = GetDesignNotesPath();
 
-        _data = await LoadCatalogDataAsync(_environment, _logger, storageConnectionString, catalogPath, suffixTreePath, designNotesPath);
+        _data = await LoadCatalogDataAsync(_environment, _logger, storageConnectionString, catalogPath, usageDataPath, suffixTreePath, designNotesPath);
     }
 
     private static async Task<CatalogData> LoadCatalogDataAsync(IHostEnvironment environment,
                                                                 ILogger logger,
                                                                 string storageConnectionString,
                                                                 string catalogPath,
+                                                                string usageDataPath,
                                                                 string suffixTreePath,
                                                                 string designNotesPath)
     {
@@ -71,6 +74,26 @@ public sealed class CatalogService
         var catalog = await ApiCatalogModel.LoadAsync(catalogPath);
 
         logger.LogInformation("Loading catalog complete.");
+
+        if (File.Exists(usageDataPath))
+        {
+            logger.LogInformation("Found usage data on disk. Skipping download.");
+        }
+        else
+        {
+            logger.LogInformation("Downloading usage data...");
+
+            var blobClient = new BlobClient(storageConnectionString, "usage", "usageData.dat");
+            await blobClient.DownloadToAsync(usageDataPath);
+
+            logger.LogInformation("Download usage data complete.");
+        }
+
+        logger.LogInformation("Loading usage data...");
+
+        var usage = FeatureUsageData.Load(usageDataPath);
+
+        logger.LogInformation("Loading usage data complete.");
 
         if (File.Exists(suffixTreePath))
         {
@@ -107,12 +130,12 @@ public sealed class CatalogService
             var blobClient = new BlobClient(storageConnectionString, "catalog", "designNotes.dat");
             await blobClient.DownloadToAsync(designNotesPath);
 
-            logger.LogInformation("Downloading desing notes complete.");
+            logger.LogInformation("Downloading design notes complete.");
         }
 
         logger.LogInformation("Loading design notes...");
 
-        var reviewLinks = DesignNoteDatabase.Load(designNotesPath);
+        var designNotes = DesignNoteDatabase.Load(designNotesPath);
 
         logger.LogInformation("Loading design notes complete.");
 
@@ -120,7 +143,7 @@ public sealed class CatalogService
         await using var jobStream = await jobBlobClient.OpenReadAsync();
         var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream) ?? CatalogJobInfo.Empty;
 
-        return new CatalogData(jobInfo, catalog, suffixTree, reviewLinks);
+        return new CatalogData(jobInfo, catalog, usage, suffixTree, designNotes);
     }
 
     private string GetCatalogPath()
@@ -129,6 +152,13 @@ public sealed class CatalogService
         var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
         var directory = environmentPath ?? applicationPath;
         return Path.Combine(directory, "apicatalog.dat");
+    }
+
+    private string GetUsageDataPath()
+    {
+        var databasePath = GetCatalogPath();
+        var directory = Path.GetDirectoryName(databasePath)!;
+        return Path.Combine(directory, "usageData.dat");
     }
 
     private string GetSuffixTreePath()
@@ -146,6 +176,8 @@ public sealed class CatalogService
     }
 
     public ApiCatalogModel Catalog => _data.Catalog;
+
+    public FeatureUsageData UsageData => _data.UsageData;
 
     public ApiCatalogStatistics CatalogStatistics => _data.Statistics;
 
@@ -169,14 +201,15 @@ public sealed class CatalogService
         public static CatalogData Empty { get; } = new();
 
         private CatalogData()
-            : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, SuffixTree.Empty, DesignNoteDatabase.Empty)
+            : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, FeatureUsageData.Empty, SuffixTree.Empty, DesignNoteDatabase.Empty)
         {
         }
 
-        public CatalogData(CatalogJobInfo jobInfo, ApiCatalogModel catalog, SuffixTree suffixTree, DesignNoteDatabase designNotes)
+        public CatalogData(CatalogJobInfo jobInfo, ApiCatalogModel catalog, FeatureUsageData usageData, SuffixTree suffixTree, DesignNoteDatabase designNotes)
         {
             JobInfo = jobInfo;
             Catalog = catalog;
+            UsageData = usageData;
             SuffixTree = suffixTree;
             DesignNotes = designNotes;
             Statistics = catalog.GetStatistics();
@@ -185,6 +218,8 @@ public sealed class CatalogService
         public CatalogJobInfo JobInfo { get; }
 
         public ApiCatalogModel Catalog { get; }
+
+        public FeatureUsageData UsageData { get; }
 
         public SuffixTree SuffixTree { get; }
 

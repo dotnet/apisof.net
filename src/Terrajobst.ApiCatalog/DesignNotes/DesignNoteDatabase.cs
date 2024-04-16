@@ -6,6 +6,9 @@ namespace Terrajobst.ApiCatalog.DesignNotes;
 
 public sealed class DesignNoteDatabase
 {
+    private static readonly byte[] MagicNumber = "apisof.net Design Note DB"u8.ToArray();
+    private const int FormatVersion = 1;
+
     public static DesignNoteDatabase Empty { get; } = new(FrozenDictionary<int, ImmutableArray<DesignNote>>.Empty);
 
     public DesignNoteDatabase(FrozenDictionary<int, ImmutableArray<DesignNote>> linkByApiId)
@@ -121,7 +124,4 @@ public sealed class DesignNoteDatabase
                 binaryWriter.Write(indexByReviewLink[reviewLink]);
         }
     }
-
-    private static readonly byte[] MagicNumber = "apisof.net Design Note DB"u8.ToArray();
-    private const int FormatVersion = 1;
 }

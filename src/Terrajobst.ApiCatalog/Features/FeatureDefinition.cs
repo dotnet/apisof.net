@@ -1,6 +1,4 @@
-﻿using NuGet.Frameworks;
-
-namespace Terrajobst.ApiCatalog.Features;
+﻿namespace Terrajobst.ApiCatalog.Features;
 
 public abstract class FeatureDefinition
 {
@@ -61,7 +59,7 @@ public abstract class FeatureDefinition
     {
         public override Guid FeatureId { get; } = Guid.Parse("740841a3-5c09-426a-b43b-750d21250c01");
 
-        public override string Name => "Defines any ref structs";
+        public override string Name => "Define any ref structs";
 
         public override string Description => "Percentage of applications/packages that defined their own ref structs";
     }
@@ -70,7 +68,7 @@ public abstract class FeatureDefinition
     {
         public override Guid FeatureId { get; } = Guid.Parse("745807b1-d30a-405c-aa91-209bae5f5ea9");
 
-        public override string Name => "Defines any DIMs";
+        public override string Name => "Define any DIMs";
 
         public override string Description => "Percentage of applications/packages that defined any default interface members (DIMs)";
     }
@@ -79,7 +77,7 @@ public abstract class FeatureDefinition
     {
         public override Guid FeatureId { get; } = Guid.Parse("580c614a-45e8-4f91-a007-322377dd23a9");
 
-        public override string Name => "Defines any virtual static interface members";
+        public override string Name => "Define any virtual static interface members";
 
         public override string Description => "Percentage of applications/packages that defined any virtual static interface members";
     }
@@ -91,7 +89,7 @@ public abstract class FeatureDefinition
             return api;
         }
 
-        public override string Name => "API Usage";
+        public override string Name => "Reference this API";
 
         public override string Description => "Usage of an API in signatures or method bodies";
     }
@@ -103,7 +101,7 @@ public abstract class FeatureDefinition
             return FeatureId.Create(DefinesAnyDefaultInterfaceMembers.FeatureId, api);
         }
 
-        public override string Name => "DIM Usage";
+        public override string Name => "Declare a DIM for this API";
 
         public override string Description => "Definition of an interface member with a default implementation (DIM)";
     }

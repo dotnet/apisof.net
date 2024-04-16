@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NuGet.Frameworks;
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.DesignNotes;
+using Terrajobst.ApiCatalog.Features;
 
 namespace ApisOfDotNet.Shared;
 
@@ -43,6 +44,8 @@ public partial class ApiDetails
 
     public required ApiModel Parent { get; set; }
 
+    public required IReadOnlyList<(FeatureUsageSource Source, IReadOnlyList<(FeatureDefinition Feature, float Percentage)> Usages)> Usages { get; set; }
+
     public required ApiAvailability Availability { get; set; }
 
     public required ApiFrameworkAvailability? SelectedAvailability { get; set; }
@@ -64,6 +67,7 @@ public partial class ApiDetails
 
     private async Task UpdateApiAsync()
     {
+        Usages = GetUsages();
         Availability = Api.GetAvailability();
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
                                Availability.Frameworks.First();
@@ -102,6 +106,22 @@ public partial class ApiDetails
 
         SourceUrl = results[0];
         HelpUrl = results[1];
+    }
+
+    private IReadOnlyList<(FeatureUsageSource Source, IReadOnlyList<(FeatureDefinition Feature, float Percentage)> Usages)> GetUsages()
+    {
+        var usages = new List<(FeatureUsageSource Source, FeatureDefinition Feature, float Percentage)>();
+        var usageData = CatalogService.UsageData;
+        foreach (var feature in FeatureDefinition.ApiFeatures)
+        {
+            var featureId = feature.GetFeatureId(Api.Guid);
+            foreach (var (usageSource, percentage) in usageData.GetUsage(featureId))
+                usages.Add((usageSource, feature, percentage));
+        }
+
+        return usages.GroupBy(u => u.Source)
+                     .Select(g => (g.Key, (IReadOnlyList<(FeatureDefinition, float)>)g.Select(t => (t.Feature, t.Percentage)).ToArray()))
+                     .ToArray();
     }
 
     private ApiModel? GetAccessor(ApiKind kind)
