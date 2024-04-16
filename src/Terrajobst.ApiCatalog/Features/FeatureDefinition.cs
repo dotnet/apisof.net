@@ -23,10 +23,12 @@ public abstract class FeatureDefinition
 
     public static ParameterizedFeatureDefinition<Guid> ApiUsage { get; } = new ApiUsageDefinition();
     public static ParameterizedFeatureDefinition<Guid> DimUsage { get; } = new DimUsageDefinition();
+    public static ParameterizedFeatureDefinition<Guid> DerivesFromUsage { get; } = new DerivesFromUsageDefinition();
 
     public static IReadOnlyList<ParameterizedFeatureDefinition<Guid>> ApiFeatures { get; } = [
         ApiUsage,
-        DimUsage
+        DimUsage,
+        DerivesFromUsage
     ];
 
     public static ParameterizedFeatureDefinition<NuGetFramework> TargetFramework { get; } = new TargetFrameworkFeatureDefinition();
@@ -168,6 +170,20 @@ public abstract class FeatureDefinition
         public override string Name => "Declare a DIM for this API";
 
         public override string Description => "Definition of an interface member with a default implementation (DIM)";
+    }
+
+    private sealed class DerivesFromUsageDefinition : ParameterizedFeatureDefinition<Guid>
+    {
+        private static readonly Guid DerivesFromFeature = Guid.Parse("ee8100f2-6eed-4e31-b290-49941837f241");
+
+        public override Guid GetFeatureId(Guid api)
+        {
+            return FeatureId.Create(DerivesFromFeature, api);
+        }
+
+        public override string Name => "Derive from this class or interface";
+
+        public override string Description => "Subclassing or interface implementation";
     }
 
     private sealed class TargetFrameworkFeatureDefinition : ParameterizedFeatureDefinition<NuGetFramework>
