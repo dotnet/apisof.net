@@ -208,6 +208,12 @@ public sealed class CatalogService
 
         public CatalogData(CatalogJobInfo jobInfo, ApiCatalogModel catalog, FeatureUsageData usageData, SuffixTree suffixTree, DesignNoteDatabase designNotes)
         {
+            ThrowIfNull(jobInfo);
+            ThrowIfNull(catalog);
+            ThrowIfNull(usageData);
+            ThrowIfNull(suffixTree);
+            ThrowIfNull(designNotes);
+            
             JobInfo = jobInfo;
             Catalog = catalog;
             UsageData = usageData;
