@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '21 */6 * * *' # At :21 in every 6th hour
 
+concurrency:
+  group: ${{ github.workflow }}
+
 env:
   DOTNET_NOLOGO: true
 

@@ -8,6 +8,10 @@ on:
       - src/apisof.net/**
       - src/Terrajobst.ApiCatalog/**
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   DOTNET_NOLOGO: true
 
