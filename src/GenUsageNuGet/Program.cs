@@ -351,7 +351,9 @@ internal sealed class Program
 
         foreach (var (child, parent) in parentFeatures)
         {
-            var childCollectorVersion = collectorVersionByFeature[child];
+            if (!collectorVersionByFeature.TryGetValue(child, out var childCollectorVersion))
+                continue;
+
             collectorVersionByFeature[parent] = childCollectorVersion;
             await usageDatabase.TryAddFeatureAsync(parent, childCollectorVersion);
             await usageDatabase.AddParentFeatureAsync(child, parent);
