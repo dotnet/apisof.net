@@ -51,7 +51,7 @@ public sealed class PlannerStore
         {
             indexTimestamp = dateTimeOffset;
         }
-        
+
         return (true, indexTimestamp);
     }
 

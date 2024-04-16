@@ -14,7 +14,7 @@ internal sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
         comparer ??= EqualityComparer<T>.Default;
         _idByValue = new Dictionary<T, int>(comparer);
     }
-    
+
     public void Add(int id, T value)
     {
         _idByValue.Add(value, id);

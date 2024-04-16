@@ -9,7 +9,7 @@ public static class UsageDatabaseExtensions
     {
         ThrowIfNull(usageDatabase);
         ThrowIfNull(catalog);
-        
+
         var catalogFeatures = FeatureDefinition.GetCatalogFeatures(catalog);
         var storedFeatures = await usageDatabase.GetFeaturesAsync();
         var irrelevantFeatures = storedFeatures.Where(f => !catalogFeatures.ContainsKey(f.Feature)).Select(f => f.Feature).ToArray();
@@ -43,7 +43,7 @@ public static class UsageDatabaseExtensions
 
         return usageDatabase.UnderlyingDatabase.DeleteIrrelevantFeaturesAsync(catalog);
     }
-    
+
     public static Task InsertParentsFeaturesAsync<T>(this UsageDatabase<T> usageDatabase, ApiCatalogModel catalog)
     {
         ThrowIfNull(usageDatabase);
