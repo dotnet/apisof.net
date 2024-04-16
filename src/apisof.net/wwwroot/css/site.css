@@ -53,12 +53,7 @@
 
 /* Stats */
 
-.statistics-container > div {
-    margin: 0 auto;
-    width: 400px;
-}
-
-.statistics-container table td:nth-child(2) {
+.statistics-table.table td:nth-child(2) {
     text-align: right;
 }
 
