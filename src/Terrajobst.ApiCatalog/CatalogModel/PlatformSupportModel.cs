@@ -24,7 +24,7 @@ public readonly struct PlatformSupportModel : IEquatable<PlatformSupportModel>
 
     public override bool Equals(object? obj)
     {
-        return obj is ApiUsageModel model && Equals(model);
+        return obj is PlatformSupportModel model && Equals(model);
     }
 
     public bool Equals(PlatformSupportModel other)

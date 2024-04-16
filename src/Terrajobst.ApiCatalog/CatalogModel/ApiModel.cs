@@ -48,15 +48,6 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
         }
     }
 
-    public UsageEnumerator Usages
-    {
-        get
-        {
-            var enumerator = ApiCatalogSchema.ApiRow.Usages.Read(_catalog, _offset);
-            return new UsageEnumerator(_offset, enumerator);
-        }
-    }
-
     public ExtensionMethodEnumerator ExtensionMethods
     {
         get
@@ -431,62 +422,6 @@ public readonly struct ApiModel : IEquatable<ApiModel>, IComparable<ApiModel>
                 var declarationOffset = _enumerator.Current;
                 var api = new ApiModel(_enumerator.Catalog, _apiOffset);
                 return new ApiDeclarationModel(api, declarationOffset);
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        void IDisposable.Dispose()
-        {
-        }
-    }
-
-    public struct UsageEnumerator : IEnumerable<ApiUsageModel>, IEnumerator<ApiUsageModel>
-    {
-        private readonly int _apiOffset;
-        private ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.ApiUsageLayout> _enumerator;
-
-        internal UsageEnumerator(int apiOffset, ApiCatalogSchema.ArrayOfStructuresEnumerator<ApiCatalogSchema.ApiUsageLayout> enumerator)
-        {
-            _apiOffset = apiOffset;
-            _enumerator = enumerator;
-        }
-
-        IEnumerator<ApiUsageModel> IEnumerable<ApiUsageModel>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public UsageEnumerator GetEnumerator()
-        {
-            return this;
-        }
-
-        public bool MoveNext()
-        {
-            return _enumerator.MoveNext();
-        }
-
-        void IEnumerator.Reset()
-        {
-            throw new NotSupportedException();
-        }
-
-        object IEnumerator.Current
-        {
-            get { return Current; }
-        }
-
-        public ApiUsageModel Current
-        {
-            get
-            {
-                var usageOffset = _enumerator.Current;
-                var api = new ApiModel(_enumerator.Catalog, _apiOffset);
-                return new ApiUsageModel(api, usageOffset);
             }
         }
 

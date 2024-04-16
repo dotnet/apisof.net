@@ -15,7 +15,6 @@ public sealed partial class CatalogBuilder
     private readonly Dictionary<Guid, IntermediatePackage> _packageByFingerprint = new();
     private readonly SortedSet<string> _platformNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<Guid, (Guid, Guid)> _extensions = new();
-    private readonly Dictionary<string, IntermediateUsageSource> _usageSources = new(StringComparer.OrdinalIgnoreCase);
 
     public void Index(string indexPath)
     {
@@ -129,50 +128,6 @@ public sealed partial class CatalogBuilder
 
             DefineApi(fingerprint, kind, parentFingerprint, name);
         }
-    }
-
-    public void IndexUsages(string path, string name, DateOnly date)
-    {
-        Console.WriteLine($"Processing {path}...");
-        var usages = ParseFile(path);
-        IndexUsages(name, date, usages);
-
-        static IEnumerable<(Guid ApiFingerprint, float Percentage)> ParseFile(string path)
-        {
-            using var streamReader = new StreamReader(path);
-
-            while (streamReader.ReadLine() is { } line)
-            {
-                var tabIndex = line.IndexOf('\t');
-                var lastTabIndex = line.LastIndexOf('\t');
-                if (tabIndex > 0 && tabIndex == lastTabIndex)
-                {
-                    var guidTextSpan = line.AsSpan(0, tabIndex);
-                    var percentageSpan = line.AsSpan(tabIndex + 1);
-
-                    if (Guid.TryParse(guidTextSpan, out var apiFingerprint) &&
-                        float.TryParse(percentageSpan, out var percentage))
-                    {
-                        yield return (apiFingerprint, percentage);
-                    }
-                }
-            }
-        }
-    }
-
-    public void IndexUsages(string name, DateOnly date, IEnumerable<(Guid ApiFingerprint, float Percentage)> usages)
-    {
-        if (_usageSources.TryGetValue(name, out var existingUsages))
-        {
-            if (existingUsages.Date < date)
-                _usageSources.Remove(name);
-            else
-                return;
-        }
-
-        var usageDictionary = usages.ToFrozenDictionary(t => t.ApiFingerprint, t => t.Percentage);
-        var usageSource = new IntermediateUsageSource(name, date, usageDictionary);
-        _usageSources.Add(usageSource.Name, usageSource);
     }
 
     public async Task<ApiCatalogModel> BuildAsync()

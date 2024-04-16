@@ -15,7 +15,6 @@ public sealed class ApiCatalogStatistics
                                 int numberOfPackages,
                                 int numberOfPackageVersions,
                                 int numberOfPackageAssemblies,
-                                int numberOfUsageSources,
                                 IReadOnlyCollection<(string TableName, int Bytes, int Rows)> tableSizes)
     {
         ThrowIfNegative(sizeCompressed);
@@ -29,7 +28,6 @@ public sealed class ApiCatalogStatistics
         ThrowIfNegative(numberOfPackages);
         ThrowIfNegative(numberOfPackageVersions);
         ThrowIfNegative(numberOfPackageAssemblies);
-        ThrowIfNegative(numberOfUsageSources);
         ThrowIfNull(tableSizes);
 
         SizeCompressed = sizeCompressed;
@@ -43,7 +41,6 @@ public sealed class ApiCatalogStatistics
         NumberOfPackages = numberOfPackages;
         NumberOfPackageVersions = numberOfPackageVersions;
         NumberOfPackageAssemblies = numberOfPackageAssemblies;
-        NumberOfUsageSources = numberOfUsageSources;
         TableSizes = tableSizes;
     }
 

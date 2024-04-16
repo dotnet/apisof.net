@@ -24,7 +24,6 @@ public sealed class ApiCatalogModel
     private readonly TableRange _frameworkTableRange;
     private readonly TableRange _packageTableRange;
     private readonly TableRange _assemblyTableRange;
-    private readonly TableRange _usageSourcesTableRange;
     private readonly TableRange _apiTableRange;
     private readonly TableRange _rootApiTableRange;
     private readonly TableRange _extensionMethodTableRange;
@@ -69,8 +68,7 @@ public sealed class ApiCatalogModel
         _frameworkTableRange = new(_platformTableRange.End, tableSizes[tableIndex++]);
         _packageTableRange = new(_frameworkTableRange.End, tableSizes[tableIndex++]);
         _assemblyTableRange = new(_packageTableRange.End, tableSizes[tableIndex++]);
-        _usageSourcesTableRange = new(_assemblyTableRange.End, tableSizes[tableIndex++]);
-        _apiTableRange = new(_usageSourcesTableRange.End, tableSizes[tableIndex++]);
+        _apiTableRange = new(_assemblyTableRange.End, tableSizes[tableIndex++]);
         _rootApiTableRange = new(_apiTableRange.End, tableSizes[tableIndex++]);
         _extensionMethodTableRange = new(_rootApiTableRange.End, tableSizes[tableIndex++]);
         _obsoletionTableRange = new(_extensionMethodTableRange.End, tableSizes[tableIndex++]);
@@ -98,8 +96,6 @@ public sealed class ApiCatalogModel
     internal ReadOnlySpan<byte> PackageTable => _packageTableRange.GetBytes(_buffer);
 
     internal ReadOnlySpan<byte> AssemblyTable => _assemblyTableRange.GetBytes(_buffer);
-
-    internal ReadOnlySpan<byte> UsageSourceTable => _usageSourcesTableRange.GetBytes(_buffer);
 
     internal ReadOnlySpan<byte> ApiTable => _apiTableRange.GetBytes(_buffer);
 
@@ -146,14 +142,6 @@ public sealed class ApiCatalogModel
         get
         {
             return new AssemblyEnumerator(this);
-        }
-    }
-
-    public UsageSourceEnumerator UsageSources
-    {
-        get
-        {
-            return new UsageSourceEnumerator(this);
         }
     }
 
@@ -472,7 +460,6 @@ public sealed class ApiCatalogModel
             ("Framework Table", FrameworkTable.Length, FrameworkTable.Length / ApiCatalogSchema.FrameworkRow.Size),
             ("Package Table", PackageTable.Length, PackageTable.Length / ApiCatalogSchema.PackageRow.Size),
             ("Assembly Table", AssemblyTable.Length, AssemblyTable.Length / ApiCatalogSchema.AssemblyRow.Size),
-            ("Usage Source Table", UsageSourceTable.Length, UsageSourceTable.Length / ApiCatalogSchema.UsageSourceRow.Size),
             ("API Table", ApiTable.Length, ApiTable.Length / ApiCatalogSchema.ApiRow.Size),
             ("Root API Table", RootApiTable.Length, RootApiTable.Length / ApiCatalogSchema.RootApiRow.Size),
             ("Obsoletion Table", ObsoletionTable.Length, ObsoletionTable.Length / ApiCatalogSchema.ObsoletionRow.Size),
@@ -494,7 +481,6 @@ public sealed class ApiCatalogModel
             numberOfPackages: Packages.Select(p => p.Name).Distinct().Count(),
             numberOfPackageVersions: Packages.Count(),
             numberOfPackageAssemblies: Assemblies.SelectMany(a => a.Packages).Count(),
-            numberOfUsageSources: UsageSources.Count(),
             tableSizes
         );
     }
@@ -827,61 +813,6 @@ public sealed class ApiCatalogModel
             {
                 var offset = _enumerator.Current;
                 return new AssemblyModel(_catalog, offset);
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        void IDisposable.Dispose()
-        {
-        }
-    }
-
-    public struct UsageSourceEnumerator : IEnumerable<UsageSourceModel>, IEnumerator<UsageSourceModel>
-    {
-        private readonly ApiCatalogModel _catalog;
-        private ApiCatalogSchema.TableRowEnumerator _enumerator;
-
-        internal UsageSourceEnumerator(ApiCatalogModel catalog)
-        {
-            _catalog = catalog;
-            _enumerator = new ApiCatalogSchema.TableRowEnumerator(catalog.UsageSourceTable, ApiCatalogSchema.UsageSourceRow.Size);
-        }
-
-        IEnumerator<UsageSourceModel> IEnumerable<UsageSourceModel>.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public UsageSourceEnumerator GetEnumerator()
-        {
-            return this;
-        }
-
-        public bool MoveNext()
-        {
-            return _enumerator.MoveNext();
-        }
-
-        void IEnumerator.Reset()
-        {
-            throw new NotSupportedException();
-        }
-
-        object IEnumerator.Current
-        {
-            get { return Current; }
-        }
-
-        public UsageSourceModel Current
-        {
-            get
-            {
-                var offset = _enumerator.Current;
-                return new UsageSourceModel(_catalog, offset);
             }
         }
 

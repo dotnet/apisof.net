@@ -4,8 +4,8 @@ internal static partial class ApiCatalogSchema
 {
     internal static ReadOnlySpan<byte> MagicNumber => "APICATFB"u8;
 
-    internal const int FormatVersion = 8;
-    internal const int NumberOfTables = 14;
+    internal const int FormatVersion = 9;
+    internal const int NumberOfTables = 13;
 
     // Tables
 
@@ -42,13 +42,6 @@ internal static partial class ApiCatalogSchema
         public override int Size { get; } = t.Size;
     }
 
-    public sealed class UsageSourceRowLayout(LayoutBuilder t) : TableLayout
-    {
-        public readonly Field<string> Name = t.DefineString();
-        public readonly Field<DateOnly> Date = t.DefineDate();
-        public override int Size { get; } = t.Size;
-    }
-
     public sealed class ApiRowLayout(LayoutBuilder t) : TableLayout
     {
         public readonly Field<Guid> Guid = t.DefineGuid();
@@ -57,7 +50,6 @@ internal static partial class ApiCatalogSchema
         public readonly Field<string> Name = t.DefineString();
         public readonly Field<ArrayEnumerator<ApiModel>> Children = t.DefineArray(ApiElement);
         public readonly Field<ArrayOfStructuresEnumerator<ApiDeclarationLayout>> Declarations = t.DefineArray(ApiDeclarationStructure);
-        public readonly Field<ArrayOfStructuresEnumerator<ApiUsageLayout>> Usages = t.DefineArray(ApiUsageStructure);
         public override int Size { get; } = t.Size;
     }
 
@@ -118,13 +110,6 @@ internal static partial class ApiCatalogSchema
     {
         public Field<AssemblyModel> Assembly { get; } = t.DefineAssembly();
         public Field<int> SyntaxOffset { get; } = t.DefineInt32();
-        public override int Size { get; } = t.Size;
-    }
-
-    public sealed class ApiUsageLayout(LayoutBuilder t) : StructureLayout
-    {
-        public Field<UsageSourceModel> UsageSource { get; } = t.DefineUsageSource();
-        public Field<float> Percentage { get; } = t.DefineSingle();
         public override int Size { get; } = t.Size;
     }
 

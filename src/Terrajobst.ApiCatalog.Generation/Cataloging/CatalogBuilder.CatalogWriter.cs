@@ -17,7 +17,6 @@ public sealed partial class CatalogBuilder
         private readonly FrameworkTable _frameworkTable = new();
         private readonly PackageTable _packageTable = new();
         private readonly AssemblyTable _assemblyTable = new();
-        private readonly UsageSourceTable _usageSourceTable = new();
         private readonly ApiTable _apiTable = new();
         private readonly RootApiTable _rootApiTable = new();
         private readonly ExtensionMethodTable _extensionMethodTable = new();
@@ -46,7 +45,6 @@ public sealed partial class CatalogBuilder
                 _frameworkTable,
                 _packageTable,
                 _assemblyTable,
-                _usageSourceTable,
                 _apiTable,
                 _rootApiTable,
                 _extensionMethodTable,
@@ -60,7 +58,6 @@ public sealed partial class CatalogBuilder
             WriteFrameworks();
             WritePackages();
             WriteAssemblies();
-            WriteUsageSources();
             WriteApis();
             WriteRootApis();
             WriteExtensionMethods();
@@ -167,22 +164,6 @@ public sealed partial class CatalogBuilder
             }
         }
 
-        private void WriteUsageSources()
-        {
-            Console.WriteLine("Writing data sources...");
-
-            var usageSources = _builder._usageSources.Values;
-
-            foreach (var usageSource in usageSources)
-            {
-                var name = _stringHeap.Store(usageSource.Name);
-                var dayNumber = usageSource.Date.DayNumber;
-
-                var rowOffset = _usageSourceTable.WriteRow(name, dayNumber);
-                _usageSourceOffsets.Add(usageSource, rowOffset);
-            }
-        }
-
         private void WriteApis()
         {
             Console.WriteLine("Writing APIs...");
@@ -196,7 +177,6 @@ public sealed partial class CatalogBuilder
             {
                 var intermediateChildren = (IReadOnlyList<IntermediaApi>?) api.Children ?? Array.Empty<IntermediaApi>();
                 var intermediateDeclarations = GetDeclarations(_builder, api);
-                var intermediateUsages = GetUsages(_builder, api);
 
                 var fingerprint = api.Fingerprint;
                 var kind = (byte)api.Kind;
@@ -204,9 +184,8 @@ public sealed partial class CatalogBuilder
                 var name = _stringHeap.Store(api.Name);
                 var children = _blobHeap.StoreApis(intermediateChildren);
                 var declarations = _blobHeap.StoreDeclarations(intermediateDeclarations, _assemblyOffsets);
-                var usages = _blobHeap.StoreUsages(intermediateUsages, _usageSourceOffsets);
 
-                var rowOffset = _apiTable.WriteRow(fingerprint, kind, parent, name, children, declarations, usages);
+                var rowOffset = _apiTable.WriteRow(fingerprint, kind, parent, name, children, declarations);
                 _apiOffsets.Add(api, rowOffset);
 
                 if (api.Children is not null)
@@ -221,19 +200,6 @@ public sealed partial class CatalogBuilder
                 {
                     if (assembly.Declarations.TryGetValue(api, out var declaration))
                         result.Add(declaration);
-                }
-
-                return result;
-            }
-
-            static IReadOnlyList<(IntermediateUsageSource UsageSource, float Percentage)> GetUsages(CatalogBuilder builder, IntermediaApi api)
-            {
-                var result = new List<(IntermediateUsageSource, float)>();
-
-                foreach (var usageSource in builder._usageSources.Values)
-                {
-                    if (usageSource.Usages.TryGetValue(api.Fingerprint, out var percentage))
-                        result.Add((usageSource, percentage));
                 }
 
                 return result;
@@ -485,11 +451,6 @@ public sealed partial class CatalogBuilder
                 WriteInt32(offset.Value);
             }
 
-            public void WriteUsageSourceOffset(UsageSourceOffset offset)
-            {
-                WriteInt32(offset.Value);
-            }
-
             public void WriteApiOffset(ApiOffset offset)
             {
                 WriteInt32(offset.Value);
@@ -526,11 +487,6 @@ public sealed partial class CatalogBuilder
             }
 
             public void WriteInt32(int value)
-            {
-                _writer.Write(value);
-            }
-
-            public void WriteSingle(float value)
             {
                 _writer.Write(value);
             }
@@ -762,24 +718,6 @@ public sealed partial class CatalogBuilder
                 return result;
             }
 
-            public BlobOffset StoreUsages(IReadOnlyList<(IntermediateUsageSource UsageSource, float Percentage)> usages,
-                                          IReadOnlyDictionary<IntermediateUsageSource, UsageSourceOffset> usageSourceOffsets)
-            {
-                if (usages.Count == 0)
-                    return BlobOffset.Nil;
-
-                var result = SeekEnd();
-
-                Memory.WriteInt32(usages.Count);
-                foreach (var usage in usages)
-                {
-                    Memory.WriteUsageSourceOffset(usageSourceOffsets[usage.UsageSource]);
-                    Memory.WriteSingle(usage.Percentage);
-                }
-
-                return result;
-            }
-
             public BlobOffset StorePlatformSupport(IReadOnlyList<IntermediatePlatformSupport> platforms,
                                                    StringHeap stringHeap)
             {
@@ -965,20 +903,6 @@ public sealed partial class CatalogBuilder
             }
         }
 
-        private sealed class UsageSourceTable : HeapOrTable
-        {
-            public UsageSourceOffset WriteRow(StringOffset name,
-                                              int dayNumber)
-            {
-                var offset = new UsageSourceOffset(Memory.GetLength());
-
-                Memory.WriteStringOffset(name);
-                Memory.WriteInt32(dayNumber);
-
-                return offset;
-            }
-        }
-
         private sealed class ApiTable : HeapOrTable
         {
             public ApiOffset WriteRow(Guid fingerprint,
@@ -986,8 +910,7 @@ public sealed partial class CatalogBuilder
                                       ApiOffset parent,
                                       StringOffset name,
                                       BlobOffset children,
-                                      BlobOffset declarations,
-                                      BlobOffset usages)
+                                      BlobOffset declarations)
             {
                 var offset = new ApiOffset(Memory.GetLength());
 
@@ -997,7 +920,6 @@ public sealed partial class CatalogBuilder
                 Memory.WriteStringOffset(name);
                 Memory.WriteBlobOffset(children);
                 Memory.WriteBlobOffset(declarations);
-                Memory.WriteBlobOffset(usages);
 
                 return offset;
             }

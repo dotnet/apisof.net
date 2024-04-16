@@ -48,11 +48,6 @@ internal static partial class ApiCatalogSchema
             return Remember(new Int32Field(_memorySelector, Size));
         }
 
-        public Field<float> DefineSingle()
-        {
-            return Remember(new SingleField(_memorySelector, Size));
-        }
-
         public Field<bool> DefineBoolean()
         {
             return Remember(new BooleanField(_memorySelector, Size));
@@ -61,11 +56,6 @@ internal static partial class ApiCatalogSchema
         public Field<string> DefineString()
         {
             return Remember(new StringField(_memorySelector, Size));
-        }
-
-        public Field<DateOnly> DefineDate()
-        {
-            return Remember(new DateField(_memorySelector, Size));
         }
 
         public Field<ApiKind> DefineApiKind()
@@ -86,11 +76,6 @@ internal static partial class ApiCatalogSchema
         public Field<AssemblyModel> DefineAssembly()
         {
             return Remember(new AssemblyField(_memorySelector, Size));
-        }
-
-        public Field<UsageSourceModel> DefineUsageSource()
-        {
-            return Remember(new UsageSourceField(_memorySelector, Size));
         }
 
         public Field<ApiModel> DefineApi()
@@ -151,17 +136,6 @@ internal static partial class ApiCatalogSchema
         }
     }
 
-    public sealed class SingleField(MemorySelector memorySelector, int start)
-        : Field<float>(memorySelector, start)
-    {
-        public override int Length => 4;
-
-        protected override float Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
-        {
-            return memory.ReadSingle(offset);
-        }
-    }
-
     public sealed class Int32Field(MemorySelector memorySelector, int start)
         : Field<int>(memorySelector, start)
     {
@@ -193,18 +167,6 @@ internal static partial class ApiCatalogSchema
         {
             var handle = memory.ReadInt32(offset);
             return catalog.GetString(handle);
-        }
-    }
-
-    public sealed class DateField(MemorySelector memorySelector, int start)
-        : Field<DateOnly>(memorySelector, start)
-    {
-        public override int Length => 4;
-
-        protected override DateOnly Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
-        {
-            var dayNumber = memory.ReadInt32(offset);
-            return DateOnly.FromDayNumber(dayNumber);
         }
     }
 
@@ -262,18 +224,6 @@ internal static partial class ApiCatalogSchema
         {
             var handle = memory.ReadInt32(offset);
             return new AssemblyModel(catalog, handle);
-        }
-    }
-
-    public sealed class UsageSourceField(MemorySelector memorySelector, int start)
-        : Field<UsageSourceModel>(memorySelector, start)
-    {
-        public override int Length => 4;
-
-        protected override UsageSourceModel Read(ApiCatalogModel catalog, ReadOnlySpan<byte> memory, int offset)
-        {
-            var handle = memory.ReadInt32(offset);
-            return new UsageSourceModel(catalog, handle);
         }
     }
 

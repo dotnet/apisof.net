@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -10,7 +8,6 @@ namespace Terrajobst.ApiCatalog.Tests;
 internal sealed class FluentCatalogBuilder
 {
     private readonly List<XDocument> _documents = new();
-    private readonly List<(string Name, DateOnly Date, List<(Guid ApiGuid, float Percentage)> Usages)> _usageSources = new();
 
     public FluentCatalogBuilder AddFramework(string name, Action<FrameworkBuilder> action)
     {
@@ -32,24 +29,12 @@ internal sealed class FluentCatalogBuilder
         return this;
     }
 
-    public FluentCatalogBuilder AddUsage(string name, DateOnly date, Action<UsageBuilder> action)
-    {
-        var builder = new UsageBuilder(name, date);
-        action(builder);
-        var usages = builder.Build();
-        _usageSources.Add(usages);
-        return this;
-    }
-
     public async Task<ApiCatalogModel> BuildAsync()
     {
         var builder = new CatalogBuilder();
 
         foreach (var doc in _documents)
             builder.IndexDocument(doc);
-
-        foreach (var (name, date, usages) in _usageSources)
-            builder.IndexUsages(name, date, usages);
 
         return await builder.BuildAsync();
     }
@@ -134,35 +119,6 @@ internal sealed class FluentCatalogBuilder
         {
             var frameworks = _frameworks.ToArray();
             return PackageEntry.Create(_id, _version, frameworks);
-        }
-    }
-
-    public sealed class UsageBuilder
-    {
-        private readonly string _name;
-        private readonly DateOnly _date;
-        private readonly List<(Guid ApiGuid, float Percentage)> _usages = new();
-
-        public UsageBuilder(string name, DateOnly date)
-        {
-            _name = name;
-            _date = date;
-        }
-
-        public void Add(Guid apiGuid, float percentage)
-        {
-            _usages.Add((apiGuid, percentage));
-        }
-
-        public void Add(string apiId, float percentage)
-        {
-            var apiGuid = new Guid(MD5.HashData(Encoding.UTF8.GetBytes(apiId)));
-            Add(apiGuid, percentage);
-        }
-
-        public (string Name, DateOnly Date, List<(Guid ApiGuid, float Percentage)>) Build()
-        {
-            return (_name, _date, _usages);
         }
     }
 }

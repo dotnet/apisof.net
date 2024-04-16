@@ -48,7 +48,6 @@ public class ApiCatalogModelTests
         Assert.Empty(catalog.Platforms);
         Assert.Empty(catalog.Packages);
         Assert.Empty(catalog.Assemblies);
-        Assert.Empty(catalog.UsageSources);
         Assert.Empty(catalog.RootApis);
         Assert.Empty(catalog.AllApis);
         Assert.Empty(catalog.ExtensionMethods);
@@ -171,7 +170,6 @@ public class ApiCatalogModelTests
         Assert.Equal(Guid.Parse("6f0315b1-0b64-5af1-51f6-8f8dec1c4aac"), type.Guid);
         Assert.Equal(catalog, type.Catalog);
         Assert.Empty(type.Children);
-        Assert.Empty(type.Usages);
 
         Assert.Equal("System.TheClass", type.GetFullName());
         Assert.Equal("System", type.GetNamespaceName());
@@ -181,7 +179,6 @@ public class ApiCatalogModelTests
         Assert.Equal("System", typeNamespace.GetFullName());
         Assert.Equal(ApiKind.Namespace, typeNamespace.Kind);
         Assert.Equal(type, Assert.Single(typeNamespace.Children));
-        Assert.Empty(typeNamespace.Usages);
 
         Assert.Equal(typeNamespace, Assert.Single(catalog.RootApis));
     }
@@ -209,7 +206,6 @@ public class ApiCatalogModelTests
         Assert.Equal(Guid.Parse("8b632220-7064-d2e5-60f8-47053a5bcc06"), type.Guid);
         Assert.Equal(catalog, type.Catalog);
         Assert.Empty(type.Children);
-        Assert.Empty(type.Usages);
 
         Assert.Equal("<global namespace>.TheClass", type.GetFullName());
         Assert.Equal("<global namespace>", type.GetNamespaceName());
@@ -219,7 +215,6 @@ public class ApiCatalogModelTests
         Assert.Equal("<global namespace>", typeNamespace.GetFullName());
         Assert.Equal(ApiKind.Namespace, typeNamespace.Kind);
         Assert.Equal(type, Assert.Single(typeNamespace.Children));
-        Assert.Empty(typeNamespace.Usages);
 
         Assert.Equal(typeNamespace, Assert.Single(catalog.RootApis));
     }
@@ -378,7 +373,6 @@ public class ApiCatalogModelTests
         Assert.Equal(Guid.Parse("709c195e-e2a5-bb55-81ed-72511f3bb783"), theMethod.Guid);
         Assert.Equal(catalog, theMethod.Catalog);
         Assert.Empty(theMethod.Children);
-        Assert.Empty(theMethod.Usages);
 
         Assert.Equal(theNamespace, Assert.Single(catalog.RootApis));
         Assert.Equal(theClass, Assert.Single(theNamespace.Children));
@@ -748,34 +742,6 @@ public class ApiCatalogModelTests
         var net462 = availability.Frameworks.Single(fx => fx.Framework.GetShortFolderName() == "net462");
         Assert.False(net462.IsInBox);
         Assert.Equal("System.Oob", net462.Package!.Value.Name);
-    }
-
-    [Fact]
-    public async Task Type_Usages()
-    {
-        var source = """
-            namespace System
-            {
-                public class TheClass { }
-            }
-            """;
-
-        var catalog = await new FluentCatalogBuilder()
-            .AddFramework("net461", fx =>
-                fx.AddAssembly("System.Runtime", source))
-            .AddUsage("nuget", new DateOnly(2012, 10, 1), u =>
-                u.Add("T:System.TheClass", 0.55f))
-            .BuildAsync();
-
-        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheClass");
-
-        var usageSource = Assert.Single(catalog.UsageSources);
-        Assert.Equal("nuget", usageSource.Name);
-        Assert.Equal(new DateOnly(2012, 10, 1), usageSource.Date);
-
-        var apiUsage = Assert.Single(api.Usages);
-        Assert.Equal(usageSource, apiUsage.Source);
-        Assert.Equal(0.55f, apiUsage.Percentage);
     }
 
     [Fact]

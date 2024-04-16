@@ -17,10 +17,10 @@ will need to be decompressed.
 | ------ | ------ | ----------- | ----------- |
 | 0      | 8      | `Char8[8]`  | Magic Value |
 | 4      | 4      | `Int32`     | Version     |
-| 8      | 56     | `Int32[14]` | Table Sizes |
+| 8      | 56     | `Int32[13]` | Table Sizes |
 
 - The magic value is `APICATFB`
-- This is version `7`
+- This is version `9`
 - The table sizes are in the following order:
   1. [String Heap]
   1. [Blob Heap]
@@ -28,7 +28,6 @@ will need to be decompressed.
   1. [Framework Table]
   1. [Package Table]
   1. [Assembly Table]
-  1. [Usage Source Table]
   1. [API Table]
   1. [Root API Table]
   1. [Extension Methods Table]
@@ -92,20 +91,6 @@ Each row looks as follows:
 | 32     | 4      | `BlobOffset` -> `FrameworkOffset[]`                  | Frameworks     |
 | 36     | 8      | `BlobOffset` -> `(PackageOffset, FrameworkOffset)[]` | Packages       |
 
-## Usage Source Table
-
-Each row looks as follows:
-
-| Offset | Length | Type           | Name              |
-| ------ | ------ | -------------- | ----------------- |
-| 0      | 4      | `StringOffset` | Usage Source Name |
-| 4      | 4      | `Int32`        | Day number        |
-
-> [!NOTE]
->
-> The day number is used to construct the date indicating how recent the usage
-> source is, via `DateOnly.FromDayNumber(int)`.
-
 ## API Table
 
 Each row looks as follows:
@@ -118,7 +103,6 @@ Each row looks as follows:
 | 21     | 4      | `StringOffset`                                   | Name         |
 | 25     | 4      | `BlobOffset` -> `ApiOffset[]`                    | Children     |
 | 29     | 4      | `BlobOffset` -> `(AssemblyOffset, BlobOffset)[]` | Declarations |
-| 33     | 4      | `BlobOffset` -> `(UsageSourceOffset, float)`     | Usages       |
 
 ## Root API Table
 
@@ -207,7 +191,6 @@ Element types can either be simple types or tuples:
 - `(FrameworkOffset, AssemblyOffset)[]`
 - `(PackageOffset, FrameworkOffset)[]`
 - `(AssemblyOffset, BlobOffset)[]`
-- `(UsageSourceOffset, Float)[]`
 - `(StringOffset, Boolean)[]`
 
 Tuples are stored in sequence with no padding or length prefix.
@@ -233,14 +216,12 @@ Each `Token` has:
 | ------------------- | -------------- | ------------------------------------------------------------ |
 | `GUID`              | `Byte[16]`     | A GUID                                                       |
 | `Boolean`           | `Byte`         | A Boolean with `True` being `1`, `0` otherwise               |
-| `Float`             | `Single`       | A 32-bit floating point                                      |
 | `StringOffset`      | `Int32`        | Points to a length-prefixed string in the [string heap]      |
 | `BlobOffset`        | `Int32`        | Points to data in the [blob heap]. Representation depends.   |
 | `PlatformOffset`    | `Int32`        | Points to the beginning of a row in the [Platform table]     |
 | `FrameworkOffset`   | `Int32`        | Points to the beginning of a row in the [Framework table]    |
 | `PackageOffset`     | `Int32`        | Points to the beginning of a row in the [Package table]      |
 | `AssemblyOffset`    | `Int32`        | Points to the beginning of a row in the [Assembly table]     |
-| `UsageSourceOffset` | `Int32`        | Points to the beginning of a row in the [Usage source table] |
 | `ApiOffset`         | `Int32`        | Points to the beginning of a row in the [API table]          |
 
 [String Heap]: #string-heap
@@ -249,7 +230,6 @@ Each `Token` has:
 [Framework Table]: #framework-table
 [Package Table]: #package-table
 [Assembly Table]: #assembly-table
-[Usage Source Table]: #usage-source-table
 [API Table]: #api-table
 [Root API Table]: #root-api-table
 [Obsoletion Table]: #obsoletion-table
