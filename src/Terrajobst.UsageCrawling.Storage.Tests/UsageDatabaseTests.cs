@@ -94,6 +94,22 @@ public class UsageDatabaseTests : IDisposable
     }
 
     [Fact]
+    public async Task UsageDatabase_AddReference_ThrowsForDuplicate()
+    {
+        using var db = await UsageDatabase.OpenOrCreateAsync(_fileName);
+        await db.AddReferenceUnitAsync("Test");
+
+        await Assert.ThrowsAsync<ArgumentException>(async () => await db.AddReferenceUnitAsync("test"));
+
+        await Assert.ThrowsAsync<ArgumentException>(async () => await db.AddReferenceUnitAsync("TEST"));
+
+        var referenceUnits = await db.GetReferenceUnitsAsync();
+        var result = Assert.Single(referenceUnits);
+
+        Assert.Equal("Test", result.Identifier);
+    }
+
+    [Fact]
     public async Task UsageDatabase_DeleteReference_RemovesIt()
     {
         using var db = await UsageDatabase.OpenOrCreateAsync(_fileName);

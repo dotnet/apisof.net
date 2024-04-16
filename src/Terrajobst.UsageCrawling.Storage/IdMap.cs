@@ -5,10 +5,16 @@ namespace Terrajobst.UsageCrawling.Storage;
 internal sealed class IdMap<T> : IEnumerable<(int Id, T Value)>
     where T : notnull
 {
-    private readonly Dictionary<T, int> _idByValue = new();
+    private readonly Dictionary<T, int> _idByValue;
     private readonly Dictionary<int, T> _valueById = new();
     private int _largestId;
 
+    public IdMap(IEqualityComparer<T>? comparer = null)
+    {
+        comparer ??= EqualityComparer<T>.Default;
+        _idByValue = new Dictionary<T, int>(comparer);
+    }
+    
     public void Add(int id, T value)
     {
         _idByValue.Add(value, id);

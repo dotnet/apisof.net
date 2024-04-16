@@ -83,7 +83,7 @@ public sealed class UsageDatabase : IDisposable
         await connection.ExecuteAsync("PRAGMA JOURNAL_MODE = OFF");
         await connection.ExecuteAsync("PRAGMA SYNCHRONOUS = OFF");
 
-        var referenceUnitIdMap = new IdMap<string>();
+        var referenceUnitIdMap = new IdMap<string>(StringComparer.OrdinalIgnoreCase);
         var featureIdMap = new IdMap<Guid>();
 
         await CreateSchemaIfNotExistsAsync(connection);
