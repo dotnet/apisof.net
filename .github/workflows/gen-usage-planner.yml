@@ -5,9 +5,6 @@ on:
   schedule:
     - cron: '21 11 * * *' # every day at 11:21 AM UTC (03:21 AM PT)
 
-concurrency:
-  group: ${{ github.workflow }}
-
 env:
   DOTNET_NOLOGO: true
 

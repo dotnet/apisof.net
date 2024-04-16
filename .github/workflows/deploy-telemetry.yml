@@ -7,10 +7,6 @@ on:
       - .github/workflows/deploy-telemetry.yml
       - src/NetUpgradePlannerTelemetry/**
 
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: true
-
 env:
   DOTNET_NOLOGO: true
 
