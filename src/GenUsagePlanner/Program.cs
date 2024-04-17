@@ -49,7 +49,8 @@ internal class Program
 
         Console.WriteLine("Discovering existing planner fingerprints...");
 
-        var referenceUnits = (await usageDatabase.GetReferenceUnitsAsync()).Select(r => r.Identifier);
+        var referenceUnits = (await usageDatabase.GetReferenceUnitsAsync()).Select(r => r.Identifier).ToArray();
+        Console.WriteLine($"Found {referenceUnits.Length:N0} planner fingerprints in the index.");
 
         Console.WriteLine("Discovering latest planner fingerprints...");
 
