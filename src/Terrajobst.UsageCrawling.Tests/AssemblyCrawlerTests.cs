@@ -454,6 +454,34 @@ public class AssemblyCrawlerTests
         Check(source, usages);
     }
 
+    [Fact]
+    public void Delegate_Invoke()
+    {
+        const string source =
+            """
+            using System;
+            static class Test {
+                static void M(string[] p) {
+                    Action<string> action = Console.WriteLine;
+                    action("Hello, World");
+                }
+            }
+            """;
+
+        var usages = new Dictionary<string, int>
+        {
+            { "T:System.Object", 3 }, // Base
+            { "T:System.Void", 1 },
+            { "T:System.String", 3 },
+            { "T:System.Action`1", 2 },
+            { "M:System.Console.WriteLine(System.String)", 1 },
+            { "M:System.Action`1.#ctor(System.Object,System.IntPtr)", 1 },
+            { "M:System.Action`1.Invoke(`0)", 1 }
+        };
+
+        Check(source, usages);
+    }
+
     // TODO: Pointers
 
     private static void Check(string source, IReadOnlyDictionary<string, int> expectedResults)
