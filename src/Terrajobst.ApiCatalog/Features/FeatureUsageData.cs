@@ -161,7 +161,27 @@ public sealed class FeatureUsageData
         }
     }
 
-    public IEnumerable<(FeatureUsageSource DataSource, float Percentage)> GetUsage(Guid featureId)
+    public IReadOnlyList<FeatureUsageSource> UsageSources => _usageSources;
+
+    public IEnumerable<(Guid FeatureId, float Percentage)> GetUsage(FeatureUsageSource source)
+    {
+        ThrowIfNull(source);
+
+        return _rows.Where(r => _usageSources[r.DataSourceIndex] == source)
+                    .Select(r => (_guids[r.GuidIndex], r.Percentage));
+    }
+
+    public float? GetUsage(FeatureUsageSource source, Guid featureId)
+    {
+        ThrowIfNull(source);
+
+        return GetUsage(featureId).Where(d => d.Source == source)
+                                  .Select(f => f.Percentage)
+                                  .Cast<float?>()
+                                  .SingleOrDefault();
+    }
+
+    public IEnumerable<(FeatureUsageSource Source, float Percentage)> GetUsage(Guid featureId)
     {
         var guidIndex = Array.BinarySearch(_guids, featureId);
         if (guidIndex < 0)
