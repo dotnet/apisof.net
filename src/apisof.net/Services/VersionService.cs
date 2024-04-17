@@ -44,7 +44,7 @@ public sealed class VersionService
 
         var url = $"https://github.com/dotnet/apisof.net/commit/{hash}";
         var title = hash;
-        
+
         var patchUrl = url + ".patch";
         using var response = await _client.GetAsync(patchUrl);
         if (response.StatusCode == HttpStatusCode.OK)

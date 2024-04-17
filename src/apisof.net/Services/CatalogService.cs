@@ -213,7 +213,7 @@ public sealed class CatalogService
             ThrowIfNull(usageData);
             ThrowIfNull(suffixTree);
             ThrowIfNull(designNotes);
-            
+
             JobInfo = jobInfo;
             Catalog = catalog;
             UsageData = usageData;

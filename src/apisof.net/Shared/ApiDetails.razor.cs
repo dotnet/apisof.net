@@ -124,7 +124,7 @@ public partial class ApiDetails
             var getter = Api.Children.Where(a => a.Kind == ApiKind.PropertyGetter).Cast<ApiModel?>().FirstOrDefault();
             var setter = Api.Children.Where(a => a.Kind == ApiKind.PropertySetter).Cast<ApiModel?>().FirstOrDefault();
 
-            // Let's only split usage into get/set when both are present. 
+            // Let's only split usage into get/set when both are present.
             if (getter is not null && setter is not null)
             {
                 var getterFeatureId = FeatureDefinition.ApiUsage.GetFeatureId(getter.Value.Guid);
@@ -289,18 +289,18 @@ public partial class ApiDetails
 
     private static class SyntheticFeatureDefinition
     {
-        public static FeatureDefinition PropertyGet { get; } = new PropertyGetFeatureDefinition(); 
-        public static FeatureDefinition PropertySet { get; } = new PropertySetFeatureDefinition(); 
+        public static FeatureDefinition PropertyGet { get; } = new PropertyGetFeatureDefinition();
+        public static FeatureDefinition PropertySet { get; } = new PropertySetFeatureDefinition();
 
-        public static FeatureDefinition EventAdd { get; } = new EventAddFeatureDefinition(); 
-        public static FeatureDefinition EventRemove { get; } = new EventRemoveFeatureDefinition(); 
+        public static FeatureDefinition EventAdd { get; } = new EventAddFeatureDefinition();
+        public static FeatureDefinition EventRemove { get; } = new EventRemoveFeatureDefinition();
 
         private sealed class PropertyGetFeatureDefinition : FeatureDefinition
         {
             public override string Name => "Get property";
             public override string Description => "Percentage of applications/packages that read this property";
         }
-    
+
         private sealed class PropertySetFeatureDefinition : FeatureDefinition
         {
             public override string Name => "Set property";
@@ -312,7 +312,7 @@ public partial class ApiDetails
             public override string Name => "Subscribe to this event";
             public override string Description => "Percentage of applications/packages that subscribe to this event";
         }
-    
+
         private sealed class EventRemoveFeatureDefinition : FeatureDefinition
         {
             public override string Name => "Unsubscribe from this event";

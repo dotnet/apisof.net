@@ -22,7 +22,7 @@ public partial class Version
     {
         (CommitTitle, CommitUrl, CommitHash) = await VersionService.GetCommitAsync();
         CommitHashShort = CommitHash.Substring(0, int.Min(CommitHash.Length, 7));
-        
+
         CatalogVersion = CatalogService.Catalog.FormatVersion;
     }
 }
