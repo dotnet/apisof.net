@@ -101,4 +101,12 @@ public readonly struct FeatureUsage : IEquatable<FeatureUsage>
     public static FeatureUsage ForTargetFramework(NuGetFramework framework) => ForParameterized(FeatureDefinition.TargetFramework, framework, framework.GetShortFolderName());
 
     public static FeatureUsage ForTargetFramework(string framework) => ForTargetFramework(NuGetFramework.Parse(framework));
+
+    public static FeatureUsage ForExceptionThrow(ApiKey field) => ForParameterized(FeatureDefinition.ExceptionThrow, field.Guid, field.DocumentationId);
+
+    public static FeatureUsage ForExceptionThrow(string documentationId) => ForExceptionThrow(new ApiKey(documentationId));
+
+    public static FeatureUsage ForExceptionCatch(ApiKey field) => ForParameterized(FeatureDefinition.ExceptionCatch, field.Guid, field.DocumentationId);
+
+    public static FeatureUsage ForExceptionCatch(string documentationId) => ForExceptionCatch(new ApiKey(documentationId));
 }

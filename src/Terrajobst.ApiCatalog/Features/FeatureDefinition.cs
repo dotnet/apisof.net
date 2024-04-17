@@ -26,13 +26,17 @@ public abstract class FeatureDefinition
     public static ParameterizedFeatureDefinition<Guid> DerivesFromUsage { get; } = new DerivesFromUsageDefinition();
     public static ParameterizedFeatureDefinition<Guid> FieldRead { get; } = new FieldReadDefinition();
     public static ParameterizedFeatureDefinition<Guid> FieldWrite { get; } = new FieldWriteDefinition();
+    public static ParameterizedFeatureDefinition<Guid> ExceptionThrow { get; } = new ExceptionThrowDefinition();
+    public static ParameterizedFeatureDefinition<Guid> ExceptionCatch { get; } = new ExceptionCatchDefinition();
 
     public static IReadOnlyList<ParameterizedFeatureDefinition<Guid>> ApiFeatures { get; } = [
         ApiUsage,
         DimUsage,
         DerivesFromUsage,
         FieldRead,
-        FieldWrite
+        FieldWrite,
+        ExceptionThrow,
+        ExceptionCatch
     ];
 
     public static ParameterizedFeatureDefinition<NuGetFramework> TargetFramework { get; } = new TargetFrameworkFeatureDefinition();
@@ -216,6 +220,34 @@ public abstract class FeatureDefinition
         public override string Name => "Field write";
 
         public override string Description => "Writes to this field";
+    }
+
+    private sealed class ExceptionThrowDefinition : ParameterizedFeatureDefinition<Guid>
+    {
+        private static readonly Guid DerivesFromFeature = Guid.Parse("eb23985b-8fe8-4230-9fa8-15c21827f5ee");
+
+        public override Guid GetFeatureId(Guid api)
+        {
+            return FeatureId.Create(DerivesFromFeature, api);
+        }
+
+        public override string Name => "Exception throw";
+
+        public override string Description => "Throwing of this exception type";
+    }
+
+    private sealed class ExceptionCatchDefinition : ParameterizedFeatureDefinition<Guid>
+    {
+        private static readonly Guid DerivesFromFeature = Guid.Parse("6b75066b-1e1e-47d7-854e-fe3da867ad0d");
+
+        public override Guid GetFeatureId(Guid api)
+        {
+            return FeatureId.Create(DerivesFromFeature, api);
+        }
+
+        public override string Name => "Exception catch";
+
+        public override string Description => "Catch handlers for this exception type";
     }
 
     private sealed class TargetFrameworkFeatureDefinition : ParameterizedFeatureDefinition<NuGetFramework>
