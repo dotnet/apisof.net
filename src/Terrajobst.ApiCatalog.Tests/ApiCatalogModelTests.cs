@@ -744,6 +744,26 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Delegate_Indexes_Members()
+    {
+        var source =
+            """
+            namespace System
+            {
+                public delegate int TheDelegate(float f, string s);
+            }
+            """;
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var api = catalog.AllApis.Single(a => a.GetFullName() == "System.TheDelegate");
+        Assert.NotEmpty(api.Children);
+    }
+
+    [Fact]
     public async Task Method_Extension()
     {
         var source = """

@@ -168,9 +168,6 @@ internal static class CatalogExtensions
             symbol.DeclaredAccessibility != Accessibility.ProtectedOrInternal)
             return false;
 
-        if (symbol.ContainingType?.TypeKind == TypeKind.Delegate)
-            return false;
-
         if (symbol is IMethodSymbol { MethodKind: MethodKind.Constructor, Parameters.Length: 0 } m && m.ContainingType.IsValueType)
             return false;
 
