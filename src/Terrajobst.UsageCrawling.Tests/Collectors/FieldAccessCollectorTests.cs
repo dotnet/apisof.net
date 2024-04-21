@@ -6,12 +6,35 @@ namespace Terrajobst.UsageCrawling.Tests.Collectors;
 public class FieldAccessCollectorTests : CollectorTest<FieldAccessCollector>
 {
     [Fact]
-    public void FieldAccess_DoesNotReport_NoUsage()
+    public void FieldAccess_DoesNotReport_SelfDefined_Read()
     {
         var source =
             """
             class C {
-                int X;
+                int F;
+
+                void M()
+                {
+                    System.Console.WriteLine(F);
+                }
+            }
+            """;
+
+        Check(source, []);
+    }
+
+    [Fact]
+    public void FieldAccess_DoesNotReport_SelfDefined_Write()
+    {
+        var source =
+            """
+            class C {
+                string S;
+
+                void M()
+                {
+                    S = System.Console.ReadLine();
+                }
             }
             """;
 
@@ -21,75 +44,105 @@ public class FieldAccessCollectorTests : CollectorTest<FieldAccessCollector>
     [Fact]
     public void FieldAccess_Report_Static_Read()
     {
+        var dependencySource =
+            """
+            public static class D
+            {
+                public static int F;
+            }
+            """;
+
         var source =
             """
             using System;
-            class C {
-                static int X;
-
+            class C
+            {
                 void M()
                 {
-                    Console.WriteLine(X);
+                    Console.WriteLine(D.F);
                 }
             }
             """;
 
-        Check(source, [FeatureUsage.ForFieldRead("F:C.X")]);
+        Check(dependencySource, source, [FeatureUsage.ForFieldRead("F:D.F")]);
     }
 
     [Fact]
     public void FieldAccess_Report_Static_Write()
     {
+        var dependencySource =
+            """
+            public static class D
+            {
+                public static int F;
+            }
+            """;
+
         var source =
             """
-            class C {
-                static int X;
-
+            class C
+            {
                 void M()
                 {
-                    X = 42;
+                    D.F = 42;
                 }
             }
             """;
 
-        Check(source, [FeatureUsage.ForFieldWrite("F:C.X")]);
+        Check(dependencySource, source, [FeatureUsage.ForFieldWrite("F:D.F")]);
     }
 
     [Fact]
     public void FieldAccess_Report_Instance_Read()
     {
+        var dependencySource =
+            """
+            public class D
+            {
+                public int F;
+            }
+            """;
+
         var source =
             """
             using System;
-            class C {
-                int X;
-
+            class C
+            {
                 void M()
                 {
-                    Console.WriteLine(X);
+                    var d = new D();
+                    Console.WriteLine(d.F);
                 }
             }
             """;
 
-        Check(source, [FeatureUsage.ForFieldRead("F:C.X")]);
+        Check(dependencySource, source, [FeatureUsage.ForFieldRead("F:D.F")]);
     }
 
     [Fact]
     public void FieldAccess_Report_Instance_Write()
     {
+        var dependencySource =
+            """
+            public class D
+            {
+                public int F;
+            }
+            """;
+
         var source =
             """
-            class C {
-                int X;
-
+            class C
+            {
                 void M()
                 {
-                    X = 42;
+                    var d = new D();
+                    d.F = 42;
                 }
             }
             """;
 
-        Check(source, [FeatureUsage.ForFieldWrite("F:C.X")]);
+        Check(dependencySource, source, [FeatureUsage.ForFieldWrite("F:D.F")]);
     }
 
     [Fact]
@@ -102,8 +155,7 @@ public class FieldAccessCollectorTests : CollectorTest<FieldAccessCollector>
                 void M()
                 {
                     var t = (1, 2);
-                    var x = t.Item2;
-                    Console.WriteLine(x);
+                    Console.WriteLine(t.Item2);
                 }
             }
             """;

@@ -5,7 +5,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class DerivesFromCollector : IncrementalUsageCollector
 {
-    public override int VersionRequired => 3;
+    public override int VersionRequired => 4;
 
     protected override void CollectFeatures(IAssembly assembly, Context context)
     {
@@ -19,12 +19,15 @@ public sealed class DerivesFromCollector : IncrementalUsageCollector
         }
     }
 
-    private static void ReportContext(Context context, ITypeReference? @interface)
+    private static void ReportContext(Context context, ITypeReference? baseType)
     {
-        if (@interface is null or Dummy)
+        if (baseType is null or Dummy)
             return;
 
-        var docId = @interface.UnWrap().DocId();
+        if (baseType.IsDefinedInCurrentAssembly())
+            return;
+
+        var docId = baseType.UnWrap().DocId();
         context.Report(FeatureUsage.ForDerivesFrom(docId));
     }
 }

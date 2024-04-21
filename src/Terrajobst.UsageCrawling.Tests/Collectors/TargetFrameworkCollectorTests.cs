@@ -50,32 +50,12 @@ public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollec
         Check(TargetFramework.NetStandard13, string.Empty, [FeatureUsage.ForTargetFramework("netstandard1.3")]);
     }
 
-    private enum TargetFramework
-    {
-        Net80,
-        Net472,
-        NetStandard20,
-        NetStandard13,
-        NetCoreApp31
-    }
-
     private void Check(TargetFramework framework, string source, IEnumerable<FeatureUsage> expectedUsages)
     {
-        _targetFramework = framework;
-        Check(source, expectedUsages);
-    }
+        var assembly = new AssemblyBuilder()
+            .SetAssembly(source, framework)
+            .ToAssembly();
 
-    private TargetFramework _targetFramework;
-
-    protected override CSharpCompilation ModifyCompilation(CSharpCompilation compilation)
-    {
-        return _targetFramework switch {
-            TargetFramework.Net80 => compilation.WithReferences(Net80.References.All),
-            TargetFramework.Net472 => compilation.WithReferences(Net472.References.All),
-            TargetFramework.NetStandard20 => compilation.WithReferences(NetStandard20.References.All),
-            TargetFramework.NetStandard13 => compilation.WithReferences(NetStandard13.References.All),
-            TargetFramework.NetCoreApp31 => compilation.WithReferences(NetCoreApp31.References.All),
-            _ => throw new UnreachableException($"Unmapped target framework: {_targetFramework}")
-        };
+        Check(assembly, expectedUsages);
     }
 }

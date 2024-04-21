@@ -5,7 +5,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class FieldAccessCollector : IncrementalUsageCollector
 {
-    public override int VersionRequired => 3;
+    public override int VersionRequired => 4;
 
     protected override void CollectFeatures(IAssembly assembly, Context context)
     {
@@ -36,6 +36,9 @@ public sealed class FieldAccessCollector : IncrementalUsageCollector
     {
         var field = opValue as IFieldReference;
         if (field is null or Dummy)
+            return;
+
+        if (field.IsDefinedInCurrentAssembly())
             return;
 
         var docId = field.UnWrapMember().DocId();

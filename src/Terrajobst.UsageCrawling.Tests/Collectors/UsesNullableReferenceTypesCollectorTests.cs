@@ -54,8 +54,11 @@ public class UsesNullableReferenceTypesCollectorTests : CollectorTest<UsesNullab
 
     private void Check(NullableMode nullableMode, string source, IEnumerable<FeatureUsage> expectedMetrics)
     {
-        _nullableMode = nullableMode;
-        Check(source, expectedMetrics);
+        var assembly = new AssemblyBuilder()
+            .SetAssembly(source, transformer: c => ApplyNullableMode(c, nullableMode))
+            .ToAssembly();
+
+        Check(assembly, expectedMetrics);
     }
 
     public enum NullableMode
@@ -72,11 +75,9 @@ public class UsesNullableReferenceTypesCollectorTests : CollectorTest<UsesNullab
         ];
     }
 
-    private NullableMode _nullableMode;
-
-    protected override CSharpCompilation ModifyCompilation(CSharpCompilation compilation)
+    private static CSharpCompilation ApplyNullableMode(CSharpCompilation compilation, NullableMode mode)
     {
-        var references = _nullableMode == NullableMode.ReferencedFrameworkTypes
+        var references = mode == NullableMode.ReferencedFrameworkTypes
             ? Net80.References.All
             : NetStandard20.References.All;
 

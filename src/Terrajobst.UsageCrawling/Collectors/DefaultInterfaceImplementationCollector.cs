@@ -5,7 +5,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class DefaultInterfaceImplementationCollector : IncrementalUsageCollector
 {
-    public override int VersionRequired => 2;
+    public override int VersionRequired => 4;
 
     protected override void CollectFeatures(IAssembly assembly, Context context)
     {
@@ -15,6 +15,9 @@ public sealed class DefaultInterfaceImplementationCollector : IncrementalUsageCo
 
             foreach (var implementation in type.ExplicitImplementationOverrides)
             {
+                if (implementation.ImplementedMethod.IsDefinedInCurrentAssembly())
+                    continue;
+
                 var docId = implementation.ImplementedMethod.UnWrapMember().DocId();
                 var key = new ApiKey(docId);
                 var metric = FeatureUsage.ForDim(key);

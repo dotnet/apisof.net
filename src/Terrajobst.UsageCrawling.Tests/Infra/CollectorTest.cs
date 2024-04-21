@@ -1,5 +1,6 @@
 ﻿using Microsoft.Cci;
-using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis;
+
 using Terrajobst.UsageCrawling.Collectors;
 
 namespace Terrajobst.UsageCrawling.Tests.Infra;
@@ -26,11 +27,28 @@ public abstract class CollectorTest<TCollector>
         ThrowIfNull(source);
         ThrowIfNull(expectedUsages);
 
-        var assembly = Compiler.Compile(source, ModifyCompilation);
+        var assembly = new AssemblyBuilder()
+            .SetAssembly(source)
+            .ToAssembly();
+
         Check(assembly, expectedUsages);
     }
 
-    private void Check(IAssembly assembly, IEnumerable<FeatureUsage> expectedUsages)
+    protected void Check(string dependencySource, string source, IEnumerable<FeatureUsage> expectedUsages)
+    {
+        ThrowIfNull(dependencySource);
+        ThrowIfNull(source);
+        ThrowIfNull(expectedUsages);
+
+        var assembly = new AssemblyBuilder()
+            .SetAssembly(source)
+            .AddDependency(dependencySource)
+            .ToAssembly();
+
+        Check(assembly, expectedUsages);
+    }
+
+    protected void Check(IAssembly assembly, IEnumerable<FeatureUsage> expectedUsages)
     {
         var collector = new TCollector();
         collector.Collect(assembly);
@@ -43,10 +61,5 @@ public abstract class CollectorTest<TCollector>
     protected virtual bool Include(FeatureUsage metric)
     {
         return true;
-    }
-
-    protected virtual CSharpCompilation ModifyCompilation(CSharpCompilation compilation)
-    {
-        return compilation;
     }
 }

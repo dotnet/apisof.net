@@ -5,7 +5,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class UsageCollectorSet
 {
-    public static int CurrentVersion { get; } = 3;
+    public static int CurrentVersion { get; } = 4;
 
     public UsageCollectorSet()
     {

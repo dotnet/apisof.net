@@ -6,7 +6,45 @@ namespace Terrajobst.UsageCrawling.Tests.Collectors;
 public class DefaultInterfaceImplementationCollectorTests : CollectorTest<DefaultInterfaceImplementationCollector>
 {
     [Fact]
-    public void DefaultInterfaceImplementation_DoestNotReport_New()
+    public void DefaultInterfaceImplementation_DoesNotReport_SelfDefined()
+    {
+        var source =
+            """
+            public interface IMine
+            {
+                int Count { get; }
+            }
+
+            public interface I<T> : IMine
+            {
+                int IMine.Count => 42;
+            }
+            """;
+
+        base.Check(source, []);
+    }
+
+    [Fact]
+    public void DefaultInterfaceImplementation_DoesNotReport_SelfDefined_Generic()
+    {
+        var source =
+            """
+            public interface IMine<T>
+            {
+                int Count { get; }
+            }
+
+            public interface I<T> : IMine<T>
+            {
+                int IMine<T>.Count => 42;
+            }
+            """;
+
+        base.Check(source, []);
+    }
+
+    [Fact]
+    public void DefaultInterfaceImplementation_DoesNotReport_New()
     {
         var source =
             """

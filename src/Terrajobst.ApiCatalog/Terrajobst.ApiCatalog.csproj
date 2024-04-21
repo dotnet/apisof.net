@@ -26,5 +26,5 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Terrajobst.ApiCatalog.Generation" />
   </ItemGroup>
-  
+
 </Project>

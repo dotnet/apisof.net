@@ -59,7 +59,25 @@ public class ExceptionCollectorTests : CollectorTest<ExceptionCollector>
     }
 
     [Fact]
-    public void ExceptionCollector_DoesReport_Throw()
+    public void ExceptionCollector_DoesNotReport_SelfDefined_Throw()
+    {
+        var source =
+            """
+            class MyEx : System.Exception { }
+            class C
+            {
+                void M()
+                {
+                    throw new MyEx();
+                }
+            }
+            """;
+
+        Check(source, []);
+    }
+
+    [Fact]
+    public void ExceptionCollector_Reports_Throw()
     {
         var source =
             """
@@ -76,15 +94,20 @@ public class ExceptionCollectorTests : CollectorTest<ExceptionCollector>
     }
 
     [Fact]
-    public void ExceptionCollector_DoesReport_Throw_Generic()
+    public void ExceptionCollector_Reports_Throw_Generic()
     {
-        var source =
+        var dependencySource =
             """
             using System;
-            class MyEx<T> : Exception
+            public class MyEx<T> : Exception
             {
                 public MyEx(T value) { }
             }
+            """;
+
+        var source =
+            """
+            using System;
             class C
             {
                 void M()
@@ -94,11 +117,39 @@ public class ExceptionCollectorTests : CollectorTest<ExceptionCollector>
             }
             """;
 
-        Check(source, [FeatureUsage.ForExceptionThrow("M:MyEx`1.#ctor(`0)")]);
+        Check(dependencySource, source, [FeatureUsage.ForExceptionThrow("M:MyEx`1.#ctor(`0)")]);
     }
 
     [Fact]
-    public void ExceptionCollector_DoesReport_Catch()
+    public void ExceptionCollector_DoesNotReport_SelfDefined_Catch()
+    {
+        var source =
+            """
+            using System;
+
+            class MyException : Exception { }
+
+            class C
+            {
+                void M()
+                {
+                    try
+                    {
+                        Console.WriteLine("Test");
+                    }
+                    catch (MyException ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                }
+            }
+            """;
+
+        Check(source, []);
+    }
+
+    [Fact]
+    public void ExceptionCollector_Reports_Catch()
     {
         var source =
             """
@@ -124,16 +175,21 @@ public class ExceptionCollectorTests : CollectorTest<ExceptionCollector>
     }
 
     [Fact]
-    public void ExceptionCollector_DoesReport_Catch_Generic()
+    public void ExceptionCollector_Reports_Catch_Generic()
     {
+        var dependencySource =
+            """
+            using System;
+            public class MyEx<T> : Exception
+            {
+                public MyEx(T value) { }
+            }
+            """;
+
         var source =
             """
             using System;
             using System.IO;
-            class MyEx<T> : Exception
-            {
-                public MyEx(T value) { }
-            }
             class C
             {
                 void M()
@@ -150,7 +206,6 @@ public class ExceptionCollectorTests : CollectorTest<ExceptionCollector>
             }
             """;
 
-        Check(source, [FeatureUsage.ForExceptionCatch("T:MyEx`1")]);
+        Check(dependencySource, source, [FeatureUsage.ForExceptionCatch("T:MyEx`1")]);
     }
-
 }

@@ -151,9 +151,7 @@ public sealed class AssemblyCrawler
                 Record(argument);
         }
 
-        // We don't want tor record definitions
-        var isDefinition = type.ResolvedType is not Dummy;
-        if (isDefinition)
+        if (type.ResolvedType.IsDefinedInCurrentAssembly())
             return;
 
         var documentationId = type.UnWrap().UniqueId();
@@ -162,9 +160,7 @@ public sealed class AssemblyCrawler
 
     private void Record(ITypeMemberReference member)
     {
-        // We don't want to record definitions
-        var isDefinition = member.ResolvedTypeDefinitionMember is not Dummy;
-        if (isDefinition)
+        if (member.IsDefinedInCurrentAssembly())
             return;
 
         if (member is ITypeReference type)

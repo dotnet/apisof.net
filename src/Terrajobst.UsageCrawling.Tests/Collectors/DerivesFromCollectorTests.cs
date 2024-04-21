@@ -64,22 +64,6 @@ public class DerivesFromCollectorTests : CollectorTest<DerivesFromCollector>
     }
 
     [Fact]
-    public void DerivesFromCollector_Reports_Classes_LocallyDefined()
-    {
-        var source =
-            """
-            using System.Collections;
-            class B {}
-            class D : B {}
-            """;
-
-        Check(source, [
-            FeatureUsage.ForDerivesFrom("T:System.Object"),
-            FeatureUsage.ForDerivesFrom("T:B")
-        ]);
-    }
-
-    [Fact]
     public void DerivesFromCollector_Reports_Classes_ImplicitlyDerivingFromObject()
     {
         var source =
@@ -145,6 +129,18 @@ public class DerivesFromCollectorTests : CollectorTest<DerivesFromCollector>
             FeatureUsage.ForDerivesFrom("T:System.ValueType"),
             FeatureUsage.ForDerivesFrom("T:System.Collections.IEnumerable")
         ]);
+    }
+
+    [Fact]
+    public void DerivesFromCollector_DoesNotReport_SelfDefined()
+    {
+        var source =
+            """
+            interface IMine {}
+            interface I : IMine {}
+            """;
+
+        Check(source, []);
     }
 
     [Fact]
