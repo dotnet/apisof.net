@@ -166,7 +166,7 @@ internal static class Program
         Console.WriteLine("Downloading NuGet usages...");
 
         var connectionString = GetAzureStorageConnectionString();
-        var blobClient = new BlobClient(connectionString, "usage", "usages.tsv", options: GetBlobOptions());
+        var blobClient = new BlobClient(connectionString, "usage", "usages-nuget.tsv", options: GetBlobOptions());
         var props = await blobClient.GetPropertiesAsync();
         var lastModified = props.Value.LastModified;
         await blobClient.DownloadToAsync(nugetUsagesPath);
@@ -200,7 +200,7 @@ internal static class Program
         Console.WriteLine("Downloading NetFx Compat Lab usages...");
 
         var connectionString = GetAzureStorageConnectionString();
-        var blobClient = new BlobClient(connectionString, "usage", "netfxcompatlab.tsv", options: GetBlobOptions());
+        var blobClient = new BlobClient(connectionString, "usage", "usages-netfxcompatlab.tsv", options: GetBlobOptions());
         var props = await blobClient.GetPropertiesAsync();
         var lastModified = props.Value.LastModified;
         await blobClient.DownloadToAsync(netfxCompatLabPath);

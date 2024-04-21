@@ -219,8 +219,8 @@ internal sealed class Program
     private static async Task CrawlAsync(PackageListCrawler packageListCrawler, CrawlerStore crawlerStore)
     {
         var apiCatalogPath = GetScratchFilePath("apicatalog.dat");
-        var databasePath = GetScratchFilePath("usage.db");
-        var usagesPath = GetScratchFilePath("usages.tsv");
+        var databasePath = GetScratchFilePath("usages-nuget.db");
+        var usagesPath = GetScratchFilePath("usages-nuget.tsv");
 
         Console.WriteLine("Downloading API catalog...");
 
