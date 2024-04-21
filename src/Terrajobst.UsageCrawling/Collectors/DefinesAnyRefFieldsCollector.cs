@@ -4,7 +4,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class DefinesAnyRefFieldsCollector : IncrementalUsageCollector
 {
-    public override int VersionIntroduced => 3;
+    public override int VersionRequired => 3;
 
     protected override void CollectFeatures(IAssembly assembly, Context context)
     {

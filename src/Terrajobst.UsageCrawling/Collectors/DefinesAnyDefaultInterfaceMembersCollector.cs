@@ -4,7 +4,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class DefinesAnyDefaultInterfaceMembersCollector : IncrementalUsageCollector
 {
-    public override int VersionIntroduced => 2;
+    public override int VersionRequired => 2;
 
     protected override void CollectFeatures(IAssembly assembly, Context context)
     {

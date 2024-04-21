@@ -4,7 +4,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public abstract class UsageCollector
 {
-    public abstract int VersionIntroduced { get; }
+    public abstract int VersionRequired { get; }
 
     public abstract void Collect(IAssembly assembly);
 

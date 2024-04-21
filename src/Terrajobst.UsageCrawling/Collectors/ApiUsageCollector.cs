@@ -6,7 +6,7 @@ public sealed class ApiUsageCollector : UsageCollector
 {
     private readonly AssemblyCrawler _crawler = new();
 
-    public override int VersionIntroduced => 1;
+    public override int VersionRequired => 1;
 
     public override void Collect(IAssembly assembly)
     {

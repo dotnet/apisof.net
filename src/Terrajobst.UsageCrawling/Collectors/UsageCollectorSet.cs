@@ -5,13 +5,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class UsageCollectorSet
 {
-    public static int CurrentVersion { get; } = ComputeCurrentVersion();
-
-    private static int ComputeCurrentVersion()
-    {
-        var dummySet = new UsageCollectorSet();
-        return dummySet.Collectors.Select(c => c.VersionIntroduced).Max();
-    }
+    public static int CurrentVersion { get; } = 3;
 
     public UsageCollectorSet()
     {
@@ -40,7 +34,7 @@ public sealed class UsageCollectorSet
     {
         var versionedSets = new List<VersionedFeatureSet>();
 
-        foreach (var group in Collectors.GroupBy(c => c.VersionIntroduced))
+        foreach (var group in Collectors.GroupBy(c => c.VersionRequired))
         {
             var version = group.Key;
             var metrics = new HashSet<Guid>();
