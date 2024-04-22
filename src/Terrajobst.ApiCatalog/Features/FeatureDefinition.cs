@@ -154,7 +154,7 @@ public abstract class FeatureDefinition
     {
         public override Guid FeatureId { get; } = Guid.Parse("b7977f35-478e-4fef-bc22-9a4984a69a48");
 
-        public override string Name => "Was compiled with nullable reference types";
+        public override string Name => "Compiles with nullable reference types";
 
         public override string Description => "Percentage of applications/packages that compiled with nullable reference types";
     }
