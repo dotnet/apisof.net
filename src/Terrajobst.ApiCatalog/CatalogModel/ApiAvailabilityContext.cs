@@ -26,7 +26,7 @@ internal sealed class ApiAvailabilityContext
         foreach (var fx in catalog.Frameworks)
         {
             var nugetFramework = _frameworkById[fx.Id];
-            if (nugetFramework.IsPCL || fx.Name is "monotouch" or "xamarinios10")
+            if (!nugetFramework.IsRelevant())
                 continue;
 
             nugetFrameworks.Add(fx.Id, nugetFramework);

@@ -100,29 +100,13 @@ public abstract class FeatureDefinition
             if (!child.IsRelevantForApisOfDotnet())
                 continue;
 
-            foreach (var parent in GetAncestorsAndSelf(child))
+            foreach (var parent in TargetFrameworkHierarchy.GetAncestorsAndSelf(child))
             {
                 var childFeature = TargetFramework.GetFeatureId(child);
                 var parentParent = TargetFramework.GetFeatureId(parent);
                 yield return (childFeature, parentParent);
             }
         }
-    }
-
-    private static IEnumerable<NuGetFramework> GetAncestorsAndSelf(NuGetFramework framework)
-    {
-        yield return framework;
-
-        if (framework.HasPlatform)
-        {
-            if (framework.PlatformVersion != FrameworkConstants.EmptyVersion)
-                yield return new NuGetFramework(framework.Framework, framework.Version, framework.Platform, FrameworkConstants.EmptyVersion);
-
-            yield return new NuGetFramework(framework.Framework, framework.Version);
-        }
-
-        var frameworkFamily = new NuGetFramework(framework.Framework, FrameworkConstants.EmptyVersion);
-        yield return frameworkFamily;
     }
 
     private sealed class DefinesAnyRefStructsDefinition : GlobalFeatureDefinition

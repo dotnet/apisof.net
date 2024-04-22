@@ -78,4 +78,21 @@ public static class NuGetFrameworkExtensions
                 return framework.Framework;
         }
     }
+
+    public static bool IsRelevant(this NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        if (framework.IsPCL)
+            return false;
+
+        if (string.Equals(framework.Framework, "monotouch", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (string.Equals(framework.Framework, "Xamarin.iOS", StringComparison.OrdinalIgnoreCase) &&
+            framework.Version.Major == 1)
+            return false;
+
+        return true;
+    }
 }
