@@ -109,6 +109,9 @@ public abstract class FeatureDefinition
 
             yield return new NuGetFramework(framework.Framework, framework.Version);
         }
+
+        var frameworkFamily = new NuGetFramework(framework.Framework, FrameworkConstants.EmptyVersion);
+        yield return frameworkFamily;
     }
 
     private sealed class DefinesAnyRefStructsDefinition : GlobalFeatureDefinition
