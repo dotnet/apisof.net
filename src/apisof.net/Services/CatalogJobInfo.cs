@@ -1,4 +1,6 @@
-﻿namespace ApisOfDotNet.Services;
+﻿using System.Text.Json;
+
+namespace ApisOfDotNet.Services;
 
 public sealed class CatalogJobInfo
 {
@@ -21,4 +23,12 @@ public sealed class CatalogJobInfo
     public DateTimeOffset Date { get; }
     public bool Success { get; }
     public string DetailsUrl { get; }
+
+    public static CatalogJobInfo Load(string path)
+    {
+        ThrowIfNullOrEmpty(path);
+
+        var stream = File.OpenRead(path);
+        return JsonSerializer.Deserialize<CatalogJobInfo>(stream) ?? Empty;
+    }
 }

@@ -1,5 +1,4 @@
 ﻿using System.IO.Compression;
-using System.Text.Json;
 using ApisOfDotNet.Shared;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
@@ -14,6 +13,12 @@ public sealed class CatalogService
     private readonly IOptions<ApisOfDotNetOptions> _options;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<CatalogService> _logger;
+
+    private readonly BlobSource<ApiCatalogModel> _catalogBlobSource;
+    private readonly BlobSource<SuffixTree> _suffixTreeBlobSource;
+    private readonly BlobSource<CatalogJobInfo> _catalogJobBlobSource;
+    private readonly BlobSource<DesignNoteDatabase> _designNotesBlobSource;
+    private readonly BlobSource<FeatureUsageData> _usageBlobSource;
     private CatalogData _data = CatalogData.Empty;
 
     public CatalogService(IOptions<ApisOfDotNetOptions> options,
@@ -27,153 +32,33 @@ public sealed class CatalogService
         _options = options;
         _environment = environment;
         _logger = logger;
+
+        _catalogBlobSource = CreateBlobSource("catalog", "apicatalog.dat", ApiCatalogModel.LoadAsync);
+        _suffixTreeBlobSource = CreateBlobSource("catalog", "suffixtree.dat.deflate", SuffixTree.Load);
+        _catalogJobBlobSource = CreateBlobSource("catalog", "job.json", CatalogJobInfo.Load);
+        _designNotesBlobSource = CreateBlobSource("catalog", "designNotes.dat", DesignNoteDatabase.Load);
+        _usageBlobSource = CreateBlobSource("usage", "usageData.dat", FeatureUsageData.Load);
     }
 
     public async Task InvalidateAsync()
     {
-        var storageConnectionString = _options.Value.AzureStorageConnectionString;
-        var catalogPath = GetCatalogPath();
-        var usageDataPath = GetUsageDataPath();
-        var suffixTreePath = GetSuffixTreePath();
-        var designNotesPath = GetDesignNotesPath();
-
-        _data = await LoadCatalogDataAsync(_environment, _logger, storageConnectionString, catalogPath, usageDataPath, suffixTreePath, designNotesPath);
+        var invalidateCachedDownload = !_environment.IsDevelopment();
+        var catalog = await _catalogBlobSource.DownloadAsync(invalidateCachedDownload);
+        var suffixTree = await _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
+        var jobInfo = await _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
+        var usageData = await _usageBlobSource.DownloadAsync(invalidateCachedDownload);
+        var designNotes = DesignNoteDatabase.Load(_designNotesBlobSource.GetLocalPath());
+        _data = new CatalogData(catalog, suffixTree, jobInfo, usageData, designNotes);
     }
 
-    private static async Task<CatalogData> LoadCatalogDataAsync(IHostEnvironment environment,
-                                                                ILogger logger,
-                                                                string storageConnectionString,
-                                                                string catalogPath,
-                                                                string usageDataPath,
-                                                                string suffixTreePath,
-                                                                string designNotesPath)
+    private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, T> loader)
     {
-        if (!environment.IsDevelopment())
-        {
-            File.Delete(catalogPath);
-            File.Delete(usageDataPath);
-            File.Delete(suffixTreePath);
-            File.Delete(designNotesPath);
-        }
-
-        if (File.Exists(catalogPath))
-        {
-            logger.LogInformation("Found catalog on disk. Skipping download.");
-        }
-        else
-        {
-            logger.LogInformation("Downloading catalog...");
-
-            var blobClient = new BlobClient(storageConnectionString, "catalog", "apicatalog.dat");
-            await blobClient.DownloadToAsync(catalogPath);
-
-            logger.LogInformation("Downloading catalog complete.");
-        }
-
-        logger.LogInformation("Loading catalog...");
-
-        var catalog = await ApiCatalogModel.LoadAsync(catalogPath);
-
-        logger.LogInformation("Loading catalog complete.");
-
-        if (File.Exists(usageDataPath))
-        {
-            logger.LogInformation("Found usage data on disk. Skipping download.");
-        }
-        else
-        {
-            logger.LogInformation("Downloading usage data...");
-
-            var blobClient = new BlobClient(storageConnectionString, "usage", "usageData.dat");
-            await blobClient.DownloadToAsync(usageDataPath);
-
-            logger.LogInformation("Download usage data complete.");
-        }
-
-        logger.LogInformation("Loading usage data...");
-
-        var usage = FeatureUsageData.Load(usageDataPath);
-
-        logger.LogInformation("Loading usage data complete.");
-
-        if (File.Exists(suffixTreePath))
-        {
-            logger.LogInformation("Found suffix tree on disk. Skipping download.");
-        }
-        else
-        {
-            logger.LogInformation("Downloading suffix tree...");
-
-            // TODO: Ideally the underlying file format uses compression. This seems weird.
-            var blobClient = new BlobClient(storageConnectionString, "catalog", "suffixtree.dat.deflate");
-            await using var blobStream = await blobClient.OpenReadAsync();
-            await using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
-            await using var fileStream = File.Create(suffixTreePath);
-            await deflateStream.CopyToAsync(fileStream);
-
-            logger.LogInformation("Download suffix tree complete.");
-        }
-
-        logger.LogInformation("Loading suffix tree...");
-
-        var suffixTree = SuffixTree.Load(suffixTreePath);
-
-        logger.LogInformation("Loading suffix tree complete.");
-
-        if (File.Exists(designNotesPath))
-        {
-            logger.LogInformation("Found design notes on disk. Skipping download.");
-        }
-        else
-        {
-            logger.LogInformation("Downloading design notes...");
-
-            var blobClient = new BlobClient(storageConnectionString, "catalog", "designNotes.dat");
-            await blobClient.DownloadToAsync(designNotesPath);
-
-            logger.LogInformation("Downloading design notes complete.");
-        }
-
-        logger.LogInformation("Loading design notes...");
-
-        var designNotes = DesignNoteDatabase.Load(designNotesPath);
-
-        logger.LogInformation("Loading design notes complete.");
-
-        var jobBlobClient = new BlobClient(storageConnectionString, "catalog", "job.json");
-        await using var jobStream = await jobBlobClient.OpenReadAsync();
-        var jobInfo = await JsonSerializer.DeserializeAsync<CatalogJobInfo>(jobStream) ?? CatalogJobInfo.Empty;
-
-        return new CatalogData(jobInfo, catalog, usage, suffixTree, designNotes);
+        return new BlobSource<T>(_logger, _options, containerName, blobName, s => Task.FromResult(loader(s)));
     }
 
-    private string GetCatalogPath()
+    private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, Task<T>> loader)
     {
-        var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
-        var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
-        var directory = environmentPath ?? applicationPath;
-        return Path.Combine(directory, "apicatalog.dat");
-    }
-
-    private string GetUsageDataPath()
-    {
-        var databasePath = GetCatalogPath();
-        var directory = Path.GetDirectoryName(databasePath)!;
-        return Path.Combine(directory, "usageData.dat");
-    }
-
-    private string GetSuffixTreePath()
-    {
-        var databasePath = GetCatalogPath();
-        var directory = Path.GetDirectoryName(databasePath)!;
-        return Path.Combine(directory, "suffixTree.dat");
-    }
-
-    private string GetDesignNotesPath()
-    {
-        var databasePath = GetCatalogPath();
-        var directory = Path.GetDirectoryName(databasePath)!;
-        return Path.Combine(directory, "designNotes.dat");
+        return new BlobSource<T>(_logger, _options, containerName, blobName, loader);
     }
 
     public ApiCatalogModel Catalog => _data.Catalog;
@@ -197,41 +82,199 @@ public sealed class CatalogService
             .Take(200);
     }
 
+    private abstract class BlobSource
+    {
+        protected BlobSource(string containerName,
+                             string blobName)
+        {
+            ThrowIfNullOrEmpty(containerName);
+            ThrowIfNullOrEmpty(blobName);
+
+            ContainerName = containerName;
+            BlobName = blobName;
+        }
+
+        public string ContainerName { get; }
+
+        public string BlobName { get; }
+
+        public string GetLocalPath()
+        {
+            var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
+            var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
+            var directory = environmentPath ?? applicationPath;
+            return Path.Combine(directory, BlobName);
+        }
+    }
+
+    private sealed class BlobSource<T> : BlobSource
+    {
+        private readonly ILogger<CatalogService> _logger;
+        private readonly IOptions<ApisOfDotNetOptions> _options;
+        private readonly Func<string, Task<T>> _loader;
+
+        public BlobSource(ILogger<CatalogService> logger,
+                          IOptions<ApisOfDotNetOptions> options,
+                          string containerName,
+                          string blobName,
+                          Func<string, Task<T>> loader)
+            : base(containerName, blobName)
+        {
+            ThrowIfNull(logger);
+            ThrowIfNull(options);
+            ThrowIfNull(loader);
+
+            _logger = logger;
+            _options = options;
+            _loader = loader;
+        }
+
+        public async Task<T> DownloadAsync(bool invalidateCachedDownload)
+        {
+            var localPath = GetLocalPath();
+
+            if (!invalidateCachedDownload && File.Exists(localPath))
+            {
+                _logger.LogInformation($"Found {BlobName}. Skipping download.");
+            }
+            else
+            {
+                _logger.LogInformation($"Downloading {BlobName}...");
+
+                var blobClient = new BlobClient(_options.Value.AzureStorageConnectionString, ContainerName, BlobName);
+
+                if (!this.BlobName.EndsWith(".deflate", StringComparison.OrdinalIgnoreCase))
+                {
+                    await blobClient.DownloadToAsync(localPath);
+                }
+                else
+                {
+                    await using var blobStream = await blobClient.OpenReadAsync();
+                    await using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
+                    await using var fileStream = File.Create(localPath);
+                    await deflateStream.CopyToAsync(fileStream);
+                }
+
+                _logger.LogInformation($"Downloading {BlobName} complete.");
+            }
+
+            return await _loader(localPath);
+        }
+    }
+
     private sealed class CatalogData
     {
         public static CatalogData Empty { get; } = new();
 
         private CatalogData()
-            : this(CatalogJobInfo.Empty, ApiCatalogModel.Empty, FeatureUsageData.Empty, SuffixTree.Empty, DesignNoteDatabase.Empty)
+            : this(ApiCatalogModel.Empty, SuffixTree.Empty, CatalogJobInfo.Empty, FeatureUsageData.Empty, DesignNoteDatabase.Empty)
         {
         }
 
-        public CatalogData(CatalogJobInfo jobInfo, ApiCatalogModel catalog, FeatureUsageData usageData, SuffixTree suffixTree, DesignNoteDatabase designNotes)
+        public CatalogData(ApiCatalogModel catalog, SuffixTree suffixTree, CatalogJobInfo jobInfo, FeatureUsageData usageData, DesignNoteDatabase designNotes)
         {
-            ThrowIfNull(jobInfo);
             ThrowIfNull(catalog);
-            ThrowIfNull(usageData);
             ThrowIfNull(suffixTree);
+            ThrowIfNull(jobInfo);
+            ThrowIfNull(usageData);
             ThrowIfNull(designNotes);
 
-            JobInfo = jobInfo;
             Catalog = catalog;
-            UsageData = usageData;
             SuffixTree = suffixTree;
+            JobInfo = jobInfo;
+            UsageData = usageData;
             DesignNotes = designNotes;
             Statistics = catalog.GetStatistics();
         }
 
-        public CatalogJobInfo JobInfo { get; }
-
         public ApiCatalogModel Catalog { get; }
 
-        public FeatureUsageData UsageData { get; }
-
         public SuffixTree SuffixTree { get; }
+
+        public CatalogJobInfo JobInfo { get; }
+
+        public FeatureUsageData UsageData { get; }
 
         public DesignNoteDatabase DesignNotes { get; }
 
         public ApiCatalogStatistics Statistics { get; }
+
+        public CatalogData WithCatalog(ApiCatalogModel catalog, SuffixTree suffixTree, CatalogJobInfo jobInfo)
+        {
+            ThrowIfNull(catalog);
+            ThrowIfNull(suffixTree);
+            ThrowIfNull(jobInfo);
+
+            if (ReferenceEquals(catalog, Catalog) &&
+                ReferenceEquals(suffixTree, SuffixTree) &&
+                ReferenceEquals(jobInfo, JobInfo))
+                return this;
+
+            return new CatalogData(catalog, suffixTree, jobInfo, UsageData, DesignNotes);
+        }
+
+        public CatalogData WithUsageData(FeatureUsageData usageData)
+        {
+            ThrowIfNull(usageData);
+
+            if (ReferenceEquals(usageData, UsageData))
+                return this;
+
+            return new CatalogData(Catalog, SuffixTree, JobInfo, usageData, DesignNotes);
+        }
+
+        public CatalogData WithDesignNotes(DesignNoteDatabase designNotes)
+        {
+            ThrowIfNull(designNotes);
+
+            if (ReferenceEquals(designNotes, DesignNotes))
+                return this;
+
+            return new CatalogData(Catalog, SuffixTree, JobInfo, UsageData, designNotes);
+        }
+    }
+
+    public async void HandleBlobChange(string blobPath)
+    {
+        if (string.IsNullOrEmpty(blobPath))
+            return;
+
+        _logger.LogInformation($"Received blob change for {blobPath}.");
+
+        if (blobPath.EndsWith("job.json", StringComparison.OrdinalIgnoreCase))
+            await ReloadCatalogAsync();
+        else if (blobPath.EndsWith("designNotes.dat", StringComparison.OrdinalIgnoreCase))
+            await ReloadDesignNotesAsync();
+        else if (blobPath.EndsWith("usageData.dat", StringComparison.OrdinalIgnoreCase))
+            await ReloadUsageDataAsync();
+    }
+
+    private async Task ReloadCatalogAsync()
+    {
+        _logger.LogInformation("Reloading catalog...");
+
+        const bool invalidateCachedDownload = true;
+        var catalog = await _catalogBlobSource.DownloadAsync(invalidateCachedDownload);
+        var suffixTree = await _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
+        var jobInfo = await _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
+        _data = _data.WithCatalog(catalog, suffixTree, jobInfo);
+    }
+
+    private async Task ReloadDesignNotesAsync()
+    {
+        _logger.LogInformation("Reloading design notes...");
+
+        const bool invalidateCachedDownload = true;
+        var designNotes = await _designNotesBlobSource.DownloadAsync(invalidateCachedDownload);
+        _data = _data.WithDesignNotes(designNotes);
+    }
+
+    private async Task ReloadUsageDataAsync()
+    {
+        _logger.LogInformation("Reloading usage data...");
+
+        const bool invalidateCachedDownload = true;
+        var usageData = await _usageBlobSource.DownloadAsync(invalidateCachedDownload);
+        _data = _data.WithUsageData(usageData);
     }
 }
