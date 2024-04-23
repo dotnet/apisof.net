@@ -88,6 +88,8 @@ public abstract class FeatureDefinition
         foreach (var fx in catalog.Frameworks)
         {
             var child = fx.NuGetFramework;
+            if (!child.IsRelevantForApisOfDotnet())
+                continue;
 
             foreach (var parent in GetAncestorsAndSelf(child))
             {

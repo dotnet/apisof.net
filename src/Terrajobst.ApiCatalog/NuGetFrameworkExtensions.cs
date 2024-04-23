@@ -4,6 +4,15 @@ namespace Terrajobst.ApiCatalog;
 
 public static class NuGetFrameworkExtensions
 {
+    public static bool IsRelevantForApisOfDotnet(this NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        return string.Equals(framework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(framework.Framework, ".NETStandard", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(framework.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase);
+    }
+    
     public static string GetVersionDisplayString(this Version version)
     {
         ThrowIfNull(version);
