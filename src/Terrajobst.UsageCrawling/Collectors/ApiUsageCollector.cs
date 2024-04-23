@@ -8,9 +8,10 @@ public sealed class ApiUsageCollector : UsageCollector
 
     public override int VersionRequired => 1;
 
-    public override void Collect(IAssembly assembly)
+    public override void Collect(IAssembly assembly, AssemblyContext assemblyContext)
     {
         ThrowIfNull(assembly);
+        ThrowIfNull(assemblyContext);
 
         _crawler.Crawl(assembly);
     }

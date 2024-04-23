@@ -7,7 +7,7 @@ public sealed class DefaultInterfaceImplementationCollector : IncrementalUsageCo
 {
     public override int VersionRequired => 4;
 
-    protected override void CollectFeatures(IAssembly assembly, Context context)
+    protected override void CollectFeatures(IAssembly assembly, AssemblyContext assemblyContext, Context context)
     {
         foreach (var type in assembly.GetAllTypes())
         {

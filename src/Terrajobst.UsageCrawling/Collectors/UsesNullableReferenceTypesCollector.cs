@@ -7,7 +7,7 @@ public sealed class UsesNullableReferenceTypesCollector : IncrementalUsageCollec
 {
     public override int VersionRequired => 3;
 
-    protected override void CollectFeatures(IAssembly assembly, Context context)
+    protected override void CollectFeatures(IAssembly assembly, AssemblyContext assemblyContext, Context context)
     {
         var referencedTypes = assembly.GetTypeReferences();
         var embeddedTypes = assembly.GetAllTypes();

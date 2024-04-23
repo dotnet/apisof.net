@@ -50,8 +50,13 @@ public abstract class CollectorTest<TCollector>
 
     protected void Check(IAssembly assembly, IEnumerable<FeatureUsage> expectedUsages)
     {
+        Check(assembly, AssemblyContext.Empty, expectedUsages);
+    }
+
+    protected void Check(IAssembly assembly, AssemblyContext assemblyContext, IEnumerable<FeatureUsage> expectedUsages)
+    {
         var collector = new TCollector();
-        collector.Collect(assembly);
+        collector.Collect(assembly, assemblyContext);
 
         var expectedFeaturesOrdered = expectedUsages.OrderBy(u => u.FeatureId);
         var actualResultsOrdered = collector.GetResults().Where(Include).OrderBy(u => u.FeatureId);

@@ -6,18 +6,25 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class TargetFrameworkCollector : IncrementalUsageCollector
 {
-    public override int VersionRequired => 3;
+    public override int VersionRequired => 5;
 
-    protected override void CollectFeatures(IAssembly assembly, Context context)
+    protected override void CollectFeatures(IAssembly assembly, AssemblyContext assemblyContext, Context context)
+    {
+        var framework = assemblyContext.Framework ?? InferFramework(assembly);
+        if (framework is not null)
+            context.Report(FeatureUsage.ForTargetFramework(framework));
+    }
+
+    private static NuGetFramework? InferFramework(IAssembly assembly)
     {
         var tfm = assembly.GetTargetFrameworkMoniker();
-        if (!string.IsNullOrEmpty(tfm))
-        {
-            var nugetFramework = NuGetFramework.Parse(tfm);
-            context.Report(FeatureUsage.ForTargetFramework(nugetFramework));
-            return;
-        }
+        return !string.IsNullOrEmpty(tfm)
+                ? NuGetFramework.Parse(tfm)
+                : InferFrameworkFromReferences(assembly);
+    }
 
+    private static NuGetFramework? InferFrameworkFromReferences(IAssembly assembly)
+    {
         foreach (var assemblyReference in assembly.AssemblyReferences)
         {
             var name = assemblyReference.Name.Value;
@@ -28,42 +35,29 @@ public sealed class TargetFrameworkCollector : IncrementalUsageCollector
             if (string.Equals(name, "System.Runtime", StringComparison.OrdinalIgnoreCase))
             {
                 if (major >= 5)
-                {
-                    context.Report(FeatureUsage.ForTargetFramework($"netcoreapp{major}.{minor}"));
-                    return;
-                }
+                    return NuGetFramework.Parse($"netcoreapp{major}.{minor}");
 
                 switch (major, minor, build)
                 {
                     case (4, 1, _):
-                        context.Report(FeatureUsage.ForTargetFramework("netcoreapp1.0"));
-                        return;
+                        return NuGetFramework.Parse("netcoreapp1.0");
                     case (4, 2, 1):
-                        context.Report(FeatureUsage.ForTargetFramework("netcoreapp2.1"));
-                        return;
+                        return NuGetFramework.Parse("netcoreapp2.1");
                     case (4, 2, 2):
-                        context.Report(FeatureUsage.ForTargetFramework("netcoreapp3.1"));
-                        return;
+                        return NuGetFramework.Parse("netcoreapp3.1");
                     case (4, 2, _):
-                        context.Report(FeatureUsage.ForTargetFramework("netcoreapp2.0"));
-                        return;
+                        return NuGetFramework.Parse("netcoreapp2.0");
                     case (4, 0, 10):
-                        context.Report(FeatureUsage.ForTargetFramework("netstandard1.2"));
-                        return;
+                        return NuGetFramework.Parse("netstandard1.2");
                     case (4, 0, 20):
-                        context.Report(FeatureUsage.ForTargetFramework("netstandard1.3"));
-                        return;
+                        return NuGetFramework.Parse("netstandard1.3");
                     case (4, 0, _):
-                        context.Report(FeatureUsage.ForTargetFramework("netstandard1.0"));
-                        return;
+                        return NuGetFramework.Parse("netstandard1.0");
                 }
             }
 
             if (string.Equals(name, "netstandard", StringComparison.OrdinalIgnoreCase))
-            {
-                context.Report(FeatureUsage.ForTargetFramework($"netstandard{major}.{minor}"));
-                return;
-            }
+                return NuGetFramework.Parse($"netstandard{major}.{minor}");
 
             if (string.Equals(name, "mscorlib", StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(assemblyReference.GetPublicKeyToken(), "b77a5c561934e089"))
@@ -71,19 +65,17 @@ public sealed class TargetFrameworkCollector : IncrementalUsageCollector
                 switch (major, minor, build)
                 {
                     case (1, 0, 3300):
-                        context.Report(FeatureUsage.ForTargetFramework("net1.0"));
-                        return;
+                        return NuGetFramework.Parse("net1.0");
                     case (1, 0, 5000):
-                        context.Report(FeatureUsage.ForTargetFramework("net2.0"));
-                        return;
+                        return NuGetFramework.Parse("net2.0");
                     case (2, _, _):
-                        context.Report(FeatureUsage.ForTargetFramework("net2.0"));
-                        return;
+                        return NuGetFramework.Parse("net2.0");
                     case (4, _, _):
-                        context.Report(FeatureUsage.ForTargetFramework("net4.0"));
-                        return;
+                        return NuGetFramework.Parse("net4.0");
                 }
             }
         }
+
+        return null;
     }
 }

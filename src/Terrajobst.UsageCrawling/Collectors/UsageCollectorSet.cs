@@ -5,7 +5,7 @@ namespace Terrajobst.UsageCrawling.Collectors;
 
 public sealed class UsageCollectorSet
 {
-    public static int CurrentVersion { get; } = 4;
+    public static int CurrentVersion { get; } = 5;
 
     public UsageCollectorSet()
     {
@@ -22,12 +22,13 @@ public sealed class UsageCollectorSet
 
     public ImmutableArray<UsageCollector> Collectors { get; }
 
-    public void Collect(IAssembly assembly)
+    public void Collect(IAssembly assembly, AssemblyContext assemblyContext)
     {
         ThrowIfNull(assembly);
+        ThrowIfNull(assemblyContext);
 
         foreach (var collector in Collectors)
-            collector.Collect(assembly);
+            collector.Collect(assembly, assemblyContext);
     }
 
     public CollectionSetResults GetResults()

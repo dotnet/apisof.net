@@ -6,7 +6,7 @@ public abstract class UsageCollector
 {
     public abstract int VersionRequired { get; }
 
-    public abstract void Collect(IAssembly assembly);
+    public abstract void Collect(IAssembly assembly, AssemblyContext assemblyContext);
 
     public abstract IEnumerable<FeatureUsage> GetResults();
 }

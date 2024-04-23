@@ -1,4 +1,5 @@
 ﻿using Microsoft.Cci.Extensions;
+using NuGet.Frameworks;
 using NuGet.Packaging.Core;
 using Terrajobst.UsageCrawling.Collectors;
 
@@ -13,6 +14,8 @@ public static class PackageCrawler
 
         foreach (var packagePath in reader.GetFiles())
         {
+            var framework = GetFrameworkFromPackagePath(packagePath);            
+            
             await using var assemblyStream = reader.GetStream(packagePath);
             await using var memoryStream = new MemoryStream();
             await assemblyStream.CopyToAsync(memoryStream);
@@ -24,9 +27,35 @@ public static class PackageCrawler
             if (assembly is null)
                 continue;
 
-            collectorSet.Collect(assembly);
+            var assemblyContext = new AssemblyContext {
+                Package = reader,
+                Framework = framework
+            };
+            
+            collectorSet.Collect(assembly, assemblyContext);
         }
 
         return collectorSet.GetResults();
+    }
+
+    private static NuGetFramework? GetFrameworkFromPackagePath(string packagePath)
+    {
+        var segments = packagePath.Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (segments.Length >= 3)
+        {
+            try
+            {
+                var frameworkFolder = segments[1];
+                var result = NuGetFramework.ParseFolder(frameworkFolder);
+                if (result.IsSpecificFramework)
+                    return result;
+            }
+            catch
+            {
+                // Ignore
+            }
+        }
+        
+        return null;
     }
 }

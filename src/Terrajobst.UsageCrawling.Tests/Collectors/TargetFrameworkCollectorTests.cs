@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Basic.Reference.Assemblies;
 using Microsoft.CodeAnalysis.CSharp;
+using NuGet.Frameworks;
 using Terrajobst.UsageCrawling.Collectors;
 using Terrajobst.UsageCrawling.Tests.Infra;
 
@@ -9,7 +10,19 @@ namespace Terrajobst.UsageCrawling.Tests.Collectors;
 public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollector>
 {
     [Fact]
-    public void TargetFrameworkCollector_PrefersTargetFrameworkOver_References()
+    public void TargetFrameworkCollector_Prefers_AssemblyContextFramework_Over_TargetFramework()
+    {
+        var source =
+            """
+            using System.Runtime.Versioning;
+            [assembly: TargetFrameworkAttribute(".NETCoreApp, Version=5.1")]
+            """;
+
+        Check(TargetFramework.Net80, NuGetFramework.Parse("net6.2"), source, [FeatureUsage.ForTargetFramework("net6.2")]);
+    }
+    
+    [Fact]
+    public void TargetFrameworkCollector_Prefers_TargetFramework_Over_References()
     {
         var source =
             """
@@ -52,10 +65,19 @@ public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollec
 
     private void Check(TargetFramework framework, string source, IEnumerable<FeatureUsage> expectedUsages)
     {
+        Check(framework, null, source, expectedUsages);
+    }
+    
+    private void Check(TargetFramework framework, NuGetFramework? assemblyContextFramework, string source, IEnumerable<FeatureUsage> expectedUsages)
+    {
         var assembly = new AssemblyBuilder()
             .SetAssembly(source, framework)
             .ToAssembly();
 
-        Check(assembly, expectedUsages);
+        var context = new AssemblyContext {
+            Framework = assemblyContextFramework
+        };
+        
+        Check(assembly, context, expectedUsages);
     }
 }

@@ -6,12 +6,13 @@ public abstract class IncrementalUsageCollector : UsageCollector
 {
     private readonly HashSet<FeatureUsage> _features = new();
 
-    public sealed override void Collect(IAssembly assembly)
+    public sealed override void Collect(IAssembly assembly, AssemblyContext assemblyContext)
     {
         ThrowIfNull(assembly);
+        ThrowIfNull(assemblyContext);
 
         var context = new Context(_features);
-        CollectFeatures(assembly, context);
+        CollectFeatures(assembly, assemblyContext, context);
     }
 
     public sealed override IEnumerable<FeatureUsage> GetResults()
@@ -19,7 +20,7 @@ public abstract class IncrementalUsageCollector : UsageCollector
         return _features;
     }
 
-    protected abstract void CollectFeatures(IAssembly assembly, Context context);
+    protected abstract void CollectFeatures(IAssembly assembly, AssemblyContext assemblyContext, Context context);
 
     protected readonly struct Context
     {

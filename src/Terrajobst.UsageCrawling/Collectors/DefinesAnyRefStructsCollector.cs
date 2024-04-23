@@ -7,7 +7,7 @@ public sealed class DefinesAnyRefStructsCollector : IncrementalUsageCollector
 {
     public override int VersionRequired => 2;
 
-    protected override void CollectFeatures(IAssembly assembly, Context context)
+    protected override void CollectFeatures(IAssembly assembly, AssemblyContext assemblyContext, Context context)
     {
         foreach (var type in assembly.GetAllTypes())
         {
