@@ -47,7 +47,7 @@ public sealed class CatalogService
         var suffixTree = await _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
         var jobInfo = await _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
         var usageData = await _usageBlobSource.DownloadAsync(invalidateCachedDownload);
-        var designNotes = DesignNoteDatabase.Load(_designNotesBlobSource.GetLocalPath());
+        var designNotes = await _designNotesBlobSource.DownloadAsync(invalidateCachedDownload);
         _data = new CatalogData(catalog, suffixTree, jobInfo, usageData, designNotes);
     }
 
@@ -98,7 +98,7 @@ public sealed class CatalogService
 
         public string BlobName { get; }
 
-        public string GetLocalPath()
+        protected string GetLocalPath()
         {
             var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
             var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
