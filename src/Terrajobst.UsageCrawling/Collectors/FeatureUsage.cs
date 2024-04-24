@@ -78,23 +78,23 @@ public readonly struct FeatureUsage : IEquatable<FeatureUsage>
 
     public static FeatureUsage UsesNullableReferenceTypes { get; }= ForGlobal(FeatureDefinition.UsesNullableReferenceTypes);
 
-    public static FeatureUsage ForApi(ApiKey api) => ForParameterized(FeatureDefinition.ApiUsage, api.Guid, api.DocumentationId);
+    public static FeatureUsage ForApi(ApiKey api) => ForParameterized(FeatureDefinition.ReferencesApi, api.Guid, api.DocumentationId);
 
     public static FeatureUsage ForApi(string documentationId) => ForApi(new ApiKey(documentationId));
 
-    public static FeatureUsage ForDim(ApiKey baseInterfaceMember) => ForParameterized(FeatureDefinition.DimUsage, baseInterfaceMember.Guid, baseInterfaceMember.DocumentationId);
+    public static FeatureUsage ForDim(ApiKey baseInterfaceMember) => ForParameterized(FeatureDefinition.DefinesDim, baseInterfaceMember.Guid, baseInterfaceMember.DocumentationId);
 
     public static FeatureUsage ForDim(string documentationId) => ForDim(new ApiKey(documentationId));
 
-    public static FeatureUsage ForDerivesFrom(ApiKey baseInterfaceMember) => ForParameterized(FeatureDefinition.DerivesFromUsage, baseInterfaceMember.Guid, baseInterfaceMember.DocumentationId);
+    public static FeatureUsage ForDerivesFrom(ApiKey baseInterfaceMember) => ForParameterized(FeatureDefinition.DerivesFromType, baseInterfaceMember.Guid, baseInterfaceMember.DocumentationId);
 
     public static FeatureUsage ForDerivesFrom(string documentationId) => ForDerivesFrom(new ApiKey(documentationId));
 
-    public static FeatureUsage ForFieldRead(ApiKey field) => ForParameterized(FeatureDefinition.FieldRead, field.Guid, field.DocumentationId);
+    public static FeatureUsage ForFieldRead(ApiKey field) => ForParameterized(FeatureDefinition.ReadsField, field.Guid, field.DocumentationId);
 
     public static FeatureUsage ForFieldRead(string documentationId) => ForFieldRead(new ApiKey(documentationId));
 
-    public static FeatureUsage ForFieldWrite(ApiKey field) => ForParameterized(FeatureDefinition.FieldWrite, field.Guid, field.DocumentationId);
+    public static FeatureUsage ForFieldWrite(ApiKey field) => ForParameterized(FeatureDefinition.WritesField, field.Guid, field.DocumentationId);
 
     public static FeatureUsage ForFieldWrite(string documentationId) => ForFieldWrite(new ApiKey(documentationId));
 
@@ -102,11 +102,11 @@ public readonly struct FeatureUsage : IEquatable<FeatureUsage>
 
     public static FeatureUsage ForTargetFramework(string framework) => ForTargetFramework(NuGetFramework.Parse(framework));
 
-    public static FeatureUsage ForExceptionThrow(ApiKey field) => ForParameterized(FeatureDefinition.ExceptionThrow, field.Guid, field.DocumentationId);
+    public static FeatureUsage ForExceptionThrow(ApiKey field) => ForParameterized(FeatureDefinition.ThrowsException, field.Guid, field.DocumentationId);
 
     public static FeatureUsage ForExceptionThrow(string documentationId) => ForExceptionThrow(new ApiKey(documentationId));
 
-    public static FeatureUsage ForExceptionCatch(ApiKey field) => ForParameterized(FeatureDefinition.ExceptionCatch, field.Guid, field.DocumentationId);
+    public static FeatureUsage ForExceptionCatch(ApiKey field) => ForParameterized(FeatureDefinition.CatchesException, field.Guid, field.DocumentationId);
 
     public static FeatureUsage ForExceptionCatch(string documentationId) => ForExceptionCatch(new ApiKey(documentationId));
 }

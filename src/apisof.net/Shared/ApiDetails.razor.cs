@@ -127,13 +127,13 @@ public partial class ApiDetails
             // Let's only split usage into get/set when both are present.
             if (getter is not null && setter is not null)
             {
-                var getterFeatureId = FeatureDefinition.ApiUsage.GetFeatureId(getter.Value.Guid);
+                var getterFeatureId = FeatureDefinition.ReferencesApi.GetFeatureId(getter.Value.Guid);
                 foreach (var (usageSource, percentage) in usageData.GetUsage(getterFeatureId))
-                    usages.Add((usageSource, SyntheticFeatureDefinition.PropertyGet, percentage));
+                    usages.Add((usageSource, FeatureDefinition.GetProperty, percentage));
 
-                var setterFeatureId = FeatureDefinition.ApiUsage.GetFeatureId(setter.Value.Guid);
+                var setterFeatureId = FeatureDefinition.ReferencesApi.GetFeatureId(setter.Value.Guid);
                 foreach (var (usageSource, percentage) in usageData.GetUsage(setterFeatureId))
-                    usages.Add((usageSource, SyntheticFeatureDefinition.PropertySet, percentage));
+                    usages.Add((usageSource, FeatureDefinition.SetProperty, percentage));
             }
         }
 
@@ -144,16 +144,16 @@ public partial class ApiDetails
 
             if (adder is not null)
             {
-                var adderFeatureId = FeatureDefinition.ApiUsage.GetFeatureId(adder.Value.Guid);
+                var adderFeatureId = FeatureDefinition.ReferencesApi.GetFeatureId(adder.Value.Guid);
                 foreach (var (usageSource, percentage) in usageData.GetUsage(adderFeatureId))
-                    usages.Add((usageSource, SyntheticFeatureDefinition.EventAdd, percentage));
+                    usages.Add((usageSource, FeatureDefinition.AddEvent, percentage));
             }
 
             if (remover is not null)
             {
-                var removerFeatureId = FeatureDefinition.ApiUsage.GetFeatureId(remover.Value.Guid);
+                var removerFeatureId = FeatureDefinition.ReferencesApi.GetFeatureId(remover.Value.Guid);
                 foreach (var (usageSource, percentage) in usageData.GetUsage(removerFeatureId))
-                    usages.Add((usageSource, SyntheticFeatureDefinition.EventRemove, percentage));
+                    usages.Add((usageSource, FeatureDefinition.RemoveEvent, percentage));
             }
         }
 
@@ -284,39 +284,6 @@ public partial class ApiDetails
                 ? Link.For(ExtensionMethod.Value, selected)
                 : Link.For(Api, selected);
             NavigationManager.NavigateTo(link);
-        }
-    }
-
-    private static class SyntheticFeatureDefinition
-    {
-        public static FeatureDefinition PropertyGet { get; } = new PropertyGetFeatureDefinition();
-        public static FeatureDefinition PropertySet { get; } = new PropertySetFeatureDefinition();
-
-        public static FeatureDefinition EventAdd { get; } = new EventAddFeatureDefinition();
-        public static FeatureDefinition EventRemove { get; } = new EventRemoveFeatureDefinition();
-
-        private sealed class PropertyGetFeatureDefinition : FeatureDefinition
-        {
-            public override string Name => "Get property";
-            public override string Description => "Percentage of applications/packages that read this property";
-        }
-
-        private sealed class PropertySetFeatureDefinition : FeatureDefinition
-        {
-            public override string Name => "Set property";
-            public override string Description => "Percentage of applications/packages that write this property";
-        }
-
-        private sealed class EventAddFeatureDefinition : FeatureDefinition
-        {
-            public override string Name => "Subscribe to this event";
-            public override string Description => "Percentage of applications/packages that subscribe to this event";
-        }
-
-        private sealed class EventRemoveFeatureDefinition : FeatureDefinition
-        {
-            public override string Name => "Unsubscribe from this event";
-            public override string Description => "Percentage of applications/packages that unsubscribe to this event";
         }
     }
 }
