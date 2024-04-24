@@ -231,7 +231,7 @@ public abstract class FeatureDefinition
             return FeatureId.Create(DerivesFromFeature, api);
         }
 
-        public override string Name => "Field write";
+        public override string Name => "Write field";
 
         public override string Description => "Writes to a field";
     }
