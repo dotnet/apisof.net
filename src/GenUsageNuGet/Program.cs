@@ -311,6 +311,13 @@ internal sealed class Program
 
         Console.WriteLine($"Finished crawling. Took {stopwatch.Elapsed}");
 
+        Console.WriteLine("Deleting unused features...");
+        
+        stopwatch.Restart();
+        var unusedFeatures = await usageDatabase.DeleteUnusedFeaturesAsync();
+
+        Console.WriteLine($"Finished deleting unused features. Delete {unusedFeatures:N0} features. Took {stopwatch.Elapsed}");
+        
         Console.WriteLine($"Vacuuming database...");
 
         stopwatch.Restart();

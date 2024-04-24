@@ -225,6 +225,24 @@ public sealed class UsageDatabase : IDisposable
         }
     }
 
+    public async Task<int> DeleteUnusedFeaturesAsync()
+    {
+        return await _connection.ExecuteAsync(
+            """
+            WITH UsedFeatures AS (
+                SELECT	DISTINCT
+                    FeatureId
+                FROM	Usages u
+            )
+            DELETE	FROM Features
+            WHERE FeatureId NOT IN (
+                SELECT	u.FeatureId
+                FROM	UsedFeatures u
+            )
+            """
+        );
+    }
+    
     public async ValueTask AddReferenceUnitAsync(string identifier, int collectorVersion = 0)
     {
         ThrowIfNullOrEmpty(identifier);

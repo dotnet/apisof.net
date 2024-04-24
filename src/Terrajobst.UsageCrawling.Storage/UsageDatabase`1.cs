@@ -59,6 +59,12 @@ public abstract class UsageDatabase<TReferenceUnit> : IDisposable
         await _usageDatabase.DeleteFeaturesAsync(features);
     }
 
+    public async Task<int> DeleteUnusedFeaturesAsync()
+    {
+        return await _usageDatabase.DeleteUnusedFeaturesAsync();
+    }
+
+
     public ValueTask AddReferenceUnitAsync(TReferenceUnit referenceUnit, int collectorVersion = 0)
     {
         ThrowIfNull(referenceUnit);
