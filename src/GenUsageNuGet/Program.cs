@@ -278,6 +278,8 @@ internal sealed class Program
         var numberOfWorkers = Environment.ProcessorCount;
         Console.WriteLine($"Crawling using {numberOfWorkers} workers.");
 
+        Console.WriteLine("::group::Crawling");
+
         var crawlingTimeout = TimeSpan.FromHours(5);
         using var crawlingCancellationTokenSource = new CancellationTokenSource(crawlingTimeout);
         var crawlingCancellationToken = crawlingCancellationTokenSource.Token;
@@ -295,6 +297,8 @@ internal sealed class Program
         var outputWorker = Task.Run(() => OutputWorker(usageDatabase, outputQueue));
 
         await Task.WhenAll(workers);
+        
+        Console.WriteLine("::endgroup::");
 
         outputQueue.CompleteAdding();
         await outputWorker;
