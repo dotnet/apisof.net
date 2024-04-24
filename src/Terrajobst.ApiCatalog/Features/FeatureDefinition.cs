@@ -266,7 +266,7 @@ public abstract class FeatureDefinition
 
     private sealed class TargetFrameworkFeatureDefinition : ParameterizedFeatureDefinition<NuGetFramework>
     {
-        private static readonly Guid TargetFrameworkFeature = Guid.Parse("8fe6904d-e83d-499c-929a-d9dd69fd0b05");
+        private static readonly Guid TargetFrameworkFeature = Guid.Parse("3c1be14d-bddb-474a-88e1-2d3605a8be6d");
 
         public override Guid GetFeatureId(NuGetFramework framework)
         {
