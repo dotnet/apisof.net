@@ -1,6 +1,7 @@
 ﻿using ApisOfDotNet.Services;
 using ApisOfDotNet.Shared;
 using Microsoft.AspNetCore.Components;
+using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Pages;
 
@@ -30,8 +31,8 @@ public partial class CatalogRoot
         {
             var left = query.Diff.Value.Left;
             var right = query.Diff.Value.Right;
-            var excludeUnchanged = query.ExcludeUnchanged is not null;
-            BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(left, right, excludeUnchanged, framework);
+            var diffOptions = query.DiffOptions?.DiffOptions;
+            BrowsingContext = ApiBrowsingContext.ForFrameworkDiff(left, right, diffOptions, framework);
         }
     }
 }

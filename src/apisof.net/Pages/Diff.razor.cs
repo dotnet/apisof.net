@@ -1,6 +1,7 @@
 ﻿using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Components;
 using NuGet.Frameworks;
+using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Pages;
 
@@ -19,8 +20,35 @@ public partial class Diff
 
     public NuGetFramework? Right { get; set; }
 
-    public bool ExcludeUnchanged { get; set; }
 
+    public bool IncludeAdded { get; set; }
+    
+    public bool IncludeRemoved { get; set; }
+    
+    public bool IncludeChanged { get; set; }
+
+    public bool IncludeUnchanged { get; set; }
+
+    public DiffOptions DiffOptions
+    {
+        get
+        {
+            var result = DiffOptions.None;
+            if (IncludeAdded) result |= DiffOptions.IncludeAdded;
+            if (IncludeRemoved) result |= DiffOptions.IncludeRemoved;
+            if (IncludeChanged) result |= DiffOptions.IncludeChanged;
+            if (IncludeUnchanged) result |= DiffOptions.IncludeUnchanged;
+            return result;
+        }
+        set
+        {
+            IncludeAdded = value.HasFlag(DiffOptions.IncludeAdded);
+            IncludeRemoved = value.HasFlag(DiffOptions.IncludeRemoved);
+            IncludeChanged = value.HasFlag(DiffOptions.IncludeChanged);
+            IncludeUnchanged = value.HasFlag(DiffOptions.IncludeUnchanged);
+        }
+    }
+    
     public bool HasDiff { get; set; }
 
     protected override void OnInitialized()
@@ -32,7 +60,7 @@ public partial class Diff
             HasDiff = true;
             Left = query.Diff.Value.Left;
             Right = query.Diff.Value.Right;
-            ExcludeUnchanged = query.ExcludeUnchanged is not null;
+            DiffOptions = query.DiffOptions?.DiffOptions ?? DiffOptions.Default;
         }
         else
         {
@@ -49,6 +77,7 @@ public partial class Diff
             {
                 Left = latestTwoCoreVersions[1];
                 Right = latestTwoCoreVersions[0];
+                DiffOptions = DiffOptions.Default;
             }
         }
     }
@@ -63,7 +92,7 @@ public partial class Diff
         if (Left is null || Right is null)
             return;
 
-        var link = Link.ForCatalog(Left, Right, ExcludeUnchanged);
+        var link = Link.ForCatalog(Left, Right, DiffOptions);
         NavigationManager.NavigateTo(link);
     }
 

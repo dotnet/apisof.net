@@ -17,9 +17,9 @@ public abstract class ApiBrowsingContext
         return new FrameworkBrowsingContext(selected);
     }
 
-    public static FrameworkDiffBrowsingContext ForFrameworkDiff(NuGetFramework left, NuGetFramework right, bool excludeUnchanged, NuGetFramework? selected)
+    public static FrameworkDiffBrowsingContext ForFrameworkDiff(NuGetFramework left, NuGetFramework right, DiffOptions? options, NuGetFramework? selected)
     {
-        return new FrameworkDiffBrowsingContext(left, right, excludeUnchanged, selected);
+        return new FrameworkDiffBrowsingContext(left, right, options ?? DiffOptions.Default, selected);
     }
 
     public virtual NuGetFramework? SelectedFramework => null;
@@ -73,17 +73,17 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
 {
     private readonly NuGetFramework _left;
     private readonly NuGetFramework _right;
-    private readonly bool _excludeUnchanged;
+    private readonly DiffOptions _diffOptions;
     private readonly NuGetFramework? _selectedFramework;
 
     public FrameworkDiffBrowsingContext(NuGetFramework left,
                                         NuGetFramework right,
-                                        bool excludeUnchanged,
+                                        DiffOptions diffOptions,
                                         NuGetFramework? selectedFramework)
     {
         _left = left;
         _right = right;
-        _excludeUnchanged = excludeUnchanged;
+        _diffOptions = diffOptions;
         _selectedFramework = selectedFramework;
     }
 
@@ -102,16 +102,15 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
         get { return _right; }
     }
 
-    public bool ExcludeUnchanged
-    {
-        get { return _excludeUnchanged; }
-    }
-
     public override ApiBrowsingData? GetData(ApiModel api)
     {
         var diffKind = api.GetDiffKind(_left, _right);
-        if (diffKind is null)
+        if (diffKind is null ||
+            diffKind == DiffKind.Added && !_diffOptions.HasFlag(DiffOptions.IncludeAdded) ||
+            diffKind == DiffKind.Removed && !_diffOptions.HasFlag(DiffOptions.IncludeRemoved))
+        {
             return new ApiBrowsingData { Excluded = true };
+        }
 
         if (diffKind == DiffKind.Added)
             return new ApiBrowsingData { CssClasses = "diff-added" };
@@ -131,12 +130,21 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
         var modified = 0;
         api.GetDiffCount(_left, _right, ref added, ref removed, ref modified);
 
-        var anyChanges = added + removed + modified > 0;
+        if (!_diffOptions.HasFlag(DiffOptions.IncludeAdded))
+            added = 0;
 
-        if (diffKind == DiffKind.None && !anyChanges && _excludeUnchanged)
+        if (!_diffOptions.HasFlag(DiffOptions.IncludeRemoved))
+            removed = 0;
+
+        if (!_diffOptions.HasFlag(DiffOptions.IncludeChanged))
+            modified = 0;
+
+        var hasNestedChanges = added + removed + modified > 0;
+
+        if (!diffKind.Value.IsIncluded(_diffOptions) && !hasNestedChanges)
             return new ApiBrowsingData { Excluded = true };
 
-        if (anyChanges)
+        if (hasNestedChanges)
         {
             var sb = new StringBuilder();
             sb.Append("""<span class="diff-details">""");

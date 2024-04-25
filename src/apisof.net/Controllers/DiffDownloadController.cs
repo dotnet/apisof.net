@@ -22,7 +22,7 @@ public sealed class DiffDownloadController : Controller
     }
 
     [HttpGet]
-    public ActionResult Get([FromQuery] string diff, [FromQuery(Name = "no-unchanged")] bool excludeUnchanged = false)
+    public ActionResult Get([FromQuery] string diff, [FromQuery(Name = "diff-options")] string? diffOptionsText = null)
     {
         var catalog = _catalogService.Catalog;
 
@@ -30,13 +30,16 @@ public sealed class DiffDownloadController : Controller
         if (diffParameter is null)
             return new BadRequestResult();
 
+        var diffOptionsParameter = DiffOptionsParameter.Parse(diffOptionsText);
+        var diffOptions = diffOptionsParameter?.DiffOptions ?? DiffOptions.Default;
+
         var left = diffParameter.Value.Left;
         var right = diffParameter.Value.Right;
         var name = $"{left.GetShortFolderName()}-vs-{right.GetShortFolderName()}.diff";
 
         return new FileCallbackResult(new MediaTypeHeaderValue("plain/text"), async (outputStream, _) =>
         {
-            var diffWriter = new DiffWriter(catalog, left, right, excludeUnchanged);
+            var diffWriter = new DiffWriter(catalog, left, right, diffOptions);
             await diffWriter.WriteToAsync(outputStream);
         })
         {

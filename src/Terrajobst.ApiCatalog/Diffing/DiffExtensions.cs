@@ -69,17 +69,17 @@ public static class DiffExtensions
 
     public static bool ContainsDifferences(this ApiModel api,
                                            NuGetFramework left,
-                                           NuGetFramework right)
+                                           NuGetFramework right,
+                                           DiffOptions diffOptions)
     {
         ThrowIfDefault(api);
         ThrowIfNull(left);
         ThrowIfNull(right);
 
         var diffKind = api.GetDiffKind(left, right);
-        var hasDifference = diffKind is not null &&
-                            diffKind.Value != DiffKind.None;
+        var hasRelevantDifference = diffKind?.IsIncluded(diffOptions) == true;
 
-        if (hasDifference)
+        if (hasRelevantDifference)
             return true;
 
         if (CanHaveChildren(api))
@@ -89,12 +89,20 @@ public static class DiffExtensions
                 if (child.Kind.IsAccessor())
                     continue;
 
-                if (child.ContainsDifferences(left, right))
+                if (child.ContainsDifferences(left, right, diffOptions))
                     return true;
             }
         }
 
         return false;
+    }
+
+    public static bool IsIncluded(this DiffKind kind, DiffOptions options)
+    {
+        return kind == DiffKind.None && options.HasFlag(DiffOptions.IncludeUnchanged) ||
+               kind == DiffKind.Added && options.HasFlag(DiffOptions.IncludeAdded) ||
+               kind == DiffKind.Removed && options.HasFlag(DiffOptions.IncludeRemoved) ||
+               kind == DiffKind.Changed && options.HasFlag(DiffOptions.IncludeChanged);
     }
 
     public static bool CanHaveChildren(this ApiModel api)

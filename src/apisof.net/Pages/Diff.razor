@@ -17,9 +17,27 @@
             <FrameworkPicker @bind-Selected="@Right"/>
         </div>
         <div class="form-check">
-            <InputCheckbox class="form-check-input" @bind-Value="ExcludeUnchanged" id="excludeUnchangedCheck" />
-            <label class="form-check-label" for="excludeUnchangedCheck">
-                Exclude Unchanged
+            <InputCheckbox class="form-check-input" @bind-Value="IncludeAdded" id="includeAddedCheck" />
+            <label class="form-check-label" for="includeAddedCheck">
+                Include Added
+            </label>
+        </div>
+        <div class="form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="IncludeRemoved" id="includeRemovedCheck" />
+            <label class="form-check-label" for="includeRemovedCheck">
+                Include Removed
+            </label>
+        </div>
+        <div class="form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="IncludeChanged" id="includeChangedCheck" />
+            <label class="form-check-label" for="includeChangedCheck">
+                Include Changed
+            </label>
+        </div>
+        <div class="form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="IncludeUnchanged" id="includeUnchangedCheck" />
+            <label class="form-check-label" for="includeUnchangedCheck">
+                Include Unchanged
             </label>
         </div>
         <div class="my-3">
@@ -35,7 +53,7 @@
 
             @if (Left is not null && Right is not null)
             {
-                <a class="ml-3 btn btn-secondary" href="@Link.ForDiffDownload(Left, Right, ExcludeUnchanged)">Download</a>
+                <a class="ml-3 btn btn-secondary" href="@Link.ForDiffDownload(Left, Right, DiffOptions)">Download</a>
             }
         </div>
         <div class="my-4 alert alert-secondary">

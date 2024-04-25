@@ -5,7 +5,7 @@ using Terrajobst.ApiCatalog;
 
 namespace ApisOfDotNet.Services;
 
-public readonly record struct BrowsingQuery(DiffParameter? Diff, ExcludeUnchangedParameter? ExcludeUnchanged, FxParameter? Fx)
+public readonly record struct BrowsingQuery(DiffParameter? Diff, DiffOptionsParameter? DiffOptions, FxParameter? Fx)
 {
     public static BrowsingQuery Get(ApiCatalogModel catalog, NavigationManager navigationManager)
     {
@@ -13,16 +13,16 @@ public readonly record struct BrowsingQuery(DiffParameter? Diff, ExcludeUnchange
         ThrowIfNull(navigationManager);
 
         var diff = DiffParameter.Get(catalog, navigationManager);
-        var excludeUnchanged = ExcludeUnchangedParameter.Get(navigationManager);
+        var diffOptions = DiffOptionsParameter.Get(navigationManager);
         var fx = FxParameter.Get(catalog, navigationManager);
-        return new BrowsingQuery(diff, excludeUnchanged, fx);
+        return new BrowsingQuery(diff, diffOptions, fx);
     }
 
     public override string ToString()
     {
         var builder = new QueryBuilder();
         builder.Add(Diff);
-        builder.Add(ExcludeUnchanged);
+        builder.Add(DiffOptions);
         builder.Add(Fx);
         return builder.ToString();
     }
@@ -119,25 +119,62 @@ public readonly record struct DiffParameter(NuGetFramework Left, NuGetFramework 
     }
 }
 
-public readonly record struct ExcludeUnchangedParameter
+public readonly record struct DiffOptionsParameter(DiffOptions DiffOptions)
 {
-    public static ExcludeUnchangedParameter? Get(NavigationManager navigationManager)
+    public static DiffOptionsParameter? Get(NavigationManager navigationManager)
     {
         ThrowIfNull(navigationManager);
 
-        var valueText = navigationManager.GetQueryParameter("no-unchanged");
-        var value = bool.TryParse(valueText, out var b) && b;
-        return Get(value);
+        var valueText = navigationManager.GetQueryParameter("diff-options");
+        return Parse(valueText);
     }
 
-    public static ExcludeUnchangedParameter? Get(bool value)
+    public static DiffOptionsParameter? Get(DiffOptions? diffOptions)
     {
-        return value ? new ExcludeUnchangedParameter() : null;
+        if (diffOptions is null or DiffOptions.None or DiffOptions.Default)
+            return null;
+
+        return new DiffOptionsParameter(diffOptions.Value);
+    }
+    
+    public static DiffOptionsParameter? Parse(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return null;
+
+        var r = DiffOptions.None;
+
+        foreach (var c in text)
+        {
+            switch (c)
+            {
+                case 'a':
+                    r |= DiffOptions.IncludeAdded;
+                    break;
+                case 'r':
+                    r |= DiffOptions.IncludeRemoved;
+                    break;
+                case 'c':
+                    r |= DiffOptions.IncludeChanged;
+                    break;
+                case 'u':
+                    r |= DiffOptions.IncludeUnchanged;
+                    break;
+                default:
+                    return null;
+            }
+        }
+
+        return new DiffOptionsParameter(r);
     }
 
     public override string ToString()
     {
-        return "no-unchanged=true";
+        var a = DiffOptions.HasFlag(DiffOptions.IncludeAdded) ? "a" : "";
+        var r = DiffOptions.HasFlag(DiffOptions.IncludeRemoved) ? "r" : "";
+        var c = DiffOptions.HasFlag(DiffOptions.IncludeChanged) ? "c" : "";
+        var u = DiffOptions.HasFlag(DiffOptions.IncludeUnchanged) ? "u" : "";
+        return DiffOptions == DiffOptions.None ? "" : $"diff-options={a}{r}{c}{u}";
     }
 }
 
