@@ -26,7 +26,7 @@ internal sealed class ApiAvailabilityContext
         foreach (var fx in catalog.Frameworks)
         {
             var nugetFramework = _frameworkById[fx.Id];
-            if (!nugetFramework.IsRelevant())
+            if (!nugetFramework.IsRelevantForCatalog())
                 continue;
 
             nugetFrameworks.Add(fx.Id, nugetFramework);

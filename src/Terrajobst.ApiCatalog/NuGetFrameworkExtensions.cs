@@ -4,7 +4,7 @@ namespace Terrajobst.ApiCatalog;
 
 public static class NuGetFrameworkExtensions
 {
-    public static bool IsRelevantForApisOfDotnet(this NuGetFramework framework)
+    public static bool IsRelevantForCatalog(this NuGetFramework framework)
     {
         ThrowIfNull(framework);
 
@@ -77,22 +77,5 @@ public static class NuGetFrameworkExtensions
             default:
                 return framework.Framework;
         }
-    }
-
-    public static bool IsRelevant(this NuGetFramework framework)
-    {
-        ThrowIfNull(framework);
-
-        if (framework.IsPCL)
-            return false;
-
-        if (string.Equals(framework.Framework, "monotouch", StringComparison.OrdinalIgnoreCase))
-            return false;
-
-        if (string.Equals(framework.Framework, "Xamarin.iOS", StringComparison.OrdinalIgnoreCase) &&
-            framework.Version.Major == 1)
-            return false;
-
-        return true;
     }
 }

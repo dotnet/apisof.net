@@ -42,7 +42,7 @@ public sealed class TargetFrameworkHierarchy
 
         foreach (var framework in catalog.Frameworks)
         {
-            if (!framework.NuGetFramework.IsRelevant())
+            if (!framework.NuGetFramework.IsRelevantForCatalog())
                 continue;
 
             Node? child = null;
