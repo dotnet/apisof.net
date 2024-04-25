@@ -53,6 +53,11 @@ public partial class Diff
         }
     }
 
+    private void Swap()
+    {
+        (Left, Right) = (Right, Left);
+    }
+
     private void ApplyDiff()
     {
         if (Left is null || Right is null)
