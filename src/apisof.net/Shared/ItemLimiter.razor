@@ -1,0 +1,13 @@
+@typeparam TItem;
+
+@for (var i = 0; i < Items.Length; i++)
+{
+    if (i == Limit && !_showMore)
+    {
+        var remaining = (Items.Length - Limit).ToString("N0");
+        <button class="btn btn-outline-secondary mt-3" @onclick="() => _showMore = true">Show @remaining remaining items</button>
+        break;
+    }
+
+    @ChildContent(Items[i])
+}

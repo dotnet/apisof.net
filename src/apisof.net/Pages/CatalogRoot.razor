@@ -23,20 +23,23 @@
             <Glyph Kind="GlyphKind.Database" /> <span class="font-weight-bold">Catalog</span>
 
             <ul class="list-unstyled pl-4">
-                @foreach (var child in CatalogService.Catalog.RootApis.Order())
-                {
-                    var childData = BrowsingContext.GetData(child);
-                    var childIsExcluded = childData?.Excluded ?? false;
-                    var childCssClasses = childData?.CssClasses ?? string.Empty;
-                    var childMarkup = childData?.AdditionalMarkup;
-
-                    if (childIsExcluded)
-                        continue;
-
-                    <li>
-                        <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
-                    </li>
+                @{
+                    var items = CatalogService.Catalog.RootApis
+                        .Order()
+                        .Select(a => (Api: a, BrowsingData: BrowsingContext.GetData(a)))
+                        .Where(a => !a.BrowsingData?.Excluded ?? true);
                 }
+                <ItemLimiter ItemSource="items" Limit="650">
+                    @{
+                        var child = context.Api;
+                        var childData = context.BrowsingData;
+                        var childCssClasses = childData?.CssClasses ?? string.Empty;
+                        var childMarkup = childData?.AdditionalMarkup;
+                        <li>
+                            <Glyph Kind="@child.Kind.GetGlyph()"/> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
+                        </li>
+                    }
+                </ItemLimiter>
             </ul>
         </li>
     </ul>
