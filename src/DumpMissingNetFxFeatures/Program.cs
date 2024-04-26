@@ -1,6 +1,4 @@
-﻿using NuGet.Frameworks;
-
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 using Terrajobst.ApiCatalog;
 
