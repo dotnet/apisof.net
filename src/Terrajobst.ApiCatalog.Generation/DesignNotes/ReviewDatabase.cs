@@ -19,7 +19,7 @@ public sealed class ReviewDatabase
         ThrowIfNullOrEmpty(path);
 
         var repositoryPath = Repository.Discover(path);
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(repositoryPath))
             throw new ArgumentException("The path needs to be a Git repository.", nameof(path));
 
         var repository = new Repository(repositoryPath);

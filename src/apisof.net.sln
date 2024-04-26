@@ -41,6 +41,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.UsageCrawling.St
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.UsageCrawling.Storage", "Terrajobst.UsageCrawling.Storage\Terrajobst.UsageCrawling.Storage.csproj", "{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenUsage", "GenUsage\GenUsage.csproj", "{1DBE6D70-A8D3-48CE-B475-B2FB4A0B726D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenDesignNotes", "GenDesignNotes\GenDesignNotes.csproj", "{07BCC162-8864-4B3F-B0F2-0626C757C1D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +127,14 @@ Global
 		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81851503-6DDC-4D2C-BF3F-F63ACB1974F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DBE6D70-A8D3-48CE-B475-B2FB4A0B726D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DBE6D70-A8D3-48CE-B475-B2FB4A0B726D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DBE6D70-A8D3-48CE-B475-B2FB4A0B726D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DBE6D70-A8D3-48CE-B475-B2FB4A0B726D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

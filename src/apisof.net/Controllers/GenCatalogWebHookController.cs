@@ -25,7 +25,7 @@ public sealed class GenCatalogWebHookController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post()
+    public async Task<IActionResult> Post(string subject)
     {
         string secret;
         using (var reader = new StreamReader(Request.Body))
@@ -37,8 +37,7 @@ public sealed class GenCatalogWebHookController : Controller
         if (!matches)
             return Unauthorized();
 
-        await _catalogService.InvalidateAsync();
-
+        _catalogService.HandleBlobChange(subject);
         return Ok();
     }
 }

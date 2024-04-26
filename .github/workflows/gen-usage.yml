@@ -1,0 +1,69 @@
+name: Generate Usage
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '21 */6 * * *' # At :21 in every 6th hour
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+
+  gen-usage-nuget:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # We need the full history in order to use Git versioning
+    - name: Get .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.*'
+    - name: Generate NuGet usage
+      env:
+        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      run: |
+        cd ./src/GenUsageNuGet
+        dotnet run -- crawl
+
+  gen-usage-planner:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # We need the full history in order to use Git versioning
+    - name: Get .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.*'
+    - name: Generate Planner usage
+      env:
+        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+      run: |
+        cd ./src/GenUsagePlanner
+        dotnet run
+
+  gen-usage:
+    if: ${{ always() }}
+    needs: [gen-usage-nuget, gen-usage-planner]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # We need the full history in order to use Git versioning
+    - name: Get .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.*'
+    - name: Generate usage
+      env:
+        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        GenCatalogWebHookUrl: ${{ secrets.GEN_USAGE_WEB_HOOK_URL }}
+        GenCatalogWebHookSecret: ${{ secrets.GEN_CATALOG_WEB_HOOK_SECRET }}
+      run: |
+        cd ./src/GenUsage
+        dotnet run -- .

@@ -1,9 +1,9 @@
-name: Generate Usage NuGet
+name: Generate Design Notes
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '21 */6 * * *' # At :21 in every 6th hour
+    - cron: '5 21 * * 2,4' # At 2:05 PM PT Tuesday and Thursday
 
 env:
   DOTNET_NOLOGO: true
@@ -23,9 +23,11 @@ jobs:
       with:
         dotnet-version: '8.0.*'
 
-    - name: Generate usage
+    - name: Generate design notes
       env:
         AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        GenCatalogWebHookUrl: ${{ secrets.GEN_DESIGN_NOTES_WEB_HOOK_URL }}
+        GenCatalogWebHookSecret: ${{ secrets.GEN_CATALOG_WEB_HOOK_SECRET }}
       run: |
-        cd ./src/GenUsageNuGet
-        dotnet run -- crawl
+        cd ./src/GenDesignNotes
+        dotnet run -- .
