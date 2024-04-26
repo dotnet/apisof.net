@@ -311,12 +311,12 @@ internal sealed class Program
 
         Console.WriteLine($"Finished crawling. Took {stopwatch.Elapsed}");
 
-        Console.WriteLine("Deleting unused features...");
+        Console.WriteLine("Deleting features without usages...");
         
         stopwatch.Restart();
-        var unusedFeatures = await usageDatabase.DeleteUnusedFeaturesAsync();
+        var unusedFeatures = await usageDatabase.DeleteFeaturesWithoutUsagesAsync();
 
-        Console.WriteLine($"Finished deleting unused features. Delete {unusedFeatures:N0} features. Took {stopwatch.Elapsed}");
+        Console.WriteLine($"Finished deleting features without usages. Deleted {unusedFeatures:N0} features. Took {stopwatch.Elapsed}");
         
         Console.WriteLine($"Vacuuming database...");
 
@@ -336,13 +336,20 @@ internal sealed class Program
 
         await usageDatabase.OpenAsync();
 
+        Console.WriteLine("Deleting reference units without usages...");
+        
+        stopwatch.Restart();
+        var referenceUnitsWithoutUsages = await usageDatabase.DeleteFeaturesWithoutUsagesAsync();
+
+        Console.WriteLine($"Finished deleting reference units without usages. Deleted {referenceUnitsWithoutUsages:N0} reference units. Took {stopwatch.Elapsed}");
+        
         Console.WriteLine($"Deleting irrelevant features...");
 
         stopwatch.Restart();
-        await usageDatabase.DeleteIrrelevantFeaturesAsync(apiCatalog);
+        var irrelevantFeatures = await usageDatabase.DeleteIrrelevantFeaturesAsync(apiCatalog);
 
-        Console.WriteLine($"Finished deleting irrelevant features. Took {stopwatch.Elapsed}");
-
+        Console.WriteLine($"Finished deleting irrelevant features. Deleted {irrelevantFeatures:N0} features. Took {stopwatch.Elapsed}");
+        
         Console.WriteLine($"Inserting parent features...");
 
         stopwatch.Restart();

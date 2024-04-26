@@ -54,16 +54,20 @@ public abstract class UsageDatabase<TReferenceUnit> : IDisposable
         await _usageDatabase.DeleteReferenceUnitsAsync(referenceUnitIdentifiers);
     }
 
+    public Task<int> DeleteReferenceUnitsWithoutUsages()
+    {
+        return _usageDatabase.DeleteReferenceUnitsWithoutUsages();
+    }
+
     public async Task DeleteFeaturesAsync(IEnumerable<Guid> features)
     {
         await _usageDatabase.DeleteFeaturesAsync(features);
     }
 
-    public async Task<int> DeleteUnusedFeaturesAsync()
+    public async Task<int> DeleteFeaturesWithoutUsagesAsync()
     {
-        return await _usageDatabase.DeleteUnusedFeaturesAsync();
+        return await _usageDatabase.DeleteFeaturesWithoutUsagesAsync();
     }
-
 
     public ValueTask AddReferenceUnitAsync(TReferenceUnit referenceUnit, int collectorVersion = 0)
     {

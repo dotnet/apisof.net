@@ -5,7 +5,7 @@ namespace Terrajobst.UsageCrawling.Storage;
 
 public static class UsageDatabaseExtensions
 {
-    public static async Task DeleteIrrelevantFeaturesAsync(this UsageDatabase usageDatabase, ApiCatalogModel catalog)
+    public static async Task<int> DeleteIrrelevantFeaturesAsync(this UsageDatabase usageDatabase, ApiCatalogModel catalog)
     {
         ThrowIfNull(usageDatabase);
         ThrowIfNull(catalog);
@@ -14,6 +14,7 @@ public static class UsageDatabaseExtensions
         var storedFeatures = await usageDatabase.GetFeaturesAsync();
         var irrelevantFeatures = storedFeatures.Where(f => !catalogFeatures.ContainsKey(f.Feature)).Select(f => f.Feature).ToArray();
         await usageDatabase.DeleteFeaturesAsync(irrelevantFeatures);
+        return irrelevantFeatures.Length;
     }
 
     public static async Task InsertParentsFeaturesAsync(this UsageDatabase usageDatabase, ApiCatalogModel catalog)
@@ -36,7 +37,7 @@ public static class UsageDatabaseExtensions
         }
     }
 
-    public static Task DeleteIrrelevantFeaturesAsync<T>(this UsageDatabase<T> usageDatabase, ApiCatalogModel catalog)
+    public static Task<int> DeleteIrrelevantFeaturesAsync<T>(this UsageDatabase<T> usageDatabase, ApiCatalogModel catalog)
     {
         ThrowIfNull(usageDatabase);
         ThrowIfNull(catalog);

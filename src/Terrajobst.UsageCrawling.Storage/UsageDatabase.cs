@@ -211,6 +211,20 @@ public sealed class UsageDatabase : IDisposable
         }
     }
 
+    public async Task<int> DeleteReferenceUnitsWithoutUsages()
+    {
+        return await _connection.ExecuteAsync(
+            """
+            DELETE FROM ReferenceUnits
+            WHERE NOT EXISTS (
+                SELECT  *
+                FROM    Usages u
+                WHERE   u.ReferenceUnitId = ReferenceUnits.ReferenceUnitId
+            )
+            """
+        );
+    }
+
     public async Task DeleteFeaturesAsync(IEnumerable<Guid> features)
     {
         ThrowIfNull(features);
@@ -225,7 +239,7 @@ public sealed class UsageDatabase : IDisposable
         }
     }
 
-    public async Task<int> DeleteUnusedFeaturesAsync()
+    public async Task<int> DeleteFeaturesWithoutUsagesAsync()
     {
         return await _connection.ExecuteAsync(
             """
