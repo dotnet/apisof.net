@@ -1,4 +1,7 @@
-﻿using System.Net.Mime;
+﻿// For now, this isn't supported because we haven't setup any storage notifications.
+#if false
+
+using System.Net.Mime;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ApisOfDotNet.Services;
@@ -144,3 +147,4 @@ public class AzureStorageWebHookController : Controller
         public string ValidationResponse { get; }
     }
 }
+#endif
