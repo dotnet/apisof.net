@@ -95,9 +95,7 @@ public partial class ApiDetails
             }
         }
 
-        DesignReviews = CatalogService.DesignNoteDatabase.LinkByApiId.TryGetValue(Api.Id, out var reviewLinks)
-            ? reviewLinks
-            : ImmutableArray<DesignNote>.Empty;
+        DesignReviews = CatalogService.DesignNoteDatabase.GetDesignNotes(Api.Guid);
 
         var results = await Task.WhenAll(
             SourceResolver.ResolveAsync(Api),

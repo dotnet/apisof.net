@@ -9,8 +9,8 @@ public sealed class DesignNoteBuilder
     private readonly ReviewDatabase _reviewsDatabase;
     private readonly ApiCatalogModel _catalog;
     private readonly Dictionary<GitHubIssueId, List<DesignNote>> _designNotesByIssue = new();
-    private readonly Dictionary<int, HashSet<DesignNote>> _designNotesByApiId = new();
-    private readonly Dictionary<int, HashSet<GitHubIssueId>> _issuesByApiId = new();
+    private readonly Dictionary<Guid, HashSet<DesignNote>> _designNotesByApiGuid = new();
+    private readonly Dictionary<Guid, HashSet<GitHubIssueId>> _issuesByApiGuid = new();
 
     private DesignNoteBuilder(ReviewDatabase reviewsDatabase, ApiCatalogModel catalog)
     {
@@ -44,27 +44,27 @@ public sealed class DesignNoteBuilder
                 if (api is null)
                     continue;
 
-                if (!_issuesByApiId.TryGetValue(api.Value.Id, out var apiIssues))
+                if (!_issuesByApiGuid.TryGetValue(api.Value.Guid, out var apiIssues))
                 {
                     apiIssues = new();
-                    _issuesByApiId.Add(api.Value.Id, apiIssues);
+                    _issuesByApiGuid.Add(api.Value.Guid, apiIssues);
                 }
 
                 apiIssues.Add(issue.Id);
 
-                if (!_designNotesByApiId.TryGetValue(api.Value.Id, out var apiLinks))
+                if (!_designNotesByApiGuid.TryGetValue(api.Value.Guid, out var apiLinks))
                 {
                     apiLinks = new();
-                    _designNotesByApiId.Add(api.Value.Id, apiLinks);
+                    _designNotesByApiGuid.Add(api.Value.Guid, apiLinks);
                 }
 
                 apiLinks.Add(reviewLink);
             }
         }
 
-        foreach (var (apiId, apiLinks) in _designNotesByApiId)
+        foreach (var (apiId, apiLinks) in _designNotesByApiGuid)
         {
-            var associatedIssueIds = _issuesByApiId[apiId];
+            var associatedIssueIds = _issuesByApiGuid[apiId];
 
             foreach (var issueId in associatedIssueIds)
             {
@@ -73,7 +73,7 @@ public sealed class DesignNoteBuilder
             }
         }
 
-        var mappings = _designNotesByApiId.Select(kv => KeyValuePair.Create(kv.Key, kv.Value.ToImmutableArray())).ToFrozenDictionary();
+        var mappings = _designNotesByApiGuid.Select(kv => KeyValuePair.Create(kv.Key, kv.Value.ToImmutableArray())).ToFrozenDictionary();
         return new DesignNoteDatabase(mappings);
     }
 
