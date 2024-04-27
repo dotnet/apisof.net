@@ -231,9 +231,13 @@
                 @{
                     var inboxApiTitle = "The API is built into the target framework.";
                     var packageApiTitle = "The API requires a package to be referenced.";
+
+                    var isAvailableInAnyRelevantFrameworks = Availability.Frameworks.Any(fx => fx.Framework.IsRelevantForCatalog());
+                    var showAllFrameworks = !isAvailableInAnyRelevantFrameworks;
                 }
 
-                @foreach (var frameworkGroup in Availability.Frameworks.GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
+                @foreach (var frameworkGroup in Availability.Frameworks.Where(fx => showAllFrameworks || fx.Framework.IsRelevantForCatalog())
+                                                                       .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
                                                                        .OrderBy(g => g.Key))
                 {
                     <tr>
