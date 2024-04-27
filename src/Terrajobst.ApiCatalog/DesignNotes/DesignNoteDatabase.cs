@@ -30,7 +30,7 @@ public sealed class DesignNoteDatabase
 
     public int GetApiCount() => _designNotesByApiGuid.Keys.Length;
 
-    public int GetNoteCount() => _designNotesByApiGuid.Values.Distinct().Count();
+    public int GetNoteCount() => _designNotesByApiGuid.Values.SelectMany(n => n).Distinct().Count();
     
     public static DesignNoteDatabase Load(string path)
     {
