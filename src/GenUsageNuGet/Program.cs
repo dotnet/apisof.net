@@ -5,7 +5,6 @@ var builder = ConsoleHost.CreateApplicationBuilder();
 
 builder.AddApisOfDotNetPathProvider();
 builder.AddApisOfDotNetStore();
-builder.AddApisOfDotNetWebHook();
 builder.AddScratchFileProvider();
 builder.AddMainWithCommands();
 
