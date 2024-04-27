@@ -29,15 +29,12 @@ public class GitHubActionsLog
     public void AppendSummary(string markdown)
     {
         if (string.IsNullOrEmpty(_environment.StepSummary))
-        {
-            Console.WriteLine("Environment variable for step summary not found -- not writing anything.");
             return;
-        }
 
-        using var writer = File.AppendText(markdown);
+        using var writer = File.AppendText(_environment.StepSummary);
         writer.WriteLine(markdown);
     }
-    
+
     public readonly struct Group : IDisposable
     {
         private readonly GitHubActionsLog _log;
@@ -46,7 +43,7 @@ public class GitHubActionsLog
         {
             _log = log;
         }
-        
+
         public void Dispose()
         {
             _log.EndGroup();
