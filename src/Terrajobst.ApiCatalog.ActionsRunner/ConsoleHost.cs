@@ -31,6 +31,8 @@ public static class ConsoleHost
         builder.Configuration.AddUserSecrets(Assembly.GetEntryAssembly()!);
         builder.Services.AddHostedService<MainDispatcher>();
         builder.Services.AddSingleton<GitHubActionsEnvironment>();
+        builder.Services.AddSingleton<GitHubActionsLog>();
+        builder.Services.AddSingleton<GitHubActionsSummaryTable>();
 
         return builder;
     }

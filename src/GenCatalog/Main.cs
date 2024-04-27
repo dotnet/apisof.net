@@ -271,7 +271,7 @@ internal sealed class Main : IConsoleMain
         var job = new Job {
             Date = DateTimeOffset.UtcNow,
             Success = success,
-            DetailsUrl = _gitHubActionsEnvironment.GitHubActionsUrl()
+            DetailsUrl = _gitHubActionsEnvironment.RunUrl
         };
 
         using var jobStream = new MemoryStream();

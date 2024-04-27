@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Azure.Storage.Blobs" />
+      <PackageReference Include="Humanizer.Core" />
       <PackageReference Include="Microsoft.Extensions.Hosting" />
       <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
       <PackageReference Include="Mono.Options" />

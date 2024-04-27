@@ -10,14 +10,22 @@ internal sealed class Main : IConsoleMain
     private readonly ApisOfDotNetPathProvider _pathProvider;
     private readonly ApisOfDotNetStore _store;
     private readonly ApisOfDotNetWebHook _webHook;
+    private readonly GitHubActionsSummaryTable _summaryTable;
 
     public Main(ApisOfDotNetPathProvider pathProvider,
                 ApisOfDotNetStore store,
-                ApisOfDotNetWebHook webHook)
+                ApisOfDotNetWebHook webHook,
+                GitHubActionsSummaryTable summaryTable)
     {
+        ThrowIfNull(pathProvider);
+        ThrowIfNull(store);
+        ThrowIfNull(webHook);
+        ThrowIfNull(summaryTable);
+        
         _pathProvider = pathProvider;
         _store = store;
         _webHook = webHook;
+        _summaryTable = summaryTable;
     }
 
     public async Task RunAsync(string[] args, CancellationToken cancellationToken)
@@ -79,7 +87,7 @@ internal sealed class Main : IConsoleMain
         await _store.DownloadToAsync("usage", "usages-netfxcompatlab.tsv", netfxCompatLabPath);
     }
 
-    private static Task GenerateUsageDataAsync(string usageDataPath, string apiUsagesPath)
+    private Task GenerateUsageDataAsync(string usageDataPath, string apiUsagesPath)
     {
         if (File.Exists(usageDataPath))
         {
@@ -97,10 +105,12 @@ internal sealed class Main : IConsoleMain
             var usageSource = new FeatureUsageSource(name, date);
             var usageSourceData = ParseFile(path).ToArray();
             data.Add((usageSource, usageSourceData));
+            AddUsageSourceCountToSummary(usageSource, usageSourceData.Length);
         }
 
         var usageData = new FeatureUsageData(data);
         usageData.Save(usageDataPath);
+        AddFileSizeToSummary(usageDataPath);
 
         return Task.CompletedTask;
 
@@ -125,6 +135,18 @@ internal sealed class Main : IConsoleMain
                 }
             }
         }
+    }
+
+    private void AddUsageSourceCountToSummary(FeatureUsageSource usageSource, int usageSourceCount)
+    {
+        _summaryTable.AppendNumber(usageSource.Name, usageSourceCount);
+    }
+
+    private void AddFileSizeToSummary(string usageDataPath)
+    {
+        var fileName = Path.GetFileName(usageDataPath);
+        var fileSize = new FileInfo(usageDataPath).Length;
+        _summaryTable.AppendBytes(fileName, fileSize);
     }
 
     private async Task UploadUsageData(string usageDataPath)

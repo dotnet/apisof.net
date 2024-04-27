@@ -28,6 +28,10 @@ public sealed class DesignNoteDatabase
             : ImmutableArray<DesignNote>.Empty;
     }
 
+    public int GetApiCount() => _designNotesByApiGuid.Keys.Length;
+
+    public int GetNoteCount() => _designNotesByApiGuid.Values.Distinct().Count();
+    
     public static DesignNoteDatabase Load(string path)
     {
         ThrowIfNullOrEmpty(path);

@@ -13,14 +13,17 @@ internal sealed class Main : IConsoleMain
     private readonly ApisOfDotNetPathProvider _pathProvider;
     private readonly ApisOfDotNetStore _store;
     private readonly ApisOfDotNetWebHook _webHook;
+    private readonly GitHubActionsSummaryTable _summaryTable;
 
     public Main(ApisOfDotNetPathProvider pathProvider,
                 ApisOfDotNetStore store,
-                ApisOfDotNetWebHook webHook)
+                ApisOfDotNetWebHook webHook,
+                GitHubActionsSummaryTable summaryTable)
     {
         _pathProvider = pathProvider;
         _store = store;
         _webHook = webHook;
+        _summaryTable = summaryTable;
     }
 
     public async Task RunAsync(string[] args, CancellationToken cancellationToken)
@@ -79,7 +82,16 @@ internal sealed class Main : IConsoleMain
         Console.WriteLine("Generating design notes...");
         var reviewDatabase = ReviewDatabase.Load(reviewRepoPath);
         var catalog = await ApiCatalogModel.LoadAsync(catalogModelPath);
-        var linkDatabase = DesignNoteBuilder.Build(reviewDatabase, catalog);
-        linkDatabase.Save(designNotesPath);
+        var database = DesignNoteBuilder.Build(reviewDatabase, catalog);
+        database.Save(designNotesPath);
+
+        var designNotesName = Path.GetFileName(designNotesPath);
+        var designNotesSize = new FileInfo(designNotesPath).Length;
+        var apiCount = database.GetApiCount();
+        var noteCount = database.GetNoteCount();
+        
+        _summaryTable.AppendNumber("#APIs with notes", apiCount);
+        _summaryTable.AppendNumber("#Notes", noteCount);
+        _summaryTable.AppendBytes(designNotesName, designNotesSize);
     }
 }
