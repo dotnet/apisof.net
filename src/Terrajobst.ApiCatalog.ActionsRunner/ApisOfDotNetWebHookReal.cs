@@ -27,7 +27,7 @@ internal sealed class ApisOfDotNetWebHookReal : ApisOfDotNetWebHook
     private static string GetWebHookUrl(ApisOfDotNetWebHookSubject subject)
     {
         var blobName = GetBlobName(subject);
-        return $"https://apisof.net/gencatalog-webhook?subject={blobName}";
+        return $"https://apisof.net/webhook?subject={blobName}";
     }
 
     private static string GetBlobName(ApisOfDotNetWebHookSubject subject)
@@ -36,9 +36,9 @@ internal sealed class ApisOfDotNetWebHookReal : ApisOfDotNetWebHook
         {
             case ApisOfDotNetWebHookSubject.ApiCatalog:
                 return "job.json";
-            case ApisOfDotNetWebHookSubject.UsageData:
-                return "designNotes.dat";
             case ApisOfDotNetWebHookSubject.DesignNotes:
+                return "designNotes.dat";
+            case ApisOfDotNetWebHookSubject.UsageData:
                 return "usageData.dat";
             default:
                 throw new ArgumentOutOfRangeException(nameof(subject), subject, null);

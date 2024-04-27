@@ -51,6 +51,21 @@ public sealed class CatalogService
         _data = new CatalogData(catalog, suffixTree, jobInfo, usageData, designNotes);
     }
 
+    public async void InvalidateCatalog()
+    {
+        await ReloadCatalogAsync();
+    }
+
+    public async void InvalidateDesignNotes()
+    {
+        await ReloadDesignNotesAsync();
+    }
+
+    public async void InvalidateUsageData()
+    {
+        await ReloadUsageDataAsync();
+    }
+
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, T> loader)
     {
         return new BlobSource<T>(_logger, _options, containerName, blobName, s => Task.FromResult(loader(s)));
@@ -232,21 +247,6 @@ public sealed class CatalogService
 
             return new CatalogData(Catalog, SuffixTree, JobInfo, UsageData, designNotes);
         }
-    }
-
-    public async void HandleBlobChange(string blobPath)
-    {
-        if (string.IsNullOrEmpty(blobPath))
-            return;
-
-        _logger.LogInformation($"Received blob change for {blobPath}.");
-
-        if (blobPath.EndsWith("job.json", StringComparison.OrdinalIgnoreCase))
-            await ReloadCatalogAsync();
-        else if (blobPath.EndsWith("designNotes.dat", StringComparison.OrdinalIgnoreCase))
-            await ReloadDesignNotesAsync();
-        else if (blobPath.EndsWith("usageData.dat", StringComparison.OrdinalIgnoreCase))
-            await ReloadUsageDataAsync();
     }
 
     private async Task ReloadCatalogAsync()
