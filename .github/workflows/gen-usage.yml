@@ -62,7 +62,7 @@ jobs:
     - name: Generate usage
       env:
         AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        GenCatalogWebHookSecret: ${{ secrets.GEN_CATALOG_WEB_HOOK_SECRET }}
+        ApisOfDotNetWebHookSecret: ${{ secrets.APISOFDOTNET_WEB_HOOK_SECRET }}
       run: |
         cd ./src/GenUsage
         dotnet run

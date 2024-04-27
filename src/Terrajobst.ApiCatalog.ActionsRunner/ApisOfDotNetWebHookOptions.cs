@@ -5,5 +5,5 @@ namespace Terrajobst.ApiCatalog.ActionsRunner;
 public sealed class ApisOfDotNetWebHookOptions
 {
     [Required]
-    public required string GenCatalogWebHookSecret { get; init; }
+    public required string ApisOfDotNetWebHookSecret { get; init; }
 }

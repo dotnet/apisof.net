@@ -17,7 +17,7 @@ internal sealed class ApisOfDotNetWebHookReal : ApisOfDotNetWebHook
     {
         Console.WriteLine($"Invoking web hook for {subject}...");
         var url = GetWebHookUrl(subject);
-        var secret = _options.Value.GenCatalogWebHookSecret;
+        var secret = _options.Value.ApisOfDotNetWebHookSecret;
 
         var client = new HttpClient();
         var response = await client.PostAsync(url, new StringContent(secret));
