@@ -31,7 +31,7 @@ public sealed class GenCatalogWebHookController : Controller
         using (var reader = new StreamReader(Request.Body))
             secret = (await reader.ReadToEndAsync()).Trim();
 
-        var expectedSecret = _options.Value.GenCatalogWebHookSecret.Trim();
+        var expectedSecret = _options.Value.ApisOfDotNetWebHookSecret.Trim();
         var matches = FixedTimeComparer.Equals(secret, expectedSecret);
 
         if (!matches)

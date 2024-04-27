@@ -8,5 +8,5 @@ public sealed class ApisOfDotNetOptions
     public required string AzureStorageConnectionString { get; init; }
 
     [Required]
-    public required string GenCatalogWebHookSecret { get; init; }
+    public required string ApisOfDotNetWebHookSecret { get; init; }
 }
