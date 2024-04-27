@@ -65,4 +65,4 @@ jobs:
         GenCatalogWebHookSecret: ${{ secrets.GEN_CATALOG_WEB_HOOK_SECRET }}
       run: |
         cd ./src/GenUsage
-        dotnet run -- .
+        dotnet run
