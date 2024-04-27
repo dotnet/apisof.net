@@ -199,12 +199,12 @@ internal sealed class CrawlMain : ConsoleCommand
                     if (crawlingCancellationToken.IsCancellationRequested)
                         break;
 
-                    var log = await RunPackageCrawlerAsync(packageId, fileName);
+                    var (exitCode, log) = await RunPackageCrawlerAsync(packageId, fileName);
                     var collectionResults = File.Exists(fileName)
                         ? await CollectionSetResults.LoadAsync(fileName)
                         : CollectionSetResults.Empty;
 
-                    var results = new PackageResults(packageId, log, collectionResults);
+                    var results = new PackageResults(packageId, exitCode, log, collectionResults);
                     outputQueue.Add(results);
 
                     File.Delete(fileName);
@@ -224,10 +224,13 @@ internal sealed class CrawlMain : ConsoleCommand
         {
             try
             {
-                foreach (var (packageIdentity, logLines, collectionSetResults) in queue.GetConsumingEnumerable())
+                foreach (var (packageIdentity, exitCode, logLines, collectionSetResults) in queue.GetConsumingEnumerable())
                 {
-                    foreach (var line in logLines)
-                        Console.WriteLine($"[Crawler] {line}");
+                    if (exitCode != 0)
+                    {
+                        foreach (var line in logLines)
+                            Console.WriteLine($"[Crawler] {line}");
+                    }
 
                     await database.DeleteReferenceUnitsAsync([packageIdentity]);
                     await database.AddReferenceUnitAsync(packageIdentity, UsageCollectorSet.CurrentVersion);
@@ -288,7 +291,7 @@ internal sealed class CrawlMain : ConsoleCommand
         return result.ToArray();
     }
 
-    private static async Task<IReadOnlyList<string>> RunPackageCrawlerAsync(PackageIdentity packageId, string fileName)
+    private static async Task<(int ExitCode, IReadOnlyList<string> OutputLines)> RunPackageCrawlerAsync(PackageIdentity packageId, string fileName)
     {
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
@@ -332,10 +335,8 @@ internal sealed class CrawlMain : ConsoleCommand
         }
 
         processLog.Add($"Exit code = {process.ExitCode}");
-        return processLog;
+        return (process.ExitCode, processLog);
     }
 
-    private record PackageResults(PackageIdentity PackageIdentity,
-                                  IReadOnlyCollection<string> Log,
-                                  CollectionSetResults CollectionSetResults);
+    private record PackageResults(PackageIdentity PackageIdentity, int ExitCode, IReadOnlyCollection<string> Log, CollectionSetResults CollectionSetResults);
 }

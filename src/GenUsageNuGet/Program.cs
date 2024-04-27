@@ -1,22 +1,13 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Terrajobst.ApiCatalog.ActionsRunner;
 
-try
-{
-    var builder = ConsoleHost.CreateApplicationBuilder();
+var builder = ConsoleHost.CreateApplicationBuilder();
 
-    builder.AddApisOfDotNetPathProvider();
-    builder.AddApisOfDotNetStore();
-    builder.AddApisOfDotNetWebHook();
-    builder.AddScratchFileProvider();
-    builder.AddMainWithCommands();
+builder.AddApisOfDotNetPathProvider();
+builder.AddApisOfDotNetStore();
+builder.AddApisOfDotNetWebHook();
+builder.AddScratchFileProvider();
+builder.AddMainWithCommands();
 
-    var app = builder.Build();
-    await app.RunAsync();
-    return 0;
-}
-catch (Exception e)
-{
-    Console.WriteLine(e);
-    return -1;
-}
+var app = builder.Build();
+await app.RunAsync();

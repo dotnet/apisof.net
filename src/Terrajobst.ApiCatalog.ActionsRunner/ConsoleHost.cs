@@ -114,8 +114,19 @@ public static class ConsoleHost
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var args = Environment.GetCommandLineArgs().Skip(1).ToArray();
-            await _main.RunAsync(args, stoppingToken);
-            await _host.StopAsync(stoppingToken);
+            try
+            {
+                await _main.RunAsync(args, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                Environment.ExitCode = 1;
+            }
+            finally
+            {
+                await _host.StopAsync(stoppingToken);
+            }
         }
     }
 }
