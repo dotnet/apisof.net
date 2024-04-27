@@ -62,7 +62,7 @@ public static class ConsoleHost
         }
         else
         {
-            builder.Services.AddSingleton<ApisOfDotNetWebHook>();
+            builder.Services.AddSingleton<ApisOfDotNetWebHookReal>();
             builder.Services.AddOptions<ApisOfDotNetWebHookOptions>()
                 .BindConfiguration("")
                 .ValidateDataAnnotations()
