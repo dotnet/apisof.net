@@ -29,8 +29,11 @@ public class GitHubActionsLog
     public void AppendSummary(string markdown)
     {
         if (string.IsNullOrEmpty(_environment.StepSummary))
+        {
+            Console.WriteLine("Environment variable for step summary not found -- not writing anything.");
             return;
-        
+        }
+
         using var writer = File.AppendText(markdown);
         writer.WriteLine(markdown);
     }
