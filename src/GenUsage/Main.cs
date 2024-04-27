@@ -37,7 +37,7 @@ internal sealed class Main : IConsoleMain
         await GenerateUsageDataAsync(usageDataPath, apiUsagesPath);
         await UploadUsageData(usageDataPath);
 
-        await _webHook.InvokeAsync();
+        await _webHook.InvokeAsync(ApisOfDotNetWebHookSubject.UsageData);
 
         Console.WriteLine($"Completed in {stopwatch.Elapsed}");
         Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");

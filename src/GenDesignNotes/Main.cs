@@ -36,7 +36,7 @@ internal sealed class Main : IConsoleMain
         await GenerateDesignNotesAsync(reviewRepoPath, catalogModelPath, designNotesPath);
         await _store.UploadDesignNotesAsync(designNotesPath);
 
-        await _webHook.InvokeAsync();
+        await _webHook.InvokeAsync(ApisOfDotNetWebHookSubject.DesignNotes);
 
         Console.WriteLine($"Completed in {stopwatch.Elapsed}");
         Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");

@@ -13,14 +13,35 @@ internal sealed class ApisOfDotNetWebHookReal : ApisOfDotNetWebHook
         _options = options;
     }
 
-    public override async Task InvokeAsync()
+    public override async Task InvokeAsync(ApisOfDotNetWebHookSubject subject)
     {
-        Console.WriteLine("Invoking web hook...");
-        var url = _options.Value.GenCatalogWebHookUrl;
+        Console.WriteLine($"Invoking web hook for {subject}...");
+        var url = GetWebHookUrl(subject);
         var secret = _options.Value.GenCatalogWebHookSecret;
 
         var client = new HttpClient();
         var response = await client.PostAsync(url, new StringContent(secret));
         Console.WriteLine($"Webhook returned: {response.StatusCode}");
+    }
+
+    private static string GetWebHookUrl(ApisOfDotNetWebHookSubject subject)
+    {
+        var blobName = GetBlobName(subject);
+        return $"https://apisof.net/gencatalog-webhook?subject={blobName}";
+    }
+
+    private static string GetBlobName(ApisOfDotNetWebHookSubject subject)
+    {
+        switch (subject)
+        {
+            case ApisOfDotNetWebHookSubject.ApiCatalog:
+                return "job.json";
+            case ApisOfDotNetWebHookSubject.UsageData:
+                return "designNotes.dat";
+            case ApisOfDotNetWebHookSubject.DesignNotes:
+                return "usageData.dat";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(subject), subject, null);
+        }
     }
 }

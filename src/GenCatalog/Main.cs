@@ -263,7 +263,7 @@ internal sealed class Main : IConsoleMain
 
     private Task PostToGenCatalogWebHook()
     {
-        return _webHook.InvokeAsync();
+        return _webHook.InvokeAsync(ApisOfDotNetWebHookSubject.ApiCatalog);
     }
 
     private async Task UploadSummaryAsync(bool success)
