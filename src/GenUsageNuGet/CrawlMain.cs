@@ -154,7 +154,7 @@ internal sealed class CrawlMain : ConsoleCommand
         Console.WriteLine("Deleting reference units without usages...");
 
         stopwatch.Restart();
-        var referenceUnitsWithoutUsages = await usageDatabase.DeleteFeaturesWithoutUsagesAsync();
+        var referenceUnitsWithoutUsages = await usageDatabase.DeleteReferenceUnitsWithoutUsages();
 
         Console.WriteLine($"Finished deleting reference units without usages. Deleted {referenceUnitsWithoutUsages:N0} reference units. Took {stopwatch.Elapsed}");
 
