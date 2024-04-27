@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -9,13 +8,11 @@
 
     <ItemGroup>
       <PackageReference Include="Azure.Storage.Blobs" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
       <PackageReference Include="Microsoft.Extensions.Hosting" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Terrajobst.ApiCatalog.ActionsRunner\Terrajobst.ApiCatalog.ActionsRunner.csproj" />
-      <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+      <PackageReference Include="Mono.Options" />
+      <PackageReference Include="Serilog.AspNetCore" />
+      <PackageReference Include="Serilog.Sinks.File" />
     </ItemGroup>
 
 </Project>

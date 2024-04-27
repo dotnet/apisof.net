@@ -20,7 +20,7 @@ public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollec
 
         Check(TargetFramework.Net80, NuGetFramework.Parse("net6.2"), source, [FeatureUsage.ForTargetFramework("net6.2")]);
     }
-    
+
     [Fact]
     public void TargetFrameworkCollector_Prefers_TargetFramework_Over_References()
     {
@@ -67,7 +67,7 @@ public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollec
     {
         Check(framework, null, source, expectedUsages);
     }
-    
+
     private void Check(TargetFramework framework, NuGetFramework? assemblyContextFramework, string source, IEnumerable<FeatureUsage> expectedUsages)
     {
         var assembly = new AssemblyBuilder()
@@ -77,7 +77,7 @@ public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollec
         var context = new AssemblyContext {
             Framework = assemblyContextFramework
         };
-        
+
         Check(assembly, context, expectedUsages);
     }
 }

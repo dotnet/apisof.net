@@ -5,7 +5,7 @@ using Terrajobst.UsageCrawling.Collectors;
 
 namespace GenUsageNuGet.Infra;
 
-public static class PackageCrawler
+internal static class PackageCrawler
 {
     public static async Task<CollectionSetResults> CrawlAsync(NuGetFeed feed, PackageIdentity packageId)
     {
@@ -14,8 +14,8 @@ public static class PackageCrawler
 
         foreach (var packagePath in reader.GetFiles())
         {
-            var framework = GetFrameworkFromPackagePath(packagePath);            
-            
+            var framework = GetFrameworkFromPackagePath(packagePath);
+
             await using var assemblyStream = reader.GetStream(packagePath);
             await using var memoryStream = new MemoryStream();
             await assemblyStream.CopyToAsync(memoryStream);
@@ -31,7 +31,7 @@ public static class PackageCrawler
                 Package = reader,
                 Framework = framework
             };
-            
+
             collectorSet.Collect(assembly, assemblyContext);
         }
 
@@ -55,7 +55,7 @@ public static class PackageCrawler
                 // Ignore
             }
         }
-        
+
         return null;
     }
 }

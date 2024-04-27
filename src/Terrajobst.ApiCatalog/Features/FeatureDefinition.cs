@@ -43,13 +43,13 @@ public abstract class FeatureDefinition
 
     // Synthetic features
     //
-    // These aren't collected but exposed by looking at the children of properties/events. 
-    
+    // These aren't collected but exposed by looking at the children of properties/events.
+
     public static FeatureDefinition GetProperty { get; } = new PropertyGetFeatureDefinition();
     public static FeatureDefinition SetProperty { get; } = new PropertySetFeatureDefinition();
     public static FeatureDefinition AddEvent { get; } = new EventAddFeatureDefinition();
     public static FeatureDefinition RemoveEvent { get; } = new EventRemoveFeatureDefinition();
-    
+
     public static Dictionary<Guid, FeatureDefinition> GetCatalogFeatures(ApiCatalogModel catalog)
     {
         ThrowIfNull(catalog);

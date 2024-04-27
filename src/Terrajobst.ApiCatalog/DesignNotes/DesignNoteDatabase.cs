@@ -9,7 +9,7 @@ public sealed class DesignNoteDatabase
 {
     private static readonly byte[] MagicNumber = "apisof.net Design Note DB"u8.ToArray();
     private const int FormatVersion = 2;
-    
+
     public static DesignNoteDatabase Empty { get; } = new(FrozenDictionary<Guid, ImmutableArray<DesignNote>>.Empty);
 
     private readonly FrozenDictionary<Guid, ImmutableArray<DesignNote>> _designNotesByApiGuid;
@@ -74,7 +74,7 @@ public sealed class DesignNoteDatabase
         {
             var readCount = reader.Read(guidBytes);
             Debug.Assert(readCount == 16);
-            
+
             var apiGuid = new Guid(guidBytes);
             var associatedDesignNoteCount = reader.Read7BitEncodedInt();
             var associatedDesignNoteBuilder = ImmutableArray.CreateBuilder<DesignNote>(associatedDesignNoteCount);
@@ -118,7 +118,7 @@ public sealed class DesignNoteDatabase
         binaryWriter.Write(FormatVersion);
 
         // Write Design Notes
-        
+
         binaryWriter.Write(indexByDesignNote.Count);
 
         foreach (var (designNote, _) in indexByDesignNote.OrderBy(kv => indexByDesignNote[kv.Key]))
@@ -130,7 +130,7 @@ public sealed class DesignNoteDatabase
         }
 
         binaryWriter.Write(_designNotesByApiGuid.Count);
-        
+
         // Write Mapping Guid -> Design Note
 
         var guidBytes = (Span<byte>)stackalloc byte[16];

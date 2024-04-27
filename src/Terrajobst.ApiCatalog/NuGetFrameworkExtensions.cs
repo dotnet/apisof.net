@@ -12,7 +12,7 @@ public static class NuGetFrameworkExtensions
                string.Equals(framework.Framework, ".NETStandard", StringComparison.OrdinalIgnoreCase) ||
                string.Equals(framework.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase);
     }
-    
+
     public static string GetVersionDisplayString(this Version version)
     {
         ThrowIfNull(version);

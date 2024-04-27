@@ -136,7 +136,7 @@ public readonly record struct DiffOptionsParameter(DiffOptions DiffOptions)
 
         return new DiffOptionsParameter(diffOptions.Value);
     }
-    
+
     public static DiffOptionsParameter? Parse(string? text)
     {
         if (string.IsNullOrEmpty(text))

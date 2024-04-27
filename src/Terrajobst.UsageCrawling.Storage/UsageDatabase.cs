@@ -256,7 +256,7 @@ public sealed class UsageDatabase : IDisposable
             """
         );
     }
-    
+
     public async ValueTask AddReferenceUnitAsync(string identifier, int collectorVersion = 0)
     {
         ThrowIfNullOrEmpty(identifier);

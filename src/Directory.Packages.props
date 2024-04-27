@@ -26,11 +26,14 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageVersion Include="Mono.Options" Version="6.12.0.148" />
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.6.133" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NuGet.Protocol" version="6.7.0" Version="6.9.1" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageVersion Include="SharpVectors.Wpf" Version="1.8.4" />
     <PackageVersion Include="Spectre.Console" Version="0.48.0" />
     <PackageVersion Include="Toolbelt.Blazor.HotKeys2" Version="4.0.0" />

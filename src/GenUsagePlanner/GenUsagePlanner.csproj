@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Terrajobst.ApiCatalog.ActionsRunner\Terrajobst.ApiCatalog.ActionsRunner.csproj" />
     <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
     <ProjectReference Include="..\Terrajobst.UsageCrawling.Storage\Terrajobst.UsageCrawling.Storage.csproj" />
   </ItemGroup>

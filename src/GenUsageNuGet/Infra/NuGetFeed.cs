@@ -9,7 +9,7 @@ using NuGet.Versioning;
 
 namespace GenUsageNuGet.Infra;
 
-public sealed class NuGetFeed
+internal sealed class NuGetFeed
 {
     public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
 

@@ -9,10 +9,11 @@
 
     <ItemGroup>
       <PackageReference Include="Azure.Storage.Blobs" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Terrajobst.ApiCatalog.ActionsRunner\Terrajobst.ApiCatalog.ActionsRunner.csproj" />
       <ProjectReference Include="..\Terrajobst.ApiCatalog.Generation\Terrajobst.ApiCatalog.Generation.csproj" />
     </ItemGroup>
 

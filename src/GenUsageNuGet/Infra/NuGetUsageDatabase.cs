@@ -4,7 +4,7 @@ using Terrajobst.UsageCrawling.Storage;
 
 namespace GenUsageNuGet.Infra;
 
-public sealed class NuGetUsageDatabase : UsageDatabase<PackageIdentity>
+internal sealed class NuGetUsageDatabase : UsageDatabase<PackageIdentity>
 {
     private NuGetUsageDatabase(UsageDatabase usageDatabase)
         : base(usageDatabase)

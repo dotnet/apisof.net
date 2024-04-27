@@ -22,9 +22,9 @@ public partial class Diff
 
 
     public bool IncludeAdded { get; set; }
-    
+
     public bool IncludeRemoved { get; set; }
-    
+
     public bool IncludeChanged { get; set; }
 
     public bool IncludeUnchanged { get; set; }
@@ -48,7 +48,7 @@ public partial class Diff
             IncludeUnchanged = value.HasFlag(DiffOptions.IncludeUnchanged);
         }
     }
-    
+
     public bool HasDiff { get; set; }
 
     protected override void OnInitialized()

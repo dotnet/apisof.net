@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Terrajobst.ApiCatalog.ActionsRunner\Terrajobst.ApiCatalog.ActionsRunner.csproj" />
     <ProjectReference Include="..\Terrajobst.ApiCatalog.Generation\Terrajobst.ApiCatalog.Generation.csproj" />
     <ProjectReference Include="..\Terrajobst.ApiCatalog.SuffixTree\Terrajobst.ApiCatalog.SuffixTree.csproj" />
     <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />

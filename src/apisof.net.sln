@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenUsage", "GenUsage\GenUsa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenDesignNotes", "GenDesignNotes\GenDesignNotes.csproj", "{07BCC162-8864-4B3F-B0F2-0626C757C1D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Terrajobst.ApiCatalog.ActionsRunner", "Terrajobst.ApiCatalog.ActionsRunner\Terrajobst.ApiCatalog.ActionsRunner.csproj", "{599287D4-00B4-47C6-AC3B-322E881FC01B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,6 +137,10 @@ Global
 		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07BCC162-8864-4B3F-B0F2-0626C757C1D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{599287D4-00B4-47C6-AC3B-322E881FC01B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{599287D4-00B4-47C6-AC3B-322E881FC01B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{599287D4-00B4-47C6-AC3B-322E881FC01B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{599287D4-00B4-47C6-AC3B-322E881FC01B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
