@@ -28,7 +28,7 @@ public sealed class DesignNoteBuilder
             var url = issue.Id.GetUrl(issue.CommentId);
             var urlText = issue.Id.ToString();
             var context = issue.Decision;
-            var reviewLink = new DesignNote(session.DateTime, url, urlText, context);
+            var designNote = new DesignNote(session.DateTime, url, urlText, context);
 
             if (!_designNotesByIssue.TryGetValue(issue.Id, out var issueLinks))
             {
@@ -36,7 +36,7 @@ public sealed class DesignNoteBuilder
                 _designNotesByIssue.Add(issue.Id, issueLinks);
             }
 
-            issueLinks.Add(reviewLink);
+            issueLinks.Add(designNote);
 
             foreach (var apiReference in issue.Apis)
             {
@@ -58,7 +58,7 @@ public sealed class DesignNoteBuilder
                     _designNotesByApiGuid.Add(api.Value.Guid, apiLinks);
                 }
 
-                apiLinks.Add(reviewLink);
+                apiLinks.Add(designNote);
             }
         }
 
@@ -73,8 +73,8 @@ public sealed class DesignNoteBuilder
             }
         }
 
-        var mappings = _designNotesByApiGuid.Select(kv => KeyValuePair.Create(kv.Key, kv.Value.ToImmutableArray())).ToFrozenDictionary();
-        return new DesignNoteDatabase(mappings);
+        var designNotesByApiGuid = _designNotesByApiGuid.Select(kv => KeyValuePair.Create(kv.Key, kv.Value.ToImmutableArray())).ToFrozenDictionary();
+        return new DesignNoteDatabase(designNotesByApiGuid);
     }
 
     public static DesignNoteDatabase Build(ReviewDatabase reviewsDatabase, ApiCatalogModel catalog)
