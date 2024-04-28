@@ -31,7 +31,7 @@ internal sealed class Main : IConsoleMain
 
     public async Task RunAsync(string[] args, CancellationToken cancellationToken)
     {
-        var success = false;
+        var success = true;
         try
         {
             var rootPath = _pathProvider.RootPath;
