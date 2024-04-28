@@ -139,7 +139,7 @@ internal sealed class Main : IConsoleMain
 
     private void AddUsageSourceCountToSummary(FeatureUsageSource usageSource, int usageSourceCount)
     {
-        _summaryTable.AppendNumber(usageSource.Name, usageSourceCount);
+        _summaryTable.AppendNumber($"#APIs in {usageSource.Name}", usageSourceCount);
     }
 
     private void AddFileSizeToSummary(string usageDataPath)
