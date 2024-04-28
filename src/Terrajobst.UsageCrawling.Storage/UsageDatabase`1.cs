@@ -104,4 +104,9 @@ public abstract class UsageDatabase<TReferenceUnit> : IDisposable
     {
         return _usageDatabase.ExportUsagesAsync(fileName);
     }
+
+    public Task<(int FeatureCount, int ReferenceUnitCount, int UsageCount)> GetStatisticsAsync()
+    {
+        return _usageDatabase.GetStatisticsAsync();
+    }
 }

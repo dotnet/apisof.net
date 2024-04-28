@@ -132,7 +132,18 @@ internal sealed class CrawlMain : ConsoleCommand
 
         Console.WriteLine($"Finished uploading database. Took {stopwatch.Elapsed}");
 
+        var databaseSize = new FileInfo(databasePath).Length;
         await usageDatabase.OpenAsync();
+        
+        Console.WriteLine("Getting statistics...");
+        
+        stopwatch.Restart();
+        var statistics = await usageDatabase.GetStatisticsAsync();
+        Console.WriteLine($"Finished getting statistics. Took {stopwatch.Elapsed}");
+        _summaryTable.AppendNumber("#Indexed Features", statistics.FeatureCount);
+        _summaryTable.AppendNumber("#Indexed Reference Units", statistics.ReferenceUnitCount);
+        _summaryTable.AppendNumber("#Indexed Usages", statistics.UsageCount);
+        _summaryTable.AppendBytes("#Index Size", databaseSize);
 
         Console.WriteLine("Deleting reference units without usages...");
 

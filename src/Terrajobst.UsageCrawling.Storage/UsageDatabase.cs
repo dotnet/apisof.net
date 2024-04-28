@@ -365,6 +365,17 @@ public sealed class UsageDatabase : IDisposable
             await writer.WriteLineAsync($"{feature:N}\t{percentage}");
     }
 
+    public async Task<(int FeatureCount, int ReferenceUnitCount, int UsageCount)> GetStatisticsAsync()
+    {
+        return await _connection.QuerySingleAsync<(int, int, int)>(
+            """
+            SELECT  (SELECT COUNT(*) FROM Features),
+                    (SELECT COUNT(*) FROM ReferenceUnits),
+                    (SELECT COUNT(*) FROM Usages)
+            """,
+            transaction: _transaction);
+    }
+    
     private sealed class InsertReferenceUnitCommand : IDisposable
     {
         private readonly SqliteCommand _command;
