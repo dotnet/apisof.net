@@ -20,7 +20,7 @@ public class GitHubActionsSummaryTable
             return;
         
         _actionsLog.AppendSummary("| Metric | Value |");
-        _actionsLog.AppendSummary("|--------|-------|");
+        _actionsLog.AppendSummary("|--------|------:|");
         _headerWritten = true;
     }
 
