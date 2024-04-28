@@ -90,6 +90,7 @@ internal sealed class CrawlMain : ConsoleCommand
         Console.WriteLine($"Found {packagesToBeReIndexed.Length:N0} package(s) to be re-indexed.");
         Console.WriteLine($"Found {packagesToBeCrawled.Length:N0} package(s) to be crawled.");
 
+        _summaryTable.AppendNumber("#Packages in index", indexedPackages.Count);
         _summaryTable.AppendNumber("#Packages to be removed", packagesToBeDeleted.Length);
         _summaryTable.AppendNumber("#Packages to be added", packagesToBeIndexed.Length);
         _summaryTable.AppendNumber("#Packages to be re-indexed", packagesToBeReIndexed.Length);

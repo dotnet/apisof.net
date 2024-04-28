@@ -9,14 +9,19 @@ internal sealed class Main : IConsoleMain
 {
     private readonly ScratchFileProvider _scratchFileProvider;
     private readonly ApisOfDotNetStore _store;
+    private readonly GitHubActionsSummaryTable _summaryTable;
 
-    public Main(ScratchFileProvider scratchFileProvider, ApisOfDotNetStore store)
+    public Main(ScratchFileProvider scratchFileProvider,
+                ApisOfDotNetStore store,
+                GitHubActionsSummaryTable summaryTable)
     {
         ThrowIfNull(scratchFileProvider);
         ThrowIfNull(store);
-
+        ThrowIfNull(summaryTable);
+        
         _scratchFileProvider = scratchFileProvider;
         _store = store;
+        _summaryTable = summaryTable;
     }
 
     public async Task RunAsync(string[] args, CancellationToken cancellationToken)
@@ -43,6 +48,7 @@ internal sealed class Main : IConsoleMain
 
         var referenceUnits = (await usageDatabase.GetReferenceUnitsAsync()).Select(r => r.Identifier).ToArray();
         Console.WriteLine($"Found {referenceUnits.Length:N0} planner fingerprints in the index.");
+        _summaryTable.AppendNumber("#Fingerprints in index", referenceUnits.Length);
 
         Console.WriteLine("Discovering latest planner fingerprints...");
 
@@ -59,6 +65,8 @@ internal sealed class Main : IConsoleMain
 
         Console.WriteLine($"Found {fingerprintsToBeDeleted.Length:N0} fingerprints(s) to remove from the index.");
         Console.WriteLine($"Found {plannerFingerprints.Count:N0} fingerprints(s) to add to the index.");
+        _summaryTable.AppendNumber("#Fingerprints to be deleted", fingerprintsToBeDeleted.Length);
+        _summaryTable.AppendNumber("#Fingerprints to be added", plannerFingerprints.Count);
 
         Console.WriteLine($"Deleting planner fingerprints...");
 
@@ -104,7 +112,8 @@ internal sealed class Main : IConsoleMain
         Console.WriteLine("Deleting irrelevant features...");
 
         stopwatch.Restart();
-        await usageDatabase.DeleteIrrelevantFeaturesAsync(apiCatalog);
+        var irrelevantFeatures = await usageDatabase.DeleteIrrelevantFeaturesAsync(apiCatalog);
+        _summaryTable.AppendNumber("#Irrelevant features", irrelevantFeatures);
 
         Console.WriteLine($"Finished deleting irrelevant features. Took {stopwatch.Elapsed}");
 
