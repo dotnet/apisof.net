@@ -140,7 +140,7 @@ internal sealed class CrawlMain : ConsoleCommand
         var referenceUnitsWithoutUsages = await usageDatabase.DeleteReferenceUnitsWithoutUsages();
 
         Console.WriteLine($"Finished deleting reference units without usages. Deleted {referenceUnitsWithoutUsages:N0} reference units. Took {stopwatch.Elapsed}");
-        _summaryTable.AppendNumber("#Reference Units without usages", referenceUnitsWithoutUsages);
+        _summaryTable.AppendNumber("#Reference units without usages", referenceUnitsWithoutUsages);
 
         Console.WriteLine("Deleting irrelevant features...");
 
