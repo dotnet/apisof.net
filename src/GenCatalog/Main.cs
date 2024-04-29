@@ -13,11 +13,13 @@ internal sealed class Main : IConsoleMain
     private readonly ApisOfDotNetStore _store;
     private readonly ApisOfDotNetWebHook _webHook;
     private readonly GitHubActionsEnvironment _gitHubActionsEnvironment;
+    private readonly GitHubActionsSummaryTable _summaryTable;
 
     public Main(ApisOfDotNetPathProvider pathProvider,
                 ApisOfDotNetStore store,
                 ApisOfDotNetWebHook webHook,
-                GitHubActionsEnvironment gitHubActionsEnvironment)
+                GitHubActionsEnvironment gitHubActionsEnvironment,
+                GitHubActionsSummaryTable summaryTable)
     {
         ThrowIfNull(pathProvider);
         ThrowIfNull(store);
@@ -27,6 +29,7 @@ internal sealed class Main : IConsoleMain
         _store = store;
         _webHook = webHook;
         _gitHubActionsEnvironment = gitHubActionsEnvironment;
+        _summaryTable = summaryTable;
     }
 
     public async Task RunAsync(string[] args, CancellationToken cancellationToken)
@@ -57,6 +60,11 @@ internal sealed class Main : IConsoleMain
             await _store.UploadApiCatalogAsync(catalogModelPath);
             await _store.UploadSuffixTreeAsync(suffixTreePath);
 
+            var catalogSize = new FileInfo(catalogModelPath).Length;
+            var suffixTreeSize = new FileInfo(suffixTreePath).Length;
+            _summaryTable.AppendBytes("Catalog Size", catalogSize);
+            _summaryTable.AppendBytes("Suffix Tree Size", suffixTreeSize);
+            
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
         }
@@ -87,14 +95,17 @@ internal sealed class Main : IConsoleMain
                 archive.ExtractToDirectory(localDirectory);
             }
         }
+        _summaryTable.AppendNumber("#Archived Frameworks", Directory.GetDirectories(archivePath).Length);
+        
     }
 
-    private static async Task DownloadPackagedPlatformsAsync(string archivePath, string packsPath)
+    private async Task DownloadPackagedPlatformsAsync(string archivePath, string packsPath)
     {
-        await FrameworkDownloader.DownloadAsync(archivePath, packsPath);
+        var frameworkCount = await FrameworkDownloader.DownloadAsync(archivePath, packsPath);
+        _summaryTable.AppendNumber("#Packaged Frameworks", frameworkCount);
     }
 
-    private static async Task DownloadDotnetPackageListAsync(string packageListPath)
+    private async Task DownloadDotnetPackageListAsync(string packageListPath)
     {
         if (File.Exists(packageListPath))
         {
@@ -102,7 +113,8 @@ internal sealed class Main : IConsoleMain
             return;
         }
 
-        await DotnetPackageIndex.CreateAsync(packageListPath);
+        var packageCount = await DotnetPackageIndex.CreateAsync(packageListPath);
+        _summaryTable.AppendNumber("#Packages", packageCount);
     }
 
     private static Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)

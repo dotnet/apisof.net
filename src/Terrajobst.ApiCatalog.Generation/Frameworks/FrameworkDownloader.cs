@@ -8,7 +8,7 @@ namespace Terrajobst.ApiCatalog;
 
 public static class FrameworkDownloader
 {
-    public static async Task DownloadAsync(string frameworksPath, string packsPath)
+    public static async Task<int> DownloadAsync(string frameworksPath, string packsPath)
     {
         Validate();
 
@@ -144,6 +144,8 @@ public static class FrameworkDownloader
         var manifestPath = Path.Join(frameworksPath, FrameworkManifest.FileName);
         var manifest = new FrameworkManifest(entries);
         manifest.Save(manifestPath);
+
+        return entries.Count;
     }
 
     private static IEnumerable<NuGetFramework> GetFrameworkNames(FrameworkDefinition framework, PackReference pack)

@@ -21,7 +21,7 @@ public static class DotnetPackageIndex
         "aspire"
     };
 
-    public static async Task CreateAsync(string packageListPath)
+    public static async Task<int> CreateAsync(string packageListPath)
     {
         var packages = await GetPackagesAsync(NuGetFeeds.NuGetOrg, NuGetFeeds.NightlyLatest);
 
@@ -41,6 +41,8 @@ public static class DotnetPackageIndex
 
         Directory.CreateDirectory(Path.GetDirectoryName(packageListPath)!);
         packageDocument.Save(packageListPath);
+
+        return packages.Count;
     }
 
     private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesAsync(params string[] feedUrls)
