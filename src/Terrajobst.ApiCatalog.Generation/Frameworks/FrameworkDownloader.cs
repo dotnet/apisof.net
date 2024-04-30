@@ -233,12 +233,26 @@ public static class FrameworkDownloader
 
             static void ValidatePlatformIsSupported(FrameworkDefinition framework, PackReference pack, string platform)
             {
+                var isNeutral = string.IsNullOrEmpty(platform);
+                if (isNeutral)
+                    return;
+
+                // Tizen is a special case where we ship some built-in support and rely on others to be on top,
+                // so we don't validate that here.
+                if (platform == "tizen")
+                    return;
+
+                // .NET Core 3.x had built-in support for windows that was modeled differently.
+                if (platform == "windows" && (framework.Name == "netcoreapp3.0" || framework.Name == "netcoreapp3.1"))
+                    return;
+
                 var nugetFramework = NuGetFramework.Parse($"{framework.Name}-{platform}");
                 var platformName = nugetFramework.Platform;
                 var platformVersion = nugetFramework.PlatformVersion.GetVersionDisplayString();
+                var platformHasVersion = nugetFramework.PlatformVersion != FrameworkConstants.EmptyVersion;
 
                 var supportedPlatform = framework.SupportedPlatforms.SingleOrDefault(p => string.Equals(p.Name, platformName, StringComparison.OrdinalIgnoreCase));
-                if (supportedPlatform is null || !supportedPlatform.Versions.Contains(platformVersion))
+                if (supportedPlatform is null || (platformHasVersion && !supportedPlatform.Versions.Contains(platformVersion)))
                     Console.WriteLine($"error: '{framework.Name}' pack '{pack.Name}' refers to platform '{platform}' which '{framework.Name}' doesn't support");
             }
         }
