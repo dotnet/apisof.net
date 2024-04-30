@@ -34,9 +34,6 @@ public static class FrameworkDownloader
 
             var baseFramework = NuGetFramework.Parse(framework.Name);
 
-            if (baseFramework.Version != new Version(5, 0, 0, 0))
-                continue;
-
             // Let's first determine the set of TFMs for this framework. This
             // will create a set including the base framework plus any platform
             // specific TFMs, such as net5.0-windows.
