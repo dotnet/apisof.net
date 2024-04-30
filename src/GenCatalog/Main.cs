@@ -230,7 +230,7 @@ internal sealed class Main : IConsoleMain
         }
     }
 
-    private static async Task GenerateCatalogAsync(string platformsPath, string packagesPath, string catalogModelPath)
+    private async Task GenerateCatalogAsync(string platformsPath, string packagesPath, string catalogModelPath)
     {
         if (File.Exists(catalogModelPath))
         {
@@ -246,10 +246,31 @@ internal sealed class Main : IConsoleMain
         builder.Build(catalogModelPath);
 
         var model = await ApiCatalogModel.LoadAsync(catalogModelPath);
-        var stats = model.GetStatistics().ToString();
+        var stats = model.GetStatistics();
+        var statsText = stats.ToString();
         Console.WriteLine("Catalog stats:");
-        Console.Write(stats);
-        await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), stats);
+        Console.Write(statsText);
+        await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), statsText);
+
+        _summaryTable.AppendNumber("Size Compressed", stats.SizeCompressed);
+        _summaryTable.AppendNumber("Size Uncompressed", stats.SizeUncompressed);
+        _summaryTable.AppendNumber("#APIs", stats.NumberOfApis);
+        _summaryTable.AppendNumber("#Extension Methods", stats.NumberOfExtensionMethods);
+        _summaryTable.AppendNumber("#Declarations", stats.NumberOfDeclarations);
+        _summaryTable.AppendNumber("#Assemblies", stats.NumberOfAssemblies);
+        _summaryTable.AppendNumber("#Frameworks", stats.NumberOfFrameworks);
+        _summaryTable.AppendNumber("#Framework Assemblies", stats.NumberOfFrameworkAssemblies);
+        _summaryTable.AppendNumber("#Packages", stats.NumberOfPackages);
+        _summaryTable.AppendNumber("#Package Versions", stats.NumberOfPackageVersions);
+        _summaryTable.AppendNumber("#Package Assemblies", stats.NumberOfPackageAssemblies);
+
+        foreach (var row in stats.TableSizes)
+        {
+            _summaryTable.AppendBytes($"{row.TableName} Size", row.Bytes);
+
+            if (row.Rows >= 0)
+                _summaryTable.AppendNumber($"{row.TableName} #Rows", row.Rows);
+        }
     }
 
     private static async Task GenerateSuffixTreeAsync(string catalogModelPath, string suffixTreePath)
