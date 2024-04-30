@@ -52,8 +52,8 @@ public sealed class KnownFrameworkReference
                     var targetFramework = NuGetFramework.Parse(targetFrameworkText);
                     var targetingPackVersion = NuGetVersion.Parse(targetingPackVersionText);
 
-                    // Strip platform and version because we don't care here.
-                    targetFramework = new NuGetFramework(targetFramework.Framework, targetFramework.Version);
+                    // NOTE: Don't strip platform and version because we want to know which version
+                    //       it's mean to apply to.
 
                     var reference = new KnownFrameworkReference(frameworkName, targetFramework, targetingPackName, targetingPackVersion);
                     result.Add(reference);
