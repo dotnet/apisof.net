@@ -45,6 +45,8 @@ public sealed partial class FrameworkDefinition(string name, bool isPreview = fa
 
     public bool IsPreview { get; } = isPreview;
 
+    public IReadOnlyList<FrameworkPlatformDefinition> SupportedPlatforms { get; init; } = [];
+
     public required IReadOnlyList<PackReference> BuiltInPacks { get; init; }
 
     public IReadOnlyList<PackReference> WorkloadPacks { get; init; } = [];
