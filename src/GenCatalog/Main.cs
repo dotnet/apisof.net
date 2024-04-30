@@ -252,8 +252,8 @@ internal sealed class Main : IConsoleMain
         Console.Write(statsText);
         await File.WriteAllTextAsync(Path.ChangeExtension(catalogModelPath, ".txt"), statsText);
 
-        _summaryTable.AppendNumber("Size Compressed", stats.SizeCompressed);
-        _summaryTable.AppendNumber("Size Uncompressed", stats.SizeUncompressed);
+        _summaryTable.AppendBytes("Size Compressed", stats.SizeCompressed);
+        _summaryTable.AppendBytes("Size Uncompressed", stats.SizeUncompressed);
         _summaryTable.AppendNumber("#APIs", stats.NumberOfApis);
         _summaryTable.AppendNumber("#Extension Methods", stats.NumberOfExtensionMethods);
         _summaryTable.AppendNumber("#Declarations", stats.NumberOfDeclarations);
