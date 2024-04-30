@@ -237,6 +237,7 @@
                 }
 
                 @foreach (var frameworkGroup in Availability.Frameworks.Where(fx => showAllFrameworks || fx.Framework.IsRelevantForCatalog())
+                                                                       .Where(fx => !fx.Framework.HasPlatform)
                                                                        .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
                                                                        .OrderBy(g => g.Key))
                 {
@@ -280,6 +281,46 @@
                         </td>
                     </tr>
                 }
+
+                @foreach (var platformGroup in GetSelectedPlatforms().GroupBy(a => a.Framework.GetPlatformDisplayString()).OrderBy(g => g.Key))
+                {
+                    <tr>
+                        <th>@platformGroup.Key</th>
+                        <td>
+                            <span class="d-flex flex-row flex-wrap align-content-between">
+                                @foreach (var availability in platformGroup.OrderBy(g => g.Framework.PlatformVersion))
+                                {
+                                    var framework = availability.Framework;
+                                    var isSelectedVersion = IsSelectedFramework(framework);
+                                    var isDiffLift = IsLeftFramework(framework);
+                                    var isDiffRight = IsRightFramework(framework);
+
+                                    var versionClass = availability.IsInBox
+                                             ? "fx-version-inbox"
+                                             : "fx-version-package";
+                                    var title = availability.IsInBox
+                                             ? inboxApiTitle
+                                             : packageApiTitle;
+
+                                    var selectedClass = isSelectedVersion
+                                        ? "fx-selected"
+                                        : "";
+                                    var diffClass = isDiffLift
+                                         ? "fx-left"
+                                         : isDiffRight
+                                            ? "fx-right"
+                                            : "";
+
+                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                        @availability.Framework.GetPlatformVersionDisplayString()
+                                    </span>
+                                }
+                            </span>
+
+                        </td>
+                    </tr>
+                }
+
                 @if (Api.Kind == ApiKind.Property)
                 {
                     var getter = GetAccessor(ApiKind.PropertyGetter);

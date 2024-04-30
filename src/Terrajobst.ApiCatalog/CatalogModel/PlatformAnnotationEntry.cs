@@ -36,6 +36,7 @@ public readonly struct PlatformAnnotationEntry : IEquatable<PlatformAnnotationEn
             "macos" => "macOS",
             "osx" => "OS X",
             "solaris" => "Solaris",
+            "tizen" => "Tizen",
             "tvos" => "tvOS",
             "watchos" => "watchOS",
             "windows" => "Windows",

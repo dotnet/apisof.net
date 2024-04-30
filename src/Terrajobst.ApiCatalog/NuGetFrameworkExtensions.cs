@@ -13,6 +13,22 @@ public static class NuGetFrameworkExtensions
                string.Equals(framework.Framework, ".NETFramework", StringComparison.OrdinalIgnoreCase);
     }
 
+    public static string GetPlatformDisplayString(this NuGetFramework framework)
+    {
+        if (!framework.HasPlatform)
+            return string.Empty;
+
+        return PlatformAnnotationEntry.FormatPlatform(framework.Platform);
+    }
+
+    public static string GetPlatformVersionDisplayString(this NuGetFramework framework)
+    {
+        if (!framework.HasPlatform)
+            return string.Empty;
+
+        return framework.PlatformVersion.GetVersionDisplayString();
+    }
+
     public static string GetVersionDisplayString(this Version version)
     {
         ThrowIfNull(version);

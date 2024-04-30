@@ -1,13 +1,13 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
-using ApisOfDotNet.Pages;
+
 using ApisOfDotNet.Services;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.Logging.Abstractions;
+
 using NuGet.Frameworks;
+
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.DesignNotes;
 using Terrajobst.ApiCatalog.Features;
@@ -104,6 +104,20 @@ public partial class ApiDetails
 
         SourceUrl = results[0];
         HelpUrl = results[1];
+    }
+
+    private IEnumerable<ApiFrameworkAvailability> GetSelectedPlatforms()
+    {
+        if (SelectedAvailability is null)
+            return Enumerable.Empty<ApiFrameworkAvailability>();
+
+        var framework = SelectedAvailability.Framework.Framework;
+        var frameworkVersion = SelectedAvailability.Framework.Version;
+
+        return Availability.Frameworks.Where(fx => string.Equals(fx.Framework.Framework, framework, StringComparison.OrdinalIgnoreCase) &&
+                                                   fx.Framework.Version == frameworkVersion &&
+                                                   fx.Framework.HasPlatform &&
+                                                   fx.Framework.PlatformVersion != FrameworkConstants.EmptyVersion);
     }
 
     private IReadOnlyList<(FeatureUsageSource Source, IReadOnlyList<(FeatureDefinition Feature, float Percentage)> Usages)> GetUsages()
