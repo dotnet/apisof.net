@@ -21,10 +21,9 @@ internal sealed class PackageGraphBuilder
     public async Task EnqueueAsync(PackageIdentity identity)
     {
         var versions = await _store.GetVersionsAsync(identity.Id);
-        var latestVersion = versions.Where(v => v.Major == identity.Version.Major &&
-                                                v.Minor == identity.Version.Minor)
-            .DefaultIfEmpty()
-            .Max();
+        var latestVersion = versions.Where(v => IsInSameBand(identity, v))
+                                    .DefaultIfEmpty()
+                                    .Max();
 
         if (latestVersion is null)
         {
@@ -33,6 +32,33 @@ internal sealed class PackageGraphBuilder
         }
 
         _dependencies.Enqueue(new PackageDependency(identity.Id, new VersionRange(latestVersion)));
+    }
+
+    private static bool IsInSameBand(PackageIdentity identity, NuGetVersion version)
+    {
+        var components = 4;
+
+        if (identity.Version.Version.Revision <= 0)
+        {
+            components--;
+
+            if (identity.Version.Version.Build <= 0)
+                components--;
+        }
+
+        return components switch
+        {
+            4 => identity.Version.Version.Major == version.Version.Major &&
+                 identity.Version.Version.Minor == version.Version.Minor &&
+                 identity.Version.Version.Build == version.Version.Build &&
+                 identity.Version.Version.Revision == version.Version.Revision,
+            3 => identity.Version.Version.Major == version.Version.Major &&
+                 identity.Version.Version.Minor == version.Version.Minor &&
+                 identity.Version.Version.Build == version.Version.Build,
+            2 => identity.Version.Version.Major == version.Version.Major &&
+                 identity.Version.Version.Minor == version.Version.Minor,
+            _ => false
+        };
     }
 
     public async Task<IReadOnlyList<PackageIdentity>> BuildAsync()

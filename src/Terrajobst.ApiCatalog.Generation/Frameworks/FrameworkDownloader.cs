@@ -32,16 +32,27 @@ public static class FrameworkDownloader
             var store = framework.IsPreview ? previewStore : releaseStore;
             var packs = framework.BuiltInPacks.Concat(framework.WorkloadPacks).ToArray();
 
+            var baseFramework = NuGetFramework.Parse(framework.Name);
+
+            if (baseFramework.Version != new Version(5, 0, 0, 0))
+                continue;
+
             // Let's first determine the set of TFMs for this framework. This
             // will create a set including the base framework plus any platform
             // specific TFMs, such as net5.0-windows.
 
-            var platformFrameworks = new HashSet<NuGetFramework>();
-
-            foreach (var pack in packs)
+            var platformFrameworks = new List<NuGetFramework>
             {
-                var packFrameworks = GetFrameworkNames(framework, pack);
-                platformFrameworks.UnionWith(packFrameworks);
+                baseFramework
+            };
+
+            foreach (var supportedPlatform in framework.SupportedPlatforms)
+            {
+                foreach (var supportedVersion in supportedPlatform.Versions)
+                {
+                    var supportedFramework = NuGetFramework.Parse($"{framework.Name}-{supportedPlatform.Name}{supportedVersion}");
+                    platformFrameworks.Add(supportedFramework);
+                }
             }
 
             // Now we'll need to restore for each of these TFMs.
@@ -52,10 +63,15 @@ public static class FrameworkDownloader
 
                 var builder = new PackageGraphBuilder(store, platformFramework);
 
-                foreach (var pack in packs)
+                // Foreach pack, we want to select the highest version that applies.
+
+                foreach (var packGroup in packs.GroupBy(p => p.Name))
                 {
-                    var packFrameworks = GetFrameworkNames(framework, pack);
-                    if (!packFrameworks.Contains(platformFramework))
+                    var pack = packGroup
+                        .Where(p => Applies(platformFramework, framework, p))
+                        .MaxBy(p => Version.Parse(p.Version));
+
+                    if (pack is null)
                         continue;
 
                     var packVersion = NuGetVersion.Parse(pack.Version);
@@ -148,30 +164,31 @@ public static class FrameworkDownloader
         return entries.Count;
     }
 
-    private static IEnumerable<NuGetFramework> GetFrameworkNames(FrameworkDefinition framework, PackReference pack)
+    private static bool Applies(NuGetFramework framework, FrameworkDefinition frameworkDefinition, PackReference pack)
     {
-        var baseFramework = NuGetFramework.Parse(framework.Name);
+        foreach (var packPlatform in pack.Platforms)
+        {
+            if (string.IsNullOrEmpty(packPlatform))
+                return true;
 
-        if (pack.Platforms.Count == 0)
-        {
-            yield return baseFramework;
+            var packFramework = NuGetFramework.Parse($"{frameworkDefinition.Name}-{packPlatform}");
+            if (Applies(framework, packFramework))
+                return true;
         }
-        else
+
+        return false;
+    }
+
+    private static bool Applies(NuGetFramework framework, NuGetFramework packFramework)
+    {
+        if (!string.Equals(framework.Framework, packFramework.Framework, StringComparison.OrdinalIgnoreCase) ||
+            framework.Version != packFramework.Version ||
+            !string.Equals(framework.Platform, packFramework.Platform, StringComparison.OrdinalIgnoreCase))
         {
-            foreach (var platform in pack.Platforms)
-            {
-                if (string.IsNullOrEmpty(platform))
-                {
-                    yield return baseFramework;
-                }
-                else
-                {
-                    var platformFrameworkName = $"{framework.Name}-{platform}";
-                    var platformFramework = NuGetFramework.Parse(platformFrameworkName);
-                    yield return platformFramework;
-                }
-            }
+            return false;
         }
+
+        return packFramework.PlatformVersion <= framework.PlatformVersion;
     }
 
     private static void Validate()

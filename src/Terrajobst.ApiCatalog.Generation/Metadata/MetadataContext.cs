@@ -8,13 +8,15 @@ namespace Terrajobst.ApiCatalog;
 public sealed class MetadataContext
 {
     private MetadataContext(CSharpCompilation compilation,
-        ImmutableArray<MetadataReference> assemblies,
-        ImmutableArray<MetadataReference> dependencies)
+                            ImmutableArray<MetadataReference> assemblies,
+                            ImmutableArray<MetadataReference> dependencies)
     {
+        Compilation = compilation;
         Assemblies = assemblies.Select(r => compilation.GetAssemblyOrModuleSymbol(r)).OfType<IAssemblySymbol>().ToImmutableArray();
         Dependencies = dependencies.Select(r => compilation.GetAssemblyOrModuleSymbol(r)).OfType<IAssemblySymbol>().ToImmutableArray();
     }
 
+    public CSharpCompilation Compilation { get; }
     public ImmutableArray<IAssemblySymbol> Assemblies { get; }
     public ImmutableArray<IAssemblySymbol> Dependencies { get; }
 
@@ -24,7 +26,7 @@ public sealed class MetadataContext
     }
 
     public static MetadataContext Create(IEnumerable<MetadataReference> assemblies,
-        IEnumerable<MetadataReference> dependencies)
+                                         IEnumerable<MetadataReference> dependencies)
     {
         var capturedAssemblies = assemblies.ToImmutableArray();
         var capturedDependencies = dependencies.ToImmutableArray();

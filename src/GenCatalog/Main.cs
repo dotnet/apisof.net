@@ -2,6 +2,10 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
 using System.Xml.Linq;
+
+using Microsoft.CodeAnalysis;
+using NuGet.Frameworks;
+
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.ActionsRunner;
 
@@ -64,7 +68,7 @@ internal sealed class Main : IConsoleMain
             var suffixTreeSize = new FileInfo(suffixTreePath).Length;
             _summaryTable.AppendBytes("Catalog Size", catalogSize);
             _summaryTable.AppendBytes("Suffix Tree Size", suffixTreeSize);
-            
+
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
         }
@@ -96,7 +100,7 @@ internal sealed class Main : IConsoleMain
             }
         }
         _summaryTable.AppendNumber("#Archived Frameworks", Directory.GetDirectories(archivePath).Length);
-        
+
     }
 
     private async Task DownloadPackagedPlatformsAsync(string archivePath, string packsPath)
@@ -125,26 +129,35 @@ internal sealed class Main : IConsoleMain
         };
 
         var frameworks = frameworkResolvers.SelectMany(r => r.Resolve())
-            .OrderBy(t => t.FrameworkName);
+            .OrderBy(t => t.FrameworkName)
+            .Select(t => (Framework: NuGetFramework.Parse(t.FrameworkName), t.Paths))
+            .GroupBy(t => new NuGetFramework(t.Framework.Framework, t.Framework.Version));
         var reindex = false;
 
         Directory.CreateDirectory(indexFrameworksPath);
 
-        foreach (var (frameworkName, paths) in frameworks)
+        foreach (var group in frameworks)
         {
-            var path = Path.Join(indexFrameworksPath, $"{frameworkName}.xml");
-            var alreadyIndexed = !reindex && File.Exists(path);
+            var assemblyByPath = new Dictionary<string, MetadataReference>(StringComparer.OrdinalIgnoreCase);
+            var assemblyEntryByPath = new Dictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
 
-            if (alreadyIndexed)
+            foreach (var (framework, paths) in group)
             {
-                Console.WriteLine($"{frameworkName} already indexed.");
-            }
-            else
-            {
-                Console.WriteLine($"Indexing {frameworkName}...");
-                var frameworkEntry = FrameworkIndexer.Index(frameworkName, paths);
-                using (var stream = File.Create(path))
-                    frameworkEntry.Write(stream);
+                var frameworkName = framework.GetShortFolderName();
+                var path = Path.Join(indexFrameworksPath, $"{frameworkName}.xml");
+                var alreadyIndexed = !reindex && File.Exists(path);
+
+                if (alreadyIndexed)
+                {
+                    Console.WriteLine($"{frameworkName} already indexed.");
+                }
+                else
+                {
+                    Console.WriteLine($"Indexing {frameworkName}...");
+                    var frameworkEntry = FrameworkIndexer.Index(frameworkName, paths, assemblyByPath, assemblyEntryByPath);
+                    using (var stream = File.Create(path))
+                        frameworkEntry.Write(stream);
+                }
             }
         }
 

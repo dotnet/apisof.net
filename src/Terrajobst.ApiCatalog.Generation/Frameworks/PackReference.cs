@@ -11,4 +11,9 @@ public sealed class PackReference(string name)
     public IReadOnlyList<string> Platforms { get; init; } = [];
 
     public IReadOnlyList<string> Workloads { get; init; } = [];
+
+    public override string ToString()
+    {
+        return $"{Name}, Version={Version}";
+    }
 }
