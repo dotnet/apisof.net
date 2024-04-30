@@ -1,5 +1,44 @@
 namespace Terrajobst.ApiCatalog;
 
+// Here are the supported platform versions for each .NET version:
+//
+// net6.0
+// Android: 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0
+// iOS: 10.0, 10.1, 10.2, 10.3, 11.0, 11.1, 11.2, 11.3, 11.4, 12.0, 12.1, 12.2, 12.3, 12.4, 13.0, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 14.0, 14.1, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.0, 16.1, 16.2, 16.4
+// MacCatalyst: 13.1, 13.2, 13.3, 13.4, 13.5, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.1, 16.2, 16.4
+// macOS: 10.14, 10.15, 10.16, 11.0, 11.1, 11.2, 11.3, 12.0, 12.1, 12.3, 13.0, 13.1, 13.3
+// tvOS: 10.0, 10.1, 10.2, 11.0, 11.1, 11.2, 11.3, 11.4, 12.0, 12.1, 12.2, 12.3, 12.4, 13.0, 13.2, 13.3, 13.4, 14.0, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.0, 16.1, 16.4
+// Windows: 7.0, 8.0, 10.0.17763.0, 10.0.18362.0, 10.0.19041.0, 10.0.20348.0, 10.0.22000.0, 10.0.22621.0
+//
+// net7.0
+// Android: 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0
+// iOS: 10.0, 10.1, 10.2, 10.3, 11.0, 11.1, 11.2, 11.3, 11.4, 12.0, 12.1, 12.2, 12.3, 12.4, 13.0, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 14.0, 14.1, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.0, 16.1, 16.2, 16.4
+// MacCatalyst: 13.1, 13.2, 13.3, 13.4, 13.5, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.1, 16.2, 16.4
+// macOS: 10.14, 10.15, 10.16, 11.0, 11.1, 11.2, 11.3, 12.0, 12.1, 12.3, 13.0, 13.1, 13.3
+// tvOS: 10.0, 10.1, 10.2, 11.0, 11.1, 11.2, 11.3, 11.4, 12.0, 12.1, 12.2, 12.3, 12.4, 13.0, 13.2, 13.3, 13.4, 14.0, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.0, 16.1, 16.4
+// Windows: 7.0, 8.0, 10.0.17763.0, 10.0.18362.0, 10.0.19041.0, 10.0.20348.0, 10.0.22000.0, 10.0.22621.0
+//
+// net8.0
+// Android: 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0
+// iOS: 10.0, 10.1, 10.2, 10.3, 11.0, 11.1, 11.2, 11.3, 11.4, 12.0, 12.1, 12.2, 12.3, 12.4, 13.0, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 14.0, 14.1, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.0, 16.1, 16.2, 16.4, 17.0, 17.2
+// MacCatalyst: 13.1, 13.2, 13.3, 13.4, 13.5, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.1, 16.2, 16.4, 17.0, 17.2
+// macOS: 10.14, 10.15, 10.16, 11.0, 11.1, 11.2, 11.3, 12.0, 12.1, 12.3, 13.0, 13.1, 13.3, 14.0, 14.2
+// tvOS: 10.0, 10.1, 10.2, 11.0, 11.1, 11.2, 11.3, 11.4, 12.0, 12.1, 12.2, 12.3, 12.4, 13.0, 13.2, 13.3, 13.4, 14.0, 14.2, 14.3, 14.4, 14.5, 15.0, 15.2, 15.4, 16.0, 16.1, 16.4, 17.0, 17.2
+// Windows: 7.0, 8.0, 10.0.17763.0, 10.0.18362.0, 10.0.19041.0, 10.0.20348.0, 10.0.22000.0, 10.0.22621.0
+//
+// Those are extracted via the the DumpPacks tool; however for that to work, you need to have
+// the workloads installed (for each major.major of .NET separately) so I did this once so we
+// don't have to do this again.
+//
+// This raises the question how we want to represent this here; right now we're expanding each
+// framework into a set of paths to assemblies and index those, which means we're going to index
+// the same set of assemblies again and again. Now, they aren't stored multiple times because the
+// catalog builder de-duplicates assemblies based on their fingerprint, but we do spend time to
+// build the XML files for those, which wasn't great when we had like 4 frameworks per major.minor
+// version of .NET, but this entirely falls apart if we expand the list above. There are 342 version
+// numbers; that means we're taking the existing 122 OS platforms and blow it up to about 450. So
+// yeah, we'll have to think about indexing if we don't want that to take several hours more.
+
 public partial class FrameworkDefinition
 {
     public static IReadOnlyList<FrameworkDefinition> All { get; } =
