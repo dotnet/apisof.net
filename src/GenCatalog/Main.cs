@@ -38,7 +38,6 @@ internal sealed class Main : IConsoleMain
 
     public async Task RunAsync(string[] args, CancellationToken cancellationToken)
     {
-        var success = true;
         try
         {
             var rootPath = _pathProvider.RootPath;
@@ -69,19 +68,18 @@ internal sealed class Main : IConsoleMain
             _summaryTable.AppendBytes("Catalog Size", catalogSize);
             _summaryTable.AppendBytes("Suffix Tree Size", suffixTreeSize);
 
+            await PostToGenCatalogWebHook();
+
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
+
+            await UploadSummaryAsync(success: true);
         }
-        catch (Exception e)
+        catch
         {
-            Console.WriteLine(e);
-            success = false;
+            await UploadSummaryAsync(success: false);
+            throw;
         }
-
-        await UploadSummaryAsync(success);
-
-        if (success)
-            await PostToGenCatalogWebHook();
     }
 
     private async Task DownloadArchivedPlatformsAsync(string archivePath)
