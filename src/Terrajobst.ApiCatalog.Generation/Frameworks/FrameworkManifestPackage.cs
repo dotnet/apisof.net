@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Terrajobst.ApiCatalog;
 
 public sealed class FrameworkManifestPackage
@@ -17,6 +15,5 @@ public sealed class FrameworkManifestPackage
 
     public string Version { get; }
 
-    [JsonIgnore]
     public IReadOnlyList<string> References { get; }
 }
