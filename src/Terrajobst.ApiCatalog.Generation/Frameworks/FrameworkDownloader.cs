@@ -178,6 +178,19 @@ public static class FrameworkDownloader
     {
         foreach (var framework in FrameworkDefinition.All)
         {
+            var nugetFramework = NuGetFramework.Parse(framework.Name);
+            var requiresSupportedPlatforms = string.Equals(nugetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
+                                             nugetFramework.Version >= new Version(5, 0);
+
+            if (requiresSupportedPlatforms && !framework.SupportedPlatforms.Any())
+                Console.WriteLine($"error: '{framework.Name}' doesn't define platforms");
+
+            foreach (var supportedPlatform in framework.SupportedPlatforms)
+            {
+                if (supportedPlatform.Versions.Count == 0)
+                    Console.WriteLine($"error: '{framework.Name}' platform {supportedPlatform.Name} doesn't define any versions");
+            }
+
             if (framework.BuiltInPacks.Count == 0)
                 Console.WriteLine($"error: '{framework.Name}' doesn't define built-in packs");
 
@@ -213,6 +226,20 @@ public static class FrameworkDownloader
                     if (pack.Platforms.Count > 0)
                         Console.WriteLine($"error: '{framework.Name}' library pack '{pack.Name}' can't list platforms");
                 }
+
+                foreach (var platform in pack.Platforms)
+                    ValidatePlatformIsSupported(framework, pack, platform);
+            }
+
+            static void ValidatePlatformIsSupported(FrameworkDefinition framework, PackReference pack, string platform)
+            {
+                var nugetFramework = NuGetFramework.Parse($"{framework.Name}-{platform}");
+                var platformName = nugetFramework.Platform;
+                var platformVersion = nugetFramework.PlatformVersion.GetVersionDisplayString();
+
+                var supportedPlatform = framework.SupportedPlatforms.SingleOrDefault(p => string.Equals(p.Name, platformName, StringComparison.OrdinalIgnoreCase));
+                if (supportedPlatform is null || !supportedPlatform.Versions.Contains(platformVersion))
+                    Console.WriteLine($"error: '{framework.Name}' pack '{pack.Name}' refers to platform '{platform}' which '{framework.Name}' doesn't support");
             }
         }
     }
