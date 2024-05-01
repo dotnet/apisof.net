@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -265,6 +266,15 @@ public sealed class SuffixTree
 
         var buffer = File.ReadAllBytes(path);
         return Load(buffer);
+    }
+
+    public static SuffixTree LoadDeflate(string path)
+    {
+        using var blobStream = File.OpenRead(path);
+        using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
+        using var memoryStream = new MemoryStream();
+        deflateStream.CopyTo(memoryStream);
+        return Load(memoryStream.ToArray());
     }
 
     public static SuffixTree Load(byte[] buffer)

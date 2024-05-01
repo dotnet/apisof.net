@@ -34,7 +34,7 @@ public sealed class CatalogService
         _logger = logger;
 
         _catalogBlobSource = CreateBlobSource("catalog", "apicatalog.dat", ApiCatalogModel.LoadAsync);
-        _suffixTreeBlobSource = CreateBlobSource("catalog", "suffixtree.dat.deflate", SuffixTree.Load);
+        _suffixTreeBlobSource = CreateBlobSource("catalog", "suffixtree.dat.deflate", SuffixTree.LoadDeflate);
         _catalogJobBlobSource = CreateBlobSource("catalog", "job.json", CatalogJobInfo.Load);
         _designNotesBlobSource = CreateBlobSource("catalog", "designNotes.dat", DesignNoteDatabase.Load);
         _usageBlobSource = CreateBlobSource("usage", "usageData.dat", FeatureUsageData.Load);
@@ -157,19 +157,7 @@ public sealed class CatalogService
                 _logger.LogInformation($"Downloading {BlobName}...");
 
                 var blobClient = new BlobClient(_options.Value.AzureStorageConnectionString, ContainerName, BlobName);
-
-                if (!this.BlobName.EndsWith(".deflate", StringComparison.OrdinalIgnoreCase))
-                {
-                    await blobClient.DownloadToAsync(localPath);
-                }
-                else
-                {
-                    await using var blobStream = await blobClient.OpenReadAsync();
-                    await using var deflateStream = new DeflateStream(blobStream, CompressionMode.Decompress);
-                    await using var fileStream = File.Create(localPath);
-                    await deflateStream.CopyToAsync(fileStream);
-                }
-
+                await blobClient.DownloadToAsync(localPath);
                 _logger.LogInformation($"Downloading {BlobName} complete.");
             }
 
