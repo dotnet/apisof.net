@@ -248,17 +248,17 @@
                                                                      .OrderBy(g => g.Key.Framework)
                                                                      .ThenBy(g => g.Key.Version))
                                 {
-                                    var framework = group
+                                    var availability = group
                                         .OrderBy(g => g.Framework.Platform)
-                                        .ThenBy(g => g.Framework.PlatformVersion)
+                                        .ThenByDescending(g => g.Framework.PlatformVersion)
                                         .ThenBy(g => g.Framework.Profile)
-                                        .First()
-                                        .Framework;
+                                        .First();
+
+                                    var framework = availability.Framework;
                                     var isSelectedVersion = IsSelectedFramework(framework);
                                     var isDiffLift = IsLeftFramework(framework);
                                     var isDiffRight = IsRightFramework(framework);
 
-                                    var availability = group.First();
                                     var versionClass = availability.IsInBox
                                              ? "fx-version-inbox"
                                              : "fx-version-package";
@@ -338,7 +338,7 @@
                                 @foreach (var availability in platformGroup.OrderBy(g => g.Framework.PlatformVersion))
                                 {
                                     var framework = availability.Framework;
-                                    var isSelectedVersion = IsSelectedFramework(framework);
+                                    var isSelectedVersion = IsSelectedFramework(framework, matchAnyPlatform:false);
                                     var isDiffLift = IsLeftFramework(framework);
                                     var isDiffRight = IsRightFramework(framework);
 

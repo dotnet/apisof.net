@@ -265,7 +265,7 @@ public partial class ApiDetails
     private bool IsSelectedFramework(NuGetFramework framework, bool matchAnyPlatform = true)
     {
         return BrowsingContext.SelectedFramework == framework ||
-               matchAnyPlatform && framework.IsPlatformNeutral() && framework == BrowsingContext.SelectedFramework?.GetBaseFrameworkOrSelf();
+               matchAnyPlatform && framework.GetBaseFrameworkOrSelf() == BrowsingContext.SelectedFramework?.GetBaseFrameworkOrSelf();
     }
 
     private bool IsLeftFramework(NuGetFramework framework)
