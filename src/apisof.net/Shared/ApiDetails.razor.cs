@@ -17,6 +17,8 @@ namespace ApisOfDotNet.Shared;
 
 public partial class ApiDetails
 {
+    private bool _rendered;
+
     [Inject]
     public required CatalogService CatalogService { get; set; }
 
@@ -66,6 +68,11 @@ public partial class ApiDetails
         await UpdateApiAsync();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _rendered = true;
+    }
+
     private async Task UpdateApiAsync()
     {
         Usages = GetUsages();
@@ -103,6 +110,15 @@ public partial class ApiDetails
 
         DesignReviews = CatalogService.DesignNoteDatabase.GetDesignNotes(Api.Guid);
 
+        // We only do this operation after the first render, otherwise server-side prerendering
+        // will wait until we resolved all the links, which makes the page sluggish.
+
+        if (_rendered)
+            await UpdateLinksAsync();
+    }
+
+    private async Task UpdateLinksAsync()
+    {
         var results = await Task.WhenAll(
             SourceResolver.ResolveAsync(Api),
             DocumentationResolver.ResolveAsync(Api)

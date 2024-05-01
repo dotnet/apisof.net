@@ -6,6 +6,12 @@ namespace ApisOfDotNet.Services;
 
 public sealed class DocumentationResolverService
 {
+    private static readonly string[] _targets = [
+        "https://docs.microsoft.com/en-us/dotnet/api/",
+        "https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/",
+        "https://learn.microsoft.com/en-us/uwp/api/"
+    ];
+
     private readonly HttpClient _client;
 
     public DocumentationResolverService(HttpClient client)
@@ -19,12 +25,34 @@ public sealed class DocumentationResolverService
     {
         ThrowIfDefault(api);
 
-        var helpLink = GetHelpLink(api);
-        using var response = await _client.GetAsync(helpLink);
-        return response.StatusCode == HttpStatusCode.OK ? helpLink : null;
+        var helpLinks = GetHelpLinks(api).ToArray();
+        var tasks = helpLinks.Select(_client.GetAsync).ToArray();
+        await Task.WhenAll(tasks);
+        try
+        {
+            for (var i = 0; i < tasks.Length; i++)
+            {
+                var response = tasks[i].Result;
+                if (response.StatusCode == HttpStatusCode.OK)
+                    return helpLinks[i];
+            }
+        }
+        finally
+        {
+            foreach (var task in tasks)
+                task.Result.Dispose();
+        }
+
+        return null;
     }
 
-    private static string GetHelpLink(ApiModel api)
+    private static IEnumerable<string> GetHelpLinks(ApiModel api)
+    {
+        var path = GetHelpPath(api);
+        return _targets.Select(t => t + path);
+    }
+
+    private static string GetHelpPath(ApiModel api)
     {
         var segments = api.AncestorsAndSelf().Reverse();
 
@@ -77,6 +105,6 @@ public sealed class DocumentationResolverService
 
         var path = sb.ToString();
 
-        return $"https://docs.microsoft.com/en-us/dotnet/api/{path}";
+        return path;
     }
 }
