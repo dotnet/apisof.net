@@ -296,7 +296,7 @@
                     if (availability is not null)
                     {
                         var framework = availability.Framework;
-                        var isSelectedVersion = IsSelectedFramework(framework);
+                        var isSelectedVersion = IsSelectedFramework(framework, matchAnyPlatform: false);
                         var isDiffLift = IsLeftFramework(framework);
                         var isDiffRight = IsRightFramework(framework);
 

@@ -241,9 +241,10 @@ public partial class ApiDetails
         return assembly.Experimental;
     }
 
-    private bool IsSelectedFramework(NuGetFramework framework)
+    private bool IsSelectedFramework(NuGetFramework framework, bool matchAnyPlatform = true)
     {
-        return BrowsingContext.SelectedFramework == framework;
+        return BrowsingContext.SelectedFramework == framework ||
+               matchAnyPlatform && framework.IsPlatformNeutral() && framework == BrowsingContext.SelectedFramework?.GetBaseFrameworkOrSelf();
     }
 
     private bool IsLeftFramework(NuGetFramework framework)
