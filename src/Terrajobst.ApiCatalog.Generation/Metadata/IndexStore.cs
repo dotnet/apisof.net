@@ -105,7 +105,9 @@ public sealed class FileSystemIndexStore : IndexStore
         if (!Directory.Exists(fullPath))
             return [];
 
-        return Directory.EnumerateFiles(fullPath);
+        return Directory
+            .EnumerateFiles(fullPath)
+            .Select(p => Path.GetRelativePath(_rootPath, p));
     }
 }
 
