@@ -596,11 +596,7 @@ public sealed class ApiCatalogModel
         await using var decompressedStream = new DeflateStream(stream, CompressionMode.Decompress);
 
         var buffer = new byte[bufferSize];
-        var offset = 0;
-
-        while (offset < buffer.Length)
-            offset += await decompressedStream.ReadAsync(buffer, offset, buffer.Length - offset);
-
+        await decompressedStream.ReadExactlyAsync(buffer);
         var sizeOnDisk = (int)(stream.Position - start);
 
         return new ApiCatalogModel(formatVersion, sizeOnDisk, buffer, tableSizes);
