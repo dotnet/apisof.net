@@ -71,7 +71,12 @@ public partial class ApiDetails
         Usages = GetUsages();
         Availability = Api.GetAvailability();
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
-                               Availability.Frameworks.First();
+                               Availability.Frameworks
+                                    .OrderByDescending(fx => fx.Framework.Version)
+                                    .ThenBy(fx => fx.Framework.Framework)
+                                    .ThenBy(fx => fx.Framework.HasPlatform)
+                                    .OrderByDescending(fx => fx.Framework.PlatformVersion)
+                                    .First();
         PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.Catalog, SelectedAvailability.Framework.GetShortFolderName());
         SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(Api);
 
