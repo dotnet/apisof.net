@@ -1,0 +1,37 @@
+﻿<div class="row">
+    <div class="col">
+        <select class="custom-select" @bind="Model.SelectedFamilyValue">
+            @foreach (var family in Model.Families)
+            {
+                <option selected="@(Model.SelectedFamily == family)" value="@family.Value">@family</option>
+            }
+        </select>
+    </div>
+    <div class="col-3 pl-0">
+        <select class="custom-select" @bind="@Model.SelectedVersionValue">
+            @foreach (var version in Model.Versions)
+            {
+                <option selected="@(Model.SelectedVersion == version)" value="@version.Value">@version</option>
+            }
+        </select>
+    </div>
+    <div class="col-3 pl-0">
+        <select class="custom-select" @bind="@Model.SelectedPlatformValue">
+            @foreach (var version in Model.Platforms)
+            {
+                <option selected="@(Model.SelectedPlatform == version)" value="@version.Value">@version</option>
+            }
+        </select>
+    </div>
+    <div class="col-3 pl-0">
+        @{ 
+            var isDisabled = Model.SelectedPlatformVersionValue is null;
+        }
+        <select class="custom-select" @bind="@Model.SelectedPlatformVersionValue" disabled="@isDisabled">
+            @foreach (var version in Model.PlatformVersions)
+            {
+                <option selected="@(Model.SelectedPlatformVersion == version)" value="@version.Value">@version</option>
+            }
+        </select>
+    </div>
+</div>
