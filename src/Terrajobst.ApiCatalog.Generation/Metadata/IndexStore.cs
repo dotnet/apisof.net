@@ -85,7 +85,8 @@ public sealed class FileSystemIndexStore : IndexStore
         ThrowIfNullOrEmpty(path);
 
         var fullPath = Path.Join(_rootPath, path);
-        File.Delete(fullPath);
+        if (File.Exists(path))
+            File.Delete(fullPath);
     }
 
     protected override bool Exists(string path)
@@ -101,6 +102,9 @@ public sealed class FileSystemIndexStore : IndexStore
         ThrowIfNullOrEmpty(path);
 
         var fullPath = Path.Join(_rootPath, path);
+        if (!Directory.Exists(fullPath))
+            return [];
+
         return Directory.EnumerateFiles(fullPath);
     }
 }
@@ -257,7 +261,7 @@ public abstract class IndexStore
 
     private static string GetPackagePath(string id, string version)
     {
-        return Path.Join(PackageDirectory, $"{ id}-{version}.xml");
+        return Path.Join(PackageDirectory, $"{id}-{version}.xml");
     }
 
     private static string GetPackageDisabledPath(string id)
