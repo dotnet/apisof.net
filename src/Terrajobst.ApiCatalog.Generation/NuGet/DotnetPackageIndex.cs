@@ -7,20 +7,6 @@ namespace Terrajobst.ApiCatalog;
 
 public static class DotnetPackageIndex
 {
-    private static readonly string[] DotnetPlatformOwners = {
-        "aspnet",
-        "dotnetframework",
-        "dotnetiot",
-        "EntityFramework",
-        "RoslynTeam",
-        "nugetsqltools",
-        //"dotnetfoundation",
-        "newtonsoft",
-        "xamarin",
-        "corewcf",
-        "aspire"
-    };
-
     public static async Task<int> CreateAsync(string packageListPath)
     {
         var packages = await GetPackagesAsync(NuGetFeeds.NuGetOrg, NuGetFeeds.NightlyLatest);
@@ -82,8 +68,7 @@ public static class DotnetPackageIndex
 
         var packageIds = ownerInformation.Keys
                                          .ToHashSet(StringComparer.OrdinalIgnoreCase)
-                                         .Where(id => IsOwnedByDotNet(ownerInformation, id) &&
-                                                      PackageFilter.Default.IsMatch(id))
+                                         .Where(id => IsPlatformPackage(id, ownerInformation))
                                          .ToArray();
 
         Console.WriteLine($"Found {packageIds.Length:N0} relevant package IDs.");
@@ -152,17 +137,14 @@ public static class DotnetPackageIndex
         return result;
     }
 
-    private static bool IsOwnedByDotNet(Dictionary<string, string[]> ownerInformation, string id)
+    private static bool IsPlatformPackage(string id, Dictionary<string, string[]> ownerInformation)
     {
         if (ownerInformation.TryGetValue(id, out var owners))
         {
             foreach (var owner in owners)
             {
-                foreach (var platformOwner in DotnetPlatformOwners)
-                {
-                    if (string.Equals(owner, platformOwner, StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
+                if (PlatformPackageDefinition.Owners.Contains(owner) && PlatformPackageDefinition.Filter.IsMatch(id))
+                    return true;
             }
         }
 

@@ -14,10 +14,8 @@ internal static class PackageExtensions
         var tfms = new HashSet<string>();
 
         foreach (var group in root.GetItems("ref").Concat(root.GetItems("lib")))
-        {
             if (tfms.Add(group.TargetFramework.GetShortFolderName()))
                 yield return group;
-        }
     }
 
     public static FrameworkSpecificGroup? GetCatalogReferenceGroup(this PackageArchiveReader root, NuGetFramework current)
