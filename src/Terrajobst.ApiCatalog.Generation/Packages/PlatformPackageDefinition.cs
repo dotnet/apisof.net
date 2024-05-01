@@ -16,7 +16,8 @@ internal static class PlatformPackageDefinition
         "newtonsoft",
         "xamarin",
         "corewcf",
-        "aspire"
+        "aspire",
+        "MicrosoftReunionESTeam"
     ], StringComparer.OrdinalIgnoreCase);
 
     public static PackageFilter Filter { get; } = new(
@@ -45,6 +46,7 @@ internal static class PlatformPackageDefinition
                 PackageFilterExpression.Parse("Microsoft.VisualBasic.*"),
                 PackageFilterExpression.Parse("Microsoft.Web.*"),
                 PackageFilterExpression.Parse("Microsoft.Win32.*"),
+                PackageFilterExpression.Parse("Microsoft.WindowsAppSDK"),
                 PackageFilterExpression.Parse("System.*"),
                 PackageFilterExpression.Parse("Iot.*"),
                 PackageFilterExpression.Parse("Newtonsoft.Json.*"),
