@@ -10,6 +10,10 @@ public static class FrameworkDownloader
 {
     public static async Task<int> DownloadAsync(string frameworksPath, string packsPath)
     {
+        var manifestPath = Path.Join(frameworksPath, FrameworkManifest.FileName);
+        if (File.Exists(manifestPath))
+            return FrameworkManifest.Load(manifestPath).Frameworks.Count;
+
         Validate();
 
         var entries = new List<FrameworkManifestEntry>();
@@ -154,7 +158,6 @@ public static class FrameworkDownloader
         }
 
         Directory.CreateDirectory(frameworksPath);
-        var manifestPath = Path.Join(frameworksPath, FrameworkManifest.FileName);
         var manifest = new FrameworkManifest(entries);
         manifest.Save(manifestPath);
 

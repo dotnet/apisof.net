@@ -134,9 +134,9 @@ internal sealed class CrawlMain : ConsoleCommand
 
         var databaseSize = new FileInfo(databasePath).Length;
         await usageDatabase.OpenAsync();
-        
+
         Console.WriteLine("Getting statistics...");
-        
+
         stopwatch.Restart();
         var statistics = await usageDatabase.GetStatisticsAsync();
         Console.WriteLine($"Finished getting statistics. Took {stopwatch.Elapsed}");
@@ -235,7 +235,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
                     if (cancellationToken.IsCancellationRequested)
                         break;
-                    
+
                     var collectionResults = File.Exists(fileName)
                         ? await CollectionSetResults.LoadAsync(fileName)
                         : CollectionSetResults.Empty;

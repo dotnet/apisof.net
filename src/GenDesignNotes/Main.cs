@@ -89,7 +89,7 @@ internal sealed class Main : IConsoleMain
         var designNotesSize = new FileInfo(designNotesPath).Length;
         var apiCount = database.GetApiCount();
         var noteCount = database.GetNoteCount();
-        
+
         _summaryTable.AppendNumber("#APIs with notes", apiCount);
         _summaryTable.AppendNumber("#Notes", noteCount);
         _summaryTable.AppendBytes(designNotesName, designNotesSize);

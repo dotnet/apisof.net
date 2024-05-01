@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Diagnostics;
 using System.Xml.Linq;
 
 namespace Terrajobst.ApiCatalog;
@@ -16,65 +17,75 @@ public sealed partial class CatalogBuilder
     private readonly SortedSet<string> _platformNames = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<Guid, (Guid, Guid)> _extensions = new();
 
-    public void Index(string indexPath)
+
+    public void Index(IndexStore indexStore)
     {
-        ThrowIfNullOrWhiteSpace(indexPath);
+        ThrowIfNull(indexStore);
 
-        var files = Directory.GetFiles(indexPath, "*.xml");
-
-        foreach (var path in files)
-        {
-            Console.WriteLine($"Processing {path}...");
-            var doc = XDocument.Load(path);
+        foreach (var doc in indexStore.GetAssemblies())
             IndexDocument(doc);
-        }
+
+        foreach (var doc in indexStore.GetFrameworks())
+            IndexDocument(doc);
+
+        foreach (var doc in indexStore.GetPackages())
+            IndexDocument(doc);
     }
 
-    public void IndexDocument(XDocument doc)
+    private void IndexDocument(XDocument doc)
     {
         ThrowIfNull(doc);
 
         if (doc.Root is null or { IsEmpty: true })
             return;
 
-        if (doc.Root.Name == "package")
-            IndexPackage(doc);
+        if (doc.Root.Name == "assembly")
+            IndexAssembly(doc);
         else if (doc.Root.Name == "framework")
             IndexFramework(doc);
+        else if (doc.Root.Name == "package")
+            IndexPackage(doc);
         else
             throw new Exception($"Unexpected element: {doc.Root.Name}");
+    }
+
+    private void IndexAssembly(XDocument doc)
+    {
+        var assemblyElement = doc.Root;
+        Debug.Assert(assemblyElement?.Name == "assembly");
+
+        DefineApis(assemblyElement.Elements("api"));
+        DefineExtensions(assemblyElement.Elements("extension"));
+
+        var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint")!.Value);
+        var name = assemblyElement.Attribute("name")!.Value;
+        var version = assemblyElement.Attribute("version")!.Value;
+        var publicKeyToken = assemblyElement.Attribute("publicKeyToken")!.Value;
+        var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
+        Debug.Assert(assemblyCreated);
+
+        foreach (var syntaxElement in assemblyElement.Elements("syntax"))
+        {
+            var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id")!.Value);
+            var syntax = syntaxElement.Value;
+            DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
+        }
+
+        DefinePlatformSupport(assemblyFingerprint, assemblyElement);
+        DefineObsoletions(assemblyFingerprint, assemblyElement);
+        DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
+        DefineExperimentals(assemblyFingerprint, assemblyElement);
     }
 
     private void IndexFramework(XDocument doc)
     {
         var framework = doc.Root!.Attribute("name")!.Value;
         DefineFramework(framework);
-        DefineApis(doc.Root.Elements("api"));
-        DefineExtensions(doc.Root.Elements("extension"));
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
             var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint")!.Value);
-            var name = assemblyElement.Attribute("name")!.Value;
-            var version = assemblyElement.Attribute("version")!.Value;
-            var publicKeyToken = assemblyElement.Attribute("publicKeyToken")!.Value;
-            var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
             DefineFrameworkAssembly(framework, assemblyFingerprint);
-
-            if (assemblyCreated)
-            {
-                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
-                {
-                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id")!.Value);
-                    var syntax = syntaxElement.Value;
-                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
-                }
-
-                DefinePlatformSupport(assemblyFingerprint, assemblyElement);
-                DefineObsoletions(assemblyFingerprint, assemblyElement);
-                DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
-                DefineExperimentals(assemblyFingerprint, assemblyElement);
-            }
         }
     }
 
@@ -82,36 +93,15 @@ public sealed partial class CatalogBuilder
     {
         var packageFingerprint = Guid.Parse(doc.Root!.Attribute("fingerprint")!.Value);
         var packageId = doc.Root.Attribute("id")!.Value;
-        var packageName = doc.Root.Attribute("name")!.Value;
-        DefinePackage(packageFingerprint, packageId, packageName);
-        DefineApis(doc.Root.Elements("api"));
-        DefineExtensions(doc.Root.Elements("extension"));
+        var packageVersion = doc.Root.Attribute("version")!.Value;
+        DefinePackage(packageFingerprint, packageId, packageVersion);
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
             var framework = assemblyElement.Attribute("fx")!.Value;
             var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint")!.Value);
-            var name = assemblyElement.Attribute("name")!.Value;
-            var version = assemblyElement.Attribute("version")!.Value;
-            var publicKeyToken = assemblyElement.Attribute("publicKeyToken")!.Value;
             DefineFramework(framework);
-            var assemblyCreated = DefineAssembly(assemblyFingerprint, name, version, publicKeyToken);
             DefinePackageAssembly(packageFingerprint, framework, assemblyFingerprint);
-
-            if (assemblyCreated)
-            {
-                foreach (var syntaxElement in assemblyElement.Elements("syntax"))
-                {
-                    var apiFingerprint = Guid.Parse(syntaxElement.Attribute("id")!.Value);
-                    var syntax = syntaxElement.Value;
-                    DefineDeclaration(assemblyFingerprint, apiFingerprint, syntax);
-                }
-
-                DefinePlatformSupport(assemblyFingerprint, assemblyElement);
-                DefineObsoletions(assemblyFingerprint, assemblyElement);
-                DefinePreviewRequirements(assemblyFingerprint, assemblyElement);
-                DefineExperimentals(assemblyFingerprint, assemblyElement);
-            }
         }
     }
 

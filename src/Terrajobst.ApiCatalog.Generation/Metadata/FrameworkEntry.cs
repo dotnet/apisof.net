@@ -17,17 +17,4 @@ public sealed class FrameworkEntry
 
     public string FrameworkName { get; }
     public IReadOnlyList<AssemblyEntry> Assemblies { get; }
-
-    public void Write(Stream stream)
-    {
-        XmlEntryFormat.WriteFrameworkEntry(stream, this);
-    }
-
-    public XDocument ToDocument()
-    {
-        using var stream = new MemoryStream();
-        Write(stream);
-        stream.Position = 0;
-        return XDocument.Load(stream);
-    }
 }

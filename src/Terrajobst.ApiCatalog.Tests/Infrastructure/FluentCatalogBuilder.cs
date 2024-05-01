@@ -1,21 +1,18 @@
-﻿using System.Xml.Linq;
-
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace Terrajobst.ApiCatalog.Tests;
 
 internal sealed class FluentCatalogBuilder
 {
-    private readonly List<XDocument> _documents = new();
+    private readonly InMemoryStore _indexStore = new();
 
     public FluentCatalogBuilder AddFramework(string name, Action<FrameworkBuilder> action)
     {
         var builder = new FrameworkBuilder(name);
         action(builder);
         var entry = builder.Build();
-        var doc = entry.ToDocument();
-        _documents.Add(doc);
+        _indexStore.Store(entry);
         return this;
     }
 
@@ -24,18 +21,14 @@ internal sealed class FluentCatalogBuilder
         var builder = new PackageBuilder(id, version);
         action(builder);
         var entry = builder.Build();
-        var doc = entry.ToDocument();
-        _documents.Add(doc);
+        _indexStore.Store(entry);
         return this;
     }
 
     public async Task<ApiCatalogModel> BuildAsync()
     {
         var builder = new CatalogBuilder();
-
-        foreach (var doc in _documents)
-            builder.IndexDocument(doc);
-
+        builder.Index(_indexStore);
         return await builder.BuildAsync();
     }
 

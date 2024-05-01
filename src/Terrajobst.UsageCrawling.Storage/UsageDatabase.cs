@@ -375,7 +375,7 @@ public sealed class UsageDatabase : IDisposable
             """,
             transaction: _transaction);
     }
-    
+
     private sealed class InsertReferenceUnitCommand : IDisposable
     {
         private readonly SqliteCommand _command;

@@ -11,7 +11,7 @@ public sealed class GitHubActionsEnvironment
     }
 
     public bool IsRunningInActions => RunId is not null;
-    
+
     public string? ServerUrl { get; } = Environment.GetEnvironmentVariable("GITHUB_SERVER_URL");
 
     public string? Repository { get; } = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");

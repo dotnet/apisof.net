@@ -32,7 +32,7 @@ public static class FrameworkIndexer
         {
             var metadata = metadataContext.Compilation.GetMetadataReference(assembly) as PortableExecutableReference;
             Debug.Assert(metadata is not null);
-            
+
             var path = metadata.FilePath;
             Debug.Assert(path is not null);
 

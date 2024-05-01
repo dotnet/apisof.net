@@ -21,17 +21,4 @@ public sealed class PackageEntry
     public string Id { get; }
     public string Version { get; }
     public IReadOnlyList<FrameworkEntry> Entries { get; }
-
-    public void Write(Stream stream)
-    {
-        XmlEntryFormat.WritePackageEntry(stream, this);
-    }
-
-    public XDocument ToDocument()
-    {
-        using var stream = new MemoryStream();
-        Write(stream);
-        stream.Position = 0;
-        return XDocument.Load(stream);
-    }
 }

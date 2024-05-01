@@ -18,7 +18,7 @@ internal sealed class Main : IConsoleMain
         ThrowIfNull(scratchFileProvider);
         ThrowIfNull(store);
         ThrowIfNull(summaryTable);
-        
+
         _scratchFileProvider = scratchFileProvider;
         _store = store;
         _summaryTable = summaryTable;
@@ -111,7 +111,7 @@ internal sealed class Main : IConsoleMain
         await usageDatabase.OpenAsync();
 
         Console.WriteLine("Getting statistics...");
-        
+
         stopwatch.Restart();
         var statistics = await usageDatabase.GetStatisticsAsync();
         Console.WriteLine($"Finished getting statistics. Took {stopwatch.Elapsed}");
@@ -119,7 +119,7 @@ internal sealed class Main : IConsoleMain
         _summaryTable.AppendNumber("#Indexed Reference Units", statistics.ReferenceUnitCount);
         _summaryTable.AppendNumber("#Indexed Usages", statistics.UsageCount);
         _summaryTable.AppendBytes("#Index Size", databaseSize);
-        
+
         Console.WriteLine("Deleting irrelevant features...");
 
         stopwatch.Restart();

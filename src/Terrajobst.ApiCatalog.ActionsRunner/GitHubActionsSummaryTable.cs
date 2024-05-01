@@ -18,7 +18,7 @@ public class GitHubActionsSummaryTable
     {
         if (_headerWritten)
             return;
-        
+
         _actionsLog.AppendSummary("| Metric | Value |");
         _actionsLog.AppendSummary("|--------|------:|");
         _headerWritten = true;

@@ -21,7 +21,7 @@ internal sealed class Main : IConsoleMain
         ThrowIfNull(store);
         ThrowIfNull(webHook);
         ThrowIfNull(summaryTable);
-        
+
         _pathProvider = pathProvider;
         _store = store;
         _webHook = webHook;

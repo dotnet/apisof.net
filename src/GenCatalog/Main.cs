@@ -42,8 +42,6 @@ internal sealed class Main : IConsoleMain
         {
             var rootPath = _pathProvider.RootPath;
             var indexPath = Path.Combine(rootPath, "index");
-            var indexFrameworksPath = Path.Combine(indexPath, "frameworks");
-            var indexPackagesPath = Path.Combine(indexPath, "packages");
             var packagesPath = Path.Combine(rootPath, "packages");
             var packageListPath = Path.Combine(packagesPath, "packages.xml");
             var frameworksPath = Path.Combine(rootPath, "frameworks");
@@ -51,14 +49,16 @@ internal sealed class Main : IConsoleMain
             var suffixTreePath = Path.Combine(rootPath, "suffixTree.dat");
             var catalogModelPath = Path.Combine(rootPath, "apicatalog.dat");
 
+            var indexStore = new FileSystemIndexStore(indexPath);
+
             var stopwatch = Stopwatch.StartNew();
 
             await DownloadArchivedPlatformsAsync(frameworksPath);
             await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
             await DownloadDotnetPackageListAsync(packageListPath);
-            await GeneratePlatformIndexAsync(frameworksPath, indexFrameworksPath);
-            await GeneratePackageIndexAsync(packageListPath, packagesPath, indexPackagesPath, frameworksPath);
-            await GenerateCatalogAsync(indexFrameworksPath, indexPackagesPath, catalogModelPath);
+            await GeneratePlatformIndexAsync(frameworksPath, indexStore);
+            await GeneratePackageIndexAsync(packageListPath, packagesPath, frameworksPath, indexStore);
+            await GenerateCatalogAsync(indexStore, catalogModelPath);
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
             await _store.UploadApiCatalogAsync(catalogModelPath);
             await _store.UploadSuffixTreeAsync(suffixTreePath);
@@ -119,20 +119,18 @@ internal sealed class Main : IConsoleMain
         _summaryTable.AppendNumber("#Packages", packageCount);
     }
 
-    private static Task GeneratePlatformIndexAsync(string frameworksPath, string indexFrameworksPath)
+    private static Task GeneratePlatformIndexAsync(string frameworksPath, IndexStore indexStore)
     {
         var frameworkResolvers = new FrameworkProvider[] {
             new ArchivedFrameworkProvider(frameworksPath),
             new PackBasedFrameworkProvider(frameworksPath)
         };
 
-        var frameworks = frameworkResolvers.SelectMany(r => r.Resolve())
+        var frameworks = frameworkResolvers
+            .SelectMany(r => r.Resolve())
             .OrderBy(t => t.FrameworkName)
             .Select(t => (Framework: NuGetFramework.Parse(t.FrameworkName), t.Paths))
             .GroupBy(t => new NuGetFramework(t.Framework.Framework, t.Framework.Version));
-        var reindex = false;
-
-        Directory.CreateDirectory(indexFrameworksPath);
 
         foreach (var group in frameworks)
         {
@@ -142,8 +140,7 @@ internal sealed class Main : IConsoleMain
             foreach (var (framework, paths) in group)
             {
                 var frameworkName = framework.GetShortFolderName();
-                var path = Path.Join(indexFrameworksPath, $"{frameworkName}.xml");
-                var alreadyIndexed = !reindex && File.Exists(path);
+                var alreadyIndexed = indexStore.HasFramework(frameworkName);
 
                 if (alreadyIndexed)
                 {
@@ -153,8 +150,7 @@ internal sealed class Main : IConsoleMain
                 {
                     Console.WriteLine($"Indexing {frameworkName}...");
                     var frameworkEntry = FrameworkIndexer.Index(frameworkName, paths, assemblyByPath, assemblyEntryByPath);
-                    using (var stream = File.Create(path))
-                        frameworkEntry.Write(stream);
+                    indexStore.Store(frameworkEntry);
                 }
             }
         }
@@ -162,7 +158,7 @@ internal sealed class Main : IConsoleMain
         return Task.CompletedTask;
     }
 
-    private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string indexPackagesPath, string frameworksPath)
+    private static async Task GeneratePackageIndexAsync(string packageListPath, string packagesPath, string frameworksPath, IndexStore indexStore)
     {
         var frameworkLocators = new FrameworkLocator[] {
             new ArchivedFrameworkLocator(frameworksPath),
@@ -171,7 +167,6 @@ internal sealed class Main : IConsoleMain
         };
 
         Directory.CreateDirectory(packagesPath);
-        Directory.CreateDirectory(indexPackagesPath);
 
         var document = XDocument.Load(packageListPath);
         Directory.CreateDirectory(packagesPath);
@@ -193,20 +188,16 @@ internal sealed class Main : IConsoleMain
 
         foreach (var (id, version) in packages)
         {
-            var path = Path.Join(indexPackagesPath, $"{id}-{version}.xml");
-            var disabledPath = Path.Join(indexPackagesPath, $"{id}-all.disabled");
-            var failedVersionPath = Path.Join(indexPackagesPath, $"{id}-{version}.failed");
-
-            var alreadyIndexed = !retryIndexed && File.Exists(path) ||
-                                 !retryDisabled && File.Exists(disabledPath) ||
-                                 !retryFailed && File.Exists(failedVersionPath);
+            var alreadyIndexed = !retryIndexed && indexStore.IsMarkedAsIndexed(id, version) ||
+                                 !retryDisabled && indexStore.IsMarkedAsDisabled(id, version) ||
+                                 !retryFailed && indexStore.IsMarkedAsFailed(id, version);
 
             if (alreadyIndexed)
             {
-                if (File.Exists(path))
+                if (indexStore.IsMarkedAsIndexed(id, version))
                     Console.WriteLine($"Package {id} {version} already indexed.");
 
-                if (File.Exists(disabledPath))
+                if (indexStore.IsMarkedAsDisabled(id, version))
                     nugetStore.DeleteFromCache(id, version);
             }
             else
@@ -215,33 +206,27 @@ internal sealed class Main : IConsoleMain
                 try
                 {
                     var packageEntry = await packageIndexer.Index(id, version);
-                    if (packageEntry is null)
+                    if (packageEntry is not null)
                     {
-                        Console.WriteLine($"Not a library package.");
-                        File.WriteAllText(disabledPath, string.Empty);
-                        nugetStore.DeleteFromCache(id, version);
+                        indexStore.Store(packageEntry);
                     }
                     else
                     {
-                        using (var stream = File.Create(path))
-                            packageEntry.Write(stream);
-
-                        File.Delete(disabledPath);
-                        File.Delete(failedVersionPath);
+                        Console.WriteLine($"Not a library package.");
+                        indexStore.MarkPackageAsDisabled(id, version);
+                        nugetStore.DeleteFromCache(id, version);
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Failed: {ex}");
-                    File.Delete(disabledPath);
-                    File.Delete(path);
-                    File.WriteAllText(failedVersionPath, ex.ToString());
+                    indexStore.MarkPackageAsFailed(id, version, ex);
                 }
             }
         }
     }
 
-    private async Task GenerateCatalogAsync(string platformsPath, string packagesPath, string catalogModelPath)
+    private async Task GenerateCatalogAsync(IndexStore indexStore, string catalogModelPath)
     {
         if (File.Exists(catalogModelPath))
         {
@@ -252,8 +237,7 @@ internal sealed class Main : IConsoleMain
         File.Delete(catalogModelPath);
 
         var builder = new CatalogBuilder();
-        builder.Index(platformsPath);
-        builder.Index(packagesPath);
+        builder.Index(indexStore);
         builder.Build(catalogModelPath);
 
         var model = await ApiCatalogModel.LoadAsync(catalogModelPath);
