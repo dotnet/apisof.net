@@ -236,8 +236,7 @@
                     var showAllFrameworks = !isAvailableInAnyRelevantFrameworks;
                 }
 
-                @foreach (var frameworkGroup in Availability.Frameworks.Where(fx => showAllFrameworks || fx.Framework.IsRelevantForCatalog())
-                                                                       .Where(fx => !fx.Framework.HasPlatform)
+                @foreach (var frameworkGroup in Availability.Frameworks.Where(a => showAllFrameworks || a.Framework.IsRelevantForCatalog())
                                                                        .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
                                                                        .OrderBy(g => g.Key))
                 {
@@ -245,13 +244,16 @@
                         <th>@frameworkGroup.Key</th>
                         <td>
                             <span class="d-flex flex-row flex-wrap align-content-between">
-                                @foreach (var group in frameworkGroup.GroupBy(fx => fx.Framework)
-                                                                     .OrderBy(g => g.Key.Version)
-                                                                     .ThenBy(g => g.Key.Platform)
-                                                                     .ThenBy(g => g.Key.PlatformVersion)
-                                                                     .ThenBy(g => g.Key.Profile))
+                                @foreach (var group in frameworkGroup.GroupBy(a => (a.Framework.Framework, a.Framework.Version))
+                                                                     .OrderBy(g => g.Key.Framework)
+                                                                     .ThenBy(g => g.Key.Version))
                                 {
-                                    var framework = group.First().Framework;
+                                    var framework = group
+                                        .OrderBy(g => g.Framework.Platform)
+                                        .ThenBy(g => g.Framework.PlatformVersion)
+                                        .ThenBy(g => g.Framework.Profile)
+                                        .First()
+                                        .Framework;
                                     var isSelectedVersion = IsSelectedFramework(framework);
                                     var isDiffLift = IsLeftFramework(framework);
                                     var isDiffRight = IsRightFramework(framework);
@@ -274,7 +276,7 @@
                                             : "";
 
                                     <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
-                                        @availability.Framework.GetVersionDisplayString()
+                                        @availability.Framework.GetBaseFrameworkOrSelf().GetVersionDisplayString()
                                     </span>
                                 }
                             </span>
@@ -282,10 +284,55 @@
                     </tr>
                 }
 
-                @foreach (var platformGroup in GetSelectedPlatforms().GroupBy(a => a.Framework.GetPlatformDisplayString()).OrderBy(g => g.Key))
+                @if (GetSelectedPlatforms().Any())
                 {
                     <tr>
-                        <th>@platformGroup.Key</th>
+                        <th colspan="2" class="table-dark">
+                            Platform Specific Frameworks
+                        </th>
+                    </tr>
+
+                    var availability = GetCrossPlatformAvailability();
+                    if (availability is not null)
+                    {
+                        var framework = availability.Framework;
+                        var isSelectedVersion = IsSelectedFramework(framework);
+                        var isDiffLift = IsLeftFramework(framework);
+                        var isDiffRight = IsRightFramework(framework);
+
+                        var versionClass = availability.IsInBox
+                                 ? "fx-version-inbox"
+                                 : "fx-version-package";
+                        var title = availability.IsInBox
+                                 ? inboxApiTitle
+                                 : packageApiTitle;
+
+                        var selectedClass = isSelectedVersion
+                            ? "fx-selected"
+                            : "";
+                        var diffClass = isDiffLift
+                             ? "fx-left"
+                             : isDiffRight
+                                ? "fx-right"
+                                : "";
+
+                        <tr>
+                            <th>
+                                @availability.Framework.GetShortFolderName()
+                            </th>
+                            <td>
+                                <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                    (neutral)
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+
+                @foreach (var platformGroup in GetSelectedPlatforms().GroupBy(a => a.Framework.Platform).OrderBy(g => g.Key))
+                {
+                    <tr>
+                        <th>@($"{SelectedAvailability!.Framework.GetBaseFrameworkOrSelf().GetShortFolderName()}-{platformGroup.Key}")</th>
                         <td>
                             <span class="d-flex flex-row flex-wrap align-content-between">
                                 @foreach (var availability in platformGroup.OrderBy(g => g.Framework.PlatformVersion))
@@ -332,7 +379,7 @@
                     if (annotation is not null)
                     {
                         <tr>
-                            <th>OS Platforms</th>
+                            <th>Platform Restrictions</th>
                             <td>
                                 @if (annotation.Value.Kind == PlatformAnnotationKind.None)
                                 {
@@ -361,7 +408,7 @@
                     if (annotation is not null)
                     {
                         <tr>
-                            <th>OS Platforms</th>
+                            <th>Platform Restrictions</th>
                             <td>
                                 @if (annotation.Value.Kind == PlatformAnnotationKind.None)
                                 {
@@ -383,7 +430,7 @@
                 {
                     var annotation = PlatformAnnotationContext.GetPlatformAnnotation(Api);
                     <tr>
-                        <th>OS Platforms</th>
+                        <th>Platform Restrictions</th>
                         <td>
                             @{ WritePlatformAnnotation("this API", annotation); }
                         </td>

@@ -33,7 +33,7 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
             // from the base framework, such as `net5.0`.
 
             var fx = NuGetFramework.Parse(entry.FrameworkName);
-            var baseFx = GetBaseFramework(fx);
+            var baseFx = fx.GetBaseFramework();
             if (baseFx is not null)
             {
                 var baseEntry = entryByFx[baseFx];
@@ -43,18 +43,6 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
 
             var files = references.ToArray();
             yield return (entry.FrameworkName, files);
-        }
-
-        static NuGetFramework? GetBaseFramework(NuGetFramework fx)
-        {
-            var hasPlatform = fx.HasPlatform;
-            var hasNetCoreApp3Profile = string.Equals(fx.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
-                                        fx.Version.Major == 3 && fx.HasProfile;
-
-            if (hasPlatform || hasNetCoreApp3Profile)
-                return new NuGetFramework(fx.Framework, fx.Version);
-
-            return null;
         }
     }
 }

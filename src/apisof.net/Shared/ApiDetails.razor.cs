@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using ApisOfDotNet.Services;
 
@@ -118,6 +119,19 @@ public partial class ApiDetails
                                                    fx.Framework.Version == frameworkVersion &&
                                                    fx.Framework.HasPlatform &&
                                                    fx.Framework.PlatformVersion != FrameworkConstants.EmptyVersion);
+    }
+
+    private ApiFrameworkAvailability? GetCrossPlatformAvailability()
+    {
+        if (SelectedAvailability is null)
+            return null;
+
+        var framework = SelectedAvailability.Framework.Framework;
+        var frameworkVersion = SelectedAvailability.Framework.Version;
+
+        return Availability.Frameworks.FirstOrDefault(fx => string.Equals(fx.Framework.Framework, framework, StringComparison.OrdinalIgnoreCase) &&
+                                                      fx.Framework.Version == frameworkVersion &&
+                                                      fx.Framework.IsPlatformNeutral());
     }
 
     private IReadOnlyList<(FeatureUsageSource Source, IReadOnlyList<(FeatureDefinition Feature, float Percentage)> Usages)> GetUsages()

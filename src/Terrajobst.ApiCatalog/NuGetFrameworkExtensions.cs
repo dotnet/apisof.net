@@ -94,4 +94,35 @@ public static class NuGetFrameworkExtensions
                 return framework.Framework;
         }
     }
+
+    public static NuGetFramework? GetBaseFramework(this NuGetFramework framework)
+    {
+        ThrowIfNull(framework);
+
+        var hasPlatform = framework.HasPlatform;
+        var hasNetCoreApp3Profile = string.Equals(framework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
+                                    framework.Version.Major == 3 && framework.HasProfile;
+
+        if (hasPlatform || hasNetCoreApp3Profile)
+            return new NuGetFramework(framework.Framework, framework.Version);
+
+        return null;
+    }
+
+    public static NuGetFramework GetBaseFrameworkOrSelf(this NuGetFramework framework)
+    {
+        return framework.GetBaseFramework() ?? framework;
+    }
+
+    public static bool CanHavePlatform(this NuGetFramework framework)
+    {
+        return string.Equals(framework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&
+               framework.Version.Major >= 3;
+    }
+
+    public static bool IsPlatformNeutral(this NuGetFramework framework)
+    {
+        return framework.CanHavePlatform() && !framework.HasPlatform && !framework.HasProfile;
+    }
+
 }
