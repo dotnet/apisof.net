@@ -77,7 +77,7 @@ public sealed class FileSystemIndexStore : IndexStore
         var fullPath = Path.Join(_rootPath, path);
         var directoryPath = Path.GetDirectoryName(fullPath)!;
         Directory.CreateDirectory(directoryPath);
-        File.WriteAllText(path, contents);
+        File.WriteAllText(fullPath, contents);
     }
 
     protected override void Delete(string path)
