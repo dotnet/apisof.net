@@ -20,7 +20,6 @@ public partial class Diff
 
     public NuGetFramework? Right { get; set; }
 
-
     public bool IncludeAdded { get; set; }
 
     public bool IncludeRemoved { get; set; }

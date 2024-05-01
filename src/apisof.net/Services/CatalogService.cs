@@ -43,12 +43,17 @@ public sealed class CatalogService
     public async Task InvalidateAsync()
     {
         var invalidateCachedDownload = !_environment.IsDevelopment();
-        var catalog = await _catalogBlobSource.DownloadAsync(invalidateCachedDownload);
-        var suffixTree = await _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
-        var jobInfo = await _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
-        var usageData = await _usageBlobSource.DownloadAsync(invalidateCachedDownload);
-        var designNotes = await _designNotesBlobSource.DownloadAsync(invalidateCachedDownload);
-        _data = new CatalogData(catalog, suffixTree, jobInfo, usageData, designNotes);
+        var catalogTask = _catalogBlobSource.DownloadAsync(invalidateCachedDownload);
+        var suffixTreeTask = _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
+        var jobInfoTask = _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
+        var usageDataTask = _usageBlobSource.DownloadAsync(invalidateCachedDownload);
+        var designNotesTask = _designNotesBlobSource.DownloadAsync(invalidateCachedDownload);
+        await Task.WhenAll(catalogTask,
+                           suffixTreeTask,
+                           jobInfoTask,
+                           usageDataTask,
+                           designNotesTask);
+        _data = new CatalogData(catalogTask.Result, suffixTreeTask.Result, jobInfoTask.Result, usageDataTask.Result, designNotesTask.Result);
     }
 
     public async void InvalidateCatalog()
@@ -156,12 +161,19 @@ public sealed class CatalogService
             {
                 _logger.LogInformation($"Downloading {BlobName}...");
 
-                var blobClient = new BlobClient(_options.Value.AzureStorageConnectionString, ContainerName, BlobName);
-                await blobClient.DownloadToAsync(localPath);
+                await Task.Run(() =>
+                {
+                    var blobClient = new BlobClient(_options.Value.AzureStorageConnectionString, ContainerName, BlobName);
+                    return blobClient.DownloadToAsync(localPath);
+                });
+
                 _logger.LogInformation($"Downloading {BlobName} complete.");
             }
 
-            return await _loader(localPath);
+            var result = await Task.Run(() => _loader(localPath));
+            _logger.LogInformation($"Loaded {BlobName}.");
+
+            return result;
         }
     }
 

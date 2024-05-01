@@ -1,4 +1,5 @@
-﻿using System.Collections.Frozen;
+﻿using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
@@ -30,9 +31,9 @@ internal sealed class ApiAvailabilityContext
             frameworkIds.Add(nugetFramework, fx.Id);
         }
 
-        var packageFolders = new Dictionary<int, IReadOnlyList<PackageFolder>>();
+        var packageFolders = new ConcurrentDictionary<int, IReadOnlyList<PackageFolder>>();
 
-        foreach (var package in catalog.Packages)
+        Parallel.ForEach(catalog.Packages, package =>
         {
             var folders = new Dictionary<NuGetFramework, PackageFolder>();
 
@@ -51,16 +52,16 @@ internal sealed class ApiAvailabilityContext
             }
 
             if (folders.Count > 0)
-                packageFolders.Add(package.Id, folders.Values.ToArray());
-        }
+                packageFolders[package.Id] = folders.Values.ToArray();
+        });
 
         // Package assemblies
 
         _frameworkIds = frameworkIds.ToFrozenDictionary();
 
-        var packageAssemblies = new Dictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>>();
+        var packageAssemblies = new ConcurrentDictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>>();
 
-        foreach (var framework in frameworkIds.Keys)
+        Parallel.ForEach(frameworkIds.Keys, framework =>
         {
             var frameworkId = frameworkIds[framework];
             var assemblies = new Dictionary<int, (int, int)>();
@@ -78,8 +79,8 @@ internal sealed class ApiAvailabilityContext
                 }
             }
 
-            packageAssemblies.Add(frameworkId, assemblies.ToFrozenDictionary());
-        }
+            packageAssemblies[frameworkId] = assemblies.ToFrozenDictionary();
+        });
 
         _packageAssemblies = packageAssemblies.ToFrozenDictionary();
     }
