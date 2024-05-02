@@ -17,7 +17,8 @@ internal static class PlatformPackageDefinition
         "xamarin",
         "corewcf",
         "aspire",
-        "MicrosoftReunionESTeam"
+        "MicrosoftReunionESTeam",
+        "azure-sdk"
     ], StringComparer.OrdinalIgnoreCase);
 
     public static PackageFilter Filter { get; } = new(
@@ -52,6 +53,7 @@ internal static class PlatformPackageDefinition
                 PackageFilterExpression.Parse("Newtonsoft.Json.*"),
                 PackageFilterExpression.Parse("CoreWCF.*"),
                 PackageFilterExpression.Parse("Aspire.*"),
+                PackageFilterExpression.Parse("Azure.*"),
         ],
         excludes:
         [
