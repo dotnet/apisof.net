@@ -17,7 +17,7 @@ public partial class FrameworkPicker
     [Parameter]
     public EventCallback<NuGetFramework?> SelectedChanged { get; set; }
 
-    private FrameworkModel Model { get; set; }
+    private FrameworkModel Model { get; set; } = null!;
 
     protected override void OnInitialized()
     {
