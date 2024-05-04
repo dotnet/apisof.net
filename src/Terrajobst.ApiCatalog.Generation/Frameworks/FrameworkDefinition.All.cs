@@ -808,10 +808,6 @@ public partial class FrameworkDefinition
         },
         new FrameworkDefinition("net9.0", isPreview: true)
         {
-            // TODO: Get SupportedPlatforms for net9.0
-            //
-            // I copy and pasted the list below from net8.0. We should install net9.0 + workloads
-            // and run DumpPacks to get the actual list.
             SupportedPlatforms =
             [
                 new FrameworkPlatformDefinition("android")
@@ -864,107 +860,107 @@ public partial class FrameworkDefinition
             [
                 new PackReference("Aspire.Hosting")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["aspire"]
                 },
                 new PackReference("Microsoft.Android.Ref.34")
                 {
-                    Version = "34.99.0",
+                    Version = "34.99",
                     Kind = PackKind.Framework,
                     Platforms = ["android"],
                     Workloads = ["android", "maui", "maui-android", "maui-mobile"]
                 },
                 new PackReference("Microsoft.AspNetCore.Components.WebView.Maui")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.iOS.Ref")
                 {
-                    Version = "17.0.0",
+                    Version = "17.2",
                     Kind = PackKind.Framework,
                     Platforms = ["ios"],
                     Workloads = ["ios", "maui", "maui-ios", "maui-mobile"]
                 },
                 new PackReference("Microsoft.MacCatalyst.Ref")
                 {
-                    Version = "17.0.0",
+                    Version = "17.2",
                     Kind = PackKind.Framework,
                     Platforms = ["maccatalyst"],
                     Workloads = ["maccatalyst", "maui", "maui-desktop", "maui-maccatalyst"]
                 },
                 new PackReference("Microsoft.macOS.Ref")
                 {
-                    Version = "14.0.0",
+                    Version = "14.2",
                     Kind = PackKind.Framework,
                     Platforms = ["macos"],
                     Workloads = ["macos"]
                 },
                 new PackReference("Microsoft.Maui.Controls")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Controls.Build.Tasks")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Controls.Compatibility")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Controls.Core")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Controls.Xaml")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Core")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Essentials")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Graphics")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Graphics.Win2D.WinUI.Desktop")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-desktop", "maui-windows"]
                 },
                 new PackReference("Microsoft.Maui.Resizetizer")
                 {
-                    Version = "9.0.0",
+                    Version = "9.0",
                     Kind = PackKind.Library,
                     Workloads = ["maui", "maui-android", "maui-desktop", "maui-ios", "maui-maccatalyst", "maui-mobile", "maui-tizen", "maui-windows"]
                 },
                 new PackReference("Microsoft.tvOS.Ref")
                 {
-                    Version = "17.0.9712",
+                    Version = "17.2",
                     Kind = PackKind.Framework,
                     Platforms = ["tvos"],
                     Workloads = ["tvos"]
