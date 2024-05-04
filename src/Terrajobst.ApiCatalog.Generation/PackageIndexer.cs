@@ -26,6 +26,11 @@ public sealed class PackageIndexer
         {
             using (var root = await _store.GetPackageAsync(id, version))
             {
+                // We don't want to index special packs, such as targeting packs or runtime packs as those aren't
+                // meant to be used directly.
+                if (root.IsPack())
+                    return null;
+
                 var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var item in root.GetCatalogReferenceGroups())

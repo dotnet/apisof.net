@@ -24,4 +24,37 @@ internal static class PackageExtensions
         var referenceGroup = NuGetFrameworkUtility.GetNearest(referenceItems, current);
         return referenceGroup;
     }
+
+    public static bool IsPack(this PackageArchiveReader reader)
+    {
+        return reader.IsRuntimePack() || reader.IsRefPack();
+    }
+
+    public static bool IsRefPack(this PackageArchiveReader reader)
+    {
+        return reader.HasFile("data/FrameworkList.xml");
+    }
+
+    public static bool IsRuntimePack(this PackageArchiveReader reader)
+    {
+        return reader.HasFile("data/RuntimeList.xml");
+    }
+
+    public static bool HasFile(this PackageArchiveReader reader, string path)
+    {
+        var normalizedPath = GetNormalizedName(path);
+
+        foreach (var file in reader.GetFiles())
+        {
+            if (string.Equals(GetNormalizedName(file), normalizedPath, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+
+        static string GetNormalizedName(string name)
+        {
+            return name.Replace('\\', '/');
+        }
+    }
 }
