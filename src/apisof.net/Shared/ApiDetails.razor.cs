@@ -68,7 +68,7 @@ public partial class ApiDetails
         await UpdateApiAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         _rendered = true;
     }
