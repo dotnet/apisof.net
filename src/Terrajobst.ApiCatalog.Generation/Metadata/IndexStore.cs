@@ -213,7 +213,29 @@ public abstract class IndexStore
             .Select(XDocument.Parse);
     }
 
+    public void MarkPackageAsNotIndexed(string id, string version)
+    {
+        ResetPackage(id, version);
+    }
+
     public void MarkPackageAsFailed(string id, string version, Exception exception)
+    {
+        var packagePath = GetPackagePath(id, version);
+        var packageDisabledPath = GetPackageDisabledPath(id);
+        var packageFailedPath = GetPackageFailedPath(id, version);
+
+        ResetPackage(id, version);
+        WriteAllText(packageFailedPath, exception.ToString());
+    }
+
+    public void MarkPackageAsDisabled(string id, string version)
+    {
+        var packageDisabledPath = GetPackageDisabledPath(id);
+        ResetPackage(id, version);
+        WriteAllText(packageDisabledPath, string.Empty);
+    }
+
+    private void ResetPackage(string id, string version)
     {
         var packagePath = GetPackagePath(id, version);
         var packageDisabledPath = GetPackageDisabledPath(id);
@@ -221,17 +243,6 @@ public abstract class IndexStore
 
         Delete(packagePath);
         Delete(packageDisabledPath);
-        WriteAllText(packageFailedPath, exception.ToString());
-    }
-
-    public void MarkPackageAsDisabled(string id, string version)
-    {
-        var packagePath = GetPackagePath(id, version);
-        var packageDisabledPath = GetPackageDisabledPath(id);
-        var packageFailedPath = GetPackageFailedPath(id, version);
-
-        Delete(packagePath);
-        WriteAllText(packageDisabledPath, string.Empty);
         Delete(packageFailedPath);
     }
 

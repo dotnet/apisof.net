@@ -188,6 +188,9 @@ internal sealed class Main : IConsoleMain
 
         foreach (var (id, version) in packages)
         {
+            var retriedCorruptedPackage = false;
+            RetryPackage:
+
             var alreadyIndexed = !retryIndexed && indexStore.IsMarkedAsIndexed(id, version) ||
                                  !retryDisabled && indexStore.IsMarkedAsDisabled(id, version) ||
                                  !retryFailed && indexStore.IsMarkedAsFailed(id, version);
@@ -216,6 +219,15 @@ internal sealed class Main : IConsoleMain
                         indexStore.MarkPackageAsDisabled(id, version);
                         nugetStore.DeleteFromCache(id, version);
                     }
+                }
+                catch (InvalidDataException ex) when (!retriedCorruptedPackage)
+                {
+                    Console.WriteLine(ex);
+                    Console.WriteLine("Package appears to be corrupted, trying to download again");
+                    retriedCorruptedPackage = true;
+                    indexStore.MarkPackageAsNotIndexed(id, version);
+                    nugetStore.DeleteFromCache(id, version);
+                    goto RetryPackage;
                 }
                 catch (Exception ex)
                 {
