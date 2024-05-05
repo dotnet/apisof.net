@@ -1,25 +1,30 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Immutable;
 using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
 
 public sealed class ApiFrameworkAvailability
 {
-    public ApiFrameworkAvailability(NuGetFramework framework, ApiDeclarationModel declaration, PackageModel? package, NuGetFramework? packageFramework)
+    public ApiFrameworkAvailability(NuGetFramework framework,
+                                    ImmutableArray<ApiDeclarationModel> frameworkDeclarations,
+                                    ImmutableArray<(PackageModel, NuGetFramework, ApiDeclarationModel)> packageDeclarations)
     {
         ThrowIfNull(framework);
-        ThrowIfDefault(declaration);
+        ThrowIfDefault(frameworkDeclarations);
+        ThrowIfDefault(packageDeclarations);
 
         Framework = framework;
-        Declaration = declaration;
-        Package = package;
-        PackageFramework = packageFramework;
+        FrameworkDeclarations = frameworkDeclarations;
+        PackageDeclarations = packageDeclarations;
     }
 
-    [MemberNotNullWhen(false, nameof(Package))]
-    public bool IsInBox => Package is null;
     public NuGetFramework Framework { get; }
-    public ApiDeclarationModel Declaration { get; }
-    public PackageModel? Package { get; }
-    public NuGetFramework? PackageFramework { get; }
+
+    public ImmutableArray<ApiDeclarationModel> FrameworkDeclarations { get; }
+
+    public ImmutableArray<(PackageModel Package, NuGetFramework PackageFramework, ApiDeclarationModel Declaration)> PackageDeclarations { get; }
+
+    public bool IsInBox => FrameworkDeclarations.Any();
+
+    public ApiDeclarationModel Declaration => FrameworkDeclarations.Any() ? FrameworkDeclarations.First() : PackageDeclarations.First().Item3;
 }

@@ -140,8 +140,9 @@
 
                 @if (SelectedAvailability is { IsInBox: false })
                 {
-                    var package = SelectedAvailability.Package!.Value;
-                    var folder = SelectedAvailability.PackageFramework!.GetShortFolderName();
+                    var packageDeclaration = SelectedAvailability.PackageDeclarations.First();
+                    var package = packageDeclaration.Package;
+                    var folder = packageDeclaration.PackageFramework.GetShortFolderName();
                     <tr>
                         <th>Package</th>
                         <td>

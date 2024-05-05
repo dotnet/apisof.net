@@ -93,7 +93,8 @@ internal static class ApiChecker
                             }
                             else
                             {
-                                availabilityResult = AvailabilityResult.AvailableInPackage(info.Package.Value);
+                                var package = info.PackageDeclarations.First().Package;
+                                availabilityResult = AvailabilityResult.AvailableInPackage(package);
                             }
 
                             // Analyze obsoletion

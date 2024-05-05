@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using System.Collections.Immutable;
+
 using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
@@ -155,39 +157,47 @@ internal sealed class ApiAvailabilityContext
         ThrowIfDefault(api);
         ThrowIfNull(framework);
 
-        if (_frameworkIds.TryGetValue(framework, out var frameworkId))
-        {
-            // Try to resolve an in-box assembly
+        if (!_frameworkIds.TryGetValue(framework, out var frameworkId))
+            return null;
 
-            if (_frameworkAssemblies.TryGetValue(frameworkId, out var frameworkAssemblies))
+        // Try to resolve an in-box assembly
+
+        if (!_frameworkAssemblies.TryGetValue(frameworkId, out var frameworkAssemblies))
+            frameworkAssemblies = FrozenSet<int>.Empty;
+
+        // Try to resolve an assembly in a package for the given framework
+
+        if (!_packageAssemblies.TryGetValue(frameworkId, out var packageAssemblies))
+            packageAssemblies = FrozenDictionary<int, (int PackageId, int FrameworkId)>.Empty;
+
+        ImmutableArray<ApiDeclarationModel>.Builder? frameworkBuilder = null;
+        ImmutableArray<(PackageModel, NuGetFramework, ApiDeclarationModel)>.Builder? packageBuilder = null;
+
+        foreach (var declaration in api.Declarations)
+        {
+            if (frameworkAssemblies.Contains(declaration.Assembly.Id))
             {
-                foreach (var declaration in api.Declarations)
-                {
-                    if (frameworkAssemblies.Contains(declaration.Assembly.Id))
-                    {
-                        return new ApiFrameworkAvailability(framework, declaration, null, null);
-                    }
-                }
+                frameworkBuilder ??= ImmutableArray.CreateBuilder<ApiDeclarationModel>();
+                frameworkBuilder.Add(declaration);
             }
 
-            // Try to resolve an assembly in a package for the given framework
-
-            if (_packageAssemblies.TryGetValue(frameworkId, out var packageAssemblies))
+            if (packageAssemblies.TryGetValue(declaration.Assembly.Id, out var packageInfo))
             {
-                foreach (var declaration in api.Declarations)
-                {
-                    if (packageAssemblies.TryGetValue(declaration.Assembly.Id, out var packageInfo))
-                    {
-                        var package = new PackageModel(_catalog, packageInfo.PackageId);
-                        var packageFramework = new FrameworkModel(_catalog, packageInfo.FrameworkId);
-                        var nugetPackageFramework = NuGetFramework.Parse(packageFramework.Name);
-                        return new ApiFrameworkAvailability(framework, declaration, package, nugetPackageFramework);
-                    }
-                }
+                packageBuilder ??= ImmutableArray.CreateBuilder<(PackageModel, NuGetFramework, ApiDeclarationModel)>();
+
+                var package = new PackageModel(_catalog, packageInfo.PackageId);
+                var packageFramework = new FrameworkModel(_catalog, packageInfo.FrameworkId).NuGetFramework;
+                packageBuilder.Add((package, packageFramework, declaration));
             }
         }
 
-        return null;
+        if (frameworkBuilder is null && packageBuilder is null)
+            return null;
+
+        var frameworks = frameworkBuilder?.ToImmutable() ?? ImmutableArray<ApiDeclarationModel>.Empty;
+        var packages = packageBuilder?.ToImmutable() ?? ImmutableArray<(PackageModel, NuGetFramework, ApiDeclarationModel)>.Empty;
+
+        return new ApiFrameworkAvailability(framework, frameworks, packages);
     }
 
     private sealed class PackageFolder : IFrameworkSpecific
