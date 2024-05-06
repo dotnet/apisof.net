@@ -20,7 +20,7 @@ will need to be decompressed.
 | 8      | 56     | `Int32[13]` | Table Sizes |
 
 - The magic value is `APICATFB`
-- This is version `9`
+- This is version `10`
 - The table sizes are in the following order:
   1. [String Heap]
   1. [Blob Heap]
@@ -62,10 +62,16 @@ Each row looks as follows:
 
 Each row looks as follows:
 
-| Offset | Length | Type                               | Name           |
-| ------ | ------ | ---------------------------------- | -------------- |
-| 0      | 4      | `StringOffset`                     | Framework Name |
-| 4      | 4      | `BlobOffset` -> `AssemblyOffset[]` | Assemblies     |
+| Offset | Length | Type                                           | Name              |
+| ------ | ------ | ---------------------------------------------- | ----------------- |
+| 0      | 4      | `StringOffset`                                 | Framework Name    |
+| 4      | 4      | `BlobOffset` -> `AssemblyOffset[]`             | Assemblies        |
+| 8      | 4      | `BlobOffset` -> `(StringOffset, BlobOffset)[]` | Assembly Packs    |
+| 12     | 4      | `BlobOffset` -> `(StringOffset, BlobOffset)[]` | Assembly Profiles |
+
+> [!NOTE]
+> In case of packs and profiles, the blob offsets in the tuple points to an
+> array of `AssemblyOffset`.
 
 ## Package Table
 
@@ -192,6 +198,7 @@ Element types can either be simple types or tuples:
 - `(PackageOffset, FrameworkOffset)[]`
 - `(AssemblyOffset, BlobOffset)[]`
 - `(StringOffset, Boolean)[]`
+- `(StringOffset, BlobOffset)[]`
 
 Tuples are stored in sequence with no padding or length prefix.
 

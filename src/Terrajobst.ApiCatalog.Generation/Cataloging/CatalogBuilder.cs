@@ -80,13 +80,34 @@ public sealed partial class CatalogBuilder
     private void IndexFramework(XDocument doc)
     {
         var framework = doc.Root!.Attribute("name")!.Value;
-        DefineFramework(framework);
+
+        var assemblies = new List<IntermediaAssembly>();
+        var assemblyPacks = new List<(string Pack, IntermediaAssembly Assembly)>();
+        var assemblyProfiles = new List<(string Profile, IntermediaAssembly Assembly)>();
 
         foreach (var assemblyElement in doc.Root.Elements("assembly"))
         {
             var assemblyFingerprint = Guid.Parse(assemblyElement.Attribute("fingerprint")!.Value);
-            DefineFrameworkAssembly(framework, assemblyFingerprint);
+            var pack = assemblyElement.Attribute("pack")?.Value ?? string.Empty;
+            var profilesText = assemblyElement.Attribute("profiles")?.Value ?? string.Empty;
+            var profiles = profilesText.Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+            if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
+            {
+                _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
+                continue;
+            }
+
+            assemblies.Add(assembly);
+
+            if (!string.IsNullOrEmpty(pack))
+                assemblyPacks.Add((pack, assembly));
+
+            foreach (var profile in profiles)
+                assemblyProfiles.Add((profile, assembly));
         }
+
+        DefineFramework(framework, assemblies, assemblyPacks, assemblyProfiles);
     }
 
     private void IndexPackage(XDocument doc)
@@ -451,22 +472,38 @@ public sealed partial class CatalogBuilder
         _frameworkByName.Add(framework.Name, framework);
     }
 
-    private void DefineFrameworkAssembly(string frameworkName, Guid assemblyFingerprint)
+    private void DefineFramework(string frameworkName,
+                                 IReadOnlyList<IntermediaAssembly> assemblies,
+                                 IReadOnlyList<(string Pack, IntermediaAssembly Assembly)> assemblyPacks,
+                                 IReadOnlyList<(string Profile, IntermediaAssembly Assembly)> assemblyProfiles)
     {
-        if (!_frameworkByName.TryGetValue(frameworkName, out var framework))
+        if (_frameworkByName.TryGetValue(frameworkName, out var framework))
         {
-            _logger.WriteLine($"error: can't find framework {frameworkName}");
+            _logger.WriteLine($"warning: trying to define framework {frameworkName} again");
             return;
         }
 
-        if (!_assemblyByFingerprint.TryGetValue(assemblyFingerprint, out var assembly))
-        {
-            _logger.WriteLine($"error: can't find assembly {assemblyFingerprint}");
-            return;
-        }
+        var assembliesGroupedByPack = assemblyPacks
+            .GroupBy(a => a.Pack)
+            .Select(g => (Pack: g.Key, Assemblies: (IReadOnlyList<IntermediaAssembly>)g.Select(t => t.Assembly).ToArray()))
+            .ToArray();
 
-        framework.Assemblies.Add(assembly);
-        assembly.Frameworks.Add(framework);
+        var assembliesGroupedByProfile = assemblyProfiles
+            .GroupBy(a => a.Profile)
+            .Select(g => (Profile: g.Key, Assemblies: (IReadOnlyList<IntermediaAssembly>)g.Select(t => t.Assembly).ToArray()))
+            .ToArray();
+
+        framework = new IntermediateFramework(frameworkName)
+        {
+            Assemblies = assemblies.ToArray(),
+            AssemblyPacks = assembliesGroupedByPack,
+            AssemblyProfiles = assembliesGroupedByProfile
+        };
+
+        _frameworkByName.Add(framework.Name, framework);
+
+        foreach (var assembly in assemblies)
+            assembly.Frameworks.Add(framework);
     }
 
     private void DefinePackage(Guid fingerprint, string name, string version)
@@ -572,7 +609,9 @@ public sealed partial class CatalogBuilder
     {
         public string Name { get; } = name;
 
-        public List<IntermediaAssembly> Assemblies { get; } = new();
+        public IReadOnlyList<IntermediaAssembly> Assemblies { get; init; } = [];
+        public IReadOnlyList<(string Pack, IReadOnlyList<IntermediaAssembly> Assemblies)> AssemblyPacks { get; init; } = [];
+        public IReadOnlyList<(string Profile, IReadOnlyList<IntermediaAssembly> Assemblies)> AssemblyProfiles { get; init; } = [];
     }
 
     private sealed class IntermediatePackage(Guid fingerprint, string name, string version)

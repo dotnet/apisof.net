@@ -35,7 +35,7 @@ internal sealed class FluentCatalogBuilder
     public sealed class FrameworkBuilder
     {
         private readonly string _frameworkName;
-        private readonly List<AssemblyEntry> _assemblyEntries = new();
+        private readonly List<FrameworkAssemblyEntry> _assemblies = new();
 
         public FrameworkBuilder(string frameworkName)
         {
@@ -76,14 +76,15 @@ internal sealed class FluentCatalogBuilder
             var reference = MetadataReference.CreateFromStream(peStream, filePath: $"{name}.dll");
             var context = MetadataContext.Create(new[] { reference }, references);
             var entry = AssemblyEntry.Create(context.Assemblies.Single());
-            _assemblyEntries.Add(entry);
+            var frameworkAssembly = new FrameworkAssemblyEntry(null, Array.Empty<string>(), entry);
+            _assemblies.Add(frameworkAssembly);
 
             return this;
         }
 
         public FrameworkEntry Build()
         {
-            var assemblies = _assemblyEntries.ToArray();
+            var assemblies = _assemblies.ToArray();
             return FrameworkEntry.Create(_frameworkName, assemblies);
         }
     }
@@ -92,7 +93,7 @@ internal sealed class FluentCatalogBuilder
     {
         private readonly string _id;
         private readonly string _version;
-        private readonly List<FrameworkEntry> _frameworks = new();
+        private readonly List<PackageAssemblyEntry> _assemblies = new();
 
         public PackageBuilder(string id, string version)
         {
@@ -104,13 +105,16 @@ internal sealed class FluentCatalogBuilder
         {
             var builder = new FrameworkBuilder(name);
             action(builder);
-            _frameworks.Add(builder.Build());
+            var frameworkEntry = builder.Build();
+
+            foreach (var assembly in frameworkEntry.Assemblies)
+                _assemblies.Add(new PackageAssemblyEntry(frameworkEntry.FrameworkName, assembly.Assembly));
             return this;
         }
 
         public PackageEntry Build()
         {
-            var frameworks = _frameworks.ToArray();
+            var frameworks = _assemblies.ToArray();
             return PackageEntry.Create(_id, _version, frameworks);
         }
     }

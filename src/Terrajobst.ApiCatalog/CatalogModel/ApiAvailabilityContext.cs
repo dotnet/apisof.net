@@ -13,6 +13,7 @@ internal sealed class ApiAvailabilityContext
     private readonly FrozenDictionary<NuGetFramework, int> _frameworkIds;
     private readonly FrozenDictionary<int, FrozenSet<int>> _frameworkAssemblies;
     private readonly FrozenDictionary<int, FrozenDictionary<int, (int PackageId, int FrameworkId)>> _packageAssemblies;
+    private readonly FrozenDictionary<(int FrameworkIndex, int AssemblyIndex), (string PackName, ImmutableArray<string> Profiles)> _assemblyInformation;
 
     public ApiAvailabilityContext(ApiCatalogModel catalog)
     {
@@ -85,6 +86,28 @@ internal sealed class ApiAvailabilityContext
         });
 
         _packageAssemblies = packageAssemblies.ToFrozenDictionary();
+
+        // Assembly information
+
+        var assemblyInformation = new Dictionary<(int FrameworkId, int AssemblyId), (string Pack, ImmutableArray<string> Profiles)>();
+
+        foreach (var framework in _catalog.Frameworks)
+        {
+            var packsByAssemblyId = framework.AssemblyPacks.ToLookup(t => t.Assembly.Id, t => t.Pack);
+            var profilesByAssemblyId = framework.AssemblyProfiles.ToLookup(t => t.Assembly.Id, t => t.Profile);
+
+            if (!packsByAssemblyId.Any() && !profilesByAssemblyId.Any())
+                continue;
+
+            foreach (var assembly in framework.Assemblies)
+            {
+                var pack = packsByAssemblyId[assembly.Id].FirstOrDefault() ?? string.Empty;
+                var profiles = profilesByAssemblyId[assembly.Id].ToImmutableArray();
+                assemblyInformation[(framework.Id, assembly.Id)] = (pack, profiles);
+            }
+        }
+
+        _assemblyInformation = assemblyInformation.ToFrozenDictionary();
     }
 
     public NuGetFramework GetNuGetFramework(int frameworkId) => _frameworkById[frameworkId];
@@ -198,6 +221,18 @@ internal sealed class ApiAvailabilityContext
         var packages = packageBuilder?.ToImmutable() ?? ImmutableArray<(PackageModel, NuGetFramework, ApiDeclarationModel)>.Empty;
 
         return new ApiFrameworkAvailability(framework, frameworks, packages);
+    }
+
+    public (string Pack, ImmutableArray<string> Profiles) GetPackAndProfiles(NuGetFramework framework, AssemblyModel assembly)
+    {
+        if (!_frameworkIds.TryGetValue(framework, out var frameworkId))
+            return (string.Empty, ImmutableArray<string>.Empty);
+
+        var key = (frameworkId, assembly.Id);
+        if (!_assemblyInformation.TryGetValue(key, out var info))
+            return (string.Empty, ImmutableArray<string>.Empty);
+
+        return info;
     }
 
     private sealed class PackageFolder : IFrameworkSpecific

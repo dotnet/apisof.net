@@ -18,8 +18,8 @@ public sealed class PackBasedFrameworkLocator : FrameworkLocator
         {
             _mappings = new Dictionary<NuGetFramework, string[]>();
             var provider = new PackBasedFrameworkProvider(_frameworksPath);
-            foreach (var (tfm, paths) in provider.Resolve())
-                _mappings.Add(NuGetFramework.Parse(tfm), paths);
+            foreach (var (tfm, assemlies) in provider.Resolve())
+                _mappings.Add(NuGetFramework.Parse(tfm), assemlies.Select(a => a.Path).ToArray());
         }
 
         if (_mappings.TryGetValue(packageFramework, out var mappingPaths))

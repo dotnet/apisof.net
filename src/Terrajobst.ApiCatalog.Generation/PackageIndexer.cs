@@ -21,7 +21,7 @@ public sealed class PackageIndexer
     public async Task<PackageEntry?> Index(string id, string version)
     {
         var dependencies = new Dictionary<string, PackageArchiveReader>();
-        var frameworkEntries = new List<FrameworkEntry>();
+        var assemblyEntries = new List<PackageAssemblyEntry>();
         try
         {
             using (var root = await _store.GetPackageAsync(id, version))
@@ -95,19 +95,16 @@ public sealed class PackageIndexer
 
                     var metadataContext = MetadataContext.Create(referenceMetadata, dependencyMetadata);
 
-                    var assemblyEntries = new List<AssemblyEntry>();
-
                     foreach (var reference in metadataContext.Assemblies)
                     {
                         var entry = AssemblyEntry.Create(reference);
-                        assemblyEntries.Add(entry);
+                        var packageAssembly = new PackageAssemblyEntry(target.GetShortFolderName(), entry);
+                        assemblyEntries.Add(packageAssembly);
                     }
-
-                    frameworkEntries.Add(FrameworkEntry.Create(target.GetShortFolderName(), assemblyEntries));
                 }
             }
 
-            return PackageEntry.Create(id, version, frameworkEntries);
+            return PackageEntry.Create(id, version, assemblyEntries);
         }
         finally
         {

@@ -88,13 +88,11 @@ public static class FrameworkDownloader
                 {
                     using var package = await store.GetPackageAsync(packageIdentity);
 
-                    var files = new List<string>();
-
                     var extractedPackageDirectory = Path.Join(store.PackagesCachePath, packageIdentity.Id, packageIdentity.Version.ToNormalizedString());
                     Directory.CreateDirectory(extractedPackageDirectory);
 
                     var frameworkListPath = package.GetFiles().SingleOrDefault(p => string.Equals(p, "Data/FrameworkList.xml", StringComparison.OrdinalIgnoreCase));
-                    var packagePaths = new List<string>();
+                    var packagedAssemblies = new List<FrameworkManifestAssembly>();
 
                     if (frameworkListPath is null)
                     {
@@ -105,7 +103,7 @@ public static class FrameworkDownloader
                             continue;
                         }
 
-                        packagePaths.AddRange(group.Items);
+                        packagedAssemblies.AddRange(group.Items.Select(i => new FrameworkManifestAssembly(i)));
                     }
                     else
                     {
@@ -121,34 +119,29 @@ public static class FrameworkDownloader
 
                             relativePath = package.GetFiles().Single(p => p.EndsWith(relativePath, StringComparison.OrdinalIgnoreCase));
 
-                            // TODO: Should we record the profiles?
-                            //
-                            //       This would be useful for WPF and WinForms in .NET Core 3.x.
-                            //
-                            // var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
-                            // var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
-                            //
-                            // if (string.IsNullOrEmpty(platformFramework.Profile) || profiles.Contains(platformFramework.Profile, StringComparer.OrdinalIgnoreCase))
-                            //    packagePaths.Add(relativePath);
+                            var profileList = node.Attribute("Profile")?.Value ?? string.Empty;
+                            var profiles = profileList.Split(';').Select(p => p.Trim()).ToList();
 
-                            packagePaths.Add(relativePath);
+                            packagedAssemblies.Add(new FrameworkManifestAssembly(relativePath, profiles));
                         }
                     }
 
-                    foreach (var packagePath in packagePaths)
+                    var extractedAssemblies = new List<FrameworkManifestAssembly>();
+
+                    foreach (var packagedAssembly in packagedAssemblies)
                     {
-                        await using var packageStream = package.GetStream(packagePath);
-                        var extractedPath = Path.GetFullPath(Path.Join(extractedPackageDirectory, packagePath));
+                        await using var packageStream = package.GetStream(packagedAssembly.Path);
+                        var extractedPath = Path.GetFullPath(Path.Join(extractedPackageDirectory, packagedAssembly.Path));
                         var extractedDirectory = Path.GetDirectoryName(extractedPath);
                         Debug.Assert(extractedDirectory is not null);
                         Directory.CreateDirectory(extractedDirectory);
                         await using var extractedStream = File.Create(extractedPath);
                         await packageStream.CopyToAsync(extractedStream);
 
-                        files.Add(extractedPath);
+                        extractedAssemblies.Add(new FrameworkManifestAssembly(extractedPath, packagedAssembly.Profiles));
                     }
 
-                    var manifestPackage = new FrameworkManifestPackage(packageIdentity.Id, packageIdentity.Version.ToNormalizedString(), files);
+                    var manifestPackage = new FrameworkManifestPackage(packageIdentity.Id, packageIdentity.Version.ToNormalizedString(), extractedAssemblies);
                     manifestPackages.Add(manifestPackage);
                 }
 

@@ -17,6 +17,10 @@ internal static partial class ApiCatalogSchema
 
     public static readonly ApiDeclarationLayout ApiDeclarationStructure = new(new LayoutBuilder(c => c.BlobHeap));
 
+    public static readonly PackAssembliesTupleLayout PackAssembliesTuple = new(new LayoutBuilder(c => c.BlobHeap));
+
+    public static readonly ProfileAssembliesTupleLayout ProfileAssembliesTuple = new(new LayoutBuilder(c => c.BlobHeap));
+
     public static readonly PackageAssemblyTupleLayout PackageAssemblyTuple = new(new LayoutBuilder(c => c.BlobHeap));
 
     public static readonly AssemblyPackageTupleLayout AssemblyPackageTuple = new(new LayoutBuilder(c => c.BlobHeap));

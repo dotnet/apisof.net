@@ -4,16 +4,16 @@ public sealed class FrameworkManifestPackage
 {
     public FrameworkManifestPackage(string id,
                                     string version,
-                                    IReadOnlyList<string> references)
+                                    IReadOnlyList<FrameworkManifestAssembly> assemblies)
     {
         Id = id;
         Version = version;
-        References = references.Order().ToArray();
+        Assemblies = assemblies.OrderBy(a => a.Path).ToArray();
     }
 
     public string Id { get; }
 
     public string Version { get; }
 
-    public IReadOnlyList<string> References { get; }
+    public IReadOnlyList<FrameworkManifestAssembly> Assemblies { get; }
 }

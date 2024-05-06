@@ -5,5 +5,5 @@
 /// </summary>
 public abstract class FrameworkProvider
 {
-    public abstract IEnumerable<(string FrameworkName, string[] Paths)> Resolve();
+    public abstract IEnumerable<(string FrameworkName, FrameworkAssembly[] Assemblies)> Resolve();
 }

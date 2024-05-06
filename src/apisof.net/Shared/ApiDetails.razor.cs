@@ -3,6 +3,8 @@ using System.Diagnostics;
 
 using ApisOfDotNet.Services;
 
+using Markdig;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -52,6 +54,8 @@ public partial class ApiDetails
 
     public required ApiFrameworkAvailability? SelectedAvailability { get; set; }
 
+    public required MarkupString? ReferenceRequirementMarkup { get; set; }
+
     public required PlatformAnnotationContext PlatformAnnotationContext { get; set; }
 
     public required PreviewDescription? SelectedPreviewDescription { get; set; }
@@ -83,6 +87,12 @@ public partial class ApiDetails
                                     .ThenBy(fx => fx.Framework.HasPlatform)
                                     .OrderByDescending(fx => fx.Framework.PlatformVersion)
                                     .First();
+
+        var referenceRequirement = ReferenceRequirement.Compute(SelectedAvailability)?.ToString();
+        ReferenceRequirementMarkup = referenceRequirement is null
+                                        ? null
+                                        : new MarkupString(Markdown.ToHtml(referenceRequirement));
+
         PlatformAnnotationContext = PlatformAnnotationContext.Create(CatalogService.Catalog, SelectedAvailability.Framework.GetShortFolderName());
         SelectedPreviewDescription = SelectedAvailability is null ? null : PreviewDescription.Create(Api);
 
@@ -139,6 +149,22 @@ public partial class ApiDetails
                                                    fx.Framework.Version == frameworkVersion &&
                                                    fx.Framework.HasPlatform &&
                                                    fx.Framework.PlatformVersion != FrameworkConstants.EmptyVersion);
+    }
+
+    private bool IsCrossPlatform()
+    {
+        if (SelectedAvailability is null)
+            return true;
+
+        var framework = SelectedAvailability.Framework.Framework;
+        var frameworkVersion = SelectedAvailability.Framework.Version;
+        var selectedFramework = new NuGetFramework(framework, frameworkVersion);
+        if (!selectedFramework.CanHavePlatform())
+            return true;
+
+        return Availability.Frameworks.Any(fx => string.Equals(fx.Framework.Framework, framework, StringComparison.OrdinalIgnoreCase) &&
+                                                 fx.Framework.Version == frameworkVersion &&
+                                                 fx.Framework.IsPlatformNeutral());
     }
 
     private ApiFrameworkAvailability? GetCrossPlatformAvailability()

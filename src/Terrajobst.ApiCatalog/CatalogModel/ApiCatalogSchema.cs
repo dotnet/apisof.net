@@ -4,7 +4,7 @@ internal static partial class ApiCatalogSchema
 {
     internal static ReadOnlySpan<byte> MagicNumber => "APICATFB"u8;
 
-    internal const int FormatVersion = 9;
+    internal const int FormatVersion = 10;
     internal const int NumberOfTables = 13;
 
     // Tables
@@ -19,6 +19,8 @@ internal static partial class ApiCatalogSchema
     {
         public readonly Field<string> Name = t.DefineString();
         public readonly Field<ArrayEnumerator<AssemblyModel>> Assemblies = t.DefineArray(AssemblyElement);
+        public readonly Field<ArrayOfStructuresEnumerator<PackAssembliesTupleLayout>> AssemblyPacks = t.DefineArray(PackAssembliesTuple);
+        public readonly Field<ArrayOfStructuresEnumerator<ProfileAssembliesTupleLayout>> AssemblyProfiles = t.DefineArray(ProfileAssembliesTuple);
         public override int Size { get; } = t.Size;
     }
 
@@ -110,6 +112,20 @@ internal static partial class ApiCatalogSchema
     {
         public Field<AssemblyModel> Assembly { get; } = t.DefineAssembly();
         public Field<int> SyntaxOffset { get; } = t.DefineInt32();
+        public override int Size { get; } = t.Size;
+    }
+
+    public sealed class PackAssembliesTupleLayout(LayoutBuilder t) : StructureLayout
+    {
+        public Field<string> Pack { get; } = t.DefineString();
+        public Field<ArrayEnumerator<AssemblyModel>> Assemblies { get; } = t.DefineArray(AssemblyElement);
+        public override int Size { get; } = t.Size;
+    }
+
+    public sealed class ProfileAssembliesTupleLayout(LayoutBuilder t) : StructureLayout
+    {
+        public Field<string> Profile { get; } = t.DefineString();
+        public Field<ArrayEnumerator<AssemblyModel>> Assemblies { get; } = t.DefineArray(AssemblyElement);
         public override int Size { get; } = t.Size;
     }
 

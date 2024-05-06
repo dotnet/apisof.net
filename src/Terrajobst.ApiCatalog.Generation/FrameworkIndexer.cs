@@ -7,26 +7,28 @@ namespace Terrajobst.ApiCatalog;
 public static class FrameworkIndexer
 {
     public static FrameworkEntry Index(string frameworkName,
-                                       IEnumerable<string> assemblyPaths,
+                                       IEnumerable<FrameworkAssembly> assemblies,
                                        Dictionary<string, MetadataReference> assemblyByPath,
                                        Dictionary<string, AssemblyEntry> assemblyEntryByPath)
     {
         var references = new List<MetadataReference>();
+        var frameworkAssemblyByPath = new Dictionary<string, FrameworkAssembly>();
 
-        foreach (var path in assemblyPaths)
+        foreach (var assembly in assemblies)
         {
-            if (!assemblyByPath.TryGetValue(path, out var metadata))
+            if (!assemblyByPath.TryGetValue(assembly.Path, out var metadata))
             {
-                metadata = MetadataReference.CreateFromFile(path);
-                assemblyByPath.Add(path, metadata);
+                metadata = MetadataReference.CreateFromFile(assembly.Path);
+                assemblyByPath.Add(assembly.Path, metadata);
             }
 
             references.Add(metadata);
+            frameworkAssemblyByPath.Add(assembly.Path, assembly);
         }
 
         var metadataContext = MetadataContext.Create(references);
 
-        var assemblyEntries = new List<AssemblyEntry>();
+        var assemblyEntries = new List<FrameworkAssemblyEntry>();
 
         foreach (var assembly in metadataContext.Assemblies)
         {
@@ -43,7 +45,10 @@ public static class FrameworkIndexer
             }
 
             if (entry.Apis.Any())
-                assemblyEntries.Add(entry);
+            {
+                var frameworkAssembly = frameworkAssemblyByPath[path];
+                assemblyEntries.Add(new FrameworkAssemblyEntry(frameworkAssembly.PackName, frameworkAssembly.Profiles, entry));
+            }
         }
 
         return FrameworkEntry.Create(frameworkName, assemblyEntries);

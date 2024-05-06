@@ -129,7 +129,7 @@ internal sealed class Main : IConsoleMain
         var frameworks = frameworkResolvers
             .SelectMany(r => r.Resolve())
             .OrderBy(t => t.FrameworkName)
-            .Select(t => (Framework: NuGetFramework.Parse(t.FrameworkName), t.Paths))
+            .Select(t => (Framework: NuGetFramework.Parse(t.FrameworkName), t.Assemblies))
             .GroupBy(t => new NuGetFramework(t.Framework.Framework, t.Framework.Version));
 
         foreach (var group in frameworks)
@@ -137,7 +137,7 @@ internal sealed class Main : IConsoleMain
             var assemblyByPath = new Dictionary<string, MetadataReference>(StringComparer.OrdinalIgnoreCase);
             var assemblyEntryByPath = new Dictionary<string, AssemblyEntry>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var (framework, paths) in group)
+            foreach (var (framework, assemblies) in group)
             {
                 var frameworkName = framework.GetShortFolderName();
                 var alreadyIndexed = indexStore.HasFramework(frameworkName);
@@ -149,7 +149,7 @@ internal sealed class Main : IConsoleMain
                 else
                 {
                     Console.WriteLine($"Indexing {frameworkName}...");
-                    var frameworkEntry = FrameworkIndexer.Index(frameworkName, paths, assemblyByPath, assemblyEntryByPath);
+                    var frameworkEntry = FrameworkIndexer.Index(frameworkName, assemblies, assemblyByPath, assemblyEntryByPath);
                     indexStore.Store(frameworkEntry);
                 }
             }

@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Immutable;
+
 using NuGet.Frameworks;
 
 namespace Terrajobst.ApiCatalog;
@@ -34,6 +36,45 @@ public readonly struct FrameworkModel : IEquatable<FrameworkModel>
             var enumerator = ApiCatalogSchema.FrameworkRow.Assemblies.Read(_catalog, _offset);
             return new AssemblyEnumerator(enumerator);
         }
+    }
+
+    public IEnumerable<(string Pack, AssemblyModel Assembly)> AssemblyPacks
+    {
+        get
+        {
+            var enumerator = ApiCatalogSchema.FrameworkRow.AssemblyPacks.Read(_catalog, _offset);
+            while (enumerator.MoveNext())
+            {
+                var offset = enumerator.Current;
+                var name = ApiCatalogSchema.PackAssembliesTuple.Pack.Read(_catalog, offset);
+                var assemblyEnumerator = ApiCatalogSchema.PackAssembliesTuple.Assemblies.Read(_catalog, offset);
+                while (assemblyEnumerator.MoveNext())
+                    yield return (name, assemblyEnumerator.Current);
+            }
+        }
+    }
+
+    public IEnumerable<(string Profile, AssemblyModel Assembly)> AssemblyProfiles
+    {
+        get
+        {
+            var enumerator = ApiCatalogSchema.FrameworkRow.AssemblyProfiles.Read(_catalog, _offset);
+            while (enumerator.MoveNext())
+            {
+                var offset = enumerator.Current;
+                var name = ApiCatalogSchema.ProfileAssembliesTuple.Profile.Read(_catalog, offset);
+                var assemblyEnumerator = ApiCatalogSchema.ProfileAssembliesTuple.Assemblies.Read(_catalog, offset);
+                while (assemblyEnumerator.MoveNext())
+                    yield return (name, assemblyEnumerator.Current);
+            }
+        }
+    }
+
+    public (string Pack, ImmutableArray<string> Profiles) GetPackAndProfiles(AssemblyModel assembly)
+    {
+        ThrowIfDefault(assembly);
+
+        return _catalog.AvailabilityContext.GetPackAndProfiles(NuGetFramework, assembly);
     }
 
     public override bool Equals(object? obj)

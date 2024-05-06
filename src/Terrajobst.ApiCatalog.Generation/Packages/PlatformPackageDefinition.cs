@@ -5,7 +5,7 @@ namespace Terrajobst.ApiCatalog;
 internal static class PlatformPackageDefinition
 {
     public static FrozenSet<string> Owners = FrozenSet.ToFrozenSet(
-    [        
+    [
         "aspnet",
         "dotnetframework",
         "dotnetiot",

@@ -24,7 +24,7 @@
         </select>
     </div>
     <div class="col-3 pl-0">
-        @{ 
+        @{
             var isDisabled = Model.SelectedPlatformVersionValue is null;
         }
         <select class="custom-select" @bind="@Model.SelectedPlatformVersionValue" disabled="@isDisabled">

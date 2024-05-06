@@ -1,4 +1,5 @@
-﻿<div class="container-fluid px-0">
+﻿@using NuGet.Frameworks
+<div class="container-fluid px-0">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             @if (BrowsingContext is FrameworkDiffBrowsingContext diffContext)
@@ -97,6 +98,9 @@
             <SyntaxView Current="@Api" BrowsingContext="@BrowsingContext" />
 
             <table class="table my-3">
+
+                <!-- Usage -->
+
                 @foreach (var (usageSource, usages) in Usages)
                 {
                     <tr>
@@ -127,16 +131,212 @@
                     </tr>
                 }
 
-                @if (SelectedAvailability is not null)
+                <!-- Implementation -->
+
+                @if (!string.IsNullOrEmpty(SourceUrl))
                 {
-                    var assembly = SelectedAvailability.Declaration.Assembly;
                     <tr>
-                        <th style="width: 185px">Assembly</th>
+                        <th>Implementation</th>
                         <td>
-                            @assembly.Name <span class="small text-muted">, Version=@assembly.Version, PublicKeyToken=@assembly.PublicKeyToken</span>
+                            <a href="@SourceUrl" target="_blank">Source</a>
                         </td>
                     </tr>
                 }
+
+                <!-- Help -->
+
+                @if (!string.IsNullOrEmpty(HelpUrl))
+                {
+                    <tr>
+                        <th>Help</th>
+                        <td>
+                            <a href="@HelpUrl" target="_blank">Documentation</a>
+                        </td>
+                    </tr>
+                }
+
+                <!-- Design Notes -->
+
+                @if (DesignReviews.Any())
+                {
+                    <tr>
+                        <th>Design Reviews</th>
+                        <td>
+                            <ul class="list-unstyled">
+                                @foreach (var designReview in DesignReviews.OrderByDescending(r => r.Date))
+                                {
+                                    <li>
+                                        <a href="@designReview.Url" target="_blank">@designReview.UrlText</a> <span class="text-muted">@designReview.Date.Humanize() (@designReview.Context)</span>
+                                    </li>
+                                }
+                            </ul>
+                        </td>
+                    </tr>
+                }
+
+                <!-- Frameworks -->
+                @{
+                    var inboxApiTitle = "The API is built into the target framework.";
+                    var packageApiTitle = "The API requires a package to be referenced.";
+
+                    var isAvailableInAnyRelevantFrameworks = Availability.Frameworks.Any(fx => fx.Framework.IsRelevantForCatalog());
+                    var showAllFrameworks = !isAvailableInAnyRelevantFrameworks;
+                }
+
+                @foreach (var frameworkGroup in Availability.Frameworks.Where(a => showAllFrameworks || a.Framework.IsRelevantForCatalog())
+                .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
+                .OrderBy(g => g.Key))
+                {
+                    <tr>
+                        <th>@frameworkGroup.Key</th>
+                        <td>
+                            <span class="d-flex flex-row flex-wrap align-content-between">
+                                @foreach (var group in frameworkGroup.GroupBy(a => (a.Framework.Framework, a.Framework.Version))
+                               .OrderBy(g => g.Key.Framework)
+                               .ThenBy(g => g.Key.Version))
+                                {
+                                    var availability = group
+                                    .OrderBy(g => g.Framework.Platform)
+                                    .ThenByDescending(g => g.Framework.PlatformVersion)
+                                    .ThenBy(g => g.Framework.Profile)
+                                    .First();
+
+                                    var framework = availability.Framework;
+                                    var isSelectedVersion = IsSelectedFramework(framework);
+                                    var isDiffLift = IsLeftFramework(framework);
+                                    var isDiffRight = IsRightFramework(framework);
+
+                                    var versionClass = availability.IsInBox
+                                    ? "fx-version-inbox"
+                                    : "fx-version-package";
+                                    var title = availability.IsInBox
+                                    ? inboxApiTitle
+                                    : packageApiTitle;
+
+                                    var selectedClass = isSelectedVersion
+                                    ? "fx-selected"
+                                    : "";
+                                    var diffClass = isDiffLift
+                                    ? "fx-left"
+                                    : isDiffRight
+                                    ? "fx-right"
+                                    : "";
+
+                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                        @availability.Framework.GetBaseFrameworkOrSelf().GetVersionDisplayString()
+                                    </span>
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+
+                <tr class="bg-dark">
+                    <th colspan="2">
+                        Information specific to <code>@SelectedAvailability!.Framework.GetBaseFrameworkOrSelf().GetShortFolderName()</code>
+                    </th>
+                </tr>
+
+                <!-- Platform Targets -->
+
+                @if (!IsCrossPlatform())
+                {
+                    <tr>
+                        <th>Platforms</th>
+                        <td>
+                            This API is only available when you target a specific platform:
+                        </td>
+                    </tr>
+
+                    @foreach (var platformGroup in GetSelectedPlatforms().GroupBy(a => a.Framework.Platform).OrderBy(g => g.Key))
+                    {
+                        <tr class="no-border-top">
+                            <td>@(PlatformAnnotationEntry.FormatPlatform(platformGroup.Key))</td>
+                            <td>
+                                <span class="d-flex flex-row flex-wrap align-content-between">
+                                    @foreach (var availability in platformGroup.OrderBy(g => g.Framework.PlatformVersion))
+                                    {
+                                        var framework = availability.Framework;
+                                        var isSelectedVersion = IsSelectedFramework(framework, matchAnyPlatform: false);
+                                        var isDiffLift = IsLeftFramework(framework);
+                                        var isDiffRight = IsRightFramework(framework);
+
+                                        var versionClass = availability.IsInBox
+                                        ? "fx-version-inbox"
+                                        : "fx-version-package";
+                                        var title = availability.IsInBox
+                                        ? inboxApiTitle
+                                        : packageApiTitle;
+
+                                        var selectedClass = isSelectedVersion
+                                        ? "fx-selected"
+                                        : "";
+                                        var diffClass = isDiffLift
+                                        ? "fx-left"
+                                        : isDiffRight
+                                        ? "fx-right"
+                                        : "";
+
+                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                            @availability.Framework.GetPlatformVersionDisplayString()
+                                        </span>
+                                    }
+                                </span>
+
+                            </td>
+                        </tr>
+                    }
+
+                    <tr class="bg-dark">
+                        <th colspan="2">
+                            Information specific to <code>@SelectedAvailability!.Framework.GetShortFolderName()</code>
+                        </th>
+                    </tr>
+                }
+
+                <!-- Assembly -->
+
+                @if (SelectedAvailability is not null)
+                {
+                    var assemblies = SelectedAvailability.FrameworkDeclarations.Any()
+                    ? SelectedAvailability.FrameworkDeclarations.Select(d => d.Assembly)
+                    : SelectedAvailability.PackageDeclarations.Select(d => d.Declaration.Assembly);
+
+                    var assembliesOrdered = assemblies
+                    .OrderBy(a => a.Name)
+                    .ThenBy(a => a.Version)
+                    .ToArray();
+
+                    var assemblyLabel = assembliesOrdered.Length == 1 ? "Assembly" : "Assemblies";
+
+                    <tr>
+                        <th style="width: 185px">@assemblyLabel</th>
+                        <td>
+                            @foreach (var assembly in assemblies)
+                            {
+                                <p class="mb-0">@assembly.Name <span class="small text-muted">, Version=@assembly.Version, PublicKeyToken=@assembly.PublicKeyToken</span></p>
+                            }
+                        </td>
+                    </tr>
+                }
+
+                <!-- Referencing -->
+
+                <tr>
+                    <th>Referencing</th>
+                    <td class="reference-requirement">
+                        @if (ReferenceRequirementMarkup is not null)
+                        {
+                            @ReferenceRequirementMarkup
+                        }
+                        else
+                        {
+                            <p>The API is automatically referenced.</p>
+                        }
+                    </td>
+                </tr>
+
+                <!-- Package -->
 
                 @if (SelectedAvailability is { IsInBox: false })
                 {
@@ -151,12 +351,14 @@
                     </tr>
                 }
 
+                <!-- Obsolete -->
+
                 @if (SelectedAvailability?.Declaration.Obsoletion is not null)
                 {
                     var o = SelectedAvailability.Declaration.Obsoletion.Value;
                     var message = string.IsNullOrEmpty(o.Message)
-                                    ? "This API is obsolete."
-                                    : o.Message;
+                    ? "This API is obsolete."
+                    : o.Message;
 
                     if (!string.IsNullOrEmpty(o.DiagnosticId))
                         message = $"{o.DiagnosticId}: {message}";
@@ -176,6 +378,8 @@
                     </tr>
                 }
 
+                <!-- Preview -->
+
                 @if (SelectedPreviewDescription is not null)
                 {
                     var preview = SelectedPreviewDescription.Value;
@@ -192,190 +396,15 @@
                     </tr>
                 }
 
-                @if (!string.IsNullOrEmpty(SourceUrl))
-                {
-                    <tr>
-                        <th>Implementation</th>
-                        <td>
-                            <a href="@SourceUrl" target="_blank">Source</a>
-                        </td>
-                    </tr>
-                }
-
-                @if (!string.IsNullOrEmpty(HelpUrl))
-                {
-                    <tr>
-                        <th>Help</th>
-                        <td>
-                            <a href="@HelpUrl" target="_blank">Documentation</a>
-                        </td>
-                    </tr>
-                }
-
-                @if (DesignReviews.Any())
-                {
-                    <tr>
-                        <th>Design Reviews</th>
-                        <td>
-                            <ul class="list-unstyled">
-                                @foreach (var designReview in DesignReviews.OrderByDescending(r => r.Date))
-                                {
-                                    <li>
-                                        <a href="@designReview.Url" target="_blank">@designReview.UrlText</a> <span class="text-muted">@designReview.Date.Humanize() (@designReview.Context)</span>
-                                    </li>
-                                }
-                            </ul>
-                        </td>
-                    </tr>
-                }
-
-                @{
-                    var inboxApiTitle = "The API is built into the target framework.";
-                    var packageApiTitle = "The API requires a package to be referenced.";
-
-                    var isAvailableInAnyRelevantFrameworks = Availability.Frameworks.Any(fx => fx.Framework.IsRelevantForCatalog());
-                    var showAllFrameworks = !isAvailableInAnyRelevantFrameworks;
-                }
-
-                @foreach (var frameworkGroup in Availability.Frameworks.Where(a => showAllFrameworks || a.Framework.IsRelevantForCatalog())
-                                                                       .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
-                                                                       .OrderBy(g => g.Key))
-                {
-                    <tr>
-                        <th>@frameworkGroup.Key</th>
-                        <td>
-                            <span class="d-flex flex-row flex-wrap align-content-between">
-                                @foreach (var group in frameworkGroup.GroupBy(a => (a.Framework.Framework, a.Framework.Version))
-                                                                     .OrderBy(g => g.Key.Framework)
-                                                                     .ThenBy(g => g.Key.Version))
-                                {
-                                    var availability = group
-                                        .OrderBy(g => g.Framework.Platform)
-                                        .ThenByDescending(g => g.Framework.PlatformVersion)
-                                        .ThenBy(g => g.Framework.Profile)
-                                        .First();
-
-                                    var framework = availability.Framework;
-                                    var isSelectedVersion = IsSelectedFramework(framework);
-                                    var isDiffLift = IsLeftFramework(framework);
-                                    var isDiffRight = IsRightFramework(framework);
-
-                                    var versionClass = availability.IsInBox
-                                             ? "fx-version-inbox"
-                                             : "fx-version-package";
-                                    var title = availability.IsInBox
-                                             ? inboxApiTitle
-                                             : packageApiTitle;
-
-                                    var selectedClass = isSelectedVersion
-                                        ? "fx-selected"
-                                        : "";
-                                    var diffClass = isDiffLift
-                                         ? "fx-left"
-                                         : isDiffRight
-                                            ? "fx-right"
-                                            : "";
-
-                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
-                                        @availability.Framework.GetBaseFrameworkOrSelf().GetVersionDisplayString()
-                                    </span>
-                                }
-                            </span>
-                        </td>
-                    </tr>
-                }
-
-                @if (GetSelectedPlatforms().Any())
-                {
-                    <tr>
-                        <th colspan="2" class="table-dark">
-                            Platform Specific Frameworks
-                        </th>
-                    </tr>
-
-                    var availability = GetCrossPlatformAvailability();
-                    if (availability is not null)
-                    {
-                        var framework = availability.Framework;
-                        var isSelectedVersion = IsSelectedFramework(framework, matchAnyPlatform: false);
-                        var isDiffLift = IsLeftFramework(framework);
-                        var isDiffRight = IsRightFramework(framework);
-
-                        var versionClass = availability.IsInBox
-                                 ? "fx-version-inbox"
-                                 : "fx-version-package";
-                        var title = availability.IsInBox
-                                 ? inboxApiTitle
-                                 : packageApiTitle;
-
-                        var selectedClass = isSelectedVersion
-                            ? "fx-selected"
-                            : "";
-                        var diffClass = isDiffLift
-                             ? "fx-left"
-                             : isDiffRight
-                                ? "fx-right"
-                                : "";
-
-                        <tr>
-                            <th>
-                                @availability.Framework.GetShortFolderName()
-                            </th>
-                            <td>
-                                <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
-                                    (neutral)
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                }
-
-                @foreach (var platformGroup in GetSelectedPlatforms().GroupBy(a => a.Framework.Platform).OrderBy(g => g.Key))
-                {
-                    <tr>
-                        <th>@($"{SelectedAvailability!.Framework.GetBaseFrameworkOrSelf().GetShortFolderName()}-{platformGroup.Key}")</th>
-                        <td>
-                            <span class="d-flex flex-row flex-wrap align-content-between">
-                                @foreach (var availability in platformGroup.OrderBy(g => g.Framework.PlatformVersion))
-                                {
-                                    var framework = availability.Framework;
-                                    var isSelectedVersion = IsSelectedFramework(framework, matchAnyPlatform:false);
-                                    var isDiffLift = IsLeftFramework(framework);
-                                    var isDiffRight = IsRightFramework(framework);
-
-                                    var versionClass = availability.IsInBox
-                                             ? "fx-version-inbox"
-                                             : "fx-version-package";
-                                    var title = availability.IsInBox
-                                             ? inboxApiTitle
-                                             : packageApiTitle;
-
-                                    var selectedClass = isSelectedVersion
-                                        ? "fx-selected"
-                                        : "";
-                                    var diffClass = isDiffLift
-                                         ? "fx-left"
-                                         : isDiffRight
-                                            ? "fx-right"
-                                            : "";
-
-                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
-                                        @availability.Framework.GetPlatformVersionDisplayString()
-                                    </span>
-                                }
-                            </span>
-
-                        </td>
-                    </tr>
-                }
+                <!-- Platform Restrictions -->
 
                 @if (Api.Kind == ApiKind.Property)
                 {
                     var getter = GetAccessor(ApiKind.PropertyGetter);
                     var setter = GetAccessor(ApiKind.PropertySetter);
 
-                    var getterAnnotation = getter is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(getter.Value);
-                    var setterAnnotation = setter is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(setter.Value);
+                    var getterAnnotation = getter is null ? (PlatformAnnotation?)null : PlatformAnnotationContext.GetPlatformAnnotation(getter.Value);
+                    var setterAnnotation = setter is null ? (PlatformAnnotation?)null : PlatformAnnotationContext.GetPlatformAnnotation(setter.Value);
                     var annotation = getterAnnotation ?? setterAnnotation;
                     if (annotation is not null)
                     {
@@ -384,15 +413,15 @@
                             <td>
                                 @if (annotation.Value.Kind == PlatformAnnotationKind.None)
                                 {
-                                    WritePlatformAnnotation("this API", annotation.Value);
+                                    WritePlatformAnnotation("This API", annotation.Value);
                                 }
                                 else
                                 {
                                     if (getterAnnotation is not null)
-                                        WritePlatformAnnotation("the property getter", getterAnnotation.Value);
+                                        WritePlatformAnnotation("The property getter", getterAnnotation.Value);
 
                                     if (setterAnnotation is not null)
-                                        WritePlatformAnnotation("the property setter", setterAnnotation.Value);
+                                        WritePlatformAnnotation("The property setter", setterAnnotation.Value);
                                 }
                             </td>
                         </tr>
@@ -403,8 +432,8 @@
                     var adder = GetAccessor(ApiKind.EventAdder);
                     var remover = GetAccessor(ApiKind.EventRemover);
 
-                    var adderAnnotation = adder is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(adder.Value);
-                    var removerAnnotation = remover is null ? (PlatformAnnotation?) null : PlatformAnnotationContext.GetPlatformAnnotation(remover.Value);
+                    var adderAnnotation = adder is null ? (PlatformAnnotation?)null : PlatformAnnotationContext.GetPlatformAnnotation(adder.Value);
+                    var removerAnnotation = remover is null ? (PlatformAnnotation?)null : PlatformAnnotationContext.GetPlatformAnnotation(remover.Value);
                     var annotation = adderAnnotation ?? removerAnnotation;
                     if (annotation is not null)
                     {
@@ -413,15 +442,15 @@
                             <td>
                                 @if (annotation.Value.Kind == PlatformAnnotationKind.None)
                                 {
-                                    WritePlatformAnnotation("this API", annotation.Value);
+                                    WritePlatformAnnotation("This API", annotation.Value);
                                 }
                                 else
                                 {
                                     if (adderAnnotation is not null)
-                                        WritePlatformAnnotation("the event adder", adderAnnotation.Value);
+                                        WritePlatformAnnotation("The event adder", adderAnnotation.Value);
 
                                     if (removerAnnotation is not null)
-                                        WritePlatformAnnotation("the event remover", removerAnnotation.Value);
+                                        WritePlatformAnnotation("The event remover", removerAnnotation.Value);
                                 }
                             </td>
                         </tr>
@@ -433,7 +462,9 @@
                     <tr>
                         <th>Platform Restrictions</th>
                         <td>
-                            @{ WritePlatformAnnotation("this API", annotation); }
+                            @{
+                                WritePlatformAnnotation("This API", annotation);
+                            }
                         </td>
                     </tr>
                 }
@@ -455,20 +486,20 @@
     {
         if (annotation.Kind == PlatformAnnotationKind.None)
         {
-            <p class="text-muted">The selected framework does not have platform annotations.</p>
+            <p class="text-muted">This framework does not have platform annotations.</p>
         }
         else if (annotation.Kind == PlatformAnnotationKind.Unrestricted)
         {
-            <p>For the selected framework @apiName is supported on all OS platforms.</p>
+            <p>@apiName is supported on all platforms.</p>
         }
         else if (annotation.Kind == PlatformAnnotationKind.RestrictedTo)
         {
-            <p>For the selected framework @apiName is only supported on the following OS platforms:</p>
+            <p>@apiName is only supported on the following platforms:</p>
             WritePlatformEntries(annotation);
         }
         else if (annotation.Kind == PlatformAnnotationKind.UnrestrictedExceptFor)
         {
-            <p>For the selected framework @apiName is supported on any platform execept for these:</p>
+            <p>@apiName is supported on any platform except for these:</p>
             WritePlatformEntries(annotation);
         }
     }

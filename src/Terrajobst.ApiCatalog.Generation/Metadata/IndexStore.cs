@@ -149,7 +149,7 @@ public abstract class IndexStore
             return;
 
         foreach (var assembly in entry.Assemblies)
-            Store(assembly);
+            Store(assembly.Assembly);
 
         using var writer = new StringWriter();
         WriteFrameworkEntry(writer, entry);
@@ -170,9 +170,8 @@ public abstract class IndexStore
         Delete(packageDisabledPath);
         Delete(packageFailedPath);
 
-        foreach (var frameworkEntry in entry.Entries)
-        foreach (var assembly in frameworkEntry.Assemblies)
-            Store(assembly);
+        foreach (var frameworkEntry in entry.Assemblies)
+            Store(frameworkEntry.Assembly);
 
         using var writer = new StringWriter();
         WritePackageEntry(writer, entry);
@@ -294,7 +293,7 @@ public abstract class IndexStore
         document.Add(root);
 
         foreach (var assembly in frameworkEntry.Assemblies)
-            AddAssembly(root, assembly);
+            AddFrameworkAssembly(root, assembly);
 
         document.Save(writer);
     }
@@ -309,11 +308,8 @@ public abstract class IndexStore
         );
         document.Add(root);
 
-        foreach (var fx in packageEntry.Entries)
-        {
-            foreach (var assembly in fx.Assemblies)
-                AddAssembly(root, assembly, fx.FrameworkName);
-        }
+        foreach (var assembly in packageEntry.Assemblies)
+            AddPackageAssembly(root, assembly);
 
         document.Save(writer);
     }
@@ -380,11 +376,31 @@ public abstract class IndexStore
         root.Add(extensionElement);
     }
 
-    private static void AddAssembly(XContainer parent, AssemblyEntry assembly, string? frameworkName = null)
+    private static void AddFrameworkAssembly(XContainer parent, FrameworkAssemblyEntry frameworkAssembly)
     {
+        var assembly = frameworkAssembly.Assembly;
+        var fingerprint = assembly.Fingerprint;
+        var packName = frameworkAssembly.PackName;
+        var profiles = frameworkAssembly.Profiles;
+
         var assemblyElement = new XElement("assembly",
-            frameworkName is null ? null : new XAttribute("fx", frameworkName),
-            new XAttribute("fingerprint", assembly.Fingerprint.ToString("N"))
+            new XAttribute("fingerprint", fingerprint.ToString("N")),
+            packName is null ? null : new XAttribute("pack", packName),
+            !profiles.Any() ? null : new XAttribute("profiles", string.Join(";", profiles))
+        );
+        parent.Add(assemblyElement);
+    }
+
+    private static void AddPackageAssembly(XContainer parent, PackageAssemblyEntry packageAssembly)
+    {
+        var assembly = packageAssembly.Assembly;
+        var framework = packageAssembly.Framework;
+        var fingerprint = assembly.Fingerprint;
+        var frameworkName = packageAssembly.Framework;
+
+        var assemblyElement = new XElement("assembly",
+            new XAttribute("fingerprint", fingerprint.ToString("N")),
+            new XAttribute("fx", framework)
         );
         parent.Add(assemblyElement);
     }

@@ -11,24 +11,25 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
         _frameworksPath = frameworksPath;
     }
 
-    public override IEnumerable<(string FrameworkName, string[] Paths)> Resolve()
+    public override IEnumerable<(string FrameworkName, FrameworkAssembly[] Assemblies)> Resolve()
     {
         var packIndexPath = Path.Combine(_frameworksPath, FrameworkManifest.FileName);
         if (!File.Exists(packIndexPath))
             yield break;
 
         var manifest = FrameworkManifest.Load(packIndexPath);
-        var references = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+        var assemblies = new Dictionary<string, FrameworkAssembly>(StringComparer.OrdinalIgnoreCase);
 
         var entryByFx = manifest.Frameworks.ToDictionary(fx => NuGetFramework.Parse(fx.FrameworkName));
 
         foreach (var entry in manifest.Frameworks)
         {
-            references.Clear();
+            assemblies.Clear();
 
-            foreach (var package in entry.Packages)
-                references.UnionWith(package.References);
+            AddAssemblies(entry.Packages, assemblies);
 
+            // TODO: I think this is superfluous now:
+            //
             // For frameworks with a platform, such as `net5.0-windows`, we also want to add in all references
             // from the base framework, such as `net5.0`.
 
@@ -37,12 +38,24 @@ public sealed class PackBasedFrameworkProvider : FrameworkProvider
             if (baseFx is not null)
             {
                 var baseEntry = entryByFx[baseFx];
-                foreach (var package in baseEntry.Packages)
-                    references.UnionWith(package.References);
+                AddAssemblies(baseEntry.Packages, assemblies);
             }
 
-            var files = references.ToArray();
-            yield return (entry.FrameworkName, files);
+            var assemblyArray = assemblies.Values.ToArray();
+            yield return (entry.FrameworkName, assemblyArray);
+        }
+
+        static void AddAssemblies(IReadOnlyList<FrameworkManifestPackage> packages, Dictionary<string, FrameworkAssembly> assemblies)
+        {
+            foreach (var package in packages)
+            foreach (var assembly in package.Assemblies)
+            {
+                if (assemblies.ContainsKey(assembly.Path))
+                    continue;
+
+                var frameworkAssembly = new FrameworkAssembly(assembly.Path, package.Id, assembly.Profiles);
+                assemblies.Add(frameworkAssembly.Path, frameworkAssembly);
+            }
         }
     }
 }

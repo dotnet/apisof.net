@@ -120,8 +120,10 @@ public sealed partial class CatalogBuilder
             {
                 var name = _stringHeap.Store(framework.Name);
                 var assemblies = _blobHeap.StoreAssemblies(framework.Assemblies);
+                var assemblyPacks = _blobHeap.StoreAssemblyPacks(framework.AssemblyPacks, _stringHeap);
+                var assemblyProfiles = _blobHeap.StoreAssemblyProfiles(framework.AssemblyProfiles, _stringHeap);
 
-                var offset = _frameworkTable.WriteRow(name, assemblies);
+                var offset = _frameworkTable.WriteRow(name, assemblies, assemblyPacks, assemblyProfiles);
                 _frameworkOffsets.Add(framework, offset);
             }
         }
@@ -652,6 +654,58 @@ public sealed partial class CatalogBuilder
                 return result;
             }
 
+            public BlobOffset StoreAssemblyPacks(IReadOnlyList<(string Pack, IReadOnlyList<IntermediaAssembly> Assemblies)> assemblyPacks,
+                                                 StringHeap stringHeap)
+            {
+                if (assemblyPacks.Count == 0)
+                    return BlobOffset.Nil;
+
+                var assemblyArrayOffsets = new BlobOffset[assemblyPacks.Count];
+                for (var i = 0; i < assemblyPacks.Count; i++)
+                    assemblyArrayOffsets[i] = StoreAssemblies(assemblyPacks[i].Assemblies);
+
+                var result = SeekEnd();
+
+                Memory.WriteInt32(assemblyPacks.Count);
+
+                for (var i = 0; i < assemblyPacks.Count; i++)
+                {
+                    var packName = stringHeap.Store(assemblyPacks[i].Pack);
+                    var assemblies = assemblyArrayOffsets[i];
+
+                    Memory.WriteStringOffset(packName);
+                    Memory.WriteBlobOffset(assemblies);
+                }
+
+                return result;
+            }
+
+            public BlobOffset StoreAssemblyProfiles(IReadOnlyList<(string Profile, IReadOnlyList<IntermediaAssembly> Assemblies)> assemblyProfiles,
+                                                    StringHeap stringHeap)
+            {
+                if (assemblyProfiles.Count == 0)
+                    return BlobOffset.Nil;
+
+                var assemblyArrayOffsets = new BlobOffset[assemblyProfiles.Count];
+                for (var i = 0; i < assemblyProfiles.Count; i++)
+                    assemblyArrayOffsets[i] = StoreAssemblies(assemblyProfiles[i].Assemblies);
+
+                var result = SeekEnd();
+
+                Memory.WriteInt32(assemblyProfiles.Count);
+
+                for (var i = 0; i < assemblyProfiles.Count; i++)
+                {
+                    var packName = stringHeap.Store(assemblyProfiles[i].Profile);
+                    var assemblies = assemblyArrayOffsets[i];
+
+                    Memory.WriteStringOffset(packName);
+                    Memory.WriteBlobOffset(assemblies);
+                }
+
+                return result;
+            }
+
             public BlobOffset StoreFrameworks(IReadOnlyList<IntermediateFramework> frameworks,
                                               IReadOnlyDictionary<IntermediateFramework, FrameworkOffset> frameworkOffsets)
             {
@@ -852,12 +906,16 @@ public sealed partial class CatalogBuilder
         private sealed class FrameworkTable : HeapOrTable
         {
             public FrameworkOffset WriteRow(StringOffset name,
-                                            BlobOffset assemblies)
+                                            BlobOffset assemblies,
+                                            BlobOffset assemblyPacks,
+                                            BlobOffset assemblyProfiles)
             {
                 var offset = new FrameworkOffset(Memory.GetLength());
 
                 Memory.WriteStringOffset(name);
                 Memory.WriteBlobOffset(assemblies);
+                Memory.WriteBlobOffset(assemblyPacks);
+                Memory.WriteBlobOffset(assemblyProfiles);
 
                 return offset;
             }

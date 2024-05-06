@@ -97,6 +97,7 @@ public sealed class ApiCatalogModel
 
     internal ReadOnlySpan<byte> AssemblyTable => _assemblyTableRange.GetBytes(_buffer);
 
+
     internal ReadOnlySpan<byte> ApiTable => _apiTableRange.GetBytes(_buffer);
 
     internal ReadOnlySpan<byte> RootApiTable => _rootApiTableRange.GetBytes(_buffer);
