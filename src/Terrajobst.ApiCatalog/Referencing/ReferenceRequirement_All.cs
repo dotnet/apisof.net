@@ -183,7 +183,7 @@ public sealed class SdkRequirement : ReferenceRequirement
     {
         ThrowIfNull(writer);
 
-        writer.WriteLine($"Your project uses SDK `{SdkName}`.");
+        writer.WriteLine($"Your project needs to use SDK `{SdkName}`.");
     }
 }
 
@@ -202,7 +202,7 @@ public sealed class WorkloadRequirement : ReferenceRequirement
     {
         ThrowIfNull(writer);
 
-        writer.WriteLine($"You have the workload `{WorkloadName}` installed.");
+        writer.WriteLine($"You need to have the workload `{WorkloadName}` installed.");
     }
 }
 
@@ -295,7 +295,7 @@ public sealed class PropertyRequirement : ReferenceRequirement
     {
         ThrowIfNull(writer);
 
-        writer.WriteLine($"Your project sets `<{UsePropertyName}>True</{UsePropertyName}>`.");
+        writer.WriteLine($"Your project needs to set `<{UsePropertyName}>True</{UsePropertyName}>`.");
     }
 }
 
@@ -315,6 +315,6 @@ public sealed class PlatformRequirement : ReferenceRequirement
         ThrowIfNull(writer);
 
         var formattedPlatform = PlatformAnnotationEntry.FormatPlatform(PlatformName);
-        writer.WriteLine($"You're building and running on {formattedPlatform}.");
+        writer.WriteLine($"You need to build and run on {formattedPlatform}.");
     }
 }
