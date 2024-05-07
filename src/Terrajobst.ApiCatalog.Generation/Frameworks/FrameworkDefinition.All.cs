@@ -110,6 +110,18 @@ public partial class FrameworkDefinition
                     Version = "10.0.19041",
                     Platforms = ["windows10.0.19041"],
                     Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.20348",
+                    Platforms = ["windows10.0.20348"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22000",
+                    Platforms = ["windows10.0.22000"],
+                    Kind = PackKind.Framework
                 }
             ]
         },
@@ -178,6 +190,24 @@ public partial class FrameworkDefinition
                 {
                     Version = "10.0.19041",
                     Platforms = ["windows10.0.19041"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.20348",
+                    Platforms = ["windows10.0.20348"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22000",
+                    Platforms = ["windows10.0.22000"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22621",
+                    Platforms = ["windows10.0.22621"],
                     Kind = PackKind.Framework
                 }
             ],
@@ -442,6 +472,24 @@ public partial class FrameworkDefinition
                     Version = "10.0.19041",
                     Platforms = ["windows10.0.19041"],
                     Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.20348",
+                    Platforms = ["windows10.0.20348"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22000",
+                    Platforms = ["windows10.0.22000"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22621",
+                    Platforms = ["windows10.0.22621"],
+                    Kind = PackKind.Framework
                 }
             ],
             WorkloadPacks =
@@ -693,6 +741,24 @@ public partial class FrameworkDefinition
                     Version = "10.0.19041",
                     Platforms = ["windows10.0.19041"],
                     Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.20348",
+                    Platforms = ["windows10.0.20348"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22000",
+                    Platforms = ["windows10.0.22000"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22621",
+                    Platforms = ["windows10.0.22621"],
+                    Kind = PackKind.Framework
                 }
             ],
             WorkloadPacks =
@@ -853,6 +919,42 @@ public partial class FrameworkDefinition
                 {
                     Version = "9.0",
                     Platforms = ["windows"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.17763",
+                    Platforms = ["windows10.0.17763"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.18362",
+                    Platforms = ["windows10.0.18362"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.19041",
+                    Platforms = ["windows10.0.19041"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.20348",
+                    Platforms = ["windows10.0.20348"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22000",
+                    Platforms = ["windows10.0.22000"],
+                    Kind = PackKind.Framework
+                },
+                new PackReference("Microsoft.Windows.SDK.NET.Ref")
+                {
+                    Version = "10.0.22621",
+                    Platforms = ["windows10.0.22621"],
                     Kind = PackKind.Framework
                 }
             ],
