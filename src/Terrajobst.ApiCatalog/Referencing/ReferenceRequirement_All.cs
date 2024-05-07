@@ -238,7 +238,7 @@ public sealed class FrameworkReferenceRequirement : ReferenceRequirement
     {
         ThrowIfNull(writer);
 
-        writer.WriteLine($"Your project has a framework reference to `{FrameworkName}`.");
+        writer.WriteLine($"Your project needs a framework reference to `{FrameworkName}`.");
     }
 }
 
@@ -257,7 +257,7 @@ public sealed class PackageReferenceRequirement : ReferenceRequirement
     {
         ThrowIfNull(writer);
 
-        writer.WriteLine($"Your project has a package reference to `{PackageName}`.");
+        writer.WriteLine($"Your project needs a package reference to `{PackageName}`.");
     }
 }
 
@@ -276,7 +276,7 @@ public sealed class AssemblyReferenceRequirement : ReferenceRequirement
     {
         ThrowIfNull(writer);
 
-        writer.WriteLine($"Your project has an assembly reference to `{AssemblyName}`.");
+        writer.WriteLine($"Your project needs an assembly reference to `{AssemblyName}`.");
     }
 }
 
