@@ -99,24 +99,7 @@ public partial class CatalogItem
 
     private static NuGetFramework SelectFramework(ApiModel model)
     {
-        var availability = model.GetAvailability();
-
-        // First we try to pick the highest .NET Core framework
-
-        var result = availability.Frameworks.Where(fx => fx.Framework.Framework == ".NETCoreApp")
-                                            .OrderByDescending(fx => fx.Framework.Version)
-                                            .ThenBy(fx => fx.Framework.HasPlatform)
-                                            .Select(fx => fx.Framework)
-                                            .FirstOrDefault();
-
-        // If we couldn't find any, pick the highest version of any framework
-
-        result ??= availability.Frameworks.OrderBy(f => f.Framework.Framework)
-                                          .ThenByDescending(f => f.Framework.Version)
-                                          .Select(fx => fx.Framework)
-                                          .First();
-
-        return result;
+        return model.GetAvailability().GetCurrent().Framework;
     }
 
     private void QueryManagerOnQueryChanged(object? sender, IReadOnlySet<string> e)

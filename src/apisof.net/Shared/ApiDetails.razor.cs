@@ -81,12 +81,7 @@ public partial class ApiDetails
         Usages = GetUsages();
         Availability = Api.GetAvailability();
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
-                               Availability.Frameworks
-                                    .OrderByDescending(fx => fx.Framework.Version)
-                                    .ThenBy(fx => fx.Framework.Framework)
-                                    .ThenBy(fx => fx.Framework.HasPlatform)
-                                    .OrderByDescending(fx => fx.Framework.PlatformVersion)
-                                    .First();
+                               Availability.GetCurrent();
 
         var referenceRequirement = ReferenceRequirement.Compute(SelectedAvailability)?.ToString();
         ReferenceRequirementMarkup = referenceRequirement is null
