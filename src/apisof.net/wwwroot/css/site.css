@@ -310,7 +310,19 @@ code {
         }
 }
 
-/* Reference requirments */
+/* Section Row */
+
+.section-row {
+    background-color: #e9ecef;
+}
+
+@media (prefers-color-scheme: dark) {
+    .section-row {
+        background-color: rgb(52, 58, 64);
+    }
+}
+
+/* Reference requirements */
 
 .reference-requirement p {
     margin-bottom: 0;
