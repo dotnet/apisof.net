@@ -28,6 +28,19 @@ public class NuGetStore
         return GetPackageAsync(identity.Id, identity.Version.ToNormalizedString());
     }
 
+    public Task<bool> IsMarkedAsLegacyAsync(string id, string version)
+    {
+        var identity = new PackageIdentity(id, NuGetVersion.Parse(version));
+        return IsMarkedLegacyAsync(identity);
+    }
+
+    public async Task<bool> IsMarkedLegacyAsync(PackageIdentity identity)
+    {
+        var results = _feeds.Select(f => f.GetDeprecationMetadata(identity)).ToArray();
+        await Task.WhenAll(results);
+        return results.Any(r => r.Result is not null);
+    }
+
     public async Task<PackageArchiveReader> GetPackageAsync(string id, string version)
     {
         var path = GetPackagePath(id, version);

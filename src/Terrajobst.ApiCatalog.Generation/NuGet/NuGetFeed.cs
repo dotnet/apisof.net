@@ -13,6 +13,7 @@ using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
+using NuGet.Protocol.Model;
 using NuGet.Versioning;
 
 namespace Terrajobst.ApiCatalog;
@@ -146,6 +147,40 @@ public sealed class NuGetFeed
         var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: includeUnlisted, cache, logger, cancellationToken);
 
         return versions.ToArray();
+    }
+
+    public async Task<PackageDeprecationMetadata?> GetDeprecationMetadata(PackageIdentity identity)
+    {
+        var cache = NullSourceCacheContext.Instance;
+        var logger = NullLogger.Instance;
+        var cancellationToken = CancellationToken.None;
+
+        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var resource = await repository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
+        if (resource is null)
+            return null;
+
+        var packageMetadata = await resource.GetMetadataAsync(identity, cache, logger, cancellationToken);
+        if (packageMetadata is null)
+            return null;
+
+        var deprecationMetadata = await packageMetadata.GetDeprecationMetadataAsync();
+        return deprecationMetadata;
+    }
+
+    public async Task<IReadOnlyList<IReadOnlyDictionary<string, IReadOnlyList<PackageVulnerabilityInfo>>>> GetVulnerabilities()
+    {
+        var cache = NullSourceCacheContext.Instance;
+        var logger = NullLogger.Instance;
+        var cancellationToken = CancellationToken.None;
+
+        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var resource = await repository.GetResourceAsync<IVulnerabilityInfoResource>(cancellationToken);
+        if (resource is null)
+            return Array.Empty<IReadOnlyDictionary<string, IReadOnlyList<PackageVulnerabilityInfo>>>();
+
+        var packageMetadata = await resource.GetVulnerabilityInfoAsync(cache, logger, cancellationToken);
+        return packageMetadata.KnownVulnerabilities ?? Array.Empty<IReadOnlyDictionary<string, IReadOnlyList<PackageVulnerabilityInfo>>>();
     }
 
     public async Task<PackageIdentity?> ResolvePackageAsync(string packageId, VersionRange range)

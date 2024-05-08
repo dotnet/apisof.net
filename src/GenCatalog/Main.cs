@@ -208,16 +208,25 @@ internal sealed class Main : IConsoleMain
                 Console.WriteLine($"Indexing {id} {version}...");
                 try
                 {
-                    var packageEntry = await packageIndexer.Index(id, version);
-                    if (packageEntry is not null)
+                    if (await nugetStore.IsMarkedAsLegacyAsync(id, version))
                     {
-                        indexStore.Store(packageEntry);
+                        Console.WriteLine("Package is marked as legacy.");
+                        indexStore.MarkPackageAsDisabled(id, version);
+                        nugetStore.DeleteFromCache(id, version);
                     }
                     else
                     {
-                        Console.WriteLine($"Not a library package.");
-                        indexStore.MarkPackageAsDisabled(id, version);
-                        nugetStore.DeleteFromCache(id, version);
+                        var packageEntry = await packageIndexer.Index(id, version);
+                        if (packageEntry is not null)
+                        {
+                            indexStore.Store(packageEntry);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Not a library package.");
+                            indexStore.MarkPackageAsDisabled(id, version);
+                            nugetStore.DeleteFromCache(id, version);
+                        }
                     }
                 }
                 catch (InvalidDataException ex) when (!retriedCorruptedPackage)
