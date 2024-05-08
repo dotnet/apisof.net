@@ -50,7 +50,7 @@ partial class ReferenceRequirement
         {
             if (string.Equals(pack, "Microsoft.AspNetCore.App.Ref", StringComparison.OrdinalIgnoreCase))
             {
-                return Or(Sdk("Microsoft.NET.Sdk.Web"), FrameworkReference("Microsoft.AspNetCore.App.Ref"));
+                return Or(Sdk("Microsoft.NET.Sdk.Web"), FrameworkReference("Microsoft.AspNetCore.App"));
             }
             else if (string.Equals(pack, "Microsoft.WindowsDesktop.App.Ref", StringComparison.OrdinalIgnoreCase))
             {
@@ -61,7 +61,7 @@ partial class ReferenceRequirement
         {
             if (string.Equals(pack, "Microsoft.AspNetCore.App.Ref", StringComparison.OrdinalIgnoreCase))
             {
-                return Or(Sdk("Microsoft.NET.Sdk.Web"), FrameworkReference("Microsoft.AspNetCore.App.Ref"));
+                return Or(Sdk("Microsoft.NET.Sdk.Web"), FrameworkReference("Microsoft.AspNetCore.App"));
             }
             else if (string.Equals(pack, "Microsoft.WindowsDesktop.App.Ref", StringComparison.OrdinalIgnoreCase))
             {
