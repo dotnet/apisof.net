@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 
 using NuGet.Frameworks;
 using NuGet.Packaging;
+using NuGet.Packaging.Core;
 
 namespace Terrajobst.ApiCatalog;
 
@@ -26,9 +27,16 @@ public sealed class PackageIndexer
         {
             using (var root = await _store.GetPackageAsync(id, version))
             {
-                // We don't want to index special packs, such as targeting packs or runtime packs as those aren't
-                // meant to be used directly.
-                if (root.IsPack())
+                // See https://learn.microsoft.com/en-us/nuget/create-packages/set-package-type?tabs=dotnet#known-package-types
+                //
+                // We only want to index library packages. Prior to NuGet 3.5, there was no
+                // package type. Having none means "Dependency".
+                //
+                // So we only want to index package that either have no package types or whose
+                // package type is Dependency.
+
+                var hasNonDependencyType = root.GetPackageTypes().Any(t => t != PackageType.Dependency);
+                if (hasNonDependencyType)
                     return null;
 
                 var targetNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
