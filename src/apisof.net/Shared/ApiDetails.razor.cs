@@ -71,9 +71,13 @@ public partial class ApiDetails
         await UpdateApiAsync();
     }
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _rendered = true;
+        if (!_rendered)
+        {
+            _rendered = true;
+            await UpdateLinksAsync();
+        }
     }
 
     private async Task UpdateApiAsync()
@@ -130,6 +134,7 @@ public partial class ApiDetails
 
         SourceUrl = results[0];
         HelpUrl = results[1];
+        StateHasChanged();
     }
 
     private IEnumerable<ApiFrameworkAvailability> GetSelectedPlatforms()
