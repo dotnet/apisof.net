@@ -27,7 +27,10 @@ public sealed class TargetFrameworkNode
         {
             if (Framework.HasPlatform)
             {
-                return PlatformAnnotationEntry.FormatPlatform(Framework.Platform);
+                if (Framework.PlatformVersion == FrameworkConstants.EmptyVersion)
+                    return PlatformAnnotationEntry.FormatPlatform(Framework.Platform);
+                else
+                    return Framework.PlatformVersion.GetVersionDisplayString();
             }
             else
             {

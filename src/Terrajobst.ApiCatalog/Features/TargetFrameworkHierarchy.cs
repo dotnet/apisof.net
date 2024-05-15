@@ -86,7 +86,7 @@ public sealed class TargetFrameworkHierarchy
                        .ThenBy(n => n.Framework.Version)
                        .ThenBy(n => n.Framework.HasPlatform)
                        .ThenBy(n => n.Framework.Platform)
-                       .ThenBy(n => n.Framework.Version);
+                       .ThenBy(n => n.Framework.PlatformVersion);
     }
 
     private sealed class Node
