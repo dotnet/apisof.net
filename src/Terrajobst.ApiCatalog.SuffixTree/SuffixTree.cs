@@ -176,31 +176,21 @@ public sealed class SuffixTree
             {
                 var child = children[i];
                 var childTextBytes = GetNodeText(child);
-                var prefixBytes = GetCommonPrefix(childTextBytes, remainingKeyBytes);
 
+                var prefixLength = childTextBytes.CommonPrefixLength(remainingKeyBytes);
 #if DEBUG
                 var childText = Encoding.UTF8.GetString(childTextBytes);
-                var prefix = Encoding.UTF8.GetString(prefixBytes);
+                var prefix = Encoding.UTF8.GetString(childTextBytes.Slice(0, prefixLength));
 #endif
 
-                if (prefixBytes.Length == 0)
+                if (prefixLength == 0)
                     break;
 
-                remainingNodes.Enqueue((child, keyIndex + prefixBytes.Length));
+                remainingNodes.Enqueue((child, keyIndex + prefixLength));
             }
         }
 
         return results.ToArray();
-    }
-
-    private ReadOnlySpan<byte> GetCommonPrefix(ReadOnlySpan<byte> childText, ReadOnlySpan<byte> remainingTokenBytes)
-    {
-        var length = Math.Min(childText.Length, remainingTokenBytes.Length);
-        var position = 0;
-        while (position < length && childText[position] == remainingTokenBytes[position])
-            position++;
-
-        return childText.Slice(0, position);
     }
 
     public void WriteDot(TextWriter writer)
