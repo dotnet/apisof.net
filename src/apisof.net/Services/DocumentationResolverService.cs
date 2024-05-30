@@ -7,9 +7,9 @@ namespace ApisOfDotNet.Services;
 public sealed class DocumentationResolverService
 {
     private static readonly string[] _targets = [
-        "https://docs.microsoft.com/en-us/dotnet/api/",
-        "https://learn.microsoft.com/en-us/windows/windows-app-sdk/api/winrt/",
-        "https://learn.microsoft.com/en-us/uwp/api/"
+        "https://learn.microsoft.com/dotnet/api/",
+        "https://learn.microsoft.com/windows/windows-app-sdk/api/winrt/",
+        "https://learn.microsoft.com/uwp/api/"
     ];
 
     private readonly HttpClient _client;
