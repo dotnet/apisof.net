@@ -9,11 +9,17 @@ public static class Tokenizer
         if (text.Contains("("))
             text = text.Substring(0, text.IndexOf('('));
 
-        // TODO: This doesn't work, we need to keep the member of generic types
+        // TODO: We'd like to keep generic types for typing purposes.
         while (text.Contains("<"))
         {
             var indexOfFirstOpenBracket = text.IndexOf('<');
             var indexOfFirstCloseBracket = text.IndexOf('>', indexOfFirstOpenBracket);
+            if (indexOfFirstCloseBracket < 0)
+            {
+                // This will happen for operator less than.
+                break;
+            }
+
             var bracketLength = indexOfFirstCloseBracket - indexOfFirstOpenBracket + 1;
             text = text.Remove(indexOfFirstOpenBracket, bracketLength);
         }
