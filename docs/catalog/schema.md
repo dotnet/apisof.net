@@ -16,8 +16,8 @@ will need to be decompressed.
 | Offset | Length | Type        | Name        |
 | ------ | ------ | ----------- | ----------- |
 | 0      | 8      | `Char8[8]`  | Magic Value |
-| 4      | 4      | `Int32`     | Version     |
-| 8      | 56     | `Int32[13]` | Table Sizes |
+| 8      | 4      | `Int32`     | Version     |
+| 12     | 52     | `Int32[13]` | Table Sizes |
 
 - The magic value is `APICATFB`
 - This is version `10`
