@@ -34,4 +34,20 @@ public class TokenizerTests
         var actual = Tokenizer.Tokenize(input);
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    public void Tokenizer_Leaves_OpenBracket()
+    {
+        var input = "System.Outer.operator<()";
+        var expected = new string[] {
+            "system",
+            ".",
+            "outer",
+            ".",
+            "operator<"
+        };
+        
+        var actual = Tokenizer.Tokenize(input);
+        Assert.Equal(expected, actual);
+    }
 }
