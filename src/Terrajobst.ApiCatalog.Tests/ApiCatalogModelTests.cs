@@ -345,6 +345,47 @@ public class ApiCatalogModelTests
     }
 
     [Fact]
+    public async Task Type_Nested()
+    {
+        var source = """
+            namespace System
+            {
+                public class OuterClass
+                {
+                    private OuterClass() {}
+
+                    public class InnerClass
+                    {
+                        private InnerClass() {}
+
+                        public void M() {}
+                    }
+                }
+            }
+            """;
+
+        var catalog = await new FluentCatalogBuilder()
+            .AddFramework("net461", fx =>
+                fx.AddAssembly("System.Runtime", source))
+            .BuildAsync();
+
+        var outerClass = catalog.AllApis.Single(a => a.Name == "OuterClass");
+        var innerClass = catalog.AllApis.Single(a => a.Name == "InnerClass");
+        var method = catalog.AllApis.Single(a => a.Name == "M()");
+
+        Assert.Equal(outerClass.DescendantsAndSelf(), new[] { outerClass, innerClass, method });
+        Assert.Equal(outerClass.Descendants(), new[] { innerClass, method });
+        Assert.Equal(innerClass.Descendants(), new[] { method });
+
+        Assert.Equal(method.Parent, innerClass);
+        Assert.Equal(innerClass.Parent, outerClass);
+
+        Assert.Equal("System.OuterClass", outerClass.ToString());
+        Assert.Equal("System.OuterClass.InnerClass", innerClass.ToString());
+        Assert.Equal("System.OuterClass.InnerClass.M()", method.ToString());
+    }
+
+    [Fact]
     public async Task Member()
     {
         var source = """

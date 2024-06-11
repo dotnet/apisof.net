@@ -10,8 +10,13 @@ public static class Tokenizer
             text = text.Substring(0, text.IndexOf('('));
 
         // TODO: This doesn't work, we need to keep the member of generic types
-        if (text.Contains("<"))
-            text = text.Substring(0, text.IndexOf('<'));
+        while (text.Contains("<"))
+        {
+            var indexOfFirstOpenBracket = text.IndexOf('<');
+            var indexOfFirstCloseBracket = text.IndexOf('>', indexOfFirstOpenBracket);
+            var bracketLength = indexOfFirstCloseBracket - indexOfFirstOpenBracket + 1;
+            text = text.Remove(indexOfFirstOpenBracket, bracketLength);
+        }
 
         var start = 0;
         var position = 0;
