@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup Label="Centralized Package Versions">
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.21.2" />
@@ -41,5 +42,9 @@
     <PackageVersion Include="xunit" Version="2.9.0" />
     <PackageVersion Include="xunit.extensibility.core" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <ItemGroup Label="Transitive Updates">
+    <PackageVersion Include="System.Formats.Asn1" Version="6.0.1" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.4" />
   </ItemGroup>
 </Project>
