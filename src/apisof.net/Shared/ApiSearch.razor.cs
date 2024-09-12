@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace ApisOfDotNet.Shared;
 
-public sealed partial class ApiSearch : IDisposable
+public sealed partial class ApiSearch : IAsyncDisposable
 {
     private readonly Timer _debounceTimer;
     private HotKeysContext? _hotKeysContext;
@@ -30,10 +30,12 @@ public sealed partial class ApiSearch : IDisposable
         _debounceTimer.Elapsed += OnDebounceTimerElapsed;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         _debounceTimer.Dispose();
-        _hotKeysContext?.Dispose();
+
+        if (_hotKeysContext is not null)
+            await _hotKeysContext.DisposeAsync();
     }
 
     private string SearchText
@@ -63,14 +65,14 @@ public sealed partial class ApiSearch : IDisposable
 
     public bool IsOpen { get; private set; }
 
-    protected override void OnInitialized()
-    {
-        _hotKeysContext = HotKeys.CreateContext()
-                                 .Add(Key.Slash, Open);
-    }
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (firstRender)
+        {
+            _hotKeysContext = HotKeys.CreateContext()
+                                     .Add(Key.Slash, Open);
+        }
+
         if (IsOpen)
             await _inputElement.FocusAsync();
     }
