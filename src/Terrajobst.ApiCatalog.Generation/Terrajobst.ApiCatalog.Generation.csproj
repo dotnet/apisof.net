@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Packages\PackageIds.txt" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="LibGit2Sharp" />
         <PackageReference Include="Nerdbank.GitVersioning">
             <PrivateAssets>all</PrivateAssets>
@@ -20,6 +24,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Packages\PackageIds.txt" />
     </ItemGroup>
 
 </Project>

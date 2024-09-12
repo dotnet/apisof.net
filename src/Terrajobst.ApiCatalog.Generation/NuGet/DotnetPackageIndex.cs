@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Xml.Linq;
 using NuGet.Packaging.Core;
 using NuGet.Versioning;
@@ -63,13 +64,15 @@ public static class DotnetPackageIndex
 
     private static async Task<IReadOnlyList<PackageIdentity>> GetPackagesFromNuGetOrgAsync(NuGetFeed feed)
     {
-        Console.WriteLine("Fetching owner information...");
-        var ownerInformation = await feed.GetOwnerMappingAsync();
+        // Console.WriteLine("Fetching owner information...");
+        // var ownerInformation = await feed.GetOwnerMappingAsync();
+        // 
+        // var packageIds = ownerInformation.Keys
+        //                                  .ToHashSet(StringComparer.OrdinalIgnoreCase)
+        //                                  .Where(id => IsPlatformPackage(id, ownerInformation))
+        //                                  .ToArray();
 
-        var packageIds = ownerInformation.Keys
-                                         .ToHashSet(StringComparer.OrdinalIgnoreCase)
-                                         .Where(id => IsPlatformPackage(id, ownerInformation))
-                                         .ToArray();
+        var packageIds = PlatformPackageDefinition.PackageIds.ToImmutableArray();
 
         Console.WriteLine($"Found {packageIds.Length:N0} relevant package IDs.");
 
@@ -99,7 +102,8 @@ public static class DotnetPackageIndex
 
         var identities = await feed.GetAllPackagesAsync();
 
-        identities = identities.Where(i => PackageFilter.Default.IsMatch(i.Id)).ToArray();
+        // identities = identities.Where(i => PackageFilter.Default.IsMatch(i.Id)).ToArray();
+        identities = identities.Where(i => PlatformPackageDefinition.PackageIds.Contains(i.Id)).ToArray();
 
         Console.WriteLine($"Found {identities.Count:N0} package versions.");
 

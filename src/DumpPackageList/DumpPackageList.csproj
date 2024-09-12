@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Terrajobst.ApiCatalog.Generation\Packages\PlatformPackageDefinition.cs" Link="Linked/PlatformPackageDefinition.cs" />
+    <Compile Include="..\Terrajobst.ApiCatalog.Generation\Packages\PackageFilter.cs" Link="Linked/PackageFilter.cs" />
+    <Compile Include="..\Terrajobst.ApiCatalog.Generation\Packages\PackageFilterExpression.cs" Link="Linked/PackageFilterExpression.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Microsoft.Azure.Kusto.Data" />
+  </ItemGroup>
+
+</Project>

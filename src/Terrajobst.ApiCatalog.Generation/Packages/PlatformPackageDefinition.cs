@@ -1,9 +1,12 @@
 ﻿using System.Collections.Frozen;
+using System.Collections.Immutable;
 
 namespace Terrajobst.ApiCatalog;
 
 internal static class PlatformPackageDefinition
 {
+    private static FrozenSet<string>? _packageIds;
+
     public static FrozenSet<string> Owners = FrozenSet.ToFrozenSet(
     [
         "aspnet",
@@ -72,4 +75,24 @@ internal static class PlatformPackageDefinition
                 PackageFilterExpression.Parse("*.zh-Hant"),
         ]
     );
+
+    public static FrozenSet<string> PackageIds
+    {
+        get
+        {
+            if (_packageIds is null)
+            {
+                using var stream = typeof(PlatformPackageDefinition).Assembly.GetManifestResourceStream("Terrajobst.ApiCatalog.Generation.Packages.PackageIds.txt")!;
+                using var reader = new StreamReader(stream);
+                var list = new List<string>();
+                while (reader.ReadLine() is string line)
+                    list.Add(line.Trim());
+
+                var packageIds = list.ToFrozenSet();
+                Interlocked.CompareExchange(ref _packageIds, packageIds, null);
+            }
+
+            return _packageIds;
+        }
+    }
 }
