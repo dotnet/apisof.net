@@ -45,7 +45,8 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
   </ItemGroup>
   <ItemGroup Label="Transitive Updates">
-    <PackageVersion Include="System.Formats.Asn1" Version="6.0.1" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.4" />
+    <PackageVersion Include="System.Formats.Asn1" Version="8.0.1" />
+    <PackageVersion Include="System.IO.Packaging" Version="8.0.1" />
+    <PackageVersion Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 </Project>
