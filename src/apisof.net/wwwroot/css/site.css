@@ -322,6 +322,14 @@ code {
     }
 }
 
+/* Reset anchor links color */
+
+@media (prefers-color-scheme: light) {
+    a, a:link, a:visited {
+        color: #0062ce;
+    }
+}
+
 /* Reference requirements */
 
 .reference-requirement p {
