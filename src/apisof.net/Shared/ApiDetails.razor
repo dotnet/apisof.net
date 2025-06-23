@@ -10,16 +10,16 @@
                     <a href="@Link.ForDiff()">@left vs @right</a>
                 </li>
             }
-            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database"/> <a href="@Link.ForCatalog()">Catalog</a></li>
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" role="presentation" /> <a href="@Link.ForCatalog()">Catalog</a></li>
             @foreach (var api in Breadcrumbs)
             {
                 if (api == Api)
                 {
-                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()"/> @api.Name</li>
+                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" role="presentation" /> @api.Name</li>
                 }
                 else
                 {
-                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()"/> <a href="@Link.For(api)">@api.Name</a></li>
+                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" role="presentation" /> <a href="@Link.For(api)">@api.Name</a></li>
                 }
             }
         </ol>
@@ -38,11 +38,11 @@
 
                 @if (Parent == Api)
                 {
-                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <span class="font-weight-bold @parentCssClasses">@Parent.Name</span> @parentMarkup
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" role="presentation" /> <span class="font-weight-bold @parentCssClasses">@Parent.Name</span> @parentMarkup
                 }
                 else
                 {
-                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@parentCssClasses" href="@Link.For(Parent)">@Parent.Name</a> @parentMarkup
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" role="presentation" /> <a class="@parentCssClasses" href="@Link.For(Parent)">@Parent.Name</a> @parentMarkup
                 }
 
                 <ul class="list-unstyled pl-4">
@@ -59,11 +59,11 @@
                         <li>
                             @if (child == Api)
                             {
-                                <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childCssClasses">@child.Name</span> @childMarkup
+                                <Glyph Kind="@child.Kind.GetGlyph()" role="presentation" /> <span class="font-weight-bold @childCssClasses">@child.Name</span> @childMarkup
                             }
                             else
                             {
-                                <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
+                                <Glyph Kind="@child.Kind.GetGlyph()" role="presentation" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
                             }
                         </li>
                     }
@@ -81,11 +81,11 @@
                         <li>
                             @if (extensionMethod == ExtensionMethod)
                             {
-                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @extensionCssClasses">@extensionMethod.ExtensionMethod.Name</span> @extensionMarkup
+                                <Glyph Kind="GlyphKind.ExtensionMethod" role="presentation" /> <span class="font-weight-bold @extensionCssClasses">@extensionMethod.ExtensionMethod.Name</span> @extensionMarkup
                             }
                             else
                             {
-                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@extensionCssClasses" href="@Link.For(extensionMethod)">@extensionMethod.ExtensionMethod.Name</a> @extensionMarkup
+                                <Glyph Kind="GlyphKind.ExtensionMethod" role="presentation" /> <a class="@extensionCssClasses" href="@Link.For(extensionMethod)">@extensionMethod.ExtensionMethod.Name</a> @extensionMarkup
                             }
                         </li>
                     }
