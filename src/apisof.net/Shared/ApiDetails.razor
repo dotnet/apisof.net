@@ -277,7 +277,7 @@
                                         ? "fx-right"
                                         : "";
 
-                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="bu" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
                                             @availability.Framework.GetPlatformVersionDisplayString()
                                         </span>
                                     }
