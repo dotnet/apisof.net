@@ -2,13 +2,13 @@
     <div class="modal-dialog modal-full" role="document" @onclick:stopPropagation="true">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Search</h5>
+                <h5 class="modal-title" id="uhfSearch">Search</h5>
                 <button type="button" class="close" aria-label="Close" @onclick="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input"
+                <input @ref="_inputElement" type="text" spellcheck="false" aria-labelledby="uhfSearch" class="form-control search-input"
                        @bind="SearchText" @bind:event="oninput"
                        @onkeydown="SearchTextKeyDown" />
 
