@@ -430,6 +430,12 @@ a {
     color: #F0F0F0 !important;
 }
 
+/* breadcrumb */
+.breadcrumb-item.active{
+    color: #606970;
+}
+
+
 /* Catalog */
 .list-unstyled a
 {
