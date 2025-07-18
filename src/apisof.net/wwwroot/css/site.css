@@ -322,6 +322,22 @@ code {
     }
 }
 
+/* Accessibility Fixes */
+
+@media (prefers-color-scheme: light) {
+    .navbar-dark .navbar-nav .nav-link {
+        color: rgba(212, 187, 255, 1);
+    }
+
+    .breadcrumb li a {
+        color: #0062ce;
+    }
+
+    .breadcrumb .breadcrumb-item.active {
+        color: #606970;
+    }
+}
+
 /* Reference requirements */
 
 .reference-requirement p {
