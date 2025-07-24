@@ -37,6 +37,15 @@
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/twitter-bootstrap/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript">
+        
+        function scrollIntoMainContent(){
+             var mainContent = document.getElementById("main-content");
+                if (mainContent) {
+                    mainContent.scrollIntoView({ behavior: "smooth" });
+                    mainContent.focus();
+                }
+        }
+
         var observer = new MutationObserver(function (mutations, observer) {
             $('[data-toggle="popover"]').popover({
                 placement: 'top',
@@ -48,6 +57,16 @@
             });
             $('.search-result-row.selected').each(function () {
                 this.scrollIntoView({block: "nearest"});
+            });
+            $("#skipToMain").on('keydown', function(e){
+                if (e.key === "Enter" || e.key === " ") {
+                    scrollIntoMainContent();
+                    e.preventDefault();
+                }
+            });
+            $("#skipToMain").on('click', function(e){
+               scrollIntoMainContent();
+               e.preventDefault();
             });
         });
         observer.observe(document, {
