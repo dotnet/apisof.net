@@ -398,10 +398,3 @@ code {
 .popover {
     max-width: 100%;
 }
-
-span[role="button"]:focus
-{
-    outline: 2px solid #0078D4;
-    border-radius: 4px;
-    background-color: #e6f0ff;
-}
