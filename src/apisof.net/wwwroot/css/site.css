@@ -45,6 +45,12 @@
     border-radius: 0rem;
 }
 
+/* List items */
+
+.list-unstyled li a {
+    word-wrap: break-word;
+}
+
 /* General */
 
 .nofocus:focus {
