@@ -104,6 +104,15 @@ code {
         background-color: #007bff;
     }
 
+@media (max-width: 768px) {
+    .search-result-row {
+        display: flex;
+        align-items: baseline;
+        word-break: break-word;
+        white-space: normal;
+    }
+}
+
 /* Diff */
 
 .diff-details {
