@@ -325,6 +325,11 @@ code {
 /* Accessibility Fixes */
 
 @media (prefers-color-scheme: light) {
+    /* Reset anchor links color */
+    a, a:link, a:visited {
+        color: #0062ce;
+    }
+
     .navbar-dark .navbar-nav .nav-link {
         color: rgba(212, 187, 255, 1);
     }
