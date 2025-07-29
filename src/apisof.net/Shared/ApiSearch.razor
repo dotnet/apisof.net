@@ -9,6 +9,7 @@
             </div>
             <div class="modal-body">
                 <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input"
+                       aria-label="Search" placeholder="Search APIs"
                        @bind="SearchText" @bind:event="oninput"
                        @onkeydown="SearchTextKeyDown" />
 
