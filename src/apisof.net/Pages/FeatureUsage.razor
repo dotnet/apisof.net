@@ -23,7 +23,7 @@
                             <div class="row align-items-center" title="@title">
                                 <div class="col col-md-5 col-xl-3">
                                     <div class="progress">
-                                        <div class="progress-bar" role="progressbar" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress-bar" role="progressbar" aria-label="@title" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
                                 <div class="col" style="max-width: 5rem;">
@@ -88,7 +88,17 @@
 
                             @if (!isLeaf)
                             {
-                                <span class="oi @icon pr-2 text-muted small"></span>
+                                <span class="oi @icon pr-2 pl-2 text-muted small"
+                                      role="button"
+                                      tabindex="0"
+                                      @onkeyup:preventDefault
+                                      @onkeyup="@(e => {
+                                          if (e.Key == " " || e.Key == "Enter")
+                                          {
+                                              ExpandNode(node, !isExpanded);
+                                          }
+                                      })">
+                                </span>
                             }
 
                             @node.Name
@@ -104,7 +114,7 @@
                                 <div class="row">
                                     <div class="col-8">
                                         <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar" role="progressbar" aria-label="@node.Name" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
                                     <div class="col-4">
