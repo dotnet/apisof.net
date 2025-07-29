@@ -88,7 +88,17 @@
 
                             @if (!isLeaf)
                             {
-                                <span class="oi @icon pr-2 text-muted small"></span>
+                                <span class="oi @icon pr-2 pl-2 text-muted small"
+                                      role="button"
+                                      tabindex="0"
+                                      @onkeyup:preventDefault
+                                      @onkeyup="@(e => {
+                                          if (e.Key == " " || e.Key == "Enter")
+                                          {
+                                              ExpandNode(node, !isExpanded);
+                                          }
+                                      })">
+                                </span>
                             }
 
                             @node.Name
