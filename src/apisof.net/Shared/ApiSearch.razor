@@ -19,8 +19,9 @@
                         @foreach (var result in SearchResults)
                         {
                             var selectedClass = result == SelectedResult ? "selected" : "";
-                            <li class="search-result-row @selectedClass" @onclick="_ => SelectAndAccept(result)">
-                                <Glyph Kind="@result.Kind.GetGlyph()" />&nbsp;@result.GetFullName()
+                            <li class="search-result-row flex-inline-breakable @selectedClass" @onclick="_ => SelectAndAccept(result)">
+                                <Glyph Kind="@result.Kind.GetGlyph()" />
+                                <span>@result.GetFullName()</span>
                             </li>
                         }
                     </ul>
