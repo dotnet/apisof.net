@@ -11,7 +11,7 @@
                     <a href="@Link.ForDiff()">@left vs @right</a>
                 </li>
             }
-            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database"/> <a href="@Link.ForCatalog()">Catalog</a></li>
         </ol>
     </nav>
 </div>
@@ -20,7 +20,7 @@
 
     <ul class="list-unstyled">
         <li>
-            <Glyph Kind="GlyphKind.Database" /> <span class="font-weight-bold">Catalog</span>
+            <Glyph Kind="GlyphKind.Database"/> <span class="font-weight-bold">Catalog</span>
 
             <ul class="list-unstyled pl-4">
                 @{
@@ -37,6 +37,7 @@
                         var childMarkup = childData?.AdditionalMarkup;
                         <li>
                             <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name  <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a> @childMarkup
+
                         </li>
                     }
                 </ItemLimiter>

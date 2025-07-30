@@ -9,17 +9,19 @@
             </div>
             <div class="modal-body">
                 <input @ref="_inputElement" type="text" spellcheck="false" class="form-control search-input"
+                       aria-label="Search" placeholder="Search APIs"
                        @bind="SearchText" @bind:event="oninput"
                        @onkeydown="SearchTextKeyDown" />
 
                 @if (SearchResults.Length > 0)
                 {
-                    <ul class="list-unstyled search-results mt-2">
+                    <ul class="list-unstyled search-results mt-2" tabindex="0">
                         @foreach (var result in SearchResults)
                         {
                             var selectedClass = result == SelectedResult ? "selected" : "";
-                            <li class="search-result-row @selectedClass" @onclick="_ => SelectAndAccept(result)">
-                                <Glyph Kind="@result.Kind.GetGlyph()" />&nbsp;@result.GetFullName()
+                            <li class="search-result-row flex-inline-breakable @selectedClass" @onclick="_ => SelectAndAccept(result)">
+                                <Glyph Kind="@result.Kind.GetGlyph()" />
+                                <span>@result.GetFullName()</span>
                             </li>
                         }
                     </ul>
