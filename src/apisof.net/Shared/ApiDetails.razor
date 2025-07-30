@@ -10,16 +10,16 @@
                     <a href="@Link.ForDiff()">@left vs @right</a>
                 </li>
             }
-            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database"/> <a href="@Link.ForCatalog()">Catalog</a></li>
+            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
             @foreach (var api in Breadcrumbs)
             {
                 if (api == Api)
                 {
-                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()"/> @api.Name</li>
+                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" /> @api.Name</li>
                 }
                 else
                 {
-                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()"/> <a href="@Link.For(api)">@api.Name</a></li>
+                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="@Link.For(api)">@api.Name</a></li>
                 }
             }
         </ol>
@@ -56,7 +56,7 @@
                         if (childExcluded)
                             continue;
 
-                        <li>
+                        <li class="flex-inline-breakable">
                             @if (child == Api)
                             {
                                 <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childCssClasses">@child.Name</span> @childMarkup
@@ -78,7 +78,7 @@
                         if (extensionExcluded)
                             continue;
 
-                        <li>
+                        <li class="flex-inline-breakable">
                             @if (extensionMethod == ExtensionMethod)
                             {
                                 <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @extensionCssClasses">@extensionMethod.ExtensionMethod.Name</span> @extensionMarkup
@@ -116,7 +116,7 @@
                                 <div class="row align-items-center" title="@title">
                                     <div class="col col-md-5 col-xl-3">
                                         <div class="progress">
-                                            <div class="progress-bar" role="progressbar" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar" role="progressbar" aria-label="@title" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
                                     <div class="col" style="max-width: 5rem;">
@@ -222,7 +222,7 @@
                                     ? "fx-right"
                                     : "";
 
-                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
                                         @availability.Framework.GetBaseFrameworkOrSelf().GetVersionDisplayString()
                                     </span>
                                 }
@@ -277,7 +277,7 @@
                                         ? "fx-right"
                                         : "";
 
-                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
                                             @availability.Framework.GetPlatformVersionDisplayString()
                                         </span>
                                     }
