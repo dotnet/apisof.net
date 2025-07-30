@@ -5,7 +5,8 @@
     --dotnet-purple: #512bd4;
     --dotnet-purple-hover: #4411BB;
     --dotnet-purple-border-hover: #3311BB;
-    --dotnet-catalog-link-color: #0062ce
+    --dotnet-catalog-link-color: #0062ce;
+    --dotnet-catalog-link-dark-color: #00b1ff
 }
 
 .bg-dotnet {
@@ -47,9 +48,10 @@
     border-radius: 0rem;
 }
 
-    .breadcrumb a {
-        color: var(--dotnet-catalog-link-color);
-    }
+.breadcrumb-item.active {
+    color: #606970;
+}
+
 /* General */
 
 .nofocus:focus {
@@ -65,16 +67,23 @@ code {
     color: unset !important;
 }
 
-a {
+a, a:link, a:visited
+{
     color: var(--dotnet-catalog-link-color);
 }
 
 .btn-primary {
-    background-color: #0071EB
+    background-color: #0071EB !important;
+    color:#fff !important;
 }
 
 .btn-info {
-    background-color: #117C8D
+    background-color: #117C8D;
+}
+
+.btn-secondary
+{
+    color: #f8ffff !important;
 }
 
 /* Stats */
@@ -118,7 +127,7 @@ a {
 
     .search-result-row.selected {
         color: white;
-        background-color: #007bff;
+        background-color: #006ee5;
     }
 
 /* Diff */
@@ -337,26 +346,51 @@ a {
     .section-row {
         background-color: rgb(52, 58, 64);
     }
+    a, a:link, a:visited
+    {
+        color: var(--dotnet-catalog-link-dark-color);
+    }
+    .btn-outline-secondary
+    {
+        color: #F7F7F7;
+        border-color: #676E76;
+        background-color: #676E76;
+    }
+    .btn-outline-secondary:hover
+    {
+        color: #fff;
+        border-color: #525960;
+        background-color: #525960;
+    }
+    .breadcrumb .breadcrumb-item.active
+    {
+        color: #97a5b1;
+    }
+    .text-muted
+    {
+        color: #7b868f !important;
+    }
+    .btn-primary
+    {
+        background-color: #0071EB !important;
+        color: #f8ffff !important;
+    }
+    .btn-info
+    {
+        background-color: #117C8D;
+        color: #f8ffff;
+    }
+    .btn-secondary
+    {
+        color: #f8ffff !important;
+    }
 }
 
 /* Accessibility Fixes */
 
 @media (prefers-color-scheme: light) {
-    /* Reset anchor links color */
-    a, a:link, a:visited {
-        color: #0062ce;
-    }
-
     .navbar-dark .navbar-nav .nav-link {
         color: rgba(212, 187, 255, 1);
-    }
-
-    .breadcrumb li a {
-        color: #0062ce;
-    }
-
-    .breadcrumb .breadcrumb-item.active {
-        color: #606970;
     }
 }
 
@@ -449,16 +483,4 @@ a {
 
 .navbar-nav .nav-link:hover {
     color: #F0F0F0 !important;
-}
-
-/* breadcrumb */
-.breadcrumb-item.active{
-    color: #606970;
-}
-
-
-/* Catalog */
-.list-unstyled a
-{
-    color: var(--dotnet-catalog-link-color);
 }
