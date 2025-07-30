@@ -36,7 +36,8 @@
                         var childCssClasses = childData?.CssClasses ?? string.Empty;
                         var childMarkup = childData?.AdditionalMarkup;
                         <li>
-                            <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
+                            <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name  <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a> @childMarkup
+
                         </li>
                     }
                 </ItemLimiter>
