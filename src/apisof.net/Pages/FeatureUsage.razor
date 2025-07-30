@@ -83,13 +83,11 @@
 
                     <tr title="@usageDetailsTitle">
                         <th scope="row" onmousedown="@(() => ExpandNode(node, !isExpanded))"
-                            role="button"
                             style="@marginLeft">
 
                             @if (!isLeaf)
                             {
                                 <span class="oi @icon pr-2 pl-2 text-muted small"
-                                      role="button"
                                       tabindex="0"
                                       @onkeyup:preventDefault
                                       @onkeyup="@(e => {

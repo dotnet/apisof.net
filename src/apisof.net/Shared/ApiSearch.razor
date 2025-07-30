@@ -15,7 +15,7 @@
 
                 @if (SearchResults.Length > 0)
                 {
-                    <ul class="list-unstyled search-results mt-2">
+                    <ul class="list-unstyled search-results mt-2" tabindex="0">
                         @foreach (var result in SearchResults)
                         {
                             var selectedClass = result == SelectedResult ? "selected" : "";
