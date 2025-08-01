@@ -553,3 +553,25 @@ a, a:link, a:visited
 .navbar-nav .nav-link:hover {
     color: #F0F0F0 !important;
 }
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea
+{
+    border-color: #1D72CC !important;
+}
+
+    input:not([type="checkbox"]):not([type="radio"]):focus,
+    select:focus,
+    textarea:focus
+    {
+        border-color: #1D72CC !important;
+        box-shadow: 0 0 0 0.2rem rgba(29, 114, 204, 0.25) !important;
+        outline: none !important;
+    }
+
+.btn:focus
+{
+    border-color: #09102A !important;
+    outline: none !important;
+}
