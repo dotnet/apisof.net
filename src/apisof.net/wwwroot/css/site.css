@@ -561,14 +561,14 @@ textarea
     border-color: #1D72CC !important;
 }
 
-    input:not([type="checkbox"]):not([type="radio"]):focus,
-    select:focus,
-    textarea:focus
-    {
-        border-color: #1D72CC !important;
-        box-shadow: 0 0 0 0.2rem rgba(29, 114, 204, 0.25) !important;
-        outline: none !important;
-    }
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus
+{
+    border-color: #1D72CC !important;
+    box-shadow: 0 0 0 0.2rem rgba(29, 114, 204, 0.25) !important;
+    outline: none !important;
+}
 
 .btn:focus
 {
