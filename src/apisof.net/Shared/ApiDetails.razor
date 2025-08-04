@@ -15,11 +15,11 @@
             {
                 if (api == Api)
                 {
-                    <li class="breadcrumb-item active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" /> @api.Name</li>
+                    <li class="breadcrumb-item flex-inline-breakable active" aria-current="page"><Glyph Kind="@api.Kind.GetGlyph()" /> @api.Name</li>
                 }
                 else
                 {
-                    <li class="breadcrumb-item"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="@Link.For(api)">@api.Name</a></li>
+                    <li class="breadcrumb-item flex-inline-breakable"><Glyph Kind="@api.Kind.GetGlyph()" /> <a href="@Link.For(api)">@api.Name</a></li>
                 }
             }
         </ol>
@@ -38,11 +38,18 @@
 
                 @if (Parent == Api)
                 {
-                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <span class="font-weight-bold @parentCssClasses">@Parent.Name</span> @parentMarkup
+                    <Glyph Kind="@Parent.Kind.GetGlyph()" />
+                    <span class="font-weight-bold text-breakable @parentCssClasses">@Parent.Name</span>
+
+                    @parentMarkup
                 }
                 else
                 {
-                    <Glyph Kind="@Parent.Kind.GetGlyph()" /> <a class="@parentCssClasses" href="@Link.For(Parent)">@Parent.Name</a> @parentMarkup
+                    <span class="flex-inline-breakable">
+                        <Glyph Kind="@Parent.Kind.GetGlyph()" />
+                        <a class="@parentCssClasses" href="@Link.For(Parent)">@Parent.Name <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+                    </span>
+                    @parentMarkup
                 }
 
                 <ul class="list-unstyled pl-4">
@@ -59,11 +66,17 @@
                         <li class="flex-inline-breakable">
                             @if (child == Api)
                             {
-                                <Glyph Kind="@child.Kind.GetGlyph()" /> <span class="font-weight-bold @childCssClasses">@child.Name</span> @childMarkup
+                                <Glyph Kind="@child.Kind.GetGlyph()" />
+                                <span class="font-weight-bold @childCssClasses">@child.Name</span>
+
+                                @childMarkup
                             }
                             else
                             {
-                                <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name</a> @childMarkup
+                                <Glyph Kind="@child.Kind.GetGlyph()" />
+                                <a class="@childCssClasses" href="@Link.For(child)">@child.Name <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+
+                                @childMarkup
                             }
                         </li>
                     }
@@ -81,11 +94,17 @@
                         <li class="flex-inline-breakable">
                             @if (extensionMethod == ExtensionMethod)
                             {
-                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <span class="font-weight-bold @extensionCssClasses">@extensionMethod.ExtensionMethod.Name</span> @extensionMarkup
+                                <Glyph Kind="GlyphKind.ExtensionMethod" />
+                                <span class="font-weight-bold @extensionCssClasses">@extensionMethod.ExtensionMethod.Name</span>
+ 
+                                @extensionMarkup
                             }
                             else
                             {
-                                <Glyph Kind="GlyphKind.ExtensionMethod" /> <a class="@extensionCssClasses" href="@Link.For(extensionMethod)">@extensionMethod.ExtensionMethod.Name</a> @extensionMarkup
+                                <Glyph Kind="GlyphKind.ExtensionMethod" />
+                                <a class="@extensionCssClasses" href="@Link.For(extensionMethod)">@extensionMethod.ExtensionMethod.Name <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+
+                                @extensionMarkup
                             }
                         </li>
                     }
@@ -100,7 +119,6 @@
             <table class="table my-3">
 
                 <!-- Usage -->
-
                 @foreach (var (usageSource, usages) in Usages)
                 {
                     <tr>
@@ -132,7 +150,6 @@
                 }
 
                 <!-- Implementation -->
-
                 @if (!string.IsNullOrEmpty(SourceUrl))
                 {
                     <tr>
@@ -144,19 +161,17 @@
                 }
 
                 <!-- Help -->
-
                 @if (!string.IsNullOrEmpty(HelpUrl))
                 {
                     <tr>
                         <th>Help</th>
                         <td>
-                            <a href="@HelpUrl" target="_blank">Documentation</a>
+                            <a href="@HelpUrl" target="_blank">Documentation <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
                         </td>
                     </tr>
                 }
 
                 <!-- Design Notes -->
-
                 @if (DesignReviews.Any())
                 {
                     <tr>
@@ -184,16 +199,16 @@
                 }
 
                 @foreach (var frameworkGroup in Availability.Frameworks.Where(a => showAllFrameworks || a.Framework.IsRelevantForCatalog())
-                .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
-                .OrderBy(g => g.Key))
+                                .GroupBy(fx => fx.Framework.GetFrameworkDisplayString())
+                                .OrderBy(g => g.Key))
                 {
                     <tr>
                         <th>@frameworkGroup.Key</th>
                         <td>
                             <span class="d-flex flex-row flex-wrap align-content-between">
                                 @foreach (var group in frameworkGroup.GroupBy(a => (a.Framework.Framework, a.Framework.Version))
-                               .OrderBy(g => g.Key.Framework)
-                               .ThenBy(g => g.Key.Version))
+                                                            .OrderBy(g => g.Key.Framework)
+                                                            .ThenBy(g => g.Key.Version))
                                 {
                                     var availability = group
                                     .OrderBy(g => g.Framework.Platform)
@@ -222,7 +237,7 @@
                                     ? "fx-right"
                                     : "";
 
-                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                    <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" tabindex="0" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
                                         @availability.Framework.GetBaseFrameworkOrSelf().GetVersionDisplayString()
                                     </span>
                                 }
@@ -238,7 +253,6 @@
                 </tr>
 
                 <!-- Platform Targets -->
-
                 @if (!IsCrossPlatform())
                 {
                     <tr>
@@ -277,7 +291,7 @@
                                         ? "fx-right"
                                         : "";
 
-                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
+                                        <span class="fx-version @versionClass @selectedClass @diffClass m-1" role="button" tabindex="0" title="@title" @onclick="e => VersionClick(e, availability.Framework)" @onclick:preventDefault="true" @onclick:stopPropagation="true">
                                             @availability.Framework.GetPlatformVersionDisplayString()
                                         </span>
                                     }
@@ -295,7 +309,6 @@
                 }
 
                 <!-- Assembly -->
-
                 @if (SelectedAvailability is not null)
                 {
                     var assemblies = SelectedAvailability.FrameworkDeclarations.Any()
@@ -337,7 +350,6 @@
                 </tr>
 
                 <!-- Package -->
-
                 @if (SelectedAvailability is { IsInBox: false })
                 {
                     var packageDeclaration = SelectedAvailability.PackageDeclarations.First();
@@ -346,13 +358,12 @@
                     <tr>
                         <th>Package</th>
                         <td>
-                            <a href="https://nuget.org/packages/@package.Name/@package.Version">@package.Name (@package.Version)</a> <span class="small text-muted">@folder</span>
+                            <a href="https://nuget.org/packages/@package.Name/@package.Version">@package.Name (@package.Version) <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a> <span class="small text-muted">@folder</span>
                         </td>
                     </tr>
                 }
 
                 <!-- Obsolete -->
-
                 @if (SelectedAvailability?.Declaration.Obsoletion is not null)
                 {
                     var o = SelectedAvailability.Declaration.Obsoletion.Value;
@@ -368,7 +379,7 @@
                         <td>
                             @if (o.Url is not null)
                             {
-                                <a href="@o.Url">@message</a>
+                                <a href="@o.Url">@message <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
                             }
                             else
                             {
@@ -379,7 +390,6 @@
                 }
 
                 <!-- Preview -->
-
                 @if (SelectedPreviewDescription is not null)
                 {
                     var preview = SelectedPreviewDescription.Value;
@@ -390,14 +400,13 @@
                             @preview.Description
                             @if (preview.Url is not null)
                             {
-                                <a class="pl-2" href="@preview.Url">(more details)</a>
+                                <a class="pl-2" href="@preview.Url">(more details) <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
                             }
                         </td>
                     </tr>
                 }
 
                 <!-- Platform Restrictions -->
-
                 @if (Api.Kind == ApiKind.Property)
                 {
                     var getter = GetAccessor(ApiKind.PropertyGetter);

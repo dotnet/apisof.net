@@ -11,7 +11,7 @@
                     <a href="@Link.ForDiff()">@left vs @right</a>
                 </li>
             }
-            <li class="breadcrumb-item"><Glyph Kind="GlyphKind.Database"/> <a href="@Link.ForCatalog()">Catalog</a></li>
+            <li class="breadcrumb-item flex-inline-breakable"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
         </ol>
     </nav>
 </div>
@@ -20,14 +20,14 @@
 
     <ul class="list-unstyled">
         <li>
-            <Glyph Kind="GlyphKind.Database"/> <span class="font-weight-bold">Catalog</span>
+            <Glyph Kind="GlyphKind.Database" /> <span class="font-weight-bold">Catalog</span>
 
             <ul class="list-unstyled pl-4">
                 @{
                     var items = CatalogService.Catalog.RootApis
-                        .Order()
-                        .Select(a => (Api: a, BrowsingData: BrowsingContext.GetData(a)))
-                        .Where(a => !a.BrowsingData?.Excluded ?? true);
+                    .Order()
+                    .Select(a => (Api: a, BrowsingData: BrowsingContext.GetData(a)))
+                    .Where(a => !a.BrowsingData?.Excluded ?? true);
                 }
                 <ItemLimiter ItemSource="items" Limit="650">
                     @{
@@ -35,7 +35,7 @@
                         var childData = context.BrowsingData;
                         var childCssClasses = childData?.CssClasses ?? string.Empty;
                         var childMarkup = childData?.AdditionalMarkup;
-                        <li>
+                        <li class="flex-inline-breakable">
                             <Glyph Kind="@child.Kind.GetGlyph()" /> <a class="@childCssClasses" href="@Link.For(child)">@child.Name  <span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a> @childMarkup
 
                         </li>

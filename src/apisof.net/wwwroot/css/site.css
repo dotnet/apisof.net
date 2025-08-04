@@ -540,6 +540,13 @@ a, a:link, a:visited
     word-break: break-all;
     overflow-wrap: anywhere;
 }
+
+.text-breakable
+{
+    white-space: normal;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
 /* Navigation */
 
 .navbar-nav a.nav-link {
