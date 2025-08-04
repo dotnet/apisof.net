@@ -303,7 +303,7 @@ public partial class ApiDetails
         return BrowsingContext is FrameworkDiffBrowsingContext diff && diff.Right == framework;
     }
 
-    private void VersionClick(MouseEventArgs e, NuGetFramework framework)
+    private void VersionClick(MouseEventArgs? e, NuGetFramework framework)
     {
         NuGetFramework? GetSelectedFramework()
         {
@@ -328,9 +328,9 @@ public partial class ApiDetails
             };
         }
 
-        var setSelected = e is { CtrlKey: false, AltKey: false };
-        var setDiffLeft = e.CtrlKey;
-        var setDiffRight = e.AltKey;
+        var setSelected = e is null || e is { CtrlKey: false, AltKey: false };
+        var setDiffLeft = e is not null && e.CtrlKey;
+        var setDiffRight = e is not null && e.AltKey;
 
         var selected = setSelected
             ? framework
