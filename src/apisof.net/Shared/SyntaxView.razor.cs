@@ -94,7 +94,7 @@ public partial class SyntaxView
             markupBuilder.Append(">");
 
             if (link is not null)
-                markupBuilder.Append($"<a href=\"{Link.ForApiOrExtensionMethod(link.Value)}\">");
+                markupBuilder.Append($"<a href=\"{Link.ForApiOrExtensionMethod(link.Value)}\" class=\"text-underline\">");
 
             markupBuilder.Append(HtmlEncoder.Encode(text));
 
@@ -181,7 +181,7 @@ public partial class SyntaxView
         var iconUrl = current.Kind.GetGlyph().ToUrl();
 
         var sb = new StringBuilder();
-        sb.Append($"<img src=\"{iconUrl}\" heigth=\"16\" width=\"16\" /> ");
+        sb.Append($"<img src=\"{iconUrl}\" heigth=\"16\" width=\"16\" role=\"presentation\" />");
 
         var isFirst = true;
 

@@ -1,4 +1,4 @@
-@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+﻿@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
 :root
 {
@@ -265,23 +265,23 @@ a, a:link, a:visited
 }
 
 .syntax-view .class a {
-    color: #2b91af
+    color: #19587D
 }
 
 .syntax-view .delegate a {
-    color: #2b91af
+    color: #19587D
 }
 
 .syntax-view .enum a {
-    color: #2b91af
+    color: #19587D
 }
 
 .syntax-view .struct a {
-    color: #2b91af
+    color: #19587D
 }
 
 .syntax-view .interface a {
-    color: #2b91af
+    color: #19587D
 }
 
 .syntax-view .reference a {
@@ -582,4 +582,128 @@ textarea:focus
 {
     border-color: #09102A !important;
     outline: none !important;
+}
+
+.text-underline
+{
+    text-decoration: underline;
+    text-decoration-skip-ink: none;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+}
+
+/* Progress bar layout for usage sections */
+.usage-progress-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.usage-progress-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.usage-progress-bar {
+    min-width: 150px;
+    max-width: 250px;
+    flex: 1;
+}
+
+.usage-percentage {
+    min-width: 3.5rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.usage-description {
+    flex: 1;
+    min-width: 50px;
+}
+
+/* Prevent horizontal overflow on all screens */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.gap-2 {
+    gap: 0.4rem;
+}
+
+.table-responsive-stack th{
+    min-width: 200px;
+}
+/* Small screens (mobile and narrow windows) */
+@media (max-width: 480px)
+{
+    /* Container adjustments */
+    .container-fluid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+    
+    .table-responsive {
+        margin-left: 0;
+        margin-right: 0;
+        overflow-x: visible;
+    }
+    
+    /* Usage section - description goes to next line */
+    .usage-description {
+        flex-basis: 100%;
+    }
+    
+    .usage-progress-bar {
+        min-width: 100px;
+        max-width: 150px;
+    }
+    
+    /* Stack table rows */
+    .table-responsive-stack tr {
+        display: block;
+        border: 1px solid #dee2e6;
+        margin-bottom: 0.5rem;
+        border-radius: 0.25rem;
+    }
+    
+    .table-responsive-stack tr.section-row {
+        display: table-row;
+        border: none;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive-stack tr.no-border-top {
+        border-top: none;
+        margin-top: -0.5rem;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    
+    .table-responsive-stack th,
+    .table-responsive-stack td {
+        display: block;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        text-align: left !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+    
+    .table-responsive-stack td {
+        padding-top: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
+        border-bottom-right-radius: 0.25rem;
+    }
+    
+    /* Ensure version badges don't overflow */
+    .fx-version {
+        display: inline-block;
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+    }
 }
