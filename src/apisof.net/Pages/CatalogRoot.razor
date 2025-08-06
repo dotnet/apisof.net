@@ -8,10 +8,10 @@
                 var left = diffContext.Left.GetShortFolderName();
                 var right = diffContext.Right.GetShortFolderName();
                 <li class="breadcrumb-item">
-                    <a href="@Link.ForDiff()">@left vs @right</a>
+                    <a href="@Link.ForDiff()" class="text-underline">@left vs @right</a>
                 </li>
             }
-            <li class="breadcrumb-item flex-inline-breakable"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()">Catalog</a></li>
+            <li class="breadcrumb-item flex-inline-breakable"><Glyph Kind="GlyphKind.Database" /> <a href="@Link.ForCatalog()" class="text-underline">Catalog</a></li>
         </ol>
     </nav>
 </div>

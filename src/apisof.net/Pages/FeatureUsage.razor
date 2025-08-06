@@ -2,131 +2,143 @@
 @using NuGet.Frameworks
 @using Terrajobst.ApiCatalog.Features
 
-<div class="mt-3 container-fluid">
-    <div class="mx-auto col-md-5">
-        <h3>
-            Feature Usage
-        </h3>
-        <table class="table">
-            @foreach (var (usageSource, usages) in GetUsages())
-            {
-                <tr>
-                    <th>
-                        @usageSource.Name
-                    </th>
-                    <td>
-                        @foreach (var usage in usages)
-                        {
-                            var value = usage.Percentage * 100;
-                            var title = $"Usage on {usageSource.Name} is {usage.Percentage:P5} (as of {usageSource.Date})";
+<div class="container-fluid px-0">
+    <div class="container-fluid overflow-hidden">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                <div class="mt-3">
+                    <h3>
+                        Feature Usage
+                    </h3>
+                    <div class="table-responsive">
+                        <table class="table table-responsive-stack">
+                            @foreach (var (usageSource, usages) in GetUsages())
+                            {
+                                <tr>
+                                    <th class="text-break align-top">
+                                        @usageSource.Name
+                                    </th>
+                                    <td>
+                                        @foreach (var usage in usages)
+                                        {
+                                            var value = usage.Percentage * 100;
+                                            var title = $"Usage on {usageSource.Name} is {usage.Percentage:P5} (as of {usageSource.Date})";
 
-                            <div class="row align-items-center" title="@title">
-                                <div class="col col-md-5 col-xl-3">
-                                    <div class="progress">
-                                        <div class="progress-bar" role="progressbar" aria-label="@title" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                                <div class="col" style="max-width: 5rem;">
-                                    @usage.Percentage.ToString("P1")
-                                </div>
-                                <div class="col text-muted small">
-                                    <span title="@usage.Feature.Description">@usage.Feature.Name</span>
-                                </div>
-                            </div>
-                        }
-                    </td>
-                </tr>
-            }
-        </table>
-    </div>
-</div>
-
-<div class="mt-3 container-fluid">
-    <div class="mx-auto col-md-5">
-        <div>
-            <h3>
-                Framework Usage
-            </h3>
+                                            <div class="usage-progress-container mb-2" title="@title">
+                                                <div class="usage-progress-group">
+                                                    <div class="usage-progress-bar">
+                                                        <div class="progress">
+                                                            <div class="progress-bar" role="progressbar" aria-label="@title" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="usage-percentage">
+                                                        @usage.Percentage.ToString("P1")
+                                                    </div>
+                                                </div>
+                                                <div class="usage-description text-muted small text-break">
+                                                    <span title="@usage.Feature.Description">@usage.Feature.Name</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        @{
-            if (NuGetSource is not null)
-            {
-                <table class="table table-striped table-sm">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+                <div class="mt-3">
+                    <h3>
+                        Framework Usage
+                    </h3>
+
                     @{
-                        WriteRows(Hierarchy.Roots);
+                        if (NuGetSource is not null)
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    @{
+                                        WriteRows(Hierarchy.Roots);
+                                    }
+                                </table>
+                            </div>
+                        }
+
+                        void WriteRows(IEnumerable<TargetFrameworkNode> nodes)
+                        {
+                            foreach (var node in nodes)
+                            {
+                                var featureId = FeatureDefinition.TargetFramework.GetFeatureId(node.Framework);
+                                var percentage = CatalogService.UsageData.GetUsage(NuGetSource, featureId);
+                                var percentageText = percentage is null ? string.Empty : percentage.Value.ToString("P0");
+                                var value = percentage * 100;
+                                var isExpanded = IsExpanded(node);
+                                var isLeaf = !node.Children.Any();
+                                var leftOffset = isLeaf ? 20.8 : 0;
+                                var marginLeft = node.Level == 0 ? "" : $"padding-left: {node.Level * 30 + leftOffset}px;";
+                                var icon = isExpanded
+                                                ? "oi-minus"
+                                                : "oi-plus";
+                                var frameworkName = node.Framework.Version == FrameworkConstants.EmptyVersion
+                                                    ? node.Framework.GetFrameworkDisplayString()
+                                                    : node.Framework.GetShortFolderName();
+                                var usageDetailsTitle = percentage is null
+                                                ? $"No usage of {frameworkName} on {NuGetSource.Name} (as of {NuGetSource.Date})"
+                                                : $"Usage of {frameworkName} on {NuGetSource.Name} is {percentage:P5} (as of {NuGetSource.Date})";
+
+                                <tr title="@usageDetailsTitle">
+                                    <th scope="row" class="text-break" onmousedown="@(() => ExpandNode(node, !isExpanded))"
+                                        style="@marginLeft;min-width:120px">
+
+                                        @if (!isLeaf)
+                                        {
+                                            <span class="oi @icon pr-2 pl-2 text-muted small"
+                                                  tabindex="0"
+                                                  @onkeyup:preventDefault
+                                                  @onkeyup="@(e => {
+                                                      if (e.Key == " " || e.Key == "Enter")
+                                                      {
+                                                          ExpandNode(node, !isExpanded);
+                                                      }
+                                                  })">
+                                            </span>
+                                        }
+
+                                        @node.Name
+
+                                        @if (node.Children.Count > 0)
+                                        {
+                                            <span class="ml-1 font-weight-normal text-muted">(@node.Children.Count)</span>
+                                        }
+                                    </th>
+                                    <td>
+                                        @if (value is not null)
+                                        {
+                                            <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center">
+                                                <div class="flex-grow-1 w-100" style="min-width: 100px;">
+                                                    <div class="progress">
+                                                        <div class="progress-bar" role="progressbar" aria-label="@node.Name" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="ml-sm-2 text-nowrap">
+                                                    @percentageText
+                                                </div>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
+
+                                if (IsExpanded(node))
+                                    WriteRows(node.Children);
+                            }
+                        }
                     }
-                </table>
-            }
-
-            void WriteRows(IEnumerable<TargetFrameworkNode> nodes)
-            {
-                foreach (var node in nodes)
-                {
-                    var featureId = FeatureDefinition.TargetFramework.GetFeatureId(node.Framework);
-                    var percentage = CatalogService.UsageData.GetUsage(NuGetSource, featureId);
-                    var percentageText = percentage is null ? string.Empty : percentage.Value.ToString("P0");
-                    var value = percentage * 100;
-                    var isExpanded = IsExpanded(node);
-                    var isLeaf = !node.Children.Any();
-                    var leftOffset = isLeaf ? 20.8 : 0;
-                    var marginLeft = node.Level == 0 ? "" : $"padding-left: {node.Level * 30 + leftOffset}px;";
-                    var icon = isExpanded
-                                    ? "oi-minus"
-                                    : "oi-plus";
-                    var frameworkName = node.Framework.Version == FrameworkConstants.EmptyVersion
-                                        ? node.Framework.GetFrameworkDisplayString()
-                                        : node.Framework.GetShortFolderName();
-                    var usageDetailsTitle = percentage is null
-                                    ? $"No usage of {frameworkName} on {NuGetSource.Name} (as of {NuGetSource.Date})"
-                                    : $"Usage of {frameworkName} on {NuGetSource.Name} is {percentage:P5} (as of {NuGetSource.Date})";
-
-                    <tr title="@usageDetailsTitle">
-                        <th scope="row" onmousedown="@(() => ExpandNode(node, !isExpanded))"
-                            style="@marginLeft">
-
-                            @if (!isLeaf)
-                            {
-                                <span class="oi @icon pr-2 pl-2 text-muted small"
-                                      tabindex="0"
-                                      @onkeyup:preventDefault
-                                      @onkeyup="@(e => {
-                                          if (e.Key == " " || e.Key == "Enter")
-                                          {
-                                              ExpandNode(node, !isExpanded);
-                                          }
-                                      })">
-                                </span>
-                            }
-
-                            @node.Name
-
-                            @if (node.Children.Count > 0)
-                            {
-                                <span class="ml-1 font-weight-normal text-muted">(@node.Children.Count)</span>
-                            }
-                        </th>
-                        <td>
-                            @if (value is not null)
-                            {
-                                <div class="row">
-                                    <div class="col-8">
-                                        <div class="progress">
-                                            <div class="progress-bar" role="progressbar" aria-label="@node.Name" style="width: @value%;" aria-valuenow="@value" aria-valuemin="0" aria-valuemax="100"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        @percentageText
-                                    </div>
-                                </div>
-                            }
-                        </td>
-                    </tr>
-
-                    if (IsExpanded(node))
-                        WriteRows(node.Children);
-                }
-            }
-        }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
