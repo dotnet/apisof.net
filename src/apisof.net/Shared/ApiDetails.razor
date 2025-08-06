@@ -28,7 +28,7 @@
 
 <div class="container-fluid overflow-hidden">
     <div class="row">
-        <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right d-none d-md-block">
+        <ul class="col-md-3 list-unstyled overflow-hidden text-nowrap border-right">
             <li>
                 @{
                     var parentBrowsingData = BrowsingContext.GetData(Parent);
@@ -143,7 +143,7 @@
                         <tr>
                             <th class="text-break align-top">Implementation</th>
                             <td class="text-break">
-                                <a href="@SourceUrl" target="_blank">Source<span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+                                <a href="@SourceUrl" target="_blank" class="text-underline">Source</a>
                             </td>
                         </tr>
                     }
@@ -155,7 +155,7 @@
                         <tr>
                             <th class="text-break align-top">Help</th>
                             <td class="text-break">
-                                <a href="@HelpUrl" target="_blank">Documentation<span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+                                <a href="@HelpUrl" target="_blank" class="text-underline">Documentation</a>
                             </td>
                         </tr>
                     }
@@ -171,7 +171,7 @@
                                     @foreach (var designReview in DesignReviews.OrderByDescending(r => r.Date))
                                     {
                                         <li class="text-break mb-1">
-                                            <a href="@designReview.Url" target="_blank">@designReview.UrlText</a> <span class="text-muted d-block d-sm-inline">@designReview.Date.Humanize() (@designReview.Context)</span>
+                                            <a href="@designReview.Url" target="_blank" class="text-underline">@designReview.UrlText</a> <span class="text-muted d-block d-sm-inline">@designReview.Date.Humanize() (@designReview.Context)</span>
                                         </li>
                                     }
                                 </ul>
@@ -367,7 +367,7 @@
                         <tr>
                             <th class="text-break align-top">Package</th>
                             <td class="text-break">
-                                <a href="https://nuget.org/packages/@package.Name/@package.Version">@package.Name (@package.Version)<span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a> <span class="small text-muted d-block d-sm-inline">@folder</span>
+                                <a href="https://nuget.org/packages/@package.Name/@package.Version" class="text-underline">@package.Name (@package.Version)</a> <span class="small text-muted d-block d-sm-inline">@folder</span>
                             </td>
                         </tr>
                     }
@@ -389,7 +389,7 @@
                             <td class="text-break">
                                 @if (o.Url is not null)
                                 {
-                                    <a href="@o.Url">@message<span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+                                    <a href="@o.Url" class="text-underline">@message</a>
                                 }
                                 else
                                 {
@@ -411,7 +411,7 @@
                                 @preview.Description
                                 @if (preview.Url is not null)
                                 {
-                                    <a class="pl-2" href="@preview.Url">(more details)<span class="oi oi-link-intact ml-1 small" aria-hidden="true"></span></a>
+                                    <a class="pl-2 text-underline" href="@preview.Url">(more details)</a>
                                 }
                             </td>
                         </tr>
