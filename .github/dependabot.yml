@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/src"
+    schedule:
+      interval: weekly
+      day: "wednesday"
+    open-pull-requests-limit: 10
+    ignore:
+      # Ignore patch updates for pre-release packages
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+        versions: ["*-*"]
+    groups:
+      nuget-dependencies:
+        patterns:
+          - "*"
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
