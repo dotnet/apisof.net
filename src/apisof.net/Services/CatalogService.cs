@@ -13,6 +13,7 @@ public sealed class CatalogService
     private readonly IOptions<ApisOfDotNetOptions> _options;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<CatalogService> _logger;
+    private readonly AzureBlobClientManager _blobClientManager;
 
     private readonly BlobSource<ApiCatalogModel> _catalogBlobSource;
     private readonly BlobSource<SuffixTree> _suffixTreeBlobSource;
@@ -23,15 +24,18 @@ public sealed class CatalogService
 
     public CatalogService(IOptions<ApisOfDotNetOptions> options,
                           IWebHostEnvironment environment,
-                          ILogger<CatalogService> logger)
+                          ILogger<CatalogService> logger,
+                          AzureBlobClientManager blobClientManager)
     {
         ThrowIfNull(options);
         ThrowIfNull(environment);
         ThrowIfNull(logger);
+        ThrowIfNull(blobClientManager);
 
         _options = options;
         _environment = environment;
         _logger = logger;
+        _blobClientManager = blobClientManager;
 
         _catalogBlobSource = CreateBlobSource("catalog", "apicatalog.dat", ApiCatalogModel.LoadAsync);
         _suffixTreeBlobSource = CreateBlobSource("catalog", "suffixtree.dat.deflate", SuffixTree.LoadDeflate);
@@ -73,12 +77,12 @@ public sealed class CatalogService
 
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, T> loader)
     {
-        return new BlobSource<T>(_logger, _options, containerName, blobName, s => Task.FromResult(loader(s)));
+        return new BlobSource<T>(_logger, _options, _blobClientManager, containerName, blobName, s => Task.FromResult(loader(s)));
     }
 
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, Task<T>> loader)
     {
-        return new BlobSource<T>(_logger, _options, containerName, blobName, loader);
+        return new BlobSource<T>(_logger, _options, _blobClientManager, containerName, blobName, loader);
     }
 
     public ApiCatalogModel Catalog => _data.Catalog;
@@ -131,10 +135,12 @@ public sealed class CatalogService
     {
         private readonly ILogger<CatalogService> _logger;
         private readonly IOptions<ApisOfDotNetOptions> _options;
+        private readonly AzureBlobClientManager _blobClientManager;
         private readonly Func<string, Task<T>> _loader;
 
         public BlobSource(ILogger<CatalogService> logger,
                           IOptions<ApisOfDotNetOptions> options,
+                          AzureBlobClientManager blobClientManager,
                           string containerName,
                           string blobName,
                           Func<string, Task<T>> loader)
@@ -142,10 +148,12 @@ public sealed class CatalogService
         {
             ThrowIfNull(logger);
             ThrowIfNull(options);
+            ThrowIfNull(blobClientManager);
             ThrowIfNull(loader);
 
             _logger = logger;
             _options = options;
+            _blobClientManager = blobClientManager;
             _loader = loader;
         }
 
@@ -161,10 +169,10 @@ public sealed class CatalogService
             {
                 _logger.LogInformation($"Downloading {BlobName}...");
 
-                await Task.Run(() =>
+                await Task.Run(async () =>
                 {
-                    var blobClient = new BlobClient(_options.Value.AzureStorageConnectionString, ContainerName, BlobName);
-                    return blobClient.DownloadToAsync(localPath);
+                    var containerClient = _blobClientManager.GetBlobContainerClient(ContainerName);
+                    await containerClient.GetBlobClient(BlobName).DownloadToAsync(localPath);
                 });
 
                 _logger.LogInformation($"Downloading {BlobName} complete.");
