@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
+using ApisOfDotNet.Shared;
 using Serilog;
 
 namespace Terrajobst.ApiCatalog.ActionsRunner;
@@ -33,7 +33,7 @@ public static class ConsoleHost
         builder.Services.AddSingleton<GitHubActionsEnvironment>();
         builder.Services.AddSingleton<GitHubActionsLog>();
         builder.Services.AddSingleton<GitHubActionsSummaryTable>();
-
+        builder.Services.AddSingleton<AzureBlobClientManager>();
         return builder;
     }
 

@@ -1,17 +1,22 @@
-﻿
-using Azure.Storage.Blobs;
-
+﻿using ApisOfDotNet.Shared;
 using Terrajobst.ApiCatalog;
 
 internal sealed class CatalogService
 {
+    private readonly AzureBlobClientManager _blobClientManager;
+
+    public CatalogService(AzureBlobClientManager blobClientManager)
+    {
+        _blobClientManager = blobClientManager;
+    }
+
     public async Task<ApiCatalogModel> LoadCatalogAsync()
     {
         var catalogPath = GetCatalogPath();
 
         if (!File.Exists(catalogPath))
         {
-            DownloadCatalog();
+            await DownloadCatalogAsync();
         }
 
         try
@@ -33,20 +38,19 @@ internal sealed class CatalogService
         return catalogPath;
     }
 
-    public void DownloadCatalog(bool force = false)
+    public async Task DownloadCatalogAsync(bool force = false)
     {
         var catalogPath = GetCatalogPath();
-
-        var url = ApiCatalogModel.Url;
-        var blobClient = new BlobClient(new Uri(url));
+        var containerClient = _blobClientManager.GetBlobContainerClient("catalog");
+        var blobClient = containerClient.GetBlobClient("apicatalog.db");
 
         if (!force && File.Exists(catalogPath))
         {
             Console.WriteLine("Checking catalog...");
-            var localTimetamp = File.GetLastWriteTimeUtc(catalogPath);
-            var properties = blobClient.GetProperties();
+            var localTimestamp = File.GetLastWriteTimeUtc(catalogPath);
+            var properties = await blobClient.GetPropertiesAsync();
             var blobTimestamp = properties.Value.LastModified.UtcDateTime;
-            var blobIsNewer = blobTimestamp > localTimetamp;
+            var blobIsNewer = blobTimestamp > localTimestamp;
 
             if (!blobIsNewer)
             {
@@ -58,8 +62,8 @@ internal sealed class CatalogService
         try
         {
             Console.WriteLine("Downloading catalog...");
-            blobClient.DownloadTo(catalogPath);
-            var properties = blobClient.GetProperties();
+            await blobClient.DownloadToAsync(catalogPath);
+            var properties = await blobClient.GetPropertiesAsync();
             File.SetLastWriteTimeUtc(catalogPath, properties.Value.LastModified.UtcDateTime);
         }
         catch (Exception ex)

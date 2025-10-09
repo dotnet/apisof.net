@@ -13,20 +13,23 @@ namespace ApisOfDotNet.Controllers;
 public sealed class DownloadController : Controller
 {
     private readonly IOptions<ApisOfDotNetOptions> _options;
+    private readonly AzureBlobClientManager _blobClientManager;
 
-    public DownloadController(IOptions<ApisOfDotNetOptions> options)
+
+    public DownloadController(IOptions<ApisOfDotNetOptions> options, AzureBlobClientManager azureBlobClientManager)
     {
         ThrowIfNull(options);
-
+        ThrowIfNull(azureBlobClientManager);
+        _blobClientManager = azureBlobClientManager;
         _options = options;
     }
 
     [HttpGet]
     public async Task<FileStreamResult> Get()
-    {
-        var azureConnectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
-        var stream = await blobClient.OpenReadAsync();
+    { 
+        var containerClient = _blobClientManager.GetBlobContainerClient("catalog");
+        var stream = await containerClient.GetBlobClient("apicatalog.dat").OpenReadAsync();
+
         return new FileStreamResult(stream, "application/octet-stream") {
             FileDownloadName = "apicatalog.dat"
         };

@@ -16,4 +16,8 @@
       <PackageReference Include="Serilog.Sinks.File" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\apisof.net\apisof.net.csproj" />
+    </ItemGroup>
+
 </Project>

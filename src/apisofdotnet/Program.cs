@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-
+using ApisOfDotNet.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -91,5 +91,6 @@ internal sealed class Program
     {
         services.AddCommands<Program>();
         services.AddSingleton<CatalogService>();
+        services.AddSingleton<AzureBlobClientManager>();
     }
 }
