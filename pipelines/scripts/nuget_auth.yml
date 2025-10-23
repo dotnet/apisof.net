@@ -1,11 +1,5 @@
 ---
 steps:
-  - checkout: self
-  - task: UseDotNet@2
-    displayName: Use .NET 8 SDK
-    inputs:
-      version: 8.x
-      includePreviewVersions: true
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: CmdLine@2

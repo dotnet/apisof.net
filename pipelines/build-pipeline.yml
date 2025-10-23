@@ -55,26 +55,29 @@ extends:
                 inputs:
                   version: 8.x
                   includePreviewVersions: true
-              - template: pipelines/scripts/nuget_auth.yml@self 
-              - task: PowerShell@2
-                displayName: 'Build Solution'
+              - template: pipelines/scripts/nuget_auth.yml@self
+              - task: DotNetCoreCLI@2
+                displayName: Restore Packages
                 inputs:
-                  targetType: 'inline'
-                  script: |
-                    .\build.cmd $(BuildConfiguration)
-              - task: PowerShell@2
+                  command: restore
+                  projects: '**/*.csproj'
+                  feedsToUse: config
+                  nugetConfigPath: src/nuget.config
+              - task: DotNetCoreCLI@2
+                displayName: Build Solution
+                inputs:
+                  command: build
+                  projects: '**/*.csproj'
+                  arguments: --configuration $(BuildConfiguration) --no-restore
+              - task: DotNetCoreCLI@2
                 displayName: Run Tests
                 inputs:
-                  targetType: 'inline'
-                  script: |
-                    .\test.cmd
-              - task: PowerShell@2
-                displayName: 'Build and Package'
+                  command: test
+                  projects: '**/*Tests*.csproj'
+                  arguments: --configuration $(BuildConfiguration) --no-build"
+              - task: DotNetCoreCLI@2
+                displayName: Publish Web Application
                 inputs:
-                  targetType: 'inline'
-                  script: |
-                    # Create output directory
-                    New-Item -ItemType Directory -Force -Path "$(build.artifactstagingdirectory)\apis-of-dotnet"
-                    
-                    # Build and publish the main web application
-                    dotnet publish src\apisof.net\apisof.net.csproj --configuration $(BuildConfiguration) --output "$(build.artifactstagingdirectory)\apis-of-dotnet" --no-restore
+                  command: publish
+                  projects: 'src/apisof.net/apisof.net.csproj'
+                  arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/apis-of-dotnet --no-restore
