@@ -1,0 +1,83 @@
+---
+variables:
+  - name: BuildParameters.RestoreBuildProjects
+    value: "**/*.csproj"
+  - name: BuildConfiguration
+    value: release
+  - name: BuildPlatform
+    value: anycpu
+  - name: Codeql.Enabled
+    value: true
+trigger:
+  branches:
+    include:
+      - "*"
+  paths:
+    exclude:
+      - /.gitignore
+      - /.github/*
+  batch: true
+name: $(date:yyyyMMdd)$(rev:.r)
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    customBuildTags:
+      - ES365AIMigrationTooling
+    stages:
+      - stage: stage
+        jobs:
+          - job: Phase_1
+            displayName: Agent job 1
+            timeoutInMinutes: 0
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: 'Publish Artifact'
+                  targetPath: $(build.artifactstagingdirectory)
+                  artifactName: apis-of-dotnet-drop
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+                  includePreviewVersions: true
+              - template: pipelines/scripts/nuget_auth.yml@self
+              - task: DotNetCoreCLI@2
+                displayName: Restore Packages
+                inputs:
+                  command: restore
+                  projects: '**/*.csproj'
+                  feedsToUse: config
+                  nugetConfigPath: src/nuget.config
+              - task: DotNetCoreCLI@2
+                displayName: Build Solution
+                inputs:
+                  command: build
+                  projects: '**/*.csproj'
+                  arguments: --configuration $(BuildConfiguration) --no-restore
+              - task: DotNetCoreCLI@2
+                displayName: Run Tests
+                inputs:
+                  command: test
+                  projects: '**/*Tests*.csproj'
+                  arguments: --configuration $(BuildConfiguration) --no-build"
+              - task: DotNetCoreCLI@2
+                displayName: Publish Web Application
+                inputs:
+                  command: publish
+                  projects: 'src/apisof.net/apisof.net.csproj'
+                  arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/apis-of-dotnet --no-restore

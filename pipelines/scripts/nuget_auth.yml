@@ -1,0 +1,9 @@
+---
+steps:
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - task: CmdLine@2
+    displayName: "Dotnet Workload install wasm-tools"
+    inputs:
+      script: |
+        dotnet workload install wasm-tools
