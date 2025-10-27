@@ -1,7 +1,7 @@
 <Project>
 
     <ItemGroup Label="Testing"
-               Condition="$(IsTestProject)">
+               Condition="$(IsTestProject) and '$(ExplicitTestPackages)' != 'true'">
         <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
         <PackageReference Include="coverlet.collector">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
