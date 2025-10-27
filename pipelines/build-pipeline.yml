@@ -74,7 +74,7 @@ extends:
                 inputs:
                   command: test
                   projects: '**/*Tests*.csproj'
-                  arguments: --configuration $(BuildConfiguration) --no-build"
+                  arguments: --configuration $(BuildConfiguration) --no-build
               - task: DotNetCoreCLI@2
                 displayName: Publish Web Application
                 inputs:
