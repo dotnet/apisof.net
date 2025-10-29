@@ -4,6 +4,7 @@
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Azure.Identity" Version="1.17.0" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.23.0" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net472" Version="1.7.9" />
     <PackageVersion Include="Basic.Reference.Assemblies.Net80" Version="1.7.9" />

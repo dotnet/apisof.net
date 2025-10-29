@@ -13,17 +13,18 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" />
-    <PackageReference Include="Microsoft.Cci.Extensions"  />
-    <PackageReference Include="Microsoft.Extensions.Hosting"  />
-    <PackageReference Include="Mono.Options"  />
+    <PackageReference Include="Microsoft.Cci.Extensions" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Mono.Options" />
     <PackageReference Include="Nerdbank.GitVersioning">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Spectre.Console"  />
+    <PackageReference Include="Spectre.Console" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\apisof.net\apisof.net.csproj" />
     <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
     <ProjectReference Include="..\Terrajobst.UsageCrawling\Terrajobst.UsageCrawling.csproj" />
   </ItemGroup>
