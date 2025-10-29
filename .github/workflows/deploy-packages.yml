@@ -32,7 +32,7 @@ jobs:
         dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
     - name: Upload build
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: bin
         path: .artifacts/package
@@ -47,7 +47,7 @@ jobs:
         dotnet-version: '8.0.*'
 
     - name: Download build
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: bin
         path: .artifacts/package
