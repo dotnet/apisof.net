@@ -31,7 +31,7 @@ extends:
             timeoutInMinutes: 0
             templateContext:
               type: releaseJob
-              isProduction: false
+              isProduction: true
               inputs:
                 - input: pipelineArtifact
                   pipeline: "apis-of-dotnet"
