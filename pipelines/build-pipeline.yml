@@ -45,7 +45,7 @@ extends:
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: 'Publish Artifact'
+                  displayName: "Publish Artifact"
                   targetPath: $(build.artifactstagingdirectory)
                   artifactName: apis-of-dotnet-drop
             steps:
@@ -60,24 +60,31 @@ extends:
                 displayName: Restore Packages
                 inputs:
                   command: restore
-                  projects: '**/*.csproj'
+                  projects: "**/*.csproj"
                   feedsToUse: config
                   nugetConfigPath: src/nuget.config
               - task: DotNetCoreCLI@2
                 displayName: Build Solution
                 inputs:
                   command: build
-                  projects: '**/*.csproj'
+                  projects: "**/*.csproj"
                   arguments: --configuration $(BuildConfiguration) --no-restore
               - task: DotNetCoreCLI@2
                 displayName: Run Tests
                 inputs:
                   command: test
-                  projects: '**/*Tests*.csproj'
+                  projects: "**/*Tests*.csproj"
                   arguments: --configuration $(BuildConfiguration) --no-build
               - task: DotNetCoreCLI@2
                 displayName: Publish Web Application
                 inputs:
                   command: publish
-                  projects: 'src/apisof.net/apisof.net.csproj'
-                  arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/apis-of-dotnet --no-restore
+                  projects: "src/apisof.net/apisof.net.csproj"
+                  arguments: --configuration $(BuildConfiguration) --output $(Agent.TempDirectory)/publish --no-restore
+              - task: ArchiveFiles@2
+                displayName: Create apisof.net.zip
+                inputs:
+                  rootFolderOrFile: $(Agent.TempDirectory)/publish
+                  includeRootFolder: false
+                  archiveType: zip
+                  archiveFile: $(build.artifactstagingdirectory)/apisof.net.zip
