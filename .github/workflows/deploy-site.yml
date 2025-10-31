@@ -33,7 +33,7 @@ jobs:
           dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
       - name: Upload build
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: site
           path: .artifacts/publish/apisof.net
@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download build
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v5
         with:
           name: site
           path: .artifacts/publish/apisof.net

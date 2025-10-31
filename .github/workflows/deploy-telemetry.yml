@@ -2,7 +2,7 @@ name: Deploy Telemetry
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - .github/workflows/deploy-telemetry.yml
       - src/NetUpgradePlannerTelemetry/**
@@ -15,42 +15,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Get code
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0 # We need the full history in order to use Git versioning
+      - name: Get code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # We need the full history in order to use Git versioning
 
-    - name: Get .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '8.0.*'
+      - name: Get .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.*"
 
-    - name: dotnet publish
-      run: |
-        cd src/NetUpgradePlannerTelemetry
-        dotnet publish /p:SourceRevisionId=${{ github.sha }}
+      - name: dotnet publish
+        run: |
+          cd src/NetUpgradePlannerTelemetry
+          dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
-    - name: Upload build
-      uses: actions/upload-artifact@v5
-      with:
-        name: function
-        path: .artifacts/publish/NetUpgradePlannerTelemetry
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: function
+          path: .artifacts/publish/NetUpgradePlannerTelemetry
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+      - name: Download build
+        uses: actions/download-artifact@v5
+        with:
+          name: function
+          path: .artifacts/publish/NetUpgradePlannerTelemetry
 
-    - name: Download build
-      uses: actions/download-artifact@v6
-      with:
-        name: function
-        path: .artifacts/publish/NetUpgradePlannerTelemetry
-
-    - name: Deploy Azure Function
-      uses: Azure/functions-action@v1
-      with:
-        app-name: apisofdotnetplanner
-        publish-profile: ${{ secrets.AZURE_FUNCTIONS_PUBLISH_PROFILE  }}
-        package: .artifacts/publish/NetUpgradePlannerTelemetry
+      - name: Deploy Azure Function
+        uses: Azure/functions-action@v1
+        with:
+          app-name: apisofdotnetplanner
+          publish-profile: ${{ secrets.AZURE_FUNCTIONS_PUBLISH_PROFILE  }}
+          package: .artifacts/publish/NetUpgradePlannerTelemetry
