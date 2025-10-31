@@ -2,7 +2,7 @@ name: Deploy Planner
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - .github/workflows/deploy-planner.yml
       - src/NetUpgradePlanner/**
@@ -18,58 +18,56 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
+      - name: Get code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # We need the full history in order to use Git versioning
 
-    - name: Get code
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0 # We need the full history in order to use Git versioning
+      - name: Get .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.*"
 
-    - name: Get .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '8.0.*'
+      - name: Get GitVersion
+        uses: dotnet/nbgv@master
+        id: nbgv
+        with:
+          path: src/NetUpgradePlanner
 
-    - name: Get GitVersion
-      uses: dotnet/nbgv@master
-      id: nbgv
-      with:
-        path: src/NetUpgradePlanner
+      - name: dotnet publish
+        run: |
+          cd src/NetUpgradePlanner
+          dotnet publish /p:SourceRevisionId=${{ github.sha }}
 
-    - name: dotnet publish
-      run: |
-        cd src/NetUpgradePlanner
-        dotnet publish /p:SourceRevisionId=${{ github.sha }}
+      - name: squirrel pack
+        shell: pwsh
+        run: |
+          mkdir .artifacts/squirrel-release
+          cd .artifacts/publish/NetUpgradePlanner
+          Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe");
+          Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "../../squirrel-release"
+          Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../../squirrel-release"
 
-    - name: squirrel pack
-      shell: pwsh
-      run: |
-        mkdir .artifacts/squirrel-release
-        cd .artifacts/publish/NetUpgradePlanner
-        Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe");
-        Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "../../squirrel-release"
-        Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "${{ steps.nbgv.outputs.SemVer1 }}" --packAuthors "Immo Landwerth" --packDir "." -r "../../squirrel-release"
-
-    - name: Upload build
-      uses: actions/upload-artifact@v5
-      with:
-        name: squirrel-release
-        path: .artifacts/squirrel-release
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: squirrel-release
+          path: .artifacts/squirrel-release
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Download build
+        uses: actions/download-artifact@v5
+        with:
+          name: squirrel-release
+          path: .artifacts/squirrel-release
 
-    - name: Download build
-      uses: actions/download-artifact@v6
-      with:
-        name: squirrel-release
-        path: .artifacts/squirrel-release
-
-    - name: Upload release
-      uses: azure/cli@v2
-      env:
-        AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-      with:
-        inlineScript: |
+      - name: Upload release
+        uses: azure/cli@v2
+        env:
+          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
+        with:
+          inlineScript: |
             az storage blob upload-batch -d squirrel -s .artifacts/squirrel-release --overwrite
