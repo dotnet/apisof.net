@@ -1,0 +1,84 @@
+trigger: none
+name: $(Date:yyyyMMdd).$(Rev:r)
+resources:
+  pipelines:
+    - pipeline: "apis-of-dotnet"
+      project: "OnlineServices"
+      source: "ASP-IIS-dotnet/builds/apis-of-dotnet-build"
+      trigger:
+        branches:
+          include:
+            - main
+  repositories:
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    stages:
+      - stage: DR
+        displayName: Deploy to DR
+        jobs:
+          - job: Job_1
+            displayName: Run on agent
+            condition: succeeded()
+            timeoutInMinutes: 0
+            templateContext:
+              type: releaseJob
+              isProduction: false
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet"
+                  artifactName: "apis-of-dotnet-drop"
+                  targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
+            steps:
+              - task: AzureRmWebAppDeployment@4
+                displayName: Deploy to DR
+                inputs:
+                  ConnectedServiceName: dotnetwebsite-azure
+                  WebAppName: apisofdotnet-dr
+                  Package: $(Pipeline.Workspace)/apis-of-dotnet-drop
+      - stage: Production
+        displayName: Deploy to Production
+        dependsOn: DR
+        jobs:
+          - job: PreDeploymentApprovalJob
+            displayName: Pre-Deployment Approval
+            condition: succeeded()
+            timeoutInMinutes: 43200
+            pool: server
+            steps:
+              - task: ManualValidation@1
+                inputs:
+                  notifyUsers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+                  approvers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+          - job: Job_1
+            displayName: Run on agent
+            dependsOn: PreDeploymentApprovalJob
+            condition: succeeded()
+            timeoutInMinutes: 0
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet"
+                  artifactName: "apis-of-dotnet-drop"
+                  targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
+            steps:
+              - task: AzureRmWebAppDeployment@4
+                displayName: Deploy to Production
+                inputs:
+                  ConnectedServiceName: dotnetwebsite-azure
+                  WebAppName: apisofdotnet
+                  Package: $(Pipeline.Workspace)/apis-of-dotnet-drop
