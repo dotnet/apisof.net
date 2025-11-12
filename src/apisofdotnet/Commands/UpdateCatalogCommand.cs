@@ -19,8 +19,8 @@ internal sealed class UpdateCatalogCommand : Command
         options.Add("f|force", "Forces downloading the catalog, even if the local version is up-to-date.", _ => _force = true);
     }
 
-    public override void Execute()
+    public override async Task ExecuteAsync()
     {
-        _catalogService.DownloadCatalog(_force);
+        await _catalogService.DownloadCatalogAsync(_force);
     }
 }

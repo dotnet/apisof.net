@@ -13,6 +13,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddControllers();
 builder.Services.AddHotKeys2();
+builder.Services.AddSingleton<AzureBlobClientManager>();
 builder.Services.AddSingleton<CatalogService>();
 builder.Services.AddSingleton<DocumentationResolverService>();
 builder.Services.AddHttpClient<DocumentationResolverService>();
