@@ -50,6 +50,7 @@ extends:
                   artifactName: apis-of-dotnet-drop
             steps:
               - checkout: self
+                fetchDepth: 0
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
@@ -57,34 +58,15 @@ extends:
                   includePreviewVersions: true
               - template: pipelines/scripts/nuget_auth.yml@self
               - task: DotNetCoreCLI@2
-                displayName: Restore Packages
-                inputs:
-                  command: restore
-                  projects: "**/*.csproj"
-                  feedsToUse: config
-                  nugetConfigPath: src/nuget.config
-              - task: DotNetCoreCLI@2
-                displayName: Build Solution
-                inputs:
-                  command: build
-                  projects: "**/*.csproj"
-                  arguments: --configuration $(BuildConfiguration) --no-restore
-              - task: DotNetCoreCLI@2
-                displayName: Run Tests
-                inputs:
-                  command: test
-                  projects: "**/*Tests*.csproj"
-                  arguments: --configuration $(BuildConfiguration) --no-build
-              - task: DotNetCoreCLI@2
                 displayName: Publish Web Application
                 inputs:
                   command: publish
                   projects: "src/apisof.net/apisof.net.csproj"
-                  arguments: --configuration $(BuildConfiguration) --output $(Agent.TempDirectory)/publish --no-restore
+                  arguments: --configuration $(BuildConfiguration) --output $(Agent.TempDirectory)/publish /p:SourceRevisionId=$(Build.SourceVersion)
               - task: ArchiveFiles@2
-                displayName: Create apisof.net.zip
+                displayName: Create site.zip
                 inputs:
                   rootFolderOrFile: $(Agent.TempDirectory)/publish
                   includeRootFolder: false
                   archiveType: zip
-                  archiveFile: $(build.artifactstagingdirectory)/apisof.net.zip
+                  archiveFile: $(build.artifactstagingdirectory)/site.zip
