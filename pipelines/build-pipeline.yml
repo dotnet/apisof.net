@@ -66,7 +66,7 @@ extends:
               - task: ArchiveFiles@2
                 displayName: Create site.zip
                 inputs:
-                  rootFolderOrFile: $(Agent.TempDirectory)/publish/apisof.net
+                  rootFolderOrFile: $(Agent.TempDirectory)/publish/*
                   includeRootFolder: false
                   archiveType: zip
                   archiveFile: $(build.artifactstagingdirectory)/site.zip
