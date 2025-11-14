@@ -1,11 +1,5 @@
 ---
 variables:
-  - name: BuildParameters.RestoreBuildProjects
-    value: "**/*.csproj"
-  - name: BuildConfiguration
-    value: release
-  - name: BuildPlatform
-    value: anycpu
   - name: Codeql.Enabled
     value: true
 trigger:
@@ -62,7 +56,7 @@ extends:
                 inputs:
                   command: publish
                   projects: "src/apisof.net/apisof.net.csproj"
-                  arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory) /p:SourceRevisionId=$(Build.SourceVersion)
+                  arguments: --output $(build.artifactstagingdirectory) /p:SourceRevisionId=$(Build.SourceVersion)
               - task: PowerShell@2
                 displayName: Rename package to site.zip
                 inputs:
