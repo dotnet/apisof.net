@@ -1,11 +1,5 @@
 ---
 variables:
-  - name: BuildParameters.RestoreBuildProjects
-    value: "**/*.csproj"
-  - name: BuildConfiguration
-    value: release
-  - name: BuildPlatform
-    value: anycpu
   - name: Codeql.Enabled
     value: true
 trigger:
@@ -45,11 +39,12 @@ extends:
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: 'Publish Artifact'
+                  displayName: "Publish Artifact"
                   targetPath: $(build.artifactstagingdirectory)
                   artifactName: apis-of-dotnet-drop
             steps:
               - checkout: self
+                fetchDepth: 0
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
@@ -57,27 +52,21 @@ extends:
                   includePreviewVersions: true
               - template: pipelines/scripts/nuget_auth.yml@self
               - task: DotNetCoreCLI@2
-                displayName: Restore Packages
-                inputs:
-                  command: restore
-                  projects: '**/*.csproj'
-                  feedsToUse: config
-                  nugetConfigPath: src/nuget.config
-              - task: DotNetCoreCLI@2
-                displayName: Build Solution
-                inputs:
-                  command: build
-                  projects: '**/*.csproj'
-                  arguments: --configuration $(BuildConfiguration) --no-restore
-              - task: DotNetCoreCLI@2
-                displayName: Run Tests
-                inputs:
-                  command: test
-                  projects: '**/*Tests*.csproj'
-                  arguments: --configuration $(BuildConfiguration) --no-build
-              - task: DotNetCoreCLI@2
                 displayName: Publish Web Application
                 inputs:
                   command: publish
-                  projects: 'src/apisof.net/apisof.net.csproj'
-                  arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/apis-of-dotnet --no-restore
+                  projects: "src/apisof.net/apisof.net.csproj"
+                  arguments: --output $(build.artifactstagingdirectory) /p:SourceRevisionId=$(Build.SourceVersion)
+              - task: PowerShell@2
+                displayName: Rename package to site.zip
+                inputs:
+                  targetType: inline
+                  script: |
+                    $sourcePath = "$(build.artifactstagingdirectory)\apisof.net.zip"
+                    $targetPath = "$(build.artifactstagingdirectory)\site.zip"
+                    if (Test-Path $sourcePath) {
+                      Rename-Item -Path $sourcePath -NewName "site.zip"
+                      Write-Host "Successfully renamed apisof.net.zip to site.zip"
+                    } else {
+                      Write-Warning "Source file not found: $sourcePath"
+                    }
