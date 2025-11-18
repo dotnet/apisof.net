@@ -63,7 +63,7 @@ extends:
                   cd src/apisof.net
                   dotnet clean
                   dotnet restore
-                  dotnet build --no-restore -c Release -r linux-x64 /p:SourceRevisionId=$(Build.SourceVersion)
+                  dotnet build --no-restore -c Release /p:SourceRevisionId=$(Build.SourceVersion)
                   dotnet publish apisof.net.csproj --self-contained false --no-build -o "$(build.artifactstagingdirectory)/publish"
                 displayName: "Publish Web Application"
               - task: ArchiveFiles@2
