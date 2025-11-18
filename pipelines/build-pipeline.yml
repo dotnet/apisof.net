@@ -12,8 +12,8 @@ trigger:
       - src/apisof.net/**
       - src/Terrajobst.ApiCatalog/**
     exclude:
-      - /.gitignore
-      - /.github/*
+      - .gitignore
+      - .github/*
   batch: true
 name: $(date:yyyyMMdd)$(rev:.r)
 resources:
@@ -28,6 +28,11 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022 # Name of the image in your pool. If not specified, first image of the pool is used
+        os: windows # OS of the image. Allowed values: windows, linux, macOS
     pool:
       name: AzurePipelines-EO
       image: 1ESPT-Ubuntu22.04
