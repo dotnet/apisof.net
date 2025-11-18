@@ -31,8 +31,8 @@ extends:
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
-        image: 1ESPT-Windows2022 # Name of the image in your pool. If not specified, first image of the pool is used
-        os: windows # OS of the image. Allowed values: windows, linux, macOS
+        image: 1ESPT-Windows2022
+        os: windows
     pool:
       name: AzurePipelines-EO
       image: 1ESPT-Ubuntu22.04
@@ -51,7 +51,6 @@ extends:
                   artifactName: apis-of-dotnet-drop
             steps:
               - checkout: self
-                fetchDepth: 0
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
@@ -62,9 +61,7 @@ extends:
               - script: |
                   cd src/apisof.net
                   dotnet clean
-                  dotnet restore
-                  dotnet build --no-restore -c Release /p:SourceRevisionId=$(Build.SourceVersion)
-                  dotnet publish apisof.net.csproj --self-contained false --no-build -o "$(build.artifactstagingdirectory)/publish"
+                  dotnet publish apisof.net.csproj -o "$(build.artifactstagingdirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: "Publish Web Application"
               - task: ArchiveFiles@2
                 displayName: "Archive published files to site.zip"
