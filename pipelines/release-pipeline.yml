@@ -79,6 +79,7 @@ extends:
               - task: AzureRmWebAppDeployment@4
                 displayName: Deploy to Production
                 inputs:
+                  appType: webAppLinux
                   ConnectedServiceName: dotnetwebsite-azure
                   WebAppName: apisofdotnet
                   Package: $(Pipeline.Workspace)/apis-of-dotnet-drop
