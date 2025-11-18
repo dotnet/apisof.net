@@ -57,6 +57,8 @@ extends:
                 inputs:
                   version: 8.x
                   includePreviewVersions: true
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
               - script: |
                   cd src/apisof.net
                   dotnet clean
