@@ -62,7 +62,9 @@ extends:
               - script: |
                   cd src/apisof.net
                   dotnet clean
-                  dotnet publish apisof.net.csproj -c Release -r linux-x64 --self-contained false -o "$(build.artifactstagingdirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
+                  dotnet restore
+                  dotnet build --no-restore -c Release -r linux-x64 /p:SourceRevisionId=$(Build.SourceVersion)
+                  dotnet publish apisof.net.csproj --self-contained false --no-build -o "$(build.artifactstagingdirectory)/publish"
                 displayName: "Publish Web Application"
               - task: ArchiveFiles@2
                 displayName: "Archive published files to site.zip"
@@ -72,3 +74,7 @@ extends:
                   archiveType: "zip"
                   archiveFile: "$(build.artifactstagingdirectory)/site.zip"
                   replaceExistingArchive: true
+              - script: |
+                  rm -rf "$(build.artifactstagingdirectory)/publish"
+                  echo "Deleted publish folder"
+                displayName: "Clean up publish folder"
