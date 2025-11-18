@@ -62,9 +62,7 @@ extends:
               - script: |
                   cd src/apisof.net
                   dotnet clean
-                  dotnet restore
-                  dotnet build apisof.net.csproj -c Release /p:SourceRevisionId=$(Build.SourceVersion)
-                  dotnet publish apisof.net.csproj -c Release -r linux-x64 --self-contained false --no-build -o "$(build.artifactstagingdirectory)/publish"
+                  dotnet publish apisof.net.csproj -c Release -r linux-x64 --self-contained false -o "$(build.artifactstagingdirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: "Publish Web Application"
               - task: ArchiveFiles@2
                 displayName: "Archive published files to site.zip"
