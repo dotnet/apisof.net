@@ -63,15 +63,14 @@ extends:
                   cd src/apisof.net
                   dotnet clean
                   dotnet restore
-                  dotnet publish apisof.net.csproj -r linux-x64 --self-contained false -o "$(build.artifactstagingdirectory)" /p:SourceRevisionId=$(Build.SourceVersion)
+                  dotnet build apisof.net.csproj -c Release /p:SourceRevisionId=$(Build.SourceVersion)
+                  dotnet publish apisof.net.csproj -c Release -r linux-x64 --self-contained false --no-build -o "$(build.artifactstagingdirectory)/publish"
                 displayName: "Publish Web Application"
-              - script: |
-                  sourcePath="$(build.artifactstagingdirectory)/apisof.net.zip"
-                  targetPath="$(build.artifactstagingdirectory)/site.zip"
-                  if [ -f "$sourcePath" ]; then
-                    mv "$sourcePath" "$targetPath"
-                    echo "Successfully renamed apisof.net.zip to site.zip"
-                  else
-                    echo "Warning: Source file not found: $sourcePath"
-                  fi
-                displayName: "Rename package to site.zip"
+              - task: ArchiveFiles@2
+                displayName: "Archive published files to site.zip"
+                inputs:
+                  rootFolderOrFile: "$(build.artifactstagingdirectory)/publish"
+                  includeRootFolder: false
+                  archiveType: "zip"
+                  archiveFile: "$(build.artifactstagingdirectory)/site.zip"
+                  replaceExistingArchive: true
