@@ -14,6 +14,7 @@ namespace ApisOfDotNet.Controllers;
 [ApiController]
 [Route("azure-storage-web-hook")]
 [AllowAnonymous]
+[IgnoreAntiforgeryToken]
 public class AzureStorageWebHookController : Controller
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
