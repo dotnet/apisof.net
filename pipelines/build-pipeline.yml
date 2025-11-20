@@ -1,11 +1,5 @@
 ---
 variables:
-  - name: BuildParameters.RestoreBuildProjects
-    value: "**/*.csproj"
-  - name: BuildConfiguration
-    value: release
-  - name: BuildPlatform
-    value: anycpu
   - name: Codeql.Enabled
     value: true
 trigger:
@@ -13,9 +7,13 @@ trigger:
     include:
       - "*"
   paths:
+    include:
+      - pipelines/**
+      - src/apisof.net/**
+      - src/Terrajobst.ApiCatalog/**
     exclude:
-      - /.gitignore
-      - /.github/*
+      - .gitignore
+      - .github/*
   batch: true
 name: $(date:yyyyMMdd)$(rev:.r)
 resources:
@@ -30,12 +28,15 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022
+        os: windows
     pool:
       name: AzurePipelines-EO
-      image: 1ESPT-Windows2022
-      os: windows
-    customBuildTags:
-      - ES365AIMigrationTooling
+      image: 1ESPT-Ubuntu22.04
+      os: linux
     stages:
       - stage: stage
         jobs:
@@ -45,7 +46,7 @@ extends:
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: 'Publish Artifact'
+                  displayName: "Publish Artifact"
                   targetPath: $(build.artifactstagingdirectory)
                   artifactName: apis-of-dotnet-drop
             steps:
@@ -55,29 +56,22 @@ extends:
                 inputs:
                   version: 8.x
                   includePreviewVersions: true
-              - template: pipelines/scripts/nuget_auth.yml@self
-              - task: DotNetCoreCLI@2
-                displayName: Restore Packages
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  cd src/apisof.net
+                  dotnet clean
+                  dotnet publish apisof.net.csproj -o "$(build.artifactstagingdirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
+                displayName: "Publish Web Application"
+              - task: ArchiveFiles@2
+                displayName: "Archive published files to site.zip"
                 inputs:
-                  command: restore
-                  projects: '**/*.csproj'
-                  feedsToUse: config
-                  nugetConfigPath: src/nuget.config
-              - task: DotNetCoreCLI@2
-                displayName: Build Solution
-                inputs:
-                  command: build
-                  projects: '**/*.csproj'
-                  arguments: --configuration $(BuildConfiguration) --no-restore
-              - task: DotNetCoreCLI@2
-                displayName: Run Tests
-                inputs:
-                  command: test
-                  projects: '**/*Tests*.csproj'
-                  arguments: --configuration $(BuildConfiguration) --no-build
-              - task: DotNetCoreCLI@2
-                displayName: Publish Web Application
-                inputs:
-                  command: publish
-                  projects: 'src/apisof.net/apisof.net.csproj'
-                  arguments: --configuration $(BuildConfiguration) --output $(build.artifactstagingdirectory)/apis-of-dotnet --no-restore
+                  rootFolderOrFile: "$(build.artifactstagingdirectory)/publish"
+                  includeRootFolder: false
+                  archiveType: "zip"
+                  archiveFile: "$(build.artifactstagingdirectory)/site.zip"
+                  replaceExistingArchive: true
+              - script: |
+                  rm -rf "$(build.artifactstagingdirectory)/publish"
+                  echo "Deleted publish folder"
+                displayName: "Clean up publish folder"
