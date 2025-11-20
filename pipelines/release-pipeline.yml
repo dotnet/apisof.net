@@ -76,11 +76,13 @@ extends:
                   artifactName: "apis-of-dotnet-drop"
                   targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
             steps:
-              - task: AzureWebApp@1
+              - task: AzureRmWebAppDeployment@4
                 displayName: Deploy to Production
                 inputs:
-                  appType: webAppLinux
+                  ConnectionType: "AzureRM"
+                  appType: webAppContainer
                   azureSubscription: dotnetwebsite-azure
-                  appName: apisofdotnet
-                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop
-                  startUpCommand: "dotnet apisof.net.dll"
+                  WebAppName: apisofdotnet
+                  packageForLinux: $(Pipeline.Workspace)/apis-of-dotnet-drop
+                  enableCustomDeployment: true
+                  DeploymentType: "zipDeploy"
