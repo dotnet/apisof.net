@@ -80,7 +80,7 @@ extends:
                 displayName: Deploy to Production
                 inputs:
                   ConnectionType: "AzureRM"
-                  appType: webAppContainer
+                  appType: webAppLinux
                   azureSubscription: dotnetwebsite-azure
                   WebAppName: apisofdotnet
                   packageForLinux: $(Pipeline.Workspace)/apis-of-dotnet-drop
