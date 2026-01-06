@@ -1,5 +1,7 @@
 ﻿using System.IO.Compression;
 using ApisOfDotNet.Shared;
+using Azure.Core;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
 using Terrajobst.ApiCatalog;
@@ -163,7 +165,15 @@ public sealed class CatalogService
 
                 await Task.Run(() =>
                 {
-                    var blobClient = new BlobClient(_options.Value.AzureStorageConnectionString, ContainerName, BlobName);
+                    var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
+#if DEBUG
+                    TokenCredential credential = new DefaultAzureCredential();
+#else
+                    TokenCredential credential = new ManagedIdentityCredential();
+#endif
+                    var serviceClient = new BlobServiceClient(serviceUri, credential);
+                    var containerClient = serviceClient.GetBlobContainerClient(ContainerName);
+                    var blobClient = containerClient.GetBlobClient(BlobName);
                     return blobClient.DownloadToAsync(localPath);
                 });
 

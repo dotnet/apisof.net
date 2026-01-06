@@ -1,5 +1,7 @@
 ﻿using System.Threading.RateLimiting;
 using ApisOfDotNet.Shared;
+using Azure.Core;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,8 +26,15 @@ public sealed class DownloadController : Controller
     [HttpGet]
     public async Task<FileStreamResult> Get()
     {
-        var azureConnectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
+        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
+#if DEBUG
+        TokenCredential credential = new DefaultAzureCredential();
+#else
+        TokenCredential credential = new ManagedIdentityCredential();
+#endif
+        var serviceClient = new BlobServiceClient(serviceUri, credential);
+        var containerClient = serviceClient.GetBlobContainerClient("catalog");
+        var blobClient = containerClient.GetBlobClient("apicatalog.dat");
         var stream = await blobClient.OpenReadAsync();
         return new FileStreamResult(stream, "application/octet-stream") {
             FileDownloadName = "apicatalog.dat"
