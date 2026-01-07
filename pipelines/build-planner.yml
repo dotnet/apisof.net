@@ -47,7 +47,7 @@ extends:
                 inputs:
                   command: custom
                   custom: tool
-                  arguments: install -g nbgv
+                  arguments: install -g nbgv --add-source "$(RestorePackageSource)"
               - script: nbgv cloud -p src/NetUpgradePlanner
                 displayName: Set Version
               - script: |
