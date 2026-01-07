@@ -48,6 +48,8 @@ extends:
                 displayName: Use .NET 8 SDK
                 inputs:
                   version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
               - script: |
                   dotnet publish src/NetUpgradePlannerTelemetry/NetUpgradePlannerTelemetry.csproj -o "$(Build.ArtifactStagingDirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: Publish Function

@@ -37,6 +37,8 @@ extends:
                 displayName: Use .NET 8 SDK
                 inputs:
                   version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
               - task: AzureCLI@2
                 displayName: Generate NuGet usage
                 inputs:
@@ -58,6 +60,8 @@ extends:
                 displayName: Use .NET 8 SDK
                 inputs:
                   version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
               - task: AzureCLI@2
                 displayName: Generate Planner usage
                 inputs:

@@ -40,22 +40,20 @@ extends:
                 displayName: Use .NET 8 SDK
                 inputs:
                   version: 8.x
-
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
               - task: DotNetCoreCLI@2
                 displayName: Install NBGV tool
                 inputs:
                   command: custom
                   custom: tool
                   arguments: install -g nbgv
-
               - script: nbgv cloud -p src/NetUpgradePlanner
                 displayName: Set Version
-
               - script: |
                   cd src/NetUpgradePlanner
                   dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: dotnet publish
-
               - script: |
                   mkdir .artifacts/squirrel-release
                   cd .artifacts/publish/NetUpgradePlanner
@@ -72,7 +70,6 @@ extends:
                   Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$(NBGV_SemVer1)" --packAuthors "Immo Landwerth" --packDir "." -r "../../squirrel-release"
                 displayName: Squirrel pack
                 workingDirectory: $(Build.SourcesDirectory)
-
               - task: AzureCLI@2
                 displayName: Upload release
                 inputs:

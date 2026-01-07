@@ -32,6 +32,8 @@ extends:
                 displayName: Use .NET 8 SDK
                 inputs:
                   version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
               - script: |
                   cd src/
                   dotnet test
