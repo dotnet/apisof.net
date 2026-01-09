@@ -4,7 +4,7 @@ resources:
   pipelines:
     - pipeline: "apis-of-dotnet-build"
       project: "OnlineServices"
-      source: "asp-iis-dotnet/builds/apis-of-dotnet-build"
+      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-build'
       trigger:
         branches:
           include:
