@@ -34,7 +34,7 @@ extends:
               isProduction: false
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "telemetry-build"
+                  pipeline: "apis-of-dotnet-telemetry-build"
                   artifactName: "telemetry-drop"
                   targetPath: "$(Pipeline.Workspace)/telemetry-drop"
             steps:
