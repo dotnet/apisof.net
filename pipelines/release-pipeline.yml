@@ -38,12 +38,13 @@ extends:
                   artifactName: "apis-of-dotnet-drop"
                   targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
             steps:
-              - task: AzureRmWebAppDeployment@5
+              - task: AzureWebApp@1
                 displayName: Deploy Web App
                 inputs:
-                  ConnectedServiceName: "$(AzureDevSubscriptionConnection)"
-                  WebAppName: apisofdotnet-dev
-                  Package: $(Pipeline.Workspace)/apis-of-dotnet-drop
+                  azureSubscription: "$(AzureDevSubscriptionConnection)"
+                  appName: apisofdotnet-dev
+                  appType: webAppLinux
+                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop
       # - stage: Production
       #   displayName: Deploy to Production
       #   # dependsOn: DR
