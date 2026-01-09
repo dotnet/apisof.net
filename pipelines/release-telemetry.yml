@@ -42,6 +42,6 @@ extends:
                 displayName: Deploy Azure Function
                 inputs:
                   azureSubscription: "$(AzureDevSubscriptionConnection)"
-                  appType: functionApp
+                  appType: functionAppLinux
                   appName: apisofdotnetplanner-dev
                   package: "$(Pipeline.Workspace)/telemetry-drop/telemetry.zip"
