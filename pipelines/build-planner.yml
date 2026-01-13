@@ -54,7 +54,7 @@ extends:
                   cd src/NetUpgradePlanner
                   dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: dotnet publish
-              - script: |
+              - powershell: |
                   mkdir .artifacts/squirrel-release
                   cd .artifacts/publish/NetUpgradePlanner
 
