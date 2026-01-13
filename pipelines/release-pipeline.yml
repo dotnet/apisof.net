@@ -44,7 +44,7 @@ extends:
                   azureSubscription: "$(AzureDevSubscriptionConnection)"
                   appName: apisofdotnet-dev
                   appType: webAppLinux
-                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop
+                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
       # - stage: Production
       #   displayName: Deploy to Production
       #   # dependsOn: DR
