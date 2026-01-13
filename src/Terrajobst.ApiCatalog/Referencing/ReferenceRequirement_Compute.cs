@@ -89,7 +89,7 @@ partial class ReferenceRequirement
 
             var desktopAutoReferenced = NetFrameworkDesktopAutoReferencedAssemblies
                 .Where(t => string.Equals(t.AssemblyName, assemblyName, StringComparison.OrdinalIgnoreCase) && framework.Version >= t.Since)
-                .Cast<(string, Version, bool RequiresWindowsForms, bool RequiresWPF)?>()
+                .Select(t => ((string, Version, bool RequiresWindowsForms, bool RequiresWPF)?)t)
                 .SingleOrDefault();
 
             if (desktopAutoReferenced is not null)
