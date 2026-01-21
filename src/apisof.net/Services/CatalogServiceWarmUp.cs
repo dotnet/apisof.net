@@ -11,10 +11,9 @@ public sealed class CatalogServiceWarmUp : IHostedService
         _catalogService = catalogService;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        _catalogService.InvalidateAsync();
-        return Task.CompletedTask;
+        await _catalogService.InvalidateAsync();
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

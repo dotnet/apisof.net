@@ -36,8 +36,8 @@ public sealed class CatalogService
         _catalogBlobSource = CreateBlobSource("catalog", "apicatalog.dat", ApiCatalogModel.LoadAsync);
         _suffixTreeBlobSource = CreateBlobSource("catalog", "suffixtree.dat.deflate", SuffixTree.LoadDeflate);
         _catalogJobBlobSource = CreateBlobSource("catalog", "job.json", CatalogJobInfo.Load);
-        _designNotesBlobSource = CreateBlobSource("catalog", "designNotes.dat", DesignNoteDatabase.Load);
-        _usageBlobSource = CreateBlobSource("usage", "usageData.dat", FeatureUsageData.Load);
+        _designNotesBlobSource = CreateBlobSourceWithFallback("catalog", "designNotes.dat", DesignNoteDatabase.Load, DesignNoteDatabase.Empty);
+        _usageBlobSource = CreateBlobSourceWithFallback("usage", "usageData.dat", FeatureUsageData.Load, FeatureUsageData.Empty);
     }
 
     public async Task InvalidateAsync()
@@ -74,6 +74,27 @@ public sealed class CatalogService
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, T> loader)
     {
         return new BlobSource<T>(_logger, _options, containerName, blobName, s => Task.FromResult(loader(s)));
+    }
+
+    private BlobSource<T> CreateBlobSourceWithFallback<T>(string containerName, string blobName, Func<string, T> loader, T fallback)
+    {
+        return new BlobSource<T>(_logger, _options, containerName, blobName, async s =>
+        {
+            try
+            {
+                return loader(s);
+            }
+            catch (InvalidDataException ex)
+            {
+                _logger.LogWarning(ex, "Failed to load {BlobName} from {Container}. Using fallback.", blobName, containerName);
+                return fallback;
+            }
+            catch (FileNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "File {BlobName} not found in {Container}. Using fallback.", blobName, containerName);
+                return fallback;
+            }
+        });
     }
 
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, Task<T>> loader)
