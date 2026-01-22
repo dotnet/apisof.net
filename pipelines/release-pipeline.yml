@@ -43,7 +43,7 @@ extends:
                 inputs:
                   azureSubscription: "$(AzureDevSubscriptionConnection)"
                   appName: apisofdotnet-dev
-                  appType: webApp
+                  appType: webAppLinux
                   package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
                   deploymentMethod: auto
       # - stage: Production
