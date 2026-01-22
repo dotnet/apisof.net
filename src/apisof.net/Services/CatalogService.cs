@@ -142,6 +142,21 @@ public sealed class CatalogService
         protected string GetLocalPath()
         {
             var environmentPath = Environment.GetEnvironmentVariable("APISOFDOTNET_INDEX_PATH");
+            
+            // On Azure App Service (Linux), use a writable directory
+            // /home/site/wwwroot is read-only, so use /home/data or /tmp
+            if (string.IsNullOrEmpty(environmentPath) && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
+            {
+                // Running on Azure App Service
+                var azureDataPath = "/home/data";
+                if (Directory.Exists(azureDataPath))
+                {
+                    return Path.Combine(azureDataPath, BlobName);
+                }
+                // Fallback to temp directory
+                return Path.Combine(Path.GetTempPath(), BlobName);
+            }
+            
             var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
             var directory = environmentPath ?? applicationPath;
             return Path.Combine(directory, BlobName);
