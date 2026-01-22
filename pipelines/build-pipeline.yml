@@ -63,15 +63,3 @@ extends:
                   dotnet clean
                   dotnet publish apisof.net.csproj -o "$(build.artifactstagingdirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: "Publish Web Application"
-              - task: ArchiveFiles@2
-                displayName: "Archive published files to site.zip"
-                inputs:
-                  rootFolderOrFile: "$(build.artifactstagingdirectory)/publish"
-                  includeRootFolder: false
-                  archiveType: "zip"
-                  archiveFile: "$(build.artifactstagingdirectory)/site.zip"
-                  replaceExistingArchive: true
-              - script: |
-                  rm -rf "$(build.artifactstagingdirectory)/publish"
-                  echo "Deleted publish folder"
-                displayName: "Clean up publish folder"
