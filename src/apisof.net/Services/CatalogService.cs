@@ -159,6 +159,10 @@ public sealed class CatalogService
             
             var applicationPath = Path.GetDirectoryName(GetType().Assembly.Location)!;
             var directory = environmentPath ?? applicationPath;
+            
+            // Ensure directory exists before returning the path
+            Directory.CreateDirectory(directory);
+            
             return Path.Combine(directory, BlobName);
         }
     }
