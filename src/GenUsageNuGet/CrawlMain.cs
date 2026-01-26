@@ -231,19 +231,35 @@ internal sealed class CrawlMain : ConsoleCommand
                     if (cancellationToken.IsCancellationRequested)
                         break;
 
-                    var (exitCode, log) = await RunPackageCrawlerAsync(packageId, fileName, cancellationToken);
+                    try
+                    {
+                        var (exitCode, log) = await RunPackageCrawlerAsync(packageId, fileName, cancellationToken);
 
-                    if (cancellationToken.IsCancellationRequested)
-                        break;
+                        if (cancellationToken.IsCancellationRequested)
+                            break;
 
-                    var collectionResults = File.Exists(fileName)
-                        ? await CollectionSetResults.LoadAsync(fileName)
-                        : CollectionSetResults.Empty;
+                        var collectionResults = File.Exists(fileName)
+                            ? await CollectionSetResults.LoadAsync(fileName)
+                            : CollectionSetResults.Empty;
 
-                    var results = new PackageResults(packageId, exitCode, log, collectionResults);
-                    outputQueue.Add(results, cancellationToken);
+                        var results = new PackageResults(packageId, exitCode, log, collectionResults);
+                        outputQueue.Add(results, cancellationToken);
 
-                    File.Delete(fileName);
+                        File.Delete(fileName);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Console.WriteLine($"[Worker {workerId:000}] Task cancelled for package {packageId.Id} {packageId.Version}. Continuing with next package.");
+                        continue;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Worker {workerId:000}] Error processing package {packageId.Id} {packageId.Version}: {ex.GetType().Name} - {ex.Message}");
+                        // Add empty result to mark package as processed even though it failed
+                        var results = new PackageResults(packageId, 1, new[] { $"Error: {ex.Message}" }, CollectionSetResults.Empty);
+                        outputQueue.Add(results, cancellationToken);
+                        continue;
+                    }
                 }
 
                 Console.WriteLine($"Crawl Worker {workerId:000} has finished.");

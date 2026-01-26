@@ -104,8 +104,15 @@ internal sealed class NuGetFeed
         var url = await GetPackageUrlAsync(identity);
 
         using var httpClient = new HttpClient();
-        var nupkgStream = await httpClient.GetStreamAsync(url);
-        return new PackageArchiveReader(nupkgStream);
+        try
+        {
+            var nupkgStream = await httpClient.GetStreamAsync(url);
+            return new PackageArchiveReader(nupkgStream);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            throw new HttpRequestException($"Package {identity.Id} {identity.Version} not found (404). The package may have been deleted or does not exist.", ex, HttpStatusCode.NotFound);
+        }
     }
 
     private async Task<string> GetPackageUrlAsync(PackageIdentity identity)

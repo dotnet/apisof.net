@@ -33,7 +33,32 @@ internal sealed class CrawlPackageMain : ConsoleCommand
     {
         Console.WriteLine($"Crawling {packageId}...");
 
-        var results = await PackageCrawler.CrawlAsync(NuGetFeed.NuGetOrg, packageId);
-        await results.SaveAsync(fileName);
+        try
+        {
+            var results = await PackageCrawler.CrawlAsync(NuGetFeed.NuGetOrg, packageId);
+            await results.SaveAsync(fileName);
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound ||
+                                               ex.Message.Contains("404") ||
+                                               ex.Message.Contains("specified blob does not exist", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine($"Warning: Package {packageId.Id} {packageId.Version} not found (404). Skipping.");
+            throw;
+        }
+        catch (StackOverflowException)
+        {
+            Console.WriteLine($"Error: Stack overflow while processing {packageId.Id} {packageId.Version}. Skipping this package.");
+            throw;
+        }
+        catch (TaskCanceledException)
+        {
+            Console.WriteLine($"Warning: Task cancelled for {packageId.Id} {packageId.Version}. Timeout or cancellation occurred.");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error crawling package {packageId.Id} {packageId.Version}: {ex.GetType().Name} - {ex.Message}");
+            throw;
+        }
     }
 }
