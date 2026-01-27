@@ -63,7 +63,8 @@ public sealed class ApisOfDotNetStore
         Console.WriteLine($"Setting timestamp for {blobContainer}/{blobName}...");
 
         var blobClient = GetBlobClient(blobContainer, blobName);
-        await blobClient.SetMetadataAsync(new Dictionary<string, string> {
+        await blobClient.SetMetadataAsync(new Dictionary<string, string>
+        {
             [BlobMetadataKeyIndexTimestamp] = timestamp.ToString("O")
         });
     }
@@ -113,7 +114,7 @@ public sealed class ApisOfDotNetStore
         await blobClient.UploadAsync(stream, overwrite: true);
     }
 
-    public async Task<IReadOnlyList<string>> GetBlobNamesAsync(string blobContainer,  DateTimeOffset? since = null)
+    public async Task<IReadOnlyList<string>> GetBlobNamesAsync(string blobContainer, DateTimeOffset? since = null)
     {
         Console.WriteLine($"Enumerating {blobContainer}...");
 

@@ -46,45 +46,43 @@ extends:
                   appType: webAppLinux
                   package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
                   deploymentMethod: auto
-      # - stage: Production
-      #   displayName: Deploy to Production
-      #   # dependsOn: DR
-      #   jobs:
-      #     - job: PreDeploymentApprovalJob
-      #       displayName: Pre-Deployment Approval
-      #       condition: succeeded()
-      #       timeoutInMinutes: 43200
-      #       pool: server
-      #       steps:
-      #         - task: ManualValidation@1
-      #           inputs:
-      #             notifyUsers: |-
-      #               Chris.Sfanos@microsoft.com,
-      #               v-danzhu1@microsoft.com
-      #             approvers: |-
-      #               Chris.Sfanos@microsoft.com,
-      #               v-danzhu1@microsoft.com
-      #     - job: Job_1
-      #       displayName: Run on agent
-      #       dependsOn: PreDeploymentApprovalJob
-      #       condition: succeeded()
-      #       timeoutInMinutes: 0
-      #       templateContext:
-      #         type: releaseJob
-      #         isProduction: true
-      #         inputs:
-      #           - input: pipelineArtifact
-      #             pipeline: "apis-of-dotnet"
-      #             artifactName: "apis-of-dotnet-drop"
-      #             targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
-      #       steps:
-      #         - task: AzureRmWebAppDeployment@5
-      #           displayName: Deploy to Production
-      #           inputs:
-      #             ConnectionType: "AzureRM"
-      #             appType: webAppLinux
-      #             azureSubscription: dotnetwebsite-azure
-      #             WebAppName: apisofdotnet
-      #             packageForLinux: $(Pipeline.Workspace)/apis-of-dotnet-drop
-      #             enableCustomDeployment: true
-      #             DeploymentType: "zipDeploy"
+      - stage: Production
+        displayName: Deploy to Production
+        # dependsOn: DR
+        jobs:
+          - job: PreDeploymentApprovalJob
+            displayName: Pre-Deployment Approval
+            condition: succeeded()
+            timeoutInMinutes: 43200
+            pool: server
+            steps:
+              - task: ManualValidation@1
+                inputs:
+                  notifyUsers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+                  approvers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+          - job: Job_1
+            displayName: Run on agent
+            dependsOn: PreDeploymentApprovalJob
+            condition: succeeded()
+            timeoutInMinutes: 0
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet"
+                  artifactName: "apis-of-dotnet-drop"
+                  targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
+            steps:
+              - task: AzureWebApp@1
+                displayName: Deploy Web App
+                inputs:
+                  azureSubscription: dotnetwebsite-azure
+                  appName: apisofdotnet
+                  appType: webAppLinux
+                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
+                  deploymentMethod: auto
