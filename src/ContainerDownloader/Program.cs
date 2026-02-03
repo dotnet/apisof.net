@@ -16,7 +16,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddSingleton(sp =>
 {
     var serviceUri = new Uri(StorageAccountUrl);
-    TokenCredential credential = new ManagedIdentityCredential();
+    TokenCredential credential = new DefaultAzureCredential();
 
     return new BlobServiceClient(serviceUri, credential, new BlobClientOptions
     {
