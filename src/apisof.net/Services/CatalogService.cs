@@ -1,9 +1,6 @@
 ﻿using System.IO.Compression;
 using ApisOfDotNet.Shared;
-using Azure.Core;
-using Azure.Identity;
 using Azure.Storage.Blobs;
-using Microsoft.Extensions.Options;
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.DesignNotes;
 using Terrajobst.ApiCatalog.Features;
@@ -12,7 +9,7 @@ namespace ApisOfDotNet.Services;
 
 public sealed class CatalogService
 {
-    private readonly IOptions<ApisOfDotNetOptions> _options;
+    private readonly BlobStorageService _blobStorageService;
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<CatalogService> _logger;
 
@@ -23,15 +20,15 @@ public sealed class CatalogService
     private readonly BlobSource<FeatureUsageData> _usageBlobSource;
     private CatalogData _data = CatalogData.Empty;
 
-    public CatalogService(IOptions<ApisOfDotNetOptions> options,
+    public CatalogService(BlobStorageService blobStorageService,
                           IWebHostEnvironment environment,
                           ILogger<CatalogService> logger)
     {
-        ThrowIfNull(options);
+        ThrowIfNull(blobStorageService);
         ThrowIfNull(environment);
         ThrowIfNull(logger);
 
-        _options = options;
+        _blobStorageService = blobStorageService;
         _environment = environment;
         _logger = logger;
 
@@ -75,12 +72,12 @@ public sealed class CatalogService
 
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, T> loader)
     {
-        return new BlobSource<T>(_logger, _options, containerName, blobName, s => Task.FromResult(loader(s)));
+        return new BlobSource<T>(_logger, _blobStorageService, containerName, blobName, s => Task.FromResult(loader(s)));
     }
 
     private BlobSource<T> CreateBlobSource<T>(string containerName, string blobName, Func<string, Task<T>> loader)
     {
-        return new BlobSource<T>(_logger, _options, containerName, blobName, loader);
+        return new BlobSource<T>(_logger, _blobStorageService, containerName, blobName, loader);
     }
 
     public ApiCatalogModel Catalog => _data.Catalog;
@@ -132,22 +129,22 @@ public sealed class CatalogService
     private sealed class BlobSource<T> : BlobSource
     {
         private readonly ILogger<CatalogService> _logger;
-        private readonly IOptions<ApisOfDotNetOptions> _options;
+        private readonly BlobStorageService _blobStorageService;
         private readonly Func<string, Task<T>> _loader;
 
         public BlobSource(ILogger<CatalogService> logger,
-                          IOptions<ApisOfDotNetOptions> options,
+                          BlobStorageService blobStorageService,
                           string containerName,
                           string blobName,
                           Func<string, Task<T>> loader)
             : base(containerName, blobName)
         {
             ThrowIfNull(logger);
-            ThrowIfNull(options);
+            ThrowIfNull(blobStorageService);
             ThrowIfNull(loader);
 
             _logger = logger;
-            _options = options;
+            _blobStorageService = blobStorageService;
             _loader = loader;
         }
 
@@ -165,15 +162,7 @@ public sealed class CatalogService
 
                 await Task.Run(() =>
                 {
-                    var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
-#if DEBUG
-                    TokenCredential credential = new DefaultAzureCredential();
-#else
-                    TokenCredential credential = new ManagedIdentityCredential();
-#endif
-                    var serviceClient = new BlobServiceClient(serviceUri, credential);
-                    var containerClient = serviceClient.GetBlobContainerClient(ContainerName);
-                    var blobClient = containerClient.GetBlobClient(BlobName);
+                    var blobClient = _blobStorageService.GetBlobClient(ContainerName, BlobName);
                     return blobClient.DownloadToAsync(localPath);
                 });
 
