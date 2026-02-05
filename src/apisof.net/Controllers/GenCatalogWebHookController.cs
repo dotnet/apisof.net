@@ -10,6 +10,7 @@ namespace ApisOfDotNet.Controllers;
 [ApiController]
 [Route("webhook")]
 [AllowAnonymous]
+[IgnoreAntiforgeryToken]
 public sealed class WebHookController : Controller
 {
     private readonly IOptions<ApisOfDotNetOptions> _options;
