@@ -1,4 +1,5 @@
 using Azure.Core;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -26,6 +27,31 @@ public sealed class ApisOfDotNetStore
         _logger = logger;
     }
 
+    private BlobClient GetBlobClient(string blobContainer, string blobName)
+    {
+        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
+#if DEBUG
+        TokenCredential credential = new DefaultAzureCredential();
+#else
+        TokenCredential credential = new ManagedIdentityCredential();
+#endif
+        var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
+        var containerClient = serviceClient.GetBlobContainerClient(blobContainer);
+        return containerClient.GetBlobClient(blobName);
+    }
+
+    private BlobContainerClient GetBlobContainerClient(string blobContainer)
+    {
+        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
+#if DEBUG
+        TokenCredential credential = new DefaultAzureCredential();
+#else
+        TokenCredential credential = new ManagedIdentityCredential();
+#endif
+        var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
+        return serviceClient.GetBlobContainerClient(blobContainer);
+    }
+
     public async Task SetTimestampAsync(string blobContainer, string blobName, DateTimeOffset timestamp)
     {
         if (_hostEnvironment.IsDevelopment())
@@ -36,9 +62,9 @@ public sealed class ApisOfDotNetStore
 
         Console.WriteLine($"Setting timestamp for {blobContainer}/{blobName}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(connectionString, blobContainer, blobName, options: GetBlobOptions());
-        await blobClient.SetMetadataAsync(new Dictionary<string, string> {
+        var blobClient = GetBlobClient(blobContainer, blobName);
+        await blobClient.SetMetadataAsync(new Dictionary<string, string>
+        {
             [BlobMetadataKeyIndexTimestamp] = timestamp.ToString("O")
         });
     }
@@ -47,8 +73,7 @@ public sealed class ApisOfDotNetStore
     {
         Console.WriteLine($"Getting timestamp for {blobContainer}/{blobName}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(connectionString, blobContainer, blobName, options: GetBlobOptions());
+        var blobClient = GetBlobClient(blobContainer, blobName);
 
         var properties = await blobClient.GetPropertiesAsync();
         if (properties.HasValue &&
@@ -71,8 +96,7 @@ public sealed class ApisOfDotNetStore
 
         Console.WriteLine($"Uploading {blobContainer}/{blobName}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(connectionString, blobContainer, blobName, options: GetBlobOptions());
+        var blobClient = GetBlobClient(blobContainer, blobName);
         await blobClient.UploadAsync(fileName, overwrite: true);
     }
 
@@ -86,17 +110,15 @@ public sealed class ApisOfDotNetStore
 
         Console.WriteLine($"Uploading {blobContainer}/{blobName}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(connectionString, blobContainer, blobName, options: GetBlobOptions());
+        var blobClient = GetBlobClient(blobContainer, blobName);
         await blobClient.UploadAsync(stream, overwrite: true);
     }
 
-    public async Task<IReadOnlyList<string>> GetBlobNamesAsync(string blobContainer,  DateTimeOffset? since = null)
+    public async Task<IReadOnlyList<string>> GetBlobNamesAsync(string blobContainer, DateTimeOffset? since = null)
     {
         Console.WriteLine($"Enumerating {blobContainer}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var containerClient = new BlobContainerClient(connectionString, blobContainer, options: GetBlobOptions());
+        var containerClient = GetBlobContainerClient(blobContainer);
 
         var result = new List<string>();
         await foreach (var blob in containerClient.GetBlobsAsync())
@@ -114,8 +136,7 @@ public sealed class ApisOfDotNetStore
     {
         Console.WriteLine($"Downloading {Path.GetFileName(fileName)}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(connectionString, blobContainer, blobName, options: GetBlobOptions());
+        var blobClient = GetBlobClient(blobContainer, blobName);
         var props = await blobClient.GetPropertiesAsync();
         var lastModified = props.Value.LastModified;
         await blobClient.DownloadToAsync(fileName);
@@ -126,8 +147,7 @@ public sealed class ApisOfDotNetStore
     {
         Console.WriteLine($"Opening blob {blobContainer}/{blobName}...");
 
-        var connectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(connectionString, blobContainer, blobName, options: GetBlobOptions());
+        var blobClient = GetBlobClient(blobContainer, blobName);
         return await blobClient.OpenReadAsync();
     }
 

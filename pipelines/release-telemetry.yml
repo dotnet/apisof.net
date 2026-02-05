@@ -1,0 +1,48 @@
+trigger: none
+name: $(Date:yyyyMMdd).$(Rev:r)
+
+resources:
+  pipelines:
+    - pipeline: "apis-of-dotnet-telemetry-build"
+      project: "OnlineServices"
+      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-telemetry-build'
+      trigger:
+        branches:
+          include:
+            - main
+  repositories:
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Ubuntu22.04
+      os: linux
+    stages:
+      - stage: Dev
+        displayName: Deploy to Dev
+        jobs:
+          - job: Deploy
+            displayName: Deploy to Azure Function
+            templateContext:
+              type: releaseJob
+              isProduction: false
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet-telemetry-build"
+                  artifactName: "telemetry-drop"
+                  targetPath: "$(Pipeline.Workspace)/telemetry-drop"
+            steps:
+              - task: AzureFunctionApp@2
+                displayName: Deploy Azure Function
+                inputs:
+                  connectedServiceNameARM: "$(AzureDevSubscriptionConnection)"
+                  runtimeStack: DOTNET|8.0
+                  appType: functionAppLinux
+                  appName: apisofdotnetplanner-dev
+                  package: "$(Pipeline.Workspace)/telemetry-drop/telemetry.zip"

@@ -5,7 +5,7 @@ namespace ApisOfDotNet.Shared;
 public sealed class ApisOfDotNetOptions
 {
     [Required]
-    public required string AzureStorageConnectionString { get; init; }
+    public required string AzureStorageServiceUrl { get; init; }
 
     [Required]
     public required string ApisOfDotNetWebHookSecret { get; init; }

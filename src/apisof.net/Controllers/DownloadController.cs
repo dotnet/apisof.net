@@ -1,9 +1,7 @@
 ﻿using System.Threading.RateLimiting;
-using ApisOfDotNet.Shared;
-using Azure.Storage.Blobs;
+using ApisOfDotNet.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace ApisOfDotNet.Controllers;
 
@@ -12,22 +10,22 @@ namespace ApisOfDotNet.Controllers;
 [AllowAnonymous]
 public sealed class DownloadController : Controller
 {
-    private readonly IOptions<ApisOfDotNetOptions> _options;
+    private readonly BlobStorageService _blobStorageService;
 
-    public DownloadController(IOptions<ApisOfDotNetOptions> options)
+    public DownloadController(BlobStorageService blobStorageService)
     {
-        ThrowIfNull(options);
+        ThrowIfNull(blobStorageService);
 
-        _options = options;
+        _blobStorageService = blobStorageService;
     }
 
     [HttpGet]
     public async Task<FileStreamResult> Get()
     {
-        var azureConnectionString = _options.Value.AzureStorageConnectionString;
-        var blobClient = new BlobClient(azureConnectionString, "catalog", "apicatalog.dat");
+        var blobClient = _blobStorageService.GetBlobClient("catalog", "apicatalog.dat");
         var stream = await blobClient.OpenReadAsync();
-        return new FileStreamResult(stream, "application/octet-stream") {
+        return new FileStreamResult(stream, "application/octet-stream")
+        {
             FileDownloadName = "apicatalog.dat"
         };
     }
