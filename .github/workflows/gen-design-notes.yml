@@ -3,7 +3,7 @@ name: Generate Design Notes
 on:
   workflow_dispatch:
   schedule:
-    - cron: '5 21 * * 2,4' # At 2:05 PM PT Tuesday and Thursday
+    - cron: "5 21 * * 2,4" # At 2:05 PM PT Tuesday and Thursday
 
 env:
   DOTNET_NOLOGO: true
@@ -13,20 +13,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Get code
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0 # We need the full history in order to use Git versioning
+      - name: Get code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # We need the full history in order to use Git versioning
 
-    - name: Get .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '8.0.*'
+      - name: Get .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.*"
 
-    - name: Generate design notes
-      env:
-        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        ApisOfDotNetWebHookSecret: ${{ secrets.APISOFDOTNET_WEB_HOOK_SECRET }}
-      run: |
-        cd ./src/GenDesignNotes
-        dotnet run
+      - name: Generate design notes
+        env:
+          AzureStorageServiceUrl: ${{ secrets.AZURE_STORAGE_SERVICE_URL }}
+          ApisOfDotNetWebHookSecret: ${{ secrets.APISOFDOTNET_WEB_HOOK_SECRET }}
+        run: |
+          cd ./src/GenDesignNotes
+          dotnet run

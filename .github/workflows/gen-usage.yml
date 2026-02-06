@@ -3,66 +3,86 @@ name: Generate Usage
 on:
   workflow_dispatch:
   schedule:
-    - cron: '21 */6 * * *' # At :21 in every 6th hour
+    - cron: "21 */6 * * *" # At :21 in every 6th hour
 
 env:
   DOTNET_NOLOGO: true
 
 jobs:
-
   gen-usage-nuget:
     runs-on: ubuntu-latest
     steps:
-    - name: Get code
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0 # We need the full history in order to use Git versioning
-    - name: Get .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '8.0.*'
-    - name: Generate NuGet usage
-      env:
-        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-      run: |
-        cd ./src/GenUsageNuGet
-        dotnet run -- crawl
+      - name: Get code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # We need the full history in order to use Git versioning
+      - name: Get .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.*"
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          auth-type: IDENTITY
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      - name: Generate NuGet usage
+        env:
+          AzureStorageServiceUrl: ${{ secrets.AZURE_STORAGE_SERVICE_URL }}
+        run: |
+          cd ./src/GenUsageNuGet
+          dotnet run -- crawl
 
   gen-usage-planner:
     runs-on: ubuntu-latest
     steps:
-    - name: Get code
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0 # We need the full history in order to use Git versioning
-    - name: Get .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '8.0.*'
-    - name: Generate Planner usage
-      env:
-        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-      run: |
-        cd ./src/GenUsagePlanner
-        dotnet run
+      - name: Get code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # We need the full history in order to use Git versioning
+      - name: Get .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.*"
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          auth-type: IDENTITY
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      - name: Generate Planner usage
+        env:
+          AzureStorageServiceUrl: ${{ secrets.AZURE_STORAGE_SERVICE_URL }}
+        run: |
+          cd ./src/GenUsagePlanner
+          dotnet run
 
   gen-usage:
     if: ${{ always() }}
     needs: [gen-usage-nuget, gen-usage-planner]
     runs-on: ubuntu-latest
     steps:
-    - name: Get code
-      uses: actions/checkout@v5
-      with:
-        fetch-depth: 0 # We need the full history in order to use Git versioning
-    - name: Get .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '8.0.*'
-    - name: Generate usage
-      env:
-        AzureStorageConnectionString: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
-        ApisOfDotNetWebHookSecret: ${{ secrets.APISOFDOTNET_WEB_HOOK_SECRET }}
-      run: |
-        cd ./src/GenUsage
-        dotnet run
+      - name: Get code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # We need the full history in order to use Git versioning
+      - name: Get .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "8.0.*"
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          auth-type: IDENTITY
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      - name: Generate usage
+        env:
+          AzureStorageServiceUrl: ${{ secrets.AZURE_STORAGE_SERVICE_URL }}
+          ApisOfDotNetWebHookSecret: ${{ secrets.APISOFDOTNET_WEB_HOOK_SECRET }}
+        run: |
+          cd ./src/GenUsage
+          dotnet run

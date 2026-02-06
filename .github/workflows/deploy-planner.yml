@@ -64,10 +64,15 @@ jobs:
           name: squirrel-release
           path: .artifacts/squirrel-release
 
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          auth-type: IDENTITY
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Upload release
         uses: azure/cli@v2
-        env:
-          AZURE_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_STORAGE_CONNECTION_STRING }}
         with:
           inlineScript: |
             az storage blob upload-batch -d squirrel -s .artifacts/squirrel-release --overwrite
