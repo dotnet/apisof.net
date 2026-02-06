@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 using Squirrel;
 
@@ -6,14 +7,15 @@ namespace NetUpgradePlanner.Services;
 
 internal sealed class UpdateService : BackgroundService
 {
-    private const string _storageUrl = "https://apisofdotnet.blob.core.windows.net/squirrel";
+    private string _storageUrl;
     private readonly ProgressService _progressService;
 
     public bool HasUpdate { get; private set; }
 
-    public UpdateService(ProgressService progressService)
+    public UpdateService(ProgressService progressService, IConfiguration configuration)
     {
         _progressService = progressService;
+        _storageUrl = configuration["Environment:BaseUrl"] + "/squirrel";
     }
 
     public async Task<bool> CheckForUpdateAsync()
