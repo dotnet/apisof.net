@@ -11,10 +11,12 @@ steps:
   - script: |
       dotnet build "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" --configuration $(ReleaseConfiguration)
     displayName: "Build GenUsageNuGet"
-  - script: |
-      cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
-      dotnet run -- crawl --configuration $(ReleaseConfiguration)
-    displayName: "Generate NuGet usage"
+  - task: DotNetCoreCLI@2
+    displayName: "Run GenUsageNuGet crawl"
+    inputs:
+      command: 'run'
+      arguments: '-- crawl --configuration $(ReleaseConfiguration)'
+      projects: '$(Build.SourcesDirectory)/src/GenUsageNuGet'
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

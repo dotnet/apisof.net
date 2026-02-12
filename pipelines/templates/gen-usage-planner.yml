@@ -11,10 +11,12 @@ steps:
   - script: |
       dotnet build "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" --configuration Release
     displayName: "Build GenUsagePlanner"
-  - script: |
-      cd "$(Build.SourcesDirectory)/src/GenUsagePlanner"
-      dotnet run --configuration $(ReleaseConfiguration)
-    displayName: "Generate planner usage"
+  - task: DotNetCoreCLI@2
+    displayName: "Run GenUsagePlanner"
+    inputs:
+      command: 'run'
+      projects: '$(Build.SourcesDirectory)/src/GenUsagePlanner'
+      arguments: '--configuration $(ReleaseConfiguration)'
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
