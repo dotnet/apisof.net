@@ -40,21 +40,21 @@ extends:
     stages:
       - stage: GenerateUsage
         jobs:
-          - job: generate-usage-nuget
+          - job: generate_usage_nuget
             displayName: Generate nuget usage
             steps:
               - template: pipelines/templates/gen-usage-nuget.yml@self
 
-          - job: generate-usage-planner
+          - job: generate_usage_planner
             displayName: Generate planner usage
             steps:
               - template: pipelines/templates/gen-usage-planner.yml@self
 
-          - job: generate-usage
+          - job: generate_usage
             displayName: Generate all usage data
             dependsOn:
-              - generate-usage-nuget
-              - generate-usage-planner
+              - generate_usage_nuget
+              - generate_usage_planner
             # We want this to run even if the previous jobs fail, so that we can at least get partial usage data
             condition: always()
             steps:
