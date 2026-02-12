@@ -1,0 +1,20 @@
+---
+steps:
+  - checkout: self
+  - task: UseDotNet@2
+    displayName: Use .NET 8 SDK
+    inputs:
+      version: 8.x
+      includePreviewVersions: true
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - script: |
+      dotnet build "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" --configuration $(ReleaseConfiguration)
+    displayName: "Build GenUsageNuGet"
+  - script: |
+      cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
+      dotnet run -- crawl --configuration $(ReleaseConfiguration)
+    displayName: "Generate NuGet usage"
+    env:
+      AzureStorageConnectionString: $(AzureStorageServiceUrl)
+      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

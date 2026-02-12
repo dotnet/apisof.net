@@ -1,0 +1,77 @@
+---
+trigger: none
+
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  - name: ReleaseConfiguration
+    value: Release
+  - name: ApisOfDotNetWebHookSecret
+    value: $(ApisOfDotNetWebHookSecret)
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+schedules:
+  - cron: '21 */6 * * *' # At :21 in every 6th hour
+    displayName: "Generate usage every 6 hours"
+    branches:
+      include:
+        - main
+    always: true
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022
+        os: windows
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Ubuntu22.04
+      os: linux
+    stages:
+      - stage: GenerateUsage
+        jobs:
+          - job: generate-usage-nuget
+            displayName: Generate nuget usage
+            steps:
+              - template: templates/gen-usage-nuget.yml@self
+
+          - job: generate-usage-planner
+            displayName: Generate planner usage
+            steps:
+              - template: templates/gen-usage-planner.yml@self
+
+          - job: generate-usage
+            displayName: Generate all usage data
+            dependsOn:
+              - generate-usage-nuget
+              - generate-usage-planner
+            # We want this to run even if the previous jobs fail, so that we can at least get partial usage data
+            condition: always()
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" --configuration $(ReleaseConfiguration)
+                displayName: "Build GenUsage"
+              - script: |
+                  cd "$(Build.SourcesDirectory)/src/GenUsage"
+                  dotnet run --configuration $(ReleaseConfiguration)
+                displayName: "Generate all usage data"
+                env:
+                  AzureStorageConnectionString: $(AzureStorageServiceUrl)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
