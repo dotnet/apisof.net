@@ -43,12 +43,12 @@ extends:
           - job: generate-usage-nuget
             displayName: Generate nuget usage
             steps:
-              - template: templates/gen-usage-nuget.yml@self
+              - template: pipelines/templates/gen-usage-nuget.yml@self
 
           - job: generate-usage-planner
             displayName: Generate planner usage
             steps:
-              - template: templates/gen-usage-planner.yml@self
+              - template: pipelines/templates/gen-usage-planner.yml@self
 
           - job: generate-usage
             displayName: Generate all usage data
