@@ -16,5 +16,5 @@ steps:
       dotnet run -- crawl --configuration $(ReleaseConfiguration)
     displayName: "Generate NuGet usage"
     env:
-      AzureStorageConnectionString: $(AzureStorageServiceUrl)
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

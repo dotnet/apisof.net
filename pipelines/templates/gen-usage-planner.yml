@@ -16,5 +16,5 @@ steps:
       dotnet run --configuration $(ReleaseConfiguration)
     displayName: "Generate planner usage"
     env:
-      AzureStorageConnectionString: $(AzureStorageServiceUrl)
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

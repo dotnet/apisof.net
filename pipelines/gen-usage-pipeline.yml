@@ -73,5 +73,5 @@ extends:
                   dotnet run --configuration $(ReleaseConfiguration)
                 displayName: "Generate all usage data"
                 env:
-                  AzureStorageConnectionString: $(AzureStorageServiceUrl)
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
