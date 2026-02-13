@@ -11,12 +11,15 @@ steps:
   - script: |
       dotnet build "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj"
     displayName: "Build GenUsagePlanner"
-  - task: DotNetCoreCLI@2
+  - task: AzureCLI@2
     displayName: "Run GenUsagePlanner"
     inputs:
-      command: 'run'
-      projects: '$(Build.SourcesDirectory)/src/GenUsagePlanner'
-      arguments: '--configuration $(BuildConfiguration)'
+      azureSubscription: "$(AzureSubscriptionConnection)"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+         cd "$(Build.SourcesDirectory)/src/GenUsagePlanner"
+         dotnet run --configuration $(BuildConfiguration)
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

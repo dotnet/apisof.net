@@ -11,12 +11,15 @@ steps:
   - script: |
       dotnet build "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" --configuration $(BuildConfiguration)
     displayName: "Build GenUsageNuGet"
-  - task: DotNetCoreCLI@2
+  - task: AzureCLI@2
     displayName: "Run GenUsageNuGet"
     inputs:
-      command: 'run'
-      arguments: '--configuration $(BuildConfiguration) -- crawl'
-      projects: '$(Build.SourcesDirectory)/src/GenUsageNuGet'
+      azureSubscription: "$(AzureSubscriptionConnection)"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+         cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
+         dotnet run --configuration $(BuildConfiguration) -- crawl
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

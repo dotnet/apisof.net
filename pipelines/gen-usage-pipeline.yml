@@ -66,10 +66,15 @@ extends:
               - script: |
                   dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj"
                 displayName: "Build GenUsage"
-              - script: |
-                  cd "$(Build.SourcesDirectory)/src/GenUsage"
-                  dotnet run --configuration $(BuildConfiguration)
-                displayName: "Generate all usage data"
+              - task: AzureCLI@2
+                displayName: "Run GenUsage"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "bash"
+                  scriptLocation: "inlineScript"
+                  inlineScript: |
+                     cd "$(Build.SourcesDirectory)/src/GenUsage"
+                     dotnet run --configuration $(BuildConfiguration)
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
