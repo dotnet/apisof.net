@@ -18,17 +18,13 @@ steps:
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
-        echo "OIDC Token File: ${AZURE_FEDERATED_TOKEN_FILE:-<not set>}"
+        az account get-access-token --resource https://management.azure.com/
 
-        if [ -n "$AZURE_FEDERATED_TOKEN_FILE" ] && [ -f "$AZURE_FEDERATED_TOKEN_FILE" ]; then
-          echo "----- RAW TOKEN -----"
-          cat "$AZURE_FEDERATED_TOKEN_FILE"
-
-          echo "----- DECODED PAYLOAD -----"
-          cut -d '.' -f2 "$AZURE_FEDERATED_TOKEN_FILE" | base64 -d | jq
-        else
-          echo "No OIDC token file available (not using workload identity)."
-        fi
+        # Or for Storage
+        az account get-access-token --resource https://storage.azure.com/
+        
+        cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
+        dotnet run --configuration $(BuildConfiguration) -- crawl
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
