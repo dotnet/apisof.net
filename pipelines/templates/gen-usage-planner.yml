@@ -9,7 +9,7 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - script: |
-      dotnet build "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj"
+      dotnet build "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" --configuration $(BuildConfiguration)
     displayName: "Build GenUsagePlanner"
   - task: AzureCLI@2
     displayName: "Run GenUsagePlanner"

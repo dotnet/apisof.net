@@ -4,7 +4,7 @@ trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: BuildConfiguration
-    value: Debug
+    value: Release
 resources:
   repositories:
     - repository: self
@@ -64,7 +64,7 @@ extends:
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
               - script: |
-                  dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj"
+                  dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" --configuration $(BuildConfiguration)
                 displayName: "Build GenUsage"
               - task: AzureCLI@2
                 displayName: "Run GenUsage"
