@@ -1,0 +1,65 @@
+---
+trigger: none
+
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  - name: BuildConfiguration
+    value: Release
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+schedules:
+  - cron: "5 21 * * 2,4" # At 21:05 on Tuesday and Thursday
+    displayName: "Generate design notes every Tuesday and Thursday"
+    branches:
+      include:
+        - main
+    always: true
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022
+        os: windows
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Ubuntu22.04
+      os: linux
+    stages:
+      - stage: GenerateDesignNotes
+        jobs:
+          - job: generate_design_notes
+            displayName: Generate design notes
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  dotnet build "$(Build.SourcesDirectory)/src/GenDesignNotes/GenDesignNotes.csproj" --configuration $(BuildConfiguration)
+                displayName: "Build GenDesignNotes"
+              - task: AzureCLI@2
+                displayName: "Run GenDesignNotes"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "bash"
+                  scriptLocation: "inlineScript"
+                  inlineScript: |
+                    cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
+                    dotnet run --configuration $(BuildConfiguration)
+                env:
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
