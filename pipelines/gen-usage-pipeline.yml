@@ -5,8 +5,6 @@ name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: ReleaseConfiguration
     value: Release
-  - name: ApisOfDotNetWebHookSecret
-    value: $(ApisOfDotNetWebHookSecret)
 resources:
   repositories:
     - repository: self
