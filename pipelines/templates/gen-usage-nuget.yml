@@ -18,6 +18,13 @@ steps:
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
+        echo "OIDC Token File: $AZURE_FEDERATED_TOKEN_FILE"
+
+        echo "----- RAW TOKEN -----"
+        cat $AZURE_FEDERATED_TOKEN_FILE
+
+        echo "----- DECODED PAYLOAD -----"
+        cat $AZURE_FEDERATED_TOKEN_FILE | cut -d '.' -f2 | base64 -d | jq
         cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
         dotnet run --configuration $(BuildConfiguration) -- crawl
     env:
