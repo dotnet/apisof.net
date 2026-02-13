@@ -18,6 +18,18 @@ steps:
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
+        set -e
+
+        echo "== az account show =="
+        az account show
+
+        echo "== test storage access =="
+        az storage blob show \
+          --account-name apisofdotnetdev \
+          --container-name catalog \
+          --name apicatalog.dat \
+          --auth-mode login
+
          cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
          dotnet run --configuration $(BuildConfiguration) -- crawl
     env:
