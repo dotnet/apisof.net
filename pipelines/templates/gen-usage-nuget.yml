@@ -29,9 +29,9 @@ steps:
           --container-name catalog \
           --name apicatalog.dat \
           --auth-mode login
-
-         cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
-         dotnet run --configuration $(BuildConfiguration) -- crawl
+        echo "Storage url: $AzureStorageServiceUrl"
+        cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
+        dotnet run --configuration $(BuildConfiguration) -- crawl
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
