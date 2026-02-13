@@ -4,7 +4,7 @@ trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: BuildConfiguration
-    value: Debug
+    value: Release
 resources:
   repositories:
     - repository: self
@@ -53,8 +53,8 @@ extends:
             dependsOn:
               - generate_usage_nuget
               - generate_usage_planner
-            # We want this to run even if the previous jobs fail, so that we can at least get partial usage data
-            condition: always()
+            # Run this job only if both dependent jobs succeed
+            condition: and(succeeded('generate_usage_nuget'), succeeded('generate_usage_planner'))
             steps:
               - checkout: self
               - task: UseDotNet@2
@@ -73,18 +73,6 @@ extends:
                   scriptType: "bash"
                   scriptLocation: "inlineScript"
                   inlineScript: |
-                    set -e
-
-                    echo "== az account show =="
-                    az account show
-
-                    echo "== test storage access =="
-                    az storage blob show \
-                      --account-name apisofdotnetdev \
-                      --container-name catalog \
-                      --name apicatalog.dat \
-                      --auth-mode login
-                    echo "Storage url: $AzureStorageServiceUrl"
                     cd "$(Build.SourcesDirectory)/src/GenUsage"
                     dotnet run --configuration $(BuildConfiguration)
                 env:
