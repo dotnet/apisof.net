@@ -9,13 +9,13 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - script: |
-      dotnet build "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" --configuration $(ReleaseConfiguration)
+      dotnet build "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" --configuration $(BuildConfiguration)
     displayName: "Build GenUsageNuGet"
   - task: DotNetCoreCLI@2
-    displayName: "Run GenUsageNuGet crawl"
+    displayName: "Run GenUsageNuGet"
     inputs:
       command: 'run'
-      arguments: '--configuration $(ReleaseConfiguration) -- crawl'
+      arguments: '--configuration $(BuildConfiguration) -- crawl'
       projects: '$(Build.SourcesDirectory)/src/GenUsageNuGet'
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)

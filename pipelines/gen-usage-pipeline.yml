@@ -3,8 +3,8 @@ trigger: none
 
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
-  - name: ReleaseConfiguration
-    value: Release
+  - name: BuildConfiguration
+    value: Debug
 resources:
   repositories:
     - repository: self
@@ -64,11 +64,11 @@ extends:
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
               - script: |
-                  dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" --configuration $(ReleaseConfiguration)
+                  dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj"
                 displayName: "Build GenUsage"
               - script: |
                   cd "$(Build.SourcesDirectory)/src/GenUsage"
-                  dotnet run --configuration $(ReleaseConfiguration)
+                  dotnet run --configuration $(BuildConfiguration)
                 displayName: "Generate all usage data"
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
