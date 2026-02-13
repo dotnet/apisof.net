@@ -15,7 +15,7 @@ steps:
     displayName: "Run GenUsageNuGet crawl"
     inputs:
       command: 'run'
-      arguments: '-- crawl --configuration $(ReleaseConfiguration)'
+      arguments: '--configuration $(ReleaseConfiguration) -- crawl'
       projects: '$(Build.SourcesDirectory)/src/GenUsageNuGet'
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
