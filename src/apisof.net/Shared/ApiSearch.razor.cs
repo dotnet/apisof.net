@@ -175,7 +175,7 @@ public sealed partial class ApiSearch : IAsyncDisposable
             return;
 
         var results = CatalogService.Search(SearchText);
-        SearchResults = results;
+        SearchResults = results.ToArray();
         SelectedResult = results.FirstOrDefault();
 
         await InvokeAsync(StateHasChanged);

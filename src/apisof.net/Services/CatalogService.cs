@@ -90,29 +90,15 @@ public sealed class CatalogService
 
     public DesignNoteDatabase DesignNoteDatabase => _data.DesignNotes;
 
-    public IReadOnlyList<ApiModel> Search(string query)
+    public IEnumerable<ApiModel> Search(string query)
     {
+        // TODO: Ideally, we'd limit the search results from inside, rather than ToArray()-ing and then limiting.
         // TODO: We should include positions.
-
-        const int maxResults = 200;
-        var ids = _data.SuffixTree.Lookup(query);
-        var result = new List<ApiModel>(maxResults);
-        var seenApiIds = new HashSet<int>();
-
-        for (var i = 0; i < ids.Length; i++)
-        {
-            var apiId = ids[i].Value;
-
-            if (!seenApiIds.Add(apiId))
-                continue;
-
-            result.Add(_data.Catalog.GetApiById(apiId));
-
-            if (result.Count == maxResults)
-                break;
-        }
-
-        return result;
+        return _data.SuffixTree.Lookup(query)
+            .ToArray()
+            .Select(t => _data.Catalog.GetApiById(t.Value))
+            .Distinct()
+            .Take(200);
     }
 
     private abstract class BlobSource
