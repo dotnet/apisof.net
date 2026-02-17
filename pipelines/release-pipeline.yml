@@ -66,7 +66,7 @@ extends:
               - task: AzureWebApp@1
                 displayName: Deploy Web App
                 inputs:
-                  azureSubscription: dotnetwebsite-azure
+                  azureSubscription: ProductionLegacy
                   appName: apisofdotnet-dr
                   appType: webAppLinux
                   package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
@@ -106,7 +106,7 @@ extends:
               - task: AzureWebApp@1
                 displayName: Deploy Web App
                 inputs:
-                  azureSubscription: dotnetwebsite-azure
+                  azureSubscription: ProductionLegacy
                   appName: apisofdotnet
                   appType: webAppLinux
                   package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
