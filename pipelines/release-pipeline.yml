@@ -48,10 +48,10 @@ extends:
                   deploymentMethod: auto
       - stage: DR
         displayName: Deploy to DR
+        dependsOn: Dev
         jobs:
           - job: Job_1
             displayName: Run on agent
-            dependsOn: PreDeploymentApprovalJob
             condition: succeeded()
             timeoutInMinutes: 0
             templateContext:
