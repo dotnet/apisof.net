@@ -1,0 +1,54 @@
+trigger: none
+
+schedules:
+  - cron: "21 12 * * *"   # 12:21 PM UTC
+    displayName: Daily 12:21 UTC
+    branches:
+      include:
+        - main
+    always: true
+
+name: $(date:yyyyMMdd)$(rev:.r)
+
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      codeql:
+        compiled:
+          enabled: false
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    stages:
+      - stage: generate_catalog
+        displayName: "Generate Catalog"
+        jobs:
+          - job: generate_catalog_job
+            displayName: "Run Catalog Generator"
+            timeoutInMinutes: 60
+            steps:
+              - checkout: self
+                fetchDepth: 0
+
+              - task: UseDotNet@2
+                displayName: "Install .NET 8"
+                inputs:
+                  packageType: sdk
+                  version: 8.0.x
+
+              - script: |
+                  cd ./src/GenCatalog
+                  dotnet run
+                displayName: "Generate catalog"
