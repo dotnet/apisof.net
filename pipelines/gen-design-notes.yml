@@ -74,9 +74,9 @@ extends:
                     az account show -o jsonc
 
                     echo "== WIF vars (from addSpnToEnvironment) =="
-                    WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/wif-vars.txt"
+                    mkdir -p "$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput"
+                    WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput/wif-vars.txt"
                     env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
-                    cat "$WIF_VARS_FILE"
                     echo "Saved WIF vars to: $WIF_VARS_FILE"
                     
                     echo "== can we get a Storage token? =="
