@@ -48,7 +48,11 @@ extends:
                   packageType: sdk
                   version: 8.0.x
 
-              - script: |
-                  cd ./src/GenCatalog
-                  dotnet run
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+
+              - task: DotNetCoreCLI@2
                 displayName: "Generate catalog"
+                inputs:
+                  command: run
+                  projects: src/GenCatalog/GenCatalog.csproj
