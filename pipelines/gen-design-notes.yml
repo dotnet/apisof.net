@@ -60,7 +60,8 @@ extends:
                 inputs:
                   azureSubscription: "$(AzureSubscriptionConnection)"
                   scriptType: "bash"
-                  scriptLocation: "inlineScript"
+                  scriptLocation: "inlineScript"                  
+                  addSpnToEnvironment: true
                   inlineScript: |
                     
                     echo "== az account =="
@@ -78,4 +79,3 @@ extends:
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-                  addSpnToEnvironment: true
