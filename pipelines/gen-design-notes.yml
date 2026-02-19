@@ -27,14 +27,18 @@ extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     sdl:
-      sourceAnalysisPool:
-        name: AzurePipelines-EO
-        image: 1ESPT-Windows2022
-        os: windows
+      codeql:
+        compiled:
+          enabled: true
+      baseline:
+        baselineSet: default
+        baselineBranch: main
     pool:
       name: AzurePipelines-EO
-      image: 1ESPT-Ubuntu22.04
-      os: linux
+      image: 1ESPT-Windows2022
+      os: windows
+    customBuildTags:
+      - ES365AIMigrationTooling
     stages:
       - stage: GenerateDesignNotes
         jobs:
@@ -58,7 +62,6 @@ extends:
                   scriptType: "bash"
                   scriptLocation: "inlineScript"
                   inlineScript: |
-                    az login --identity
                     az account get-access-token --resource https://storage.azure.com/
 
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
