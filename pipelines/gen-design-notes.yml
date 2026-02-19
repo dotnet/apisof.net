@@ -58,6 +58,8 @@ extends:
                   scriptType: "bash"
                   scriptLocation: "inlineScript"
                   inlineScript: |
+                    az account get-access-token --resource https://storage.azure.com/
+
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
                     dotnet run --configuration $(BuildConfiguration)
                 env:
