@@ -56,3 +56,5 @@ extends:
                 inputs:
                   command: run
                   projects: src/GenCatalog/GenCatalog.csproj
+                env:
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
