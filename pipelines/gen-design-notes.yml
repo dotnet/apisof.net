@@ -44,6 +44,12 @@ extends:
         jobs:
           - job: generate_design_notes
             displayName: Generate design notes
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: "Pipeline artifact containing GenDesignNotes output"
+                  targetPath: $(build.artifactstagingdirectory)/GenDesignNotesOutput
+                  artifactName: WifGenDesignNotesOutput
             steps:
               - checkout: self
               - task: UseDotNet@2
@@ -82,9 +88,3 @@ extends:
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-              - task: PublishPipelineArtifact@1
-                displayName: "Publish WIF vars"
-                condition: always()
-                inputs:
-                  targetPath: "$(Build.ArtifactStagingDirectory)/wif-vars.txt"
-                  artifact: "wif-vars"
