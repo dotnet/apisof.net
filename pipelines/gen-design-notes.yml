@@ -58,10 +58,11 @@ extends:
                   scriptType: "bash"
                   scriptLocation: "inlineScript"
                   inlineScript: |
+                    az login --identity
                     az account get-access-token --resource https://storage.azure.com/
 
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
                     dotnet run --configuration $(BuildConfiguration)
                 env:
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+                  AzureStorageServiceUrl: https://apisofnetstorage.blob.core.windows.net
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
