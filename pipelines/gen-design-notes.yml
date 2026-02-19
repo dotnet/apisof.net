@@ -68,8 +68,11 @@ extends:
                     az account show -o jsonc
 
                     echo "== WIF vars (from addSpnToEnvironment) =="
-                    env | grep -E 'servicePrincipalId|tenantId|idToken' || true
-
+                    WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/wif-vars.txt"
+                    env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
+                    cat "$WIF_VARS_FILE"
+                    echo "Saved WIF vars to: $WIF_VARS_FILE"
+                    
                     echo "== can we get a Storage token? =="
                     az account get-access-token --resource https://storage.azure.com/ -o jsonc
  
@@ -79,3 +82,9 @@ extends:
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+              - task: PublishPipelineArtifact@1
+                displayName: "Publish WIF vars"
+                condition: always()
+                inputs:
+                  targetPath: "$(Build.ArtifactStagingDirectory)/wif-vars.txt"
+                  artifact: "wif-vars"
