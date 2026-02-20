@@ -84,7 +84,7 @@ extends:
  
 
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    # dotnet run --configuration $(BuildConfiguration)
+                    dotnet run --configuration $(BuildConfiguration)
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
