@@ -72,11 +72,8 @@ extends:
                     echo "== can we get a Storage token? =="
                     az account get-access-token --resource https://storage.azure.com/ -o jsonc
 
-                    Write-Host "Files:"
-                    ls
-
                     cd "$(Build.SourcesDirectory)/src/GenCatalog"
-                    dotnet run --configuration $(BuildConfiguration)
+                    dotnet run
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
