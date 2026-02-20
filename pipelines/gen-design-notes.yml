@@ -52,6 +52,15 @@ extends:
                   artifactName: WifGenDesignNotesOutput
             steps:
               - checkout: self
+              - task: AzurePowerShell@5
+                displayName: "Test Storage WIF Identity"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  ScriptType: FilePath
+                  ScriptPath: "$(System.DefaultWorkingDirectory)/automations/Test-StorageWifIdentity.ps1"
+                  azurePowerShellVersion: LatestVersion
+                  pwsh: true
+                  
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
@@ -84,7 +93,7 @@ extends:
  
 
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run --configuration $(BuildConfiguration)
+                    # dotnet run --configuration $(BuildConfiguration)
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
