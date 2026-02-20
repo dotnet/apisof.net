@@ -54,7 +54,27 @@ extends:
               - task: DotNetCoreCLI@2
                 displayName: "Generate catalog"
                 inputs:
-                  command: run
-                  projects: src/GenCatalog/GenCatalog.csproj
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "bash"
+                  scriptLocation: "inlineScript"                  
+                  addSpnToEnvironment: true
+                  inlineScript: |
+                    
+                    echo "== az account =="
+                    az account show -o jsonc
+
+                    echo "== WIF vars (from addSpnToEnvironment) =="
+                    mkdir -p "$(Build.ArtifactStagingDirectory)/GenCatalogOutput"
+                    WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/GenCatalogOutput/wif-vars.txt"
+                    env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
+                    echo "Saved WIF vars to: $WIF_VARS_FILE"
+                    
+                    echo "== can we get a Storage token? =="
+                    az account get-access-token --resource https://storage.azure.com/ -o jsonc
+ 
+
+                    cd "$(Build.SourcesDirectory)/src/GenCatalog"
+                    dotnet run --configuration $(BuildConfiguration)
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
