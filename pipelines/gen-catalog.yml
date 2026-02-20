@@ -51,8 +51,8 @@ extends:
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
 
-              - task: DotNetCoreCLI@2
-                displayName: "Generate catalog"
+              - task: AzureCLI@2
+                displayName: "Generate Catalog"
                 inputs:
                   azureSubscription: "$(AzureSubscriptionConnection)"
                   scriptType: "bash"
