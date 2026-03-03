@@ -15,8 +15,7 @@ public sealed class BlobStorageService
         ThrowIfNull(options);
 
         var serviceUri = new Uri(options.Value.AzureStorageServiceUrl);
-        Console.WriteLine($"Creating BlobServiceClient for {serviceUri}...");
-        TokenCredential credential = new ManagedIdentityCredential();
+        TokenCredential credential = new DefaultAzureCredential();
 
         _serviceClient = new BlobServiceClient(serviceUri, credential);
     }
