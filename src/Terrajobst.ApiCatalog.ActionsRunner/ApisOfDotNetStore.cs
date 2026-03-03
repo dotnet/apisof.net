@@ -30,6 +30,7 @@ public sealed class ApisOfDotNetStore
     private BlobClient GetBlobClient(string blobContainer, string blobName)
     {
         var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
+        Console.WriteLine($"Creating BlobServiceClient for {serviceUri}...");
         TokenCredential credential = new ManagedIdentityCredential();
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         var containerClient = serviceClient.GetBlobContainerClient(blobContainer);
@@ -39,6 +40,8 @@ public sealed class ApisOfDotNetStore
     private BlobContainerClient GetBlobContainerClient(string blobContainer)
     {
         var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
+        Console.WriteLine($"Creating BlobServiceClient for {serviceUri}...");
+
         TokenCredential credential = new ManagedIdentityCredential();
 
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());

@@ -58,6 +58,8 @@ public sealed class StoreTelemetryFunction
             return request.CreateResponse(HttpStatusCode.BadRequest);
 
         var serviceUrl = _configuration["AzureStorageServiceUrl"];
+        Console.WriteLine($"Creating BlobServiceClient for {serviceUrl}...");
+
         if (string.IsNullOrEmpty(serviceUrl))
             return request.CreateResponse(HttpStatusCode.InternalServerError);
         var serviceUri = new Uri(serviceUrl);
