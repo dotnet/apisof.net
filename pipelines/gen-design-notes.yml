@@ -1,11 +1,10 @@
 ---
 trigger: none
 variables:
-  System.Debug: true
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
-  - name: BuildConfiguration
-    value: Debug
+  System.Debug: true
+  BuildConfiguration: Debug
 resources:
   repositories:
     - repository: self
