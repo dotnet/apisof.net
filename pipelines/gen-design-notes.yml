@@ -1,6 +1,5 @@
 ---
 trigger: none
-variables:
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   System.Debug: true
