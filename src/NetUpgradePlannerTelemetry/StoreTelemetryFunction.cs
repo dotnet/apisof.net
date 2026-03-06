@@ -57,7 +57,7 @@ public sealed class StoreTelemetryFunction
         if (apis.Count == 0)
             return request.CreateResponse(HttpStatusCode.BadRequest);
 
-        var serviceUrl = _configuration["AzureStorageServiceUrl"];
+        var serviceUrl = _configuration["AzureStorageServiceUrl"].TrimEnd('/');
 
         if (string.IsNullOrEmpty(serviceUrl))
             return request.CreateResponse(HttpStatusCode.InternalServerError);
