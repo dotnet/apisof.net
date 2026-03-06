@@ -9,4 +9,6 @@ public sealed class ApisOfDotNetOptions
 
     [Required]
     public required string ApisOfDotNetWebHookSecret { get; init; }
+    [Required]
+    public required string AzureClientId { get; init; }
 }

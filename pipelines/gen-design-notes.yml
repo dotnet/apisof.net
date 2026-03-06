@@ -108,3 +108,4 @@ extends:
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+                  AzureClientId: $(servicePrincipalId)

@@ -3,6 +3,7 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace ApisOfDotNet.Services;
 
@@ -15,8 +16,9 @@ public sealed class BlobStorageService
         ThrowIfNull(options);
 
         var serviceUri = new Uri(options.Value.AzureStorageServiceUrl);
-        TokenCredential credential = new DefaultAzureCredential();
-
+        string clientId = options.Value.AzureClientId;
+        // TokenCredential credential = new DefaultAzureCredential();
+        TokenCredential credential = new ManagedIdentityCredential(clientId);
         _serviceClient = new BlobServiceClient(serviceUri, credential);
     }
 
