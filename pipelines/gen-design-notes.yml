@@ -51,14 +51,14 @@ extends:
                   artifactName: WifGenDesignNotesOutput
             steps:
               - checkout: self
-              - task: AzurePowerShell@5
-                displayName: "Test Storage WIF Identity"
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  ScriptType: FilePath
-                  ScriptPath: "$(System.DefaultWorkingDirectory)/automations/Test-StorageWifIdentity.ps1"
-                  azurePowerShellVersion: LatestVersion
-                  pwsh: true
+              # - task: AzurePowerShell@5
+              #   displayName: "Test Storage WIF Identity"
+              #   inputs:
+              #     azureSubscription: "$(AzureSubscriptionConnection)"
+              #     ScriptType: FilePath
+              #     ScriptPath: "$(System.DefaultWorkingDirectory)/automations/Test-StorageWifIdentity.ps1"
+              #     azurePowerShellVersion: LatestVersion
+              #     pwsh: true
                   
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
@@ -78,34 +78,34 @@ extends:
                   addSpnToEnvironment: true
                   inlineScript: |
                     echo "== az account =="
-                    az account show -o jsonc
+                    az account show
 
-                    echo "== WIF vars (from addSpnToEnvironment) =="
-                    mkdir -p "$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput"
-                    WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput/wif-vars.txt"
-                    env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
-                    echo "Saved WIF vars to: $WIF_VARS_FILE"
+                    # echo "== WIF vars (from addSpnToEnvironment) =="
+                    # mkdir -p "$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput"
+                    # WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput/wif-vars.txt"
+                    # env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
+                    # echo "Saved WIF vars to: $WIF_VARS_FILE"
 
-                    echo "== Configure DefaultAzureCredential for WIF =="
-                    echo "servicePrincipalId=$servicePrincipalId"
-                    echo "tenantId=$tenantId"
-                    echo "idToken=$idToken"
+                    # echo "== Configure DefaultAzureCredential for WIF =="
+                    # echo "servicePrincipalId=$servicePrincipalId"
+                    # echo "tenantId=$tenantId"
+                    # echo "idToken=$idToken"
 
-                    # Map Azure DevOps WIF env vars to what Azure.Identity.DefaultAzureCredential expects
-                    export AZURE_CLIENT_ID="$servicePrincipalId"
-                    export AZURE_TENANT_ID="$tenantId"
-                    export AZURE_FEDERATED_TOKEN_FILE="$idToken"
+                    # # Map Azure DevOps WIF env vars to what Azure.Identity.DefaultAzureCredential expects
+                    # export AZURE_CLIENT_ID="$servicePrincipalId"
+                    # export AZURE_TENANT_ID="$tenantId"
+                    # export AZURE_FEDERATED_TOKEN_FILE="$idToken"
 
-                    echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID"
-                    echo "AZURE_TENANT_ID=$AZURE_TENANT_ID"
-                    echo "AZURE_FEDERATED_TOKEN_FILE=$AZURE_FEDERATED_TOKEN_FILE"
+                    # echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID"
+                    # echo "AZURE_TENANT_ID=$AZURE_TENANT_ID"
+                    # echo "AZURE_FEDERATED_TOKEN_FILE=$AZURE_FEDERATED_TOKEN_FILE"
 
-                    echo "== can we get a Storage token? =="
-                    az account get-access-token --resource https://storage.azure.com/ -o jsonc
+                    # echo "== can we get a Storage token? =="
+                    # az account get-access-token --resource https://storage.azure.com/ -o jsonc
 
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run --configuration $(BuildConfiguration)
+                    dotnet run
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-                  AzureClientId: $(servicePrincipalId)
+                  # AzureClientId: $(servicePrincipalId)
