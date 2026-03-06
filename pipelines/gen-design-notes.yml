@@ -65,23 +65,6 @@ extends:
                   scriptLocation: "inlineScript"                  
                   addSpnToEnvironment: true
                   inlineScript: |
-                    az account show
-
-                    echo "== WIF vars (from addSpnToEnvironment) =="
-                    mkdir -p "$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput"
-                    WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput/wif-vars.txt"
-                    env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
-                    echo "Saved WIF vars to: $WIF_VARS_FILE"
-
-                    # Write the federated token to a file and point Azure.Identity to it
-                    TOKEN_FILE="$AGENT_TEMPDIRECTORY/azdo-wif-token"
-                    printf '%s' "$idToken" > "$TOKEN_FILE"
-
-                    # Map Azure DevOps WIF env vars to what Azure.Identity.DefaultAzureCredential expects
-                    export AZURE_CLIENT_ID="$servicePrincipalId"
-                    export AZURE_TENANT_ID="$tenantId"
-                    export AZURE_FEDERATED_TOKEN_FILE="$TOKEN_FILE"
-
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
                     dotnet run
                 env:

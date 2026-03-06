@@ -14,9 +14,8 @@ public sealed class BlobStorageService
     {
         ThrowIfNull(options);
         Console.WriteLine($"Initializing BlobStorageService with service URL: '{options.Value.AzureStorageServiceUrl}'");
-        var serviceUrl = options.Value.AzureStorageServiceUrl.TrimEnd('/');
-        var serviceUri = new Uri(serviceUrl);
-        TokenCredential credential = new ManagedIdentityCredential();
+        var serviceUri = new Uri(options.Value.AzureStorageServiceUrl);
+        TokenCredential credential = new AzureCliCredential();
         _serviceClient = new BlobServiceClient(serviceUri, credential);
     }
 
