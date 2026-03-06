@@ -66,9 +66,6 @@ extends:
                   version: 8.x
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
-              - script: |
-                  dotnet build "$(Build.SourcesDirectory)/src/GenDesignNotes/GenDesignNotes.csproj" --configuration $(BuildConfiguration)
-                displayName: "Build GenDesignNotes"
               - task: AzureCLI@2
                 displayName: "Run GenDesignNotes"
                 inputs:
