@@ -62,7 +62,7 @@ public sealed class StoreTelemetryFunction
         if (string.IsNullOrEmpty(serviceUrl))
             return request.CreateResponse(HttpStatusCode.InternalServerError);
         var serviceUri = new Uri(serviceUrl);
-        TokenCredential credential = new DefaultAzureCredential();
+        TokenCredential credential = new ManagedIdentityCredential();
 
         var serviceClient = new BlobServiceClient(serviceUri, credential);
         var containerClient = serviceClient.GetBlobContainerClient("planner");
