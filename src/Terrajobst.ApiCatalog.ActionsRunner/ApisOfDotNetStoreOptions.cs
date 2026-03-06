@@ -6,6 +6,4 @@ public sealed class ApisOfDotNetStoreOptions
 {
     [Required]
     public required string AzureStorageServiceUrl { get; init; }
-    [Required]
-    public required string AzureClientId { get; init; }
 }
