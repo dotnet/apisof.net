@@ -1,0 +1,80 @@
+---
+trigger: none
+
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  - name: BuildConfiguration
+    value: Release
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+schedules:
+  - cron: '21 */6 * * *' # At :21 in every 6th hour
+    displayName: "Generate usage every 6 hours"
+    branches:
+      include:
+        - main
+    always: true
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022
+        os: windows
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    stages:
+      - stage: GenerateUsage
+        jobs:
+          - job: generate_usage_nuget
+            displayName: Generate nuget usage
+            steps:
+              - template: pipelines/templates/gen-usage-nuget.yml@self
+
+          - job: generate_usage_planner
+            displayName: Generate planner usage
+            steps:
+              - template: pipelines/templates/gen-usage-planner.yml@self
+
+          - job: generate_usage
+            displayName: Generate all usage data
+            dependsOn:
+              - generate_usage_nuget
+              - generate_usage_planner
+            # Run this job only if both dependent jobs succeed
+            condition: and(succeeded('generate_usage_nuget'), succeeded('generate_usage_planner'))
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" --configuration $(BuildConfiguration)
+                displayName: "Build GenUsage"
+              - task: AzureCLI@2
+                displayName: "Run GenUsage"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "bash"
+                  scriptLocation: "inlineScript"
+                  inlineScript: |
+                    cd "$(Build.SourcesDirectory)/src/GenUsage"
+                    dotnet run --configuration $(BuildConfiguration)
+                env:
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

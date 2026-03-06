@@ -1,0 +1,25 @@
+---
+steps:
+  - checkout: self
+  - task: UseDotNet@2
+    displayName: Use .NET 8 SDK
+    inputs:
+      version: 8.x
+      includePreviewVersions: true
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - script: |
+      dotnet build "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" --configuration $(BuildConfiguration)
+    displayName: "Build GenUsagePlanner"
+  - task: AzureCLI@2
+    displayName: "Run GenUsagePlanner"
+    inputs:
+      azureSubscription: "$(AzureSubscriptionConnection)"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        cd "$(Build.SourcesDirectory)/src/GenUsagePlanner"
+        dotnet run --configuration $(BuildConfiguration)
+    env:
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
