@@ -18,7 +18,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Terrajobst.ApiCatalog.SuffixTree\Terrajobst.ApiCatalog.SuffixTree.csproj" />
     <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
-    <ProjectReference Include="..\AzureTokenHelper\AzureTokenCredentialHelper.csproj" />
   </ItemGroup>
 
 </Project>

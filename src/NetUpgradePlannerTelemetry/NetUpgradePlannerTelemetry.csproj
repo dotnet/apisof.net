@@ -25,7 +25,4 @@
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AzureTokenHelper\AzureTokenCredentialHelper.csproj" />
-  </ItemGroup>
 </Project>
