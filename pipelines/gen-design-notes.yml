@@ -77,7 +77,6 @@ extends:
                   scriptLocation: "inlineScript"                  
                   addSpnToEnvironment: true
                   inlineScript: |
-                    
                     echo "== az account =="
                     az account show -o jsonc
 
@@ -86,10 +85,23 @@ extends:
                     WIF_VARS_FILE="$(Build.ArtifactStagingDirectory)/GenDesignNotesOutput/wif-vars.txt"
                     env | grep -E 'servicePrincipalId|tenantId|idToken' > "$WIF_VARS_FILE" || true
                     echo "Saved WIF vars to: $WIF_VARS_FILE"
-                    
+
+                    echo "== Configure DefaultAzureCredential for WIF =="
+                    echo "servicePrincipalId=$servicePrincipalId"
+                    echo "tenantId=$tenantId"
+                    echo "idToken=$idToken"
+
+                    # Map Azure DevOps WIF env vars to what Azure.Identity.DefaultAzureCredential expects
+                    export AZURE_CLIENT_ID="$servicePrincipalId"
+                    export AZURE_TENANT_ID="$tenantId"
+                    export AZURE_FEDERATED_TOKEN_FILE="$idToken"
+
+                    echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID"
+                    echo "AZURE_TENANT_ID=$AZURE_TENANT_ID"
+                    echo "AZURE_FEDERATED_TOKEN_FILE=$AZURE_FEDERATED_TOKEN_FILE"
+
                     echo "== can we get a Storage token? =="
                     az account get-access-token --resource https://storage.azure.com/ -o jsonc
- 
 
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
                     dotnet run --configuration $(BuildConfiguration)
