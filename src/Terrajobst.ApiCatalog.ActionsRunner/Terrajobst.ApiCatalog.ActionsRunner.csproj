@@ -16,5 +16,7 @@
       <PackageReference Include="Serilog.AspNetCore" />
       <PackageReference Include="Serilog.Sinks.File" />
     </ItemGroup>
-
+    <ItemGroup>
+      <ProjectReference Include="..\AzureTokenHelper\AzureTokenCredentialHelper.csproj" />
+    </ItemGroup>
 </Project>

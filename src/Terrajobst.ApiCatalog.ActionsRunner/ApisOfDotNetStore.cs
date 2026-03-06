@@ -1,6 +1,7 @@
 using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using BlobClientHelper;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -33,7 +34,8 @@ public sealed class ApisOfDotNetStore
     {
         var serviceUri = new Uri(_serviceUrl);
         TokenCredential credential = new ManagedIdentityCredential();
-        var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
+        var cred = new AzureTokenCredentialHelper(credential);
+        var serviceClient = new BlobServiceClient(serviceUri, cred, GetBlobOptions());
         var containerClient = serviceClient.GetBlobContainerClient(blobContainer);
         return containerClient.GetBlobClient(blobName);
     }
@@ -43,8 +45,9 @@ public sealed class ApisOfDotNetStore
         var serviceUri = new Uri(_serviceUrl);
 
         TokenCredential credential = new ManagedIdentityCredential();
+        var cred = new AzureTokenCredentialHelper(credential);
 
-        var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
+        var serviceClient = new BlobServiceClient(serviceUri, cred, GetBlobOptions());
         return serviceClient.GetBlobContainerClient(blobContainer);
     }
 

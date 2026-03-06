@@ -4,7 +4,7 @@ using System.Web;
 using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
-
+using BlobClientHelper;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
@@ -63,8 +63,8 @@ public sealed class StoreTelemetryFunction
             return request.CreateResponse(HttpStatusCode.InternalServerError);
         var serviceUri = new Uri(serviceUrl);
         TokenCredential credential = new ManagedIdentityCredential();
-
-        var serviceClient = new BlobServiceClient(serviceUri, credential);
+        var cred = new AzureTokenCredentialHelper(credential);
+        var serviceClient = new BlobServiceClient(serviceUri, cred);
         var containerClient = serviceClient.GetBlobContainerClient("planner");
         var blobClient = containerClient.GetBlobClient(fingerprint);
 
