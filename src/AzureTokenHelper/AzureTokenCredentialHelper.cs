@@ -5,7 +5,7 @@ namespace BlobClientHelper;
 
 public class AzureTokenCredentialHelper : TokenCredential
 {
-    private static readonly string[] StorageAccountScope = new[] { "https://exp.azure.net/.default" };
+    private static readonly string[] StorageAccountScope = new[] { "https://storage.azure.com/.default" };
 
     private readonly TokenCredential _accessTokenProvider;
     public AzureTokenCredentialHelper(TokenCredential tokenCredential)
