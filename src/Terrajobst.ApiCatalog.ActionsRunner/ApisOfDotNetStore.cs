@@ -12,6 +12,7 @@ public sealed class ApisOfDotNetStore
     private readonly IHostEnvironment _hostEnvironment;
     private readonly IOptions<ApisOfDotNetStoreOptions> _options;
     private readonly ILogger<ApisOfDotNetStore> _logger;
+    private readonly string _serviceUrl ;
 
     private const string BlobMetadataKeyIndexTimestamp = "IndexTimestamp";
 
@@ -25,16 +26,17 @@ public sealed class ApisOfDotNetStore
         _hostEnvironment = hostEnvironment;
         _options = options;
         _logger = logger;
+        _serviceUrl = options.Value.AzureStorageServiceUrl.TrimEnd('/');
     }
 
     private BlobClient GetBlobClient(string blobContainer, string blobName)
     {
-        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
-#if DEBUG
+        var serviceUri = new Uri(_serviceUrl);
+        #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
-#else
-        TokenCredential credential = new ManagedIdentityCredential();
-#endif
+        #else
+        TokenCredential credential = new AzureCliCredential();
+        #endif
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         var containerClient = serviceClient.GetBlobContainerClient(blobContainer);
         return containerClient.GetBlobClient(blobName);
@@ -42,12 +44,12 @@ public sealed class ApisOfDotNetStore
 
     private BlobContainerClient GetBlobContainerClient(string blobContainer)
     {
-        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
-#if DEBUG
+        var serviceUri = new Uri(_serviceUrl);
+        #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
-#else
-        TokenCredential credential = new ManagedIdentityCredential();
-#endif
+        #else
+        TokenCredential credential = new AzureCliCredential();
+        #endif
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         return serviceClient.GetBlobContainerClient(blobContainer);
     }

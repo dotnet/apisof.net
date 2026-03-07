@@ -1,10 +1,8 @@
 using System.Net;
 using System.Web;
-
 using Azure.Core;
 using Azure.Identity;
 using Azure.Storage.Blobs;
-
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Configuration;
@@ -57,15 +55,16 @@ public sealed class StoreTelemetryFunction
         if (apis.Count == 0)
             return request.CreateResponse(HttpStatusCode.BadRequest);
 
-        var serviceUrl = _configuration["AzureStorageServiceUrl"];
+        var serviceUrl = _configuration["AzureStorageServiceUrl"].TrimEnd('/');
+
         if (string.IsNullOrEmpty(serviceUrl))
             return request.CreateResponse(HttpStatusCode.InternalServerError);
         var serviceUri = new Uri(serviceUrl);
-#if DEBUG
+        #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
-#else
-        TokenCredential credential = new ManagedIdentityCredential();
-#endif
+        #else
+        TokenCredential credential = new AzureCliCredential();
+        #endif        
         var serviceClient = new BlobServiceClient(serviceUri, credential);
         var containerClient = serviceClient.GetBlobContainerClient("planner");
         var blobClient = containerClient.GetBlobClient(fingerprint);
