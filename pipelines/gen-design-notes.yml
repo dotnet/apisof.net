@@ -43,12 +43,6 @@ extends:
         jobs:
           - job: generate_design_notes
             displayName: Generate design notes
-            templateContext:
-              outputs:
-                - output: pipelineArtifact
-                  displayName: "Pipeline artifact containing GenDesignNotes output"
-                  targetPath: $(build.artifactstagingdirectory)/GenDesignNotesOutput
-                  artifactName: WifGenDesignNotesOutput
             steps:
               - checkout: self
               - task: UseDotNet@2
