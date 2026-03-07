@@ -3,7 +3,7 @@ trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   System.Debug: true
-  BuildConfiguration: Debug
+  BuildConfiguration: Release
 resources:
   repositories:
     - repository: self
@@ -60,7 +60,7 @@ extends:
                   addSpnToEnvironment: true
                   inlineScript: |
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run
+                    dotnet run --configuration $(BuildConfiguration)
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
