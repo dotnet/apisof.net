@@ -32,7 +32,11 @@ public sealed class ApisOfDotNetStore
     private BlobClient GetBlobClient(string blobContainer, string blobName)
     {
         var serviceUri = new Uri(_serviceUrl);
+        #if DEBUG
+        TokenCredential credential = new DefaultAzureCredential();
+        #else
         TokenCredential credential = new AzureCliCredential();
+        #endif
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         var containerClient = serviceClient.GetBlobContainerClient(blobContainer);
         return containerClient.GetBlobClient(blobName);
@@ -41,8 +45,11 @@ public sealed class ApisOfDotNetStore
     private BlobContainerClient GetBlobContainerClient(string blobContainer)
     {
         var serviceUri = new Uri(_serviceUrl);
-
+        #if DEBUG
+        TokenCredential credential = new DefaultAzureCredential();
+        #else
         TokenCredential credential = new AzureCliCredential();
+        #endif
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         return serviceClient.GetBlobContainerClient(blobContainer);
     }
