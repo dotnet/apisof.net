@@ -8,9 +8,6 @@ steps:
       includePreviewVersions: true
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
-  - script: |
-      dotnet build "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" --configuration $(BuildConfiguration)
-    displayName: "Build GenUsageNuGet"
   - task: AzureCLI@2
     displayName: "Run GenUsageNuGet"
     inputs:
@@ -18,11 +15,6 @@ steps:
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
-        az account get-access-token --resource https://management.azure.com/
-
-        # Or for Storage
-        az account get-access-token --resource https://storage.azure.com/
-        
         cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
         dotnet run --configuration $(BuildConfiguration) -- crawl
     env:
