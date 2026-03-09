@@ -64,7 +64,7 @@ public sealed class StoreTelemetryFunction
         TokenCredential credential = new DefaultAzureCredential();
 #else
         TokenCredential credential = new AzureCliCredential();
-#endif        
+#endif
         var serviceClient = new BlobServiceClient(serviceUri, credential);
         var containerClient = serviceClient.GetBlobContainerClient("planner");
         var blobClient = containerClient.GetBlobClient(fingerprint);
