@@ -2,7 +2,6 @@
 trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
-  System.Debug: true
   BuildConfiguration: Release
 resources:
   repositories:

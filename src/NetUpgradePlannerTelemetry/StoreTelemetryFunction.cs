@@ -55,16 +55,16 @@ public sealed class StoreTelemetryFunction
         if (apis.Count == 0)
             return request.CreateResponse(HttpStatusCode.BadRequest);
 
-        var serviceUrl = _configuration["AzureStorageServiceUrl"].TrimEnd('/');
+        var serviceUrl = _configuration["AzureStorageServiceUrl"];
 
         if (string.IsNullOrEmpty(serviceUrl))
             return request.CreateResponse(HttpStatusCode.InternalServerError);
         var serviceUri = new Uri(serviceUrl);
-        #if DEBUG
+#if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
-        #else
+#else
         TokenCredential credential = new AzureCliCredential();
-        #endif        
+#endif        
         var serviceClient = new BlobServiceClient(serviceUri, credential);
         var containerClient = serviceClient.GetBlobContainerClient("planner");
         var blobClient = containerClient.GetBlobClient(fingerprint);

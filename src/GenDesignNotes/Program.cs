@@ -1,5 +1,4 @@
-﻿using Azure.Core.Diagnostics;
-using GenDesignNotes;
+﻿using GenDesignNotes;
 using Microsoft.Extensions.Hosting;
 using Terrajobst.ApiCatalog.ActionsRunner;
 
