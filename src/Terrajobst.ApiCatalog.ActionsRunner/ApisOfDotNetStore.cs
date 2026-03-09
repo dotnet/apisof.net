@@ -12,7 +12,6 @@ public sealed class ApisOfDotNetStore
     private readonly IHostEnvironment _hostEnvironment;
     private readonly IOptions<ApisOfDotNetStoreOptions> _options;
     private readonly ILogger<ApisOfDotNetStore> _logger;
-    private readonly string _serviceUrl ;
 
     private const string BlobMetadataKeyIndexTimestamp = "IndexTimestamp";
 
@@ -26,12 +25,11 @@ public sealed class ApisOfDotNetStore
         _hostEnvironment = hostEnvironment;
         _options = options;
         _logger = logger;
-        _serviceUrl = options.Value.AzureStorageServiceUrl.TrimEnd('/');
     }
 
     private BlobClient GetBlobClient(string blobContainer, string blobName)
     {
-        var serviceUri = new Uri(_serviceUrl);
+        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
 #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
 #else
@@ -44,7 +42,7 @@ public sealed class ApisOfDotNetStore
 
     private BlobContainerClient GetBlobContainerClient(string blobContainer)
     {
-        var serviceUri = new Uri(_serviceUrl);
+        var serviceUri = new Uri(_options.Value.AzureStorageServiceUrl);
 #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
 #else
