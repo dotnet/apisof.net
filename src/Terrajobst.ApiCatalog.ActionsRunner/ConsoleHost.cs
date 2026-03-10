@@ -16,9 +16,6 @@ public static class ConsoleHost
     {
         var builder = Host.CreateApplicationBuilder();
 
-        if (!IsRunningInsideOfGitHubActions())
-            builder.Environment.EnvironmentName = Environments.Development;
-
         var logFilePath = Path.Join(Path.GetDirectoryName(Environment.ProcessPath), "log.txt");
 
         builder.Logging.ClearProviders();
@@ -35,11 +32,6 @@ public static class ConsoleHost
         builder.Services.AddSingleton<GitHubActionsSummaryTable>();
 
         return builder;
-    }
-
-    private static bool IsRunningInsideOfGitHubActions()
-    {
-        return Environment.GetEnvironmentVariable("GITHUB_RUN_ID") is not null;
     }
 
     public static void AddApisOfDotNetPathProvider(this IHostApplicationBuilder builder)
