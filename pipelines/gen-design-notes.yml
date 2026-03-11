@@ -50,16 +50,17 @@ extends:
                   version: 8.x
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
-              - task: DotNetCoreCLI@2
+              - task: AzureCLI@2
                 displayName: "Run GenDesignNotes"
                 inputs:
-                  command: run
                   azureSubscription: "$(AzureSubscriptionConnection)"
-                  projects: >
-                    $(Build.SourcesDirectory)/src/GenDesignNotes/GenDesignNotes.csproj
-                  arguments: >
-                    --configuration $(BuildConfiguration)
+                  scriptType: "bash"
+                  scriptLocation: "inlineScript"                  
+                  addSpnToEnvironment: true
+                  inlineScript: |
+                    cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
+                    dotnet run --configuration $(BuildConfiguration)
                 env:
+                  DOTNET_ENVIRONMENT: "Release"
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-                  DOTNET_ENVIRONMENT: Production
