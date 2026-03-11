@@ -59,5 +59,7 @@ extends:
                     $(Build.SourcesDirectory)/src/GenDesignNotes/GenDesignNotes.csproj
                   arguments: >
                     --configuration $(BuildConfiguration)
-                    -AzureStorageServiceUrl $(AzureStorageServiceUrl)
-                    -ApisOfDotNetWebHookSecret $(ApisOfDotNetWebHookSecret)
+                env:
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+                  DOTNET_ENVIRONMENT: Production
