@@ -2,7 +2,7 @@
 
 public static class NuGetFeeds
 {
-    public static string NuGetOrg => "https://api.nuget.org/v3/index.json";
+    public static string NuGetOrg => "https://devdiv.pkgs.visualstudio.com/OnlineServices/_packaging/dotnetlegacy/nuget/v3/index.json";
     public static string NightlyDotnet7 => "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet7/nuget/v3/index.json";
     public static string NightlyDotnet8 => "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet8/nuget/v3/index.json";
     public static string NightlyDotnet9 => "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet9/nuget/v3/index.json";
