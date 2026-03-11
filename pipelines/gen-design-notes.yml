@@ -59,7 +59,7 @@ extends:
                   addSpnToEnvironment: true
                   inlineScript: |
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run --configuration $(BuildConfiguration)
+                    dotnet run
                 env:
                   DOTNET_ENVIRONMENT: "Release"
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
