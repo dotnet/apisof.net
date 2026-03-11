@@ -59,8 +59,8 @@ extends:
                   addSpnToEnvironment: true
                   inlineScript: |
                     cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run --configuration $(BuildConfiguration) --environment Release
+                    dotnet run --configuration $(BuildConfiguration)
                 env:
-                  DOTNET_ENVIRONMENT: "Release"
+                  ASPNETCORE_ENVIRONMENT: "Release"
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
