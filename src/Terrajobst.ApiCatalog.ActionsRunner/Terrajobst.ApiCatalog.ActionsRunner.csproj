@@ -16,5 +16,4 @@
       <PackageReference Include="Serilog.AspNetCore" />
       <PackageReference Include="Serilog.Sinks.File" />
     </ItemGroup>
-
 </Project>

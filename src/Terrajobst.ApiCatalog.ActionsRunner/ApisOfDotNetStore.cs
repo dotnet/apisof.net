@@ -33,7 +33,7 @@ public sealed class ApisOfDotNetStore
 #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
 #else
-        TokenCredential credential = new ManagedIdentityCredential();
+        TokenCredential credential = new AzureCliCredential();
 #endif
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         var containerClient = serviceClient.GetBlobContainerClient(blobContainer);
@@ -46,7 +46,7 @@ public sealed class ApisOfDotNetStore
 #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
 #else
-        TokenCredential credential = new ManagedIdentityCredential();
+        TokenCredential credential = new AzureCliCredential();
 #endif
         var serviceClient = new BlobServiceClient(serviceUri, credential, GetBlobOptions());
         return serviceClient.GetBlobContainerClient(blobContainer);

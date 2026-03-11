@@ -7,6 +7,7 @@ using Terrajobst.ApiCatalog;
 namespace ApisOfDotNet.Pages;
 
 public partial class CatalogItem
+    : IDisposable
 {
     [Inject]
     public required CatalogService CatalogService { get; set; }
@@ -106,5 +107,10 @@ public partial class CatalogItem
     {
         UpdateApi();
         StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        QueryManager.QueryChanged -= QueryManagerOnQueryChanged;
     }
 }
