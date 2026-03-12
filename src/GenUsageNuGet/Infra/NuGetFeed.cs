@@ -11,7 +11,7 @@ namespace GenUsageNuGet.Infra;
 
 internal sealed class NuGetFeed
 {
-    public static NuGetFeed NuGetOrg { get; } = new("https://devdiv.pkgs.visualstudio.com/OnlineServices/_packaging/dotnetlegacy/nuget/v3/index.json");
+    public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
 
     public NuGetFeed(string feedUrl)
     {
