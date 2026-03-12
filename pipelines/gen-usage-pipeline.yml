@@ -28,12 +28,12 @@ stages:
       - job: generate_usage_nuget
         displayName: Generate nuget usage
         steps:
-          - template: pipelines/templates/gen-usage-nuget.yml@self
+          - template: templates/gen-usage-nuget.yml@self
 
       - job: generate_usage_planner
         displayName: Generate planner usage
         steps:
-          - template: pipelines/templates/gen-usage-planner.yml@self
+          - template: templates/gen-usage-planner.yml@self
 
       - job: generate_usage
         displayName: Generate all usage data
