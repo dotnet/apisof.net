@@ -31,7 +31,7 @@ internal sealed class NuGetFeed
         if (catalogIndexUrl is null)
             throw new InvalidOperationException("This feed doesn't support enumeration");
 
-        const int MaxDegreeOfParallelism = 64;
+        const int MaxDegreeOfParallelism = 12;
 
         ThreadPool.SetMinThreads(MaxDegreeOfParallelism, completionPortThreads: 4);
         ServicePointManager.DefaultConnectionLimit = MaxDegreeOfParallelism;
