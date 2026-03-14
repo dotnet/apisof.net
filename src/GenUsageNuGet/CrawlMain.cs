@@ -192,7 +192,7 @@ internal sealed class CrawlMain : ConsoleCommand
         var cancellationToken = cts.Token;
 
         var inputQueue = new ConcurrentQueue<PackageIdentity>(packages);
-        var outputQueue = new BlockingCollection<PackageResults>();
+        var outputQueue = new BlockingCollection<PackageResults>(boundedCapacity: numberOfWorkers * 2);
 
         var workers = Enumerable.Range(0, numberOfWorkers)
             .Select(i => Task.Run(() => CrawlWorker(i, inputQueue, outputQueue, _scratchFileProvider, cancellationToken), cancellationToken))
@@ -329,6 +329,8 @@ internal sealed class CrawlMain : ConsoleCommand
 
     private static async Task<(int ExitCode, IReadOnlyList<string> OutputLines)> RunPackageCrawlerAsync(PackageIdentity packageId, string fileName, CancellationToken cancellationToken)
     {
+        const int MaxLoggedLines = 200;
+
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
@@ -351,6 +353,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
         var processLog = new List<string>();
         var processLogLock = new object();
+    var logWasTruncated = false;
 
         process.ErrorDataReceived += OnDataReceived;
         process.OutputDataReceived += OnDataReceived;
@@ -368,6 +371,9 @@ internal sealed class CrawlMain : ConsoleCommand
             return (1, processLog);
         }
 
+        if (logWasTruncated)
+            processLog.Add($"Output was truncated after {MaxLoggedLines:N0} lines.");
+
         processLog.Add($"Exit code = {process.ExitCode}");
         return (process.ExitCode, processLog);
 
@@ -377,7 +383,16 @@ internal sealed class CrawlMain : ConsoleCommand
                 return;
 
             lock (processLogLock)
-                processLog.Add(e.Data);
+            {
+                if (processLog.Count < MaxLoggedLines)
+                {
+                    processLog.Add(e.Data);
+                }
+                else
+                {
+                    logWasTruncated = true;
+                }
+            }
         }
     }
 

@@ -11,6 +11,8 @@ namespace GenUsageNuGet.Infra;
 
 internal sealed class NuGetFeed
 {
+    private static readonly HttpClient s_httpClient = CreateHttpClient();
+
     public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
 
     public NuGetFeed(string feedUrl)
@@ -21,6 +23,16 @@ internal sealed class NuGetFeed
     }
 
     public string FeedUrl { get; }
+
+    private static HttpClient CreateHttpClient()
+    {
+        var handler = new HttpClientHandler
+        {
+            SslProtocols = System.Security.Authentication.SslProtocols.Tls12
+        };
+
+        return new HttpClient(handler, disposeHandler: true);
+    }
 
     public async Task<IReadOnlyList<PackageIdentity>> GetAllPackages(DateTimeOffset? since = null)
     {
@@ -37,13 +49,7 @@ internal sealed class NuGetFeed
         ServicePointManager.DefaultConnectionLimit = MaxDegreeOfParallelism;
         ServicePointManager.MaxServicePointIdleTime = 10000;
 
-        using var handler = new HttpClientHandler
-        {
-            SslProtocols = System.Security.Authentication.SslProtocols.Tls12
-        };
-        using var httpClient = new HttpClient(handler);
-
-        var indexString = await httpClient.GetStringAsync(catalogIndexUrl);
+        var indexString = await s_httpClient.GetStringAsync(catalogIndexUrl);
         var index = JsonConvert.DeserializeObject<CatalogIndex>(indexString)!;
 
         // Find all pages in the catalog index.
@@ -62,7 +68,7 @@ internal sealed class NuGetFeed
                 try
                 {
                     // Download the catalog page and deserialize it.
-                    var pageString = await httpClient.GetStringAsync(pageItem.Url);
+                    var pageString = await s_httpClient.GetStringAsync(pageItem.Url);
                     var page = JsonConvert.DeserializeObject<CatalogPage>(pageString)!;
 
                     foreach (var pageLeafItem in page.Items)
@@ -103,8 +109,7 @@ internal sealed class NuGetFeed
 
         var url = await GetPackageUrlAsync(identity);
 
-        using var httpClient = new HttpClient();
-        var nupkgStream = await httpClient.GetStreamAsync(url);
+        var nupkgStream = await s_httpClient.GetStreamAsync(url);
         return new PackageArchiveReader(nupkgStream);
     }
 
