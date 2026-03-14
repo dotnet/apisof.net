@@ -1,0 +1,22 @@
+---
+steps:
+  - checkout: self
+  - task: UseDotNet@2
+    displayName: Use .NET 8 SDK
+    inputs:
+      version: 8.x
+      includePreviewVersions: true
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - task: AzureCLI@2
+    displayName: "Run GenUsageNuGet"
+    inputs:
+      azureSubscription: "$(AzureSubscriptionConnection)"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
+        dotnet run --configuration $(BuildConfiguration) -- crawl
+    env:
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
