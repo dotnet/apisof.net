@@ -29,16 +29,22 @@ stages:
     jobs:
       - job: generate_usage_nuget
         displayName: Generate nuget usage
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
         steps:
           - template: templates/gen-usage-nuget.yml@self
 
       - job: generate_usage_planner
         displayName: Generate planner usage
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
         steps:
           - template: templates/gen-usage-planner.yml@self
 
       - job: generate_usage
         displayName: Generate all usage data
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
         dependsOn:
           - generate_usage_nuget
           - generate_usage_planner
@@ -57,6 +63,7 @@ stages:
             displayName: "Build GenUsage"
           - task: AzureCLI@2
             displayName: "Run GenUsage"
+            timeoutInMinutes: 0
             inputs:
               azureSubscription: "$(AzureSubscriptionConnection)"
               scriptType: "bash"

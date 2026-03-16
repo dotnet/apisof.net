@@ -10,6 +10,7 @@ steps:
     displayName: "NuGet Authenticate"
   - task: AzureCLI@2
     displayName: "Run GenUsagePlanner"
+    timeoutInMinutes: 0
     inputs:
       azureSubscription: "$(AzureSubscriptionConnection)"
       scriptType: "bash"
