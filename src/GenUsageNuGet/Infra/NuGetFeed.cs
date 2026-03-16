@@ -59,7 +59,7 @@ internal sealed class NuGetFeed
 
         // Find all pages in the catalog index.
         var pageItems = new ConcurrentBag<CatalogPage>(index.Items);
-        var catalogLeaves = new ConcurrentBag<CatalogLeaf>();
+        var packages = new ConcurrentDictionary<PackageIdentity, byte>();
 
         var fetchLeafsTasks = RunInParallel(async () =>
         {
@@ -79,7 +79,10 @@ internal sealed class NuGetFeed
                     foreach (var pageLeafItem in page.Items)
                     {
                         if (pageLeafItem.Type == "nuget:PackageDetails")
-                            catalogLeaves.Add(pageLeafItem);
+                        {
+                            var package = new PackageIdentity(pageLeafItem.Id, NuGetVersion.Parse(pageLeafItem.Version));
+                            packages.TryAdd(package, 0);
+                        }
                     }
                 }
                 catch (Exception ex) when (retryCount > 0)
@@ -95,9 +98,7 @@ internal sealed class NuGetFeed
 
         await Task.WhenAll(fetchLeafsTasks);
 
-        return catalogLeaves
-            .Select(l => new PackageIdentity(l.Id, NuGetVersion.Parse(l.Version)))
-            .Distinct()
+        return packages.Keys
             .OrderBy(p => p.Id)
             .ThenBy(p => p.Version)
             .ToArray();

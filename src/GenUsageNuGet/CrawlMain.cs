@@ -182,7 +182,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
     private async Task CrawlPackagesAsync(NuGetUsageDatabase usageDatabase, IEnumerable<PackageIdentity> packages)
     {
-        var numberOfWorkers = Environment.ProcessorCount;
+        var numberOfWorkers = GetCrawlerWorkerCount();
         Console.WriteLine($"Crawling using {numberOfWorkers} workers.");
 
         Console.WriteLine("::group::Crawling");
@@ -286,6 +286,17 @@ internal sealed class CrawlMain : ConsoleCommand
                 Console.WriteLine("[Fatal] Output Worker crashed: " + ex);
                 Environment.Exit(1);
             }
+        }
+
+        static int GetCrawlerWorkerCount()
+        {
+            const int min = 1;
+            const int max = 16;
+
+            var text = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_WORKERS");
+            return int.TryParse(text, out var value)
+                ? Math.Clamp(value, min, max)
+                : Math.Clamp(Environment.ProcessorCount, min, max);
         }
     }
 
