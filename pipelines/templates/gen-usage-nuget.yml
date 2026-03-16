@@ -20,3 +20,5 @@ steps:
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+      GENUSAGE_NUGET_CATALOG_DOP: "4"
+      GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"

@@ -12,6 +12,8 @@ namespace GenUsageNuGet.Infra;
 internal sealed class NuGetFeed
 {
     private static readonly HttpClient s_httpClient = CreateHttpClient();
+    private static readonly int s_maxDegreeOfParallelism = GetCatalogMaxDegreeOfParallelism();
+    private static readonly TimeSpan s_httpTimeout = GetHttpTimeout();
 
     public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
 
@@ -31,7 +33,10 @@ internal sealed class NuGetFeed
             SslProtocols = System.Security.Authentication.SslProtocols.Tls12
         };
 
-        return new HttpClient(handler, disposeHandler: true);
+        return new HttpClient(handler, disposeHandler: true)
+        {
+            Timeout = s_httpTimeout
+        };
     }
 
     public async Task<IReadOnlyList<PackageIdentity>> GetAllPackages(DateTimeOffset? since = null)
@@ -43,10 +48,10 @@ internal sealed class NuGetFeed
         if (catalogIndexUrl is null)
             throw new InvalidOperationException("This feed doesn't support enumeration");
 
-        const int MaxDegreeOfParallelism = 12;
+        var maxDegreeOfParallelism = s_maxDegreeOfParallelism;
 
-        ThreadPool.SetMinThreads(MaxDegreeOfParallelism, completionPortThreads: 4);
-        ServicePointManager.DefaultConnectionLimit = MaxDegreeOfParallelism;
+        ThreadPool.SetMinThreads(maxDegreeOfParallelism, completionPortThreads: 4);
+        ServicePointManager.DefaultConnectionLimit = maxDegreeOfParallelism;
         ServicePointManager.MaxServicePointIdleTime = 10000;
 
         var indexString = await s_httpClient.GetStringAsync(catalogIndexUrl);
@@ -80,11 +85,13 @@ internal sealed class NuGetFeed
                 catch (Exception ex) when (retryCount > 0)
                 {
                     retryCount--;
-                    Console.Error.WriteLine($"error: {ex.Message}, retries left = {retryCount}");
+                    var delay = TimeSpan.FromSeconds(Math.Min(30, Math.Pow(2, 3 - retryCount)));
+                    Console.Error.WriteLine($"error: {ex.GetType().Name}: {ex.Message}, url = {pageItem.Url}, delay = {delay.TotalSeconds:N0}s, retries left = {retryCount}");
+                    await Task.Delay(delay);
                     goto Retry;
                 }
             }
-        });
+        }, maxDegreeOfParallelism);
 
         await Task.WhenAll(fetchLeafsTasks);
 
@@ -95,12 +102,38 @@ internal sealed class NuGetFeed
             .ThenBy(p => p.Version)
             .ToArray();
 
-        static List<Task> RunInParallel(Func<Task> work)
+        static List<Task> RunInParallel(Func<Task> work, int degreeOfParallelism)
         {
-            return Enumerable.Range(0, MaxDegreeOfParallelism)
+            return Enumerable.Range(0, degreeOfParallelism)
                 .Select(_ => work())
                 .ToList();
         }
+    }
+
+    private static int GetCatalogMaxDegreeOfParallelism()
+    {
+        const int fallback = 4;
+        const int min = 1;
+        const int max = 16;
+
+        var text = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CATALOG_DOP");
+        return int.TryParse(text, out var value)
+            ? Math.Clamp(value, min, max)
+            : fallback;
+    }
+
+    private static TimeSpan GetHttpTimeout()
+    {
+        const int fallbackSeconds = 36000;
+        const int minSeconds = 30;
+        const int maxSeconds = 36000;
+
+        var text = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS");
+        var seconds = int.TryParse(text, out var value)
+            ? Math.Clamp(value, minSeconds, maxSeconds)
+            : fallbackSeconds;
+
+        return TimeSpan.FromSeconds(seconds);
     }
 
     public async Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)
