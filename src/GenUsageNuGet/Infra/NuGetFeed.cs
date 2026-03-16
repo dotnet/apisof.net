@@ -11,9 +11,9 @@ namespace GenUsageNuGet.Infra;
 
 internal sealed class NuGetFeed
 {
-    private static readonly HttpClient s_httpClient = CreateHttpClient();
     private static readonly int s_maxDegreeOfParallelism = GetCatalogMaxDegreeOfParallelism();
     private static readonly TimeSpan s_httpTimeout = GetHttpTimeout();
+    private static readonly HttpClient s_httpClient = CreateHttpClient();
 
     public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
 
