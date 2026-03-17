@@ -544,7 +544,7 @@ public sealed class UsageDatabase : IDisposable
         {
             _command = new SqliteCommand(
                 """
-                INSERT INTO [ParentFeatures]
+                INSERT OR IGNORE INTO [ParentFeatures]
                     ([ChildFeatureId], [ParentFeatureId])
                 VALUES
                     (@ChildFeatureId, @ParentFeatureId)
