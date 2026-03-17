@@ -364,7 +364,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
         var processLog = new List<string>();
         var processLogLock = new object();
-    var logWasTruncated = false;
+        var logWasTruncated = false;
 
         process.ErrorDataReceived += OnDataReceived;
         process.OutputDataReceived += OnDataReceived;
@@ -373,11 +373,15 @@ internal sealed class CrawlMain : ConsoleCommand
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
 
-        await process.WaitForExitAsync(cancellationToken);
-
-        if (cancellationToken.IsCancellationRequested)
+        try
         {
-            process.Kill();
+            await process.WaitForExitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            if (!process.HasExited)
+                process.Kill(entireProcessTree: true);
+
             processLog.Add("Crawling cancelled.");
             return (1, processLog);
         }
