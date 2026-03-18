@@ -46,9 +46,34 @@ extends:
                   appType: webAppLinux
                   package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
                   deploymentMethod: auto
+      - stage: DR
+        displayName: Deploy to DR
+        dependsOn: Dev
+        jobs:
+          - job: Job_1
+            displayName: Run on agent
+            condition: succeeded()
+            timeoutInMinutes: 0
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet-build"
+                  artifactName: "apis-of-dotnet-drop"
+                  targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
+            steps:
+              - task: AzureWebApp@1
+                displayName: Deploy Web App
+                inputs:
+                  azureSubscription: ProductionLegacy
+                  appName: apisofdotnet-dr
+                  appType: webAppLinux
+                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
+                  deploymentMethod: auto
       - stage: Production
         displayName: Deploy to Production
-        # dependsOn: DR
+        dependsOn: DR
         jobs:
           - job: PreDeploymentApprovalJob
             displayName: Pre-Deployment Approval
@@ -81,7 +106,7 @@ extends:
               - task: AzureWebApp@1
                 displayName: Deploy Web App
                 inputs:
-                  azureSubscription: dotnetwebsite-azure
+                  azureSubscription: ProductionLegacy
                   appName: apisofdotnet
                   appType: webAppLinux
                   package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
