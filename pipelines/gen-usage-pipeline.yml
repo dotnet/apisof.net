@@ -4,7 +4,7 @@ trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: BuildConfiguration
-    value: Release
+    value: Debug
   - name: System.Debug
     value: true
 resources:
