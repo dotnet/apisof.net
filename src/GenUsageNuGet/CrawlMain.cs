@@ -182,7 +182,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
     private async Task CrawlPackagesAsync(NuGetUsageDatabase usageDatabase, IEnumerable<PackageIdentity> packages)
     {
-        var numberOfWorkers = Environment.ProcessorCount;
+        var numberOfWorkers = GetCrawlerWorkerCount();
         Console.WriteLine($"Crawling using {numberOfWorkers} workers.");
 
         Console.WriteLine("::group::Crawling");
@@ -192,7 +192,7 @@ internal sealed class CrawlMain : ConsoleCommand
         var cancellationToken = cts.Token;
 
         var inputQueue = new ConcurrentQueue<PackageIdentity>(packages);
-        var outputQueue = new BlockingCollection<PackageResults>();
+        var outputQueue = new BlockingCollection<PackageResults>(boundedCapacity: numberOfWorkers * 2);
 
         var workers = Enumerable.Range(0, numberOfWorkers)
             .Select(i => Task.Run(() => CrawlWorker(i, inputQueue, outputQueue, _scratchFileProvider, cancellationToken), cancellationToken))
@@ -287,6 +287,17 @@ internal sealed class CrawlMain : ConsoleCommand
                 Environment.Exit(1);
             }
         }
+
+        static int GetCrawlerWorkerCount()
+        {
+            const int min = 1;
+            const int max = 16;
+
+            var text = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_WORKERS");
+            return int.TryParse(text, out var value)
+                ? Math.Clamp(value, min, max)
+                : Math.Clamp(Environment.ProcessorCount, min, max);
+        }
     }
 
     private async Task<IReadOnlyList<PackageIdentity>> GetAllPackagesAsync()
@@ -329,6 +340,8 @@ internal sealed class CrawlMain : ConsoleCommand
 
     private static async Task<(int ExitCode, IReadOnlyList<string> OutputLines)> RunPackageCrawlerAsync(PackageIdentity packageId, string fileName, CancellationToken cancellationToken)
     {
+        const int MaxLoggedLines = 200;
+
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
@@ -351,6 +364,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
         var processLog = new List<string>();
         var processLogLock = new object();
+        var logWasTruncated = false;
 
         process.ErrorDataReceived += OnDataReceived;
         process.OutputDataReceived += OnDataReceived;
@@ -359,14 +373,21 @@ internal sealed class CrawlMain : ConsoleCommand
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
 
-        await process.WaitForExitAsync(cancellationToken);
-
-        if (cancellationToken.IsCancellationRequested)
+        try
         {
-            process.Kill();
+            await process.WaitForExitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            if (!process.HasExited)
+                process.Kill(entireProcessTree: true);
+
             processLog.Add("Crawling cancelled.");
             return (1, processLog);
         }
+
+        if (logWasTruncated)
+            processLog.Add($"Output was truncated after {MaxLoggedLines:N0} lines.");
 
         processLog.Add($"Exit code = {process.ExitCode}");
         return (process.ExitCode, processLog);
@@ -377,7 +398,16 @@ internal sealed class CrawlMain : ConsoleCommand
                 return;
 
             lock (processLogLock)
-                processLog.Add(e.Data);
+            {
+                if (processLog.Count < MaxLoggedLines)
+                {
+                    processLog.Add(e.Data);
+                }
+                else
+                {
+                    logWasTruncated = true;
+                }
+            }
         }
     }
 
