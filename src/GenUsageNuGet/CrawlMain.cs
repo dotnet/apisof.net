@@ -187,9 +187,16 @@ internal sealed class CrawlMain : ConsoleCommand
 
         Console.WriteLine("::group::Crawling");
 
-        var crawlingTimeout = TimeSpan.FromHours(5);
-        using var cts = new CancellationTokenSource(crawlingTimeout);
+        var crawlingTimeout = GetCrawlingTimeout();
+        using var cts = crawlingTimeout is { } timeout
+            ? new CancellationTokenSource(timeout)
+            : new CancellationTokenSource();
         var cancellationToken = cts.Token;
+
+        if (crawlingTimeout is { } timeoutValue)
+            Console.WriteLine($"Crawling timeout is set to {timeoutValue}.");
+        else
+            Console.WriteLine("Crawling timeout is disabled.");
 
         var inputQueue = new ConcurrentQueue<PackageIdentity>(packages);
         var outputQueue = new BlockingCollection<PackageResults>(boundedCapacity: numberOfWorkers * 2);
@@ -209,7 +216,11 @@ internal sealed class CrawlMain : ConsoleCommand
 
         if (cancellationToken.IsCancellationRequested)
         {
-            Console.WriteLine($"Crawling interrupted because timeout of {crawlingTimeout} was exceeded.");
+            if (crawlingTimeout is { } configuredTimeout)
+                Console.WriteLine($"Crawling interrupted because timeout of {configuredTimeout} was exceeded.");
+            else
+                Console.WriteLine("Crawling was cancelled.");
+
             Console.WriteLine($"There are {inputQueue.Count:N0} items left to index.");
         }
 
@@ -293,10 +304,19 @@ internal sealed class CrawlMain : ConsoleCommand
             const int min = 1;
             const int max = 16;
 
-            var text = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_WORKERS");
-            return int.TryParse(text, out var value)
+            var crawlerCount = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_WORKERS");
+            return int.TryParse(crawlerCount, out var value)
                 ? Math.Clamp(value, min, max)
                 : Math.Clamp(Environment.ProcessorCount, min, max);
+        }
+
+        static TimeSpan? GetCrawlingTimeout()
+        {
+            var timeoutHours = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS");
+            if (!double.TryParse(timeoutHours, out var hours) || hours <= 0)
+                return TimeSpan.FromHours(2);
+
+            return TimeSpan.FromHours(hours);
         }
     }
 
