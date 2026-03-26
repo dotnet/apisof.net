@@ -21,6 +21,8 @@ schedules:
 
 pool:
   name: AzurePipelines-EO
+  image: 1ESPT-Windows2022
+  os: windows
 
 stages:
   - stage: GenerateUsage

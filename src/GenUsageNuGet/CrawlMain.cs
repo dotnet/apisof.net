@@ -188,9 +188,7 @@ internal sealed class CrawlMain : ConsoleCommand
         Console.WriteLine("::group::Crawling");
 
         var crawlingTimeout = GetCrawlingTimeout();
-        using var cts = crawlingTimeout is { } timeout
-            ? new CancellationTokenSource(timeout)
-            : new CancellationTokenSource();
+        using var cts = new CancellationTokenSource(crawlingTimeout);
         var cancellationToken = cts.Token;
 
         if (crawlingTimeout is { } timeoutValue)
@@ -310,11 +308,11 @@ internal sealed class CrawlMain : ConsoleCommand
                 : Math.Clamp(Environment.ProcessorCount, min, max);
         }
 
-        static TimeSpan? GetCrawlingTimeout()
+        static TimeSpan GetCrawlingTimeout()
         {
             var timeoutHours = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS");
             if (!double.TryParse(timeoutHours, out var hours) || hours <= 0)
-                return TimeSpan.FromHours(2);
+                return TimeSpan.FromHours(3);
 
             return TimeSpan.FromHours(hours);
         }
