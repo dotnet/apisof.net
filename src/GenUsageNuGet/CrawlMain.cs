@@ -390,18 +390,42 @@ internal sealed class CrawlMain : ConsoleCommand
         try
         {
             await process.WaitForExitAsync(cancellationToken);
+
+            // Ensure async output readers have drained all pending DataReceived events.
+            process.WaitForExit();
+
+            process.ErrorDataReceived -= OnDataReceived;
+            process.OutputDataReceived -= OnDataReceived;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             if (!process.HasExited)
-                process.Kill(entireProcessTree: true);
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException)
+                {
+                    // The process may have already exited between the check and kill.
+                }
+            }
+
+            await process.WaitForExitAsync(CancellationToken.None);
+
+            // Ensure async output readers have drained all pending DataReceived events.
+            process.WaitForExit();
+
+            process.ErrorDataReceived -= OnDataReceived;
+            process.OutputDataReceived -= OnDataReceived;
                 
             lock (processLogLock)
             {
                 processLog.Add($"Process was killed due to cancellation.");
+                processLog.Add($"Exit code = {process.ExitCode}");
             }
 
-            return(1, processLog);
+            return (1, processLog.ToArray());
         }
 
         lock (processLogLock)
@@ -413,7 +437,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
             processLog.Add($"Exit code = {process.ExitCode}");
 
-            return (process.ExitCode, processLog);
+            return (process.ExitCode, processLog.ToArray());
         }
 
         void OnDataReceived(object sender, DataReceivedEventArgs e)
