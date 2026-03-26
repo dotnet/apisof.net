@@ -214,11 +214,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
         if (cancellationToken.IsCancellationRequested)
         {
-            if (crawlingTimeout is { } configuredTimeout)
-                Console.WriteLine($"Crawling interrupted because timeout of {configuredTimeout} was exceeded.");
-            else
-                Console.WriteLine("Crawling was cancelled.");
-
+            Console.WriteLine($"Crawling interrupted because timeout of {crawlingTimeout} was exceeded.");
             Console.WriteLine($"There are {inputQueue.Count:N0} items left to index.");
         }
 
@@ -411,7 +407,9 @@ internal sealed class CrawlMain : ConsoleCommand
         lock (processLogLock)
         {
             if (logWasTruncated)
-            processLog.Add($"Output was truncated after {MaxLoggedLines:N0} lines.");
+            {
+                processLog.Add($"Output was truncated after {MaxLoggedLines:N0} lines.");
+            }
 
             processLog.Add($"Exit code = {process.ExitCode}");
 
