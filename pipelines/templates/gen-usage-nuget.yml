@@ -1,0 +1,27 @@
+---
+steps:
+  - checkout: self
+  - task: UseDotNet@2
+    displayName: Use .NET 8 SDK
+    inputs:
+      version: 8.x
+      includePreviewVersions: true
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - task: AzureCLI@2
+    displayName: "Run GenUsageNuGet"
+    timeoutInMinutes: 0
+    inputs:
+      azureSubscription: "$(AzureSubscriptionConnection)"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
+        dotnet run --configuration $(BuildConfiguration) -- crawl
+    env:
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+      GENUSAGE_NUGET_CATALOG_DOP: "2"
+      GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
+      GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
+      GENUSAGE_NUGET_CRAWL_WORKERS: "16"

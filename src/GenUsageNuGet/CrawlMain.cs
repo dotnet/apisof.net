@@ -182,17 +182,22 @@ internal sealed class CrawlMain : ConsoleCommand
 
     private async Task CrawlPackagesAsync(NuGetUsageDatabase usageDatabase, IEnumerable<PackageIdentity> packages)
     {
-        var numberOfWorkers = Environment.ProcessorCount;
+        var numberOfWorkers = GetCrawlerWorkerCount();
         Console.WriteLine($"Crawling using {numberOfWorkers} workers.");
 
         Console.WriteLine("::group::Crawling");
 
-        var crawlingTimeout = TimeSpan.FromHours(5);
+        var crawlingTimeout = GetCrawlingTimeout();
         using var cts = new CancellationTokenSource(crawlingTimeout);
         var cancellationToken = cts.Token;
 
+        if (crawlingTimeout is { } timeoutValue)
+            Console.WriteLine($"Crawling timeout is set to {timeoutValue}.");
+        else
+            Console.WriteLine("Crawling timeout is disabled.");
+
         var inputQueue = new ConcurrentQueue<PackageIdentity>(packages);
-        var outputQueue = new BlockingCollection<PackageResults>();
+        var outputQueue = new BlockingCollection<PackageResults>(boundedCapacity: numberOfWorkers * 2);
 
         var workers = Enumerable.Range(0, numberOfWorkers)
             .Select(i => Task.Run(() => CrawlWorker(i, inputQueue, outputQueue, _scratchFileProvider, cancellationToken), cancellationToken))
@@ -287,6 +292,26 @@ internal sealed class CrawlMain : ConsoleCommand
                 Environment.Exit(1);
             }
         }
+
+        static int GetCrawlerWorkerCount()
+        {
+            const int min = 1;
+            const int max = 16;
+
+            var crawlerCount = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_WORKERS");
+            return int.TryParse(crawlerCount, out var value)
+                ? Math.Clamp(value, min, max)
+                : Math.Clamp(Environment.ProcessorCount, min, max);
+        }
+
+        static TimeSpan GetCrawlingTimeout()
+        {
+            var timeoutHours = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS");
+            if (!double.TryParse(timeoutHours, out var hours) || hours <= 0)
+                return TimeSpan.FromHours(3);
+
+            return TimeSpan.FromHours(hours);
+        }
     }
 
     private async Task<IReadOnlyList<PackageIdentity>> GetAllPackagesAsync()
@@ -329,6 +354,8 @@ internal sealed class CrawlMain : ConsoleCommand
 
     private static async Task<(int ExitCode, IReadOnlyList<string> OutputLines)> RunPackageCrawlerAsync(PackageIdentity packageId, string fileName, CancellationToken cancellationToken)
     {
+        const int MaxLoggedLines = 200;
+
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
@@ -351,6 +378,7 @@ internal sealed class CrawlMain : ConsoleCommand
 
         var processLog = new List<string>();
         var processLogLock = new object();
+        var logWasTruncated = false;
 
         process.ErrorDataReceived += OnDataReceived;
         process.OutputDataReceived += OnDataReceived;
@@ -359,17 +387,58 @@ internal sealed class CrawlMain : ConsoleCommand
         process.BeginErrorReadLine();
         process.BeginOutputReadLine();
 
-        await process.WaitForExitAsync(cancellationToken);
-
-        if (cancellationToken.IsCancellationRequested)
+        try
         {
-            process.Kill();
-            processLog.Add("Crawling cancelled.");
-            return (1, processLog);
+            await process.WaitForExitAsync(cancellationToken);
+
+            // Ensure async output readers have drained all pending DataReceived events.
+            process.WaitForExit();
+
+            process.ErrorDataReceived -= OnDataReceived;
+            process.OutputDataReceived -= OnDataReceived;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            if (!process.HasExited)
+            {
+                try
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+                catch (InvalidOperationException)
+                {
+                    // The process may have already exited between the check and kill.
+                }
+            }
+
+            await process.WaitForExitAsync(CancellationToken.None);
+
+            // Ensure async output readers have drained all pending DataReceived events.
+            process.WaitForExit();
+
+            process.ErrorDataReceived -= OnDataReceived;
+            process.OutputDataReceived -= OnDataReceived;
+                
+            lock (processLogLock)
+            {
+                processLog.Add($"Process was killed due to cancellation.");
+                processLog.Add($"Exit code = {process.ExitCode}");
+            }
+
+            return (1, processLog.ToArray());
         }
 
-        processLog.Add($"Exit code = {process.ExitCode}");
-        return (process.ExitCode, processLog);
+        lock (processLogLock)
+        {
+            if (logWasTruncated)
+            {
+                processLog.Add($"Output was truncated after {MaxLoggedLines:N0} lines.");
+            }
+
+            processLog.Add($"Exit code = {process.ExitCode}");
+
+            return (process.ExitCode, processLog.ToArray());
+        }
 
         void OnDataReceived(object sender, DataReceivedEventArgs e)
         {
@@ -377,7 +446,16 @@ internal sealed class CrawlMain : ConsoleCommand
                 return;
 
             lock (processLogLock)
-                processLog.Add(e.Data);
+            {
+                if (processLog.Count < MaxLoggedLines)
+                {
+                    processLog.Add(e.Data);
+                }
+                else
+                {
+                    logWasTruncated = true;
+                }
+            }
         }
     }
 

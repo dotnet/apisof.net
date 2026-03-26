@@ -1,0 +1,75 @@
+---
+trigger: none
+
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  - name: BuildConfiguration
+    value: Release
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+
+schedules:
+  - cron: '21 */6 * * *' # At :21 in every 6th hour
+    displayName: "Generate usage every 6 hours"
+    branches:
+      include:
+        - main
+    always: true
+
+pool:
+  name: AzurePipelines-EO
+
+stages:
+  - stage: GenerateUsage
+    jobs:
+      - job: generate_usage_nuget
+        displayName: Generate nuget usage
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
+        steps:
+          - template: templates/gen-usage-nuget.yml@self
+
+      - job: generate_usage_planner
+        displayName: Generate planner usage
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
+        steps:
+          - template: templates/gen-usage-planner.yml@self
+
+      - job: generate_usage
+        displayName: Generate all usage data
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
+        dependsOn:
+          - generate_usage_nuget
+          - generate_usage_planner
+        # Run this job only if both dependent jobs succeed
+        condition: and(succeeded('generate_usage_nuget'), succeeded('generate_usage_planner'))
+        steps:
+          - checkout: self
+          - task: UseDotNet@2
+            displayName: Use .NET 8 SDK
+            inputs:
+              version: 8.x
+          - task: NuGetAuthenticate@1
+            displayName: "NuGet Authenticate"
+          - script: |
+              dotnet build "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" --configuration $(BuildConfiguration)
+            displayName: "Build GenUsage"
+          - task: AzureCLI@2
+            displayName: "Run GenUsage"
+            timeoutInMinutes: 0
+            inputs:
+              azureSubscription: "$(AzureSubscriptionConnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                cd "$(Build.SourcesDirectory)/src/GenUsage"
+                dotnet run --configuration $(BuildConfiguration)
+            env:
+              DOTNET_ENVIRONMENT: "Release"
+              AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+              ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
