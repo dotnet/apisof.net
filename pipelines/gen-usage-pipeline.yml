@@ -5,8 +5,6 @@ name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: BuildConfiguration
     value: Release
-  - name: System.Debug
-    value: true
 resources:
   repositories:
     - repository: self

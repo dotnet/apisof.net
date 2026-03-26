@@ -401,16 +401,24 @@ internal sealed class CrawlMain : ConsoleCommand
         {
             if (!process.HasExited)
                 process.Kill(entireProcessTree: true);
+                
+            lock (processLogLock)
+            {
+                processLog.Add($"Process was killed due to cancellation.");
+            }
 
-            processLog.Add("Crawling cancelled.");
-            return (1, processLog);
+            return(1, processLog);
         }
 
-        if (logWasTruncated)
+        lock (processLogLock)
+        {
+            if (logWasTruncated)
             processLog.Add($"Output was truncated after {MaxLoggedLines:N0} lines.");
 
-        processLog.Add($"Exit code = {process.ExitCode}");
-        return (process.ExitCode, processLog);
+            processLog.Add($"Exit code = {process.ExitCode}");
+
+            return (process.ExitCode, processLog);
+        }
 
         void OnDataReceived(object sender, DataReceivedEventArgs e)
         {

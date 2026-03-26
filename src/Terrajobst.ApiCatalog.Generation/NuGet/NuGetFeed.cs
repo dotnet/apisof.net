@@ -115,8 +115,8 @@ public sealed class NuGetFeed
         while (true)
         {
             var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
-            var data = await s_httpClient.GetStreamAsync(url);
-            var document = JsonNode.Parse(data)!;
+            using var data = await s_httpClient.GetStreamAsync(url);
+            var document = JsonNode.Parse(data)!; 
 
             var count = document["count"]!.GetValue<int>();
             if (count == 0)
@@ -221,7 +221,8 @@ public sealed class NuGetFeed
     Retry:
         try
         {
-            var nupkgStream = await s_httpClient.GetStreamAsync(url);
+            using var nupkgStream = await s_httpClient.GetStreamAsync(url);
+            
             await nupkgStream.CopyToAsync(destination);
             return true;
         }
