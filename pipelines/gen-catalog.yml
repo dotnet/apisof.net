@@ -60,8 +60,11 @@ extends:
                   scriptLocation: "inlineScript"                  
                   addSpnToEnvironment: true
                   inlineScript: |
+                    export APISOFDOTNET_INDEX_PATH="$(Pipeline.Workspace)/catalog"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH"
                     cd "$(Build.SourcesDirectory)/src/GenCatalog"
                     dotnet run --configuration $(BuildConfiguration)
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrl)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+                  APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
