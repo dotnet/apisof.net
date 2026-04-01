@@ -13,12 +13,11 @@ public sealed class BlobStorageService
     public BlobStorageService(IOptions<ApisOfDotNetOptions> options)
     {
         ThrowIfNull(options);
-
         var serviceUri = new Uri(options.Value.AzureStorageServiceUrl);
 #if DEBUG
         TokenCredential credential = new DefaultAzureCredential();
 #else
-        TokenCredential credential = new ManagedIdentityCredential();
+        TokenCredential credential = new AzureCliCredential();
 #endif
         _serviceClient = new BlobServiceClient(serviceUri, credential);
     }
