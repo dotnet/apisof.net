@@ -29,14 +29,14 @@ stages:
         timeoutInMinutes: 60
         steps:
           - checkout: self
-            fetchDepth: 0
+            fetchDepth: 
           - task: UseDotNet@2
             displayName: "Install .NET 8"
             inputs:
               packageType: sdk
-              version: 8.0
+              version: 8.0.
           - task: NuGetAuthenticate@1
-            displayName: "NuGet Authenticat
+            displayName: "NuGet Authenticate
           - task: AzureCLI@2
             displayName: "Generate Catalog"
             inputs:
