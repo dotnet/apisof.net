@@ -62,6 +62,10 @@ extends:
                   inlineScript: |
                     export APISOFDOTNET_INDEX_PATH="$(Pipeline.Workspace)/catalog"
                     mkdir -p "$APISOFDOTNET_INDEX_PATH"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/index"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/frameworks"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/packs"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/packages"
                     cd "$(Build.SourcesDirectory)/src/GenCatalog"
                     dotnet run --configuration $(BuildConfiguration)
                 env:
