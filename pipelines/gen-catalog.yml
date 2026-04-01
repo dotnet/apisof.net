@@ -16,10 +16,12 @@ resources:
     - repository: self
       type: git
       ref: main
+
 pool:
   name: AzurePipelines-EO
   image: 1ESPT-Windows2022
   os: windows
+  
 stages:
   - stage: generate_catalog
     displayName: "Generate Catalog"
