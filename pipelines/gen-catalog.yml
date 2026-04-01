@@ -35,7 +35,7 @@ stages:
             displayName: "Install .NET 8"
             inputs:
               packageType: sdk
-              version: 8.0.
+              version: 8.x
           - task: NuGetAuthenticate@1
             displayName: "NuGet Authenticate"
           - task: AzureCLI@2
