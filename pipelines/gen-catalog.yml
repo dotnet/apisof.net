@@ -21,7 +21,6 @@ pool:
   name: AzurePipelines-EO
   image: 1ESPT-Windows2022
   os: windows
-
 stages:
   - stage: generate_catalog
     displayName: "Generate Catalog"
@@ -31,7 +30,7 @@ stages:
         timeoutInMinutes: 60
         steps:
           - checkout: self
-            fetchDepth: 
+            fetchDepth: 0
           - task: UseDotNet@2
             displayName: "Install .NET 8"
             inputs:
