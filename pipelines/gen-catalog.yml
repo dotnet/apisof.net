@@ -21,7 +21,7 @@ pool:
   name: AzurePipelines-EO
   image: 1ESPT-Windows2022
   os: windows
-  
+
 stages:
   - stage: generate_catalog
     displayName: "Generate Catalog"
@@ -38,7 +38,7 @@ stages:
               packageType: sdk
               version: 8.0.
           - task: NuGetAuthenticate@1
-            displayName: "NuGet Authenticate
+            displayName: "NuGet Authenticate"
           - task: AzureCLI@2
             displayName: "Generate Catalog"
             inputs:
