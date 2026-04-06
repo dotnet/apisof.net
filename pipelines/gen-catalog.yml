@@ -27,7 +27,8 @@ stages:
     jobs:
       - job: generate_catalog_job
         displayName: "Run Catalog Generator"
-        timeoutInMinutes: 60
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
         steps:
           - checkout: self
             fetchDepth: 0
