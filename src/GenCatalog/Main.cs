@@ -174,8 +174,7 @@ internal sealed class Main : IConsoleMain
         var packages = document.Root!.Elements("package")
             .Select(e => (
                 Id: e.Attribute("id")!.Value,
-                Version: e.Attribute("version")!.Value))
-            .ToArray();
+                Version: e.Attribute("version")!.Value));
 
         var nightlies = new NuGetFeed(NuGetFeeds.NightlyLatest);
         var nuGetOrg = new NuGetFeed(NuGetFeeds.NuGetOrg);

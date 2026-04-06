@@ -60,3 +60,6 @@ stages:
               AzureStorageServiceUrl: $(AzureStorageServiceUrl)
               ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
               APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
+              DOTNET_gcServer: 0
+              DOTNET_GCConserveMemory: 9
+              DOTNET_GCHeapHardLimitPercent: 75
