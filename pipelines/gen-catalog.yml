@@ -1,4 +1,5 @@
 trigger: none
+System.Debug: true
 variables:
   BuildConfiguration: Release
 schedules:
