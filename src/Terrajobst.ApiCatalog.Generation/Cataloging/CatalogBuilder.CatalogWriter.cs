@@ -27,13 +27,35 @@ public sealed partial class CatalogBuilder
 
         private readonly Dictionary<IntermediateFramework, FrameworkOffset> _frameworkOffsets = new();
         private readonly Dictionary<IntermediatePackage, PackageOffset> _packageOffsets = new();
-        private readonly Dictionary<IntermediaAssembly, AssemblyOffset> _assemblyOffsets = new();
+        private readonly AssemblyOffset[] _assemblyOffsets;
         private readonly Dictionary<IntermediateUsageSource, UsageSourceOffset> _usageSourceOffsets = new();
-        private readonly Dictionary<IntermediaApi, ApiOffset> _apiOffsets = new();
+        private readonly ApiOffset[] _apiOffsets;
 
         public CatalogWriter(CatalogBuilder builder)
         {
             _builder = builder;
+            _assemblyOffsets = new AssemblyOffset[_builder._assemblies.Count];
+            _apiOffsets = new ApiOffset[_builder._apis.Count];
+        }
+
+        private AssemblyOffset GetAssemblyOffset(IntermediaAssembly assembly)
+        {
+            return _assemblyOffsets[assembly.Index];
+        }
+
+        private void SetAssemblyOffset(IntermediaAssembly assembly, AssemblyOffset offset)
+        {
+            _assemblyOffsets[assembly.Index] = offset;
+        }
+
+        private ApiOffset GetApiOffset(IntermediaApi api)
+        {
+            return _apiOffsets[api.Index];
+        }
+
+        private void SetApiOffset(IntermediaApi api, ApiOffset offset)
+        {
+            _apiOffsets[api.Index] = offset;
         }
 
         public void Write(Stream stream)
@@ -114,7 +136,7 @@ public sealed partial class CatalogBuilder
         {
             Console.WriteLine("Writing frameworks...");
 
-            var frameworks = _builder._frameworkByName.Values.ToArray();
+            var frameworks = _builder._frameworkByName.Values;
 
             foreach (var framework in frameworks)
             {
@@ -132,7 +154,7 @@ public sealed partial class CatalogBuilder
         {
             Console.WriteLine("Writing packages...");
 
-            var packages = _builder._packageByFingerprint.Values.ToArray();
+            var packages = _builder._packageByFingerprint.Values;
 
             foreach (var package in packages)
             {
@@ -157,12 +179,12 @@ public sealed partial class CatalogBuilder
                 var name = _stringHeap.Store(assembly.Name);
                 var publicKeyToken = _stringHeap.Store(assembly.PublicKeyToken);
                 var version = _stringHeap.Store(assembly.Version);
-                var rootApis = _blobHeap.StoreApis(assembly.RootApis.ToArray());
+                var rootApis = _blobHeap.StoreApis(assembly.RootApis);
                 var frameworks = _blobHeap.StoreFrameworks(assembly.Frameworks, _frameworkOffsets);
                 var packages = _blobHeap.StorePackages(assembly.Packages, _packageOffsets, _frameworkOffsets);
 
                 var rowOffset = _assemblyTable.WriteRow(fingerprint, name, publicKeyToken, version, rootApis, frameworks, packages);
-                _assemblyOffsets.Add(assembly, rowOffset);
+                SetAssemblyOffset(assembly, rowOffset);
             }
         }
 
@@ -178,33 +200,19 @@ public sealed partial class CatalogBuilder
             foreach (var api in apis)
             {
                 var intermediateChildren = (IReadOnlyList<IntermediaApi>?) api.Children ?? Array.Empty<IntermediaApi>();
-                var intermediateDeclarations = GetDeclarations(_builder, api);
 
                 var fingerprint = api.Fingerprint;
                 var kind = (byte)api.Kind;
-                var parent = api.Parent is null ? ApiOffset.Nil : _apiOffsets[api.Parent]; // NOTE: This is safe because we know the parent was already written.
+                var parent = api.Parent is null ? ApiOffset.Nil : GetApiOffset(api.Parent); // NOTE: This is safe because we know the parent was already written.
                 var name = _stringHeap.Store(api.Name);
                 var children = _blobHeap.StoreApis(intermediateChildren);
-                var declarations = _blobHeap.StoreDeclarations(intermediateDeclarations, _assemblyOffsets);
+                var declarations = _blobHeap.StoreDeclarations(api, _builder._assemblies, _assemblyOffsets);
 
                 var rowOffset = _apiTable.WriteRow(fingerprint, kind, parent, name, children, declarations);
-                _apiOffsets.Add(api, rowOffset);
+                SetApiOffset(api, rowOffset);
 
                 if (api.Children is not null)
                     WriteApis(api.Children);
-            }
-
-            static IReadOnlyList<IntermediateDeclaration> GetDeclarations(CatalogBuilder builder, IntermediaApi api)
-            {
-                var result = new List<IntermediateDeclaration>();
-
-                foreach (var assembly in builder._assemblies)
-                {
-                    if (assembly.Declarations.TryGetValue(api, out var declaration))
-                        result.Add(declaration);
-                }
-
-                return result;
             }
         }
 
@@ -214,7 +222,7 @@ public sealed partial class CatalogBuilder
 
             foreach (var entry in _builder._rootApis)
             {
-                var api = _apiOffsets[entry];
+                var api = GetApiOffset(entry);
                 _rootApiTable.WriteRow(api);
             }
         }
@@ -227,11 +235,10 @@ public sealed partial class CatalogBuilder
                 .Where(a => a.Extensions is not null)
                 .SelectMany(type => type.Extensions!, (type, extension) => (
                     ExtensionMethodGuid: extension.Fingerprint,
-                    ExtendedType: _apiOffsets[type],
-                    ExtensionMethod: _apiOffsets[extension.Method]))
+                    ExtendedType: GetApiOffset(type),
+                    ExtensionMethod: GetApiOffset(extension.Method)))
                 .OrderBy(t => t.ExtendedType.Value)
-                .ThenBy(t => t.ExtensionMethod.Value)
-                .ToArray();
+                .ThenBy(t => t.ExtensionMethod.Value);
 
             foreach (var entry in entries)
             {
@@ -250,16 +257,15 @@ public sealed partial class CatalogBuilder
                 .SelectMany(a => a.Declarations.Values)
                 .Where(d => d.Obsoletion is not null)
                 .Select(d => (
-                    Api: _apiOffsets[d.Api],
-                    Assembly: _assemblyOffsets[d.Assembly],
+                    Api: GetApiOffset(d.Api),
+                    Assembly: GetAssemblyOffset(d.Assembly),
                     Message: _stringHeap.Store(d.Obsoletion!.Message),
                     d.Obsoletion.IsError,
                     DiagnosticId: _stringHeap.Store(d.Obsoletion.DiagnosticId),
                     UrlFormat: _stringHeap.Store(d.Obsoletion.UrlFormat)
                 ))
                 .OrderBy(t => t.Api.Value)
-                .ThenBy(t => t.Assembly.Value)
-                .ToArray();
+                .ThenBy(t => t.Assembly.Value);
 
             foreach (var entry in entries)
             {
@@ -288,13 +294,12 @@ public sealed partial class CatalogBuilder
                 .Concat(apiPlatformSupport)
                 .Where(e => e.PlatformSupport is not null)
                 .Select(e => (
-                    Api: e.Api is null ? ApiOffset.Nil : _apiOffsets[e.Api],
-                    Assembly: _assemblyOffsets[e.Assembly],
+                    Api: e.Api is null ? ApiOffset.Nil : GetApiOffset(e.Api),
+                    Assembly: GetAssemblyOffset(e.Assembly),
                     Platforms: _blobHeap.StorePlatformSupport(e.PlatformSupport!, _stringHeap)
                 ))
                 .OrderBy(t => t.Api.Value)
-                .ThenBy(t => t.Assembly.Value)
-                .ToArray();
+                .ThenBy(t => t.Assembly.Value);
 
             foreach (var entry in entries)
             {
@@ -319,14 +324,13 @@ public sealed partial class CatalogBuilder
                 .Concat(apiPreviewRequirements)
                 .Where(e => e.PreviewRequirement is not null)
                 .Select(e => (
-                    Api: e.Api is null ? ApiOffset.Nil : _apiOffsets[e.Api],
-                    Assembly: _assemblyOffsets[e.Assembly],
+                    Api: e.Api is null ? ApiOffset.Nil : GetApiOffset(e.Api),
+                    Assembly: GetAssemblyOffset(e.Assembly),
                     Message: _stringHeap.Store(e.PreviewRequirement!.Message),
                     Url: _stringHeap.Store(e.PreviewRequirement.Url)
                 ))
                 .OrderBy(t => t.Api.Value)
-                .ThenBy(t => t.Assembly.Value)
-                .ToArray();
+                .ThenBy(t => t.Assembly.Value);
 
             foreach (var entry in entries)
             {
@@ -353,14 +357,13 @@ public sealed partial class CatalogBuilder
                 .Concat(apiExperimental)
                 .Where(e => e.Experimental is not null)
                 .Select(e => (
-                    Api: e.Api is null ? ApiOffset.Nil : _apiOffsets[e.Api],
-                    Assembly: _assemblyOffsets[e.Assembly],
+                    Api: e.Api is null ? ApiOffset.Nil : GetApiOffset(e.Api),
+                    Assembly: GetAssemblyOffset(e.Assembly),
                     DiagnosticId: _stringHeap.Store(e.Experimental!.DiagnosticId),
                     UrlFormat: _stringHeap.Store(e.Experimental.UrlFormat)
                 ))
                 .OrderBy(t => t.Api.Value)
-                .ThenBy(t => t.Assembly.Value)
-                .ToArray();
+                .ThenBy(t => t.Assembly.Value);
 
             foreach (var entry in entries)
             {
@@ -754,6 +757,24 @@ public sealed partial class CatalogBuilder
                 return result;
             }
 
+            public BlobOffset StoreApis(IEnumerable<IntermediaApi> apis)
+            {
+                var count = 0;
+                foreach (var _ in apis)
+                    count++;
+
+                if (count == 0)
+                    return BlobOffset.Nil;
+
+                var result = SeekEnd();
+
+                Memory.WriteInt32(count);
+                foreach (var api in apis)
+                    WriteApiPatchup(api);
+
+                return result;
+            }
+
             public BlobOffset StoreDeclarations(IReadOnlyList<IntermediateDeclaration> declarations,
                                                 IReadOnlyDictionary<IntermediaAssembly, AssemblyOffset> assemblyOffsets)
             {
@@ -767,6 +788,35 @@ public sealed partial class CatalogBuilder
                 {
                     Memory.WriteAssemblyOffset(assemblyOffsets[declaration.Assembly]);
                     WriteSyntaxPatchup(declaration);
+                }
+
+                return result;
+            }
+
+            public BlobOffset StoreDeclarations(IntermediaApi api,
+                                                IReadOnlyList<IntermediaAssembly> assemblies,
+                                                IReadOnlyList<AssemblyOffset> assemblyOffsets)
+            {
+                var count = 0;
+                foreach (var assembly in assemblies)
+                {
+                    if (assembly.Declarations.ContainsKey(api))
+                        count++;
+                }
+
+                if (count == 0)
+                    return BlobOffset.Nil;
+
+                var result = SeekEnd();
+
+                Memory.WriteInt32(count);
+                foreach (var assembly in assemblies)
+                {
+                    if (assembly.Declarations.TryGetValue(api, out var declaration))
+                    {
+                        Memory.WriteAssemblyOffset(assemblyOffsets[assembly.Index]);
+                        WriteSyntaxPatchup(declaration);
+                    }
                 }
 
                 return result;
@@ -844,7 +894,7 @@ public sealed partial class CatalogBuilder
             }
 
             public void PatchApiOffsets(IReadOnlyList<IntermediaApi> apis,
-                                        IReadOnlyDictionary<IntermediaApi, ApiOffset> apiOffsets)
+                                        IReadOnlyList<ApiOffset> apiOffsets)
             {
                 Console.WriteLine("Patching API offsets...");
 
@@ -852,8 +902,7 @@ public sealed partial class CatalogBuilder
                 {
                     Memory.Seek(patchOffset.Value);
                     var apiIndex = Memory.PeekInt32();
-                    var api = apis[apiIndex];
-                    var apiOffset = apiOffsets[api];
+                    var apiOffset = apiOffsets[apiIndex];
                     Memory.WriteApiOffset(apiOffset);
                 }
 
@@ -861,7 +910,7 @@ public sealed partial class CatalogBuilder
             }
 
             public void PatchAssemblyOffsets(IReadOnlyList<IntermediaAssembly> assemblies,
-                                             IReadOnlyDictionary<IntermediaAssembly, AssemblyOffset> assemblyOffsets)
+                                             IReadOnlyList<AssemblyOffset> assemblyOffsets)
             {
                 Console.WriteLine("Patching assembly offsets...");
 
@@ -869,8 +918,7 @@ public sealed partial class CatalogBuilder
                 {
                     Memory.Seek(patchOffset.Value);
                     var assemblyIndex = Memory.PeekInt32();
-                    var assembly = assemblies[assemblyIndex];
-                    var assemblyOffset = assemblyOffsets[assembly];
+                    var assemblyOffset = assemblyOffsets[assemblyIndex];
                     Memory.WriteAssemblyOffset(assemblyOffset);
                 }
 
