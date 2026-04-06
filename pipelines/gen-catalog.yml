@@ -1,6 +1,6 @@
 trigger: none
-System.Debug: true
 variables:
+  System.Debug: true
   BuildConfiguration: Release
 schedules:
   - cron: "21 12 * * *"   # 12:21 PM UTC
