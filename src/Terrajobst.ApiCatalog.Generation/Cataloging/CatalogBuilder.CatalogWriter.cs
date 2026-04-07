@@ -586,6 +586,9 @@ public sealed partial class CatalogBuilder
 
         private sealed class BlobHeap : HeapOrTable
         {
+            private const int PatchChunkSize = 250_000;
+            private const int SyntaxOffsetCacheLimit = 200_000;
+
             private readonly List<BlobOffset> _assemblyPatchups = new();
             private readonly List<BlobOffset> _apiPatchups = new();
             private readonly List<(BlobOffset, IntermediateDeclaration)> _syntaxPatchups = new();
@@ -877,20 +880,37 @@ public sealed partial class CatalogBuilder
                 Console.WriteLine("Patching syntaxes...");
 
                 var syntaxOffsets = new Dictionary<string, BlobOffset>(StringComparer.Ordinal);
+                var total = _syntaxPatchups.Count;
 
-                foreach (var (patchOffset, declaration) in _syntaxPatchups)
+                for (var i = 0; i < _syntaxPatchups.Count; i++)
                 {
+                    if (i % PatchChunkSize == 0)
+                    {
+                        var chunk = i / PatchChunkSize + 1;
+                        var chunkEnd = Math.Min(i + PatchChunkSize, total);
+                        Console.WriteLine($"  Syntax chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
+                    }
+
+                    var (patchOffset, declaration) = _syntaxPatchups[i];
+
                     if (!syntaxOffsets.TryGetValue(declaration.Syntax, out var syntaxOffset))
                     {
+                        if (syntaxOffsets.Count >= SyntaxOffsetCacheLimit)
+                            syntaxOffsets.Clear();
+
                         syntaxOffset = StoreSyntax(declaration.Syntax, stringHeap, apiByFingerprint);
                         syntaxOffsets.Add(declaration.Syntax, syntaxOffset);
                     }
 
                     Memory.Seek(patchOffset.Value);
                     Memory.WriteInt32(syntaxOffset.Value);
+
+                    if ((i + 1) % PatchChunkSize == 0)
+                        GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
                 }
 
                 Memory.Seek(Memory.GetLength());
+                syntaxOffsets.Clear();
                 _syntaxPatchups.Clear();
             }
 
@@ -898,13 +918,25 @@ public sealed partial class CatalogBuilder
                                         IReadOnlyList<ApiOffset> apiOffsets)
             {
                 Console.WriteLine("Patching API offsets...");
+                var total = _apiPatchups.Count;
 
-                foreach (var patchOffset in _apiPatchups)
+                for (var i = 0; i < _apiPatchups.Count; i++)
                 {
+                    if (i % PatchChunkSize == 0)
+                    {
+                        var chunk = i / PatchChunkSize + 1;
+                        var chunkEnd = Math.Min(i + PatchChunkSize, total);
+                        Console.WriteLine($"  API chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
+                    }
+
+                    var patchOffset = _apiPatchups[i];
                     Memory.Seek(patchOffset.Value);
                     var apiIndex = Memory.PeekInt32();
                     var apiOffset = apiOffsets[apiIndex];
                     Memory.WriteApiOffset(apiOffset);
+
+                    if ((i + 1) % PatchChunkSize == 0)
+                        GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
                 }
 
                 Memory.Seek(Memory.GetLength());
@@ -915,13 +947,25 @@ public sealed partial class CatalogBuilder
                                              IReadOnlyList<AssemblyOffset> assemblyOffsets)
             {
                 Console.WriteLine("Patching assembly offsets...");
+                var total = _assemblyPatchups.Count;
 
-                foreach (var patchOffset in _assemblyPatchups)
+                for (var i = 0; i < _assemblyPatchups.Count; i++)
                 {
+                    if (i % PatchChunkSize == 0)
+                    {
+                        var chunk = i / PatchChunkSize + 1;
+                        var chunkEnd = Math.Min(i + PatchChunkSize, total);
+                        Console.WriteLine($"  Assembly chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
+                    }
+
+                    var patchOffset = _assemblyPatchups[i];
                     Memory.Seek(patchOffset.Value);
                     var assemblyIndex = Memory.PeekInt32();
                     var assemblyOffset = assemblyOffsets[assemblyIndex];
                     Memory.WriteAssemblyOffset(assemblyOffset);
+
+                    if ((i + 1) % PatchChunkSize == 0)
+                        GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
                 }
 
                 Memory.Seek(Memory.GetLength());
