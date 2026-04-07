@@ -891,6 +891,7 @@ public sealed partial class CatalogBuilder
                 }
 
                 Memory.Seek(Memory.GetLength());
+                _syntaxPatchups.Clear();
             }
 
             public void PatchApiOffsets(IReadOnlyList<IntermediaApi> apis,
@@ -907,6 +908,7 @@ public sealed partial class CatalogBuilder
                 }
 
                 Memory.Seek(Memory.GetLength());
+                _apiPatchups.Clear();
             }
 
             public void PatchAssemblyOffsets(IReadOnlyList<IntermediaAssembly> assemblies,
@@ -923,6 +925,7 @@ public sealed partial class CatalogBuilder
                 }
 
                 Memory.Seek(Memory.GetLength());
+                _assemblyPatchups.Clear();
             }
         }
 
