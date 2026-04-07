@@ -80,6 +80,7 @@ public sealed partial class CatalogBuilder
             WriteFrameworks();
             WritePackages();
             WriteAssemblies();
+            _blobHeap.PatchAssemblyOffsets(_builder._assemblies, _assemblyOffsets);
             WriteApis();
             WriteRootApis();
             WriteExtensionMethods();
@@ -90,7 +91,6 @@ public sealed partial class CatalogBuilder
 
             _blobHeap.PatchSyntaxes(_stringHeap, _builder._apiByFingerprint);
             _blobHeap.PatchApiOffsets(_builder._apis, _apiOffsets);
-            _blobHeap.PatchAssemblyOffsets(_builder._assemblies, _assemblyOffsets);
 
             using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
             {
@@ -970,6 +970,7 @@ public sealed partial class CatalogBuilder
 
                 Memory.Seek(Memory.GetLength());
                 _assemblyPatchups.Clear();
+                _assemblyPatchups.TrimExcess();
             }
         }
 
