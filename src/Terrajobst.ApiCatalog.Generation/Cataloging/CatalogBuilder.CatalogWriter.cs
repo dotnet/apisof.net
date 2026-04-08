@@ -879,13 +879,27 @@ public sealed partial class CatalogBuilder
             {
                 Console.WriteLine("Patching syntaxes...");
 
-                var syntaxOffsets = new Dictionary<string, BlobOffset>(StringComparer.Ordinal);
                 var total = _syntaxPatchups.Count;
+                var chunkStart = 0;
+                var syntaxOffsets = new Dictionary<string, BlobOffset>(StringComparer.Ordinal);
 
                 for (var i = 0; i < _syntaxPatchups.Count; i++)
                 {
                     if (i % PatchChunkSize == 0)
                     {
+                        if (i > 0)
+                        {
+                            // Drop references from the previous chunk so declarations can be collected sooner.
+                            for (var j = chunkStart; j < i; j++)
+                                _syntaxPatchups[j] = default;
+
+                            syntaxOffsets.Clear();
+                            syntaxOffsets.TrimExcess();
+                            syntaxOffsets = new Dictionary<string, BlobOffset>(StringComparer.Ordinal);
+                            chunkStart = i;
+                            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
+                        }
+
                         var chunk = i / PatchChunkSize + 1;
                         var chunkEnd = Math.Min(i + PatchChunkSize, total);
                         Console.WriteLine($"  Syntax chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
@@ -904,14 +918,16 @@ public sealed partial class CatalogBuilder
 
                     Memory.Seek(patchOffset.Value);
                     Memory.WriteInt32(syntaxOffset.Value);
-
-                    if ((i + 1) % PatchChunkSize == 0)
-                        GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
                 }
 
                 Memory.Seek(Memory.GetLength());
+                for (var j = chunkStart; j < _syntaxPatchups.Count; j++)
+                    _syntaxPatchups[j] = default;
+
                 syntaxOffsets.Clear();
+                syntaxOffsets.TrimExcess();
                 _syntaxPatchups.Clear();
+                _syntaxPatchups.TrimExcess();
             }
 
             public void PatchApiOffsets(IReadOnlyList<IntermediaApi> apis,
@@ -941,6 +957,7 @@ public sealed partial class CatalogBuilder
 
                 Memory.Seek(Memory.GetLength());
                 _apiPatchups.Clear();
+                _apiPatchups.TrimExcess();
             }
 
             public void PatchAssemblyOffsets(IReadOnlyList<IntermediaAssembly> assemblies,
