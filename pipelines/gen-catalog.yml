@@ -55,7 +55,9 @@ stages:
                 mkdir -p "$APISOFDOTNET_INDEX_PATH/packs"
                 mkdir -p "$APISOFDOTNET_INDEX_PATH/packages"
                 cd "$(Build.SourcesDirectory)/src/GenCatalog"
-                dotnet run --configuration $(BuildConfiguration)
+                dotnet restore --disable-parallel
+                dotnet build --configuration $(BuildConfiguration) /m:1
+                dotnet run --configuration $(BuildConfiguration) --no-restore --no-build
             env:
               AzureStorageServiceUrl: $(AzureStorageServiceUrl)
               ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
@@ -63,3 +65,4 @@ stages:
               DOTNET_gcServer: 0
               DOTNET_GCConserveMemory: 9
               DOTNET_GCHeapHardLimitPercent: 75
+              DOTNET_GCHeapHardLimit: 5368709120

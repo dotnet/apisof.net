@@ -206,7 +206,7 @@ public sealed partial class CatalogBuilder
                 var parent = api.Parent is null ? ApiOffset.Nil : GetApiOffset(api.Parent); // NOTE: This is safe because we know the parent was already written.
                 var name = _stringHeap.Store(api.Name);
                 var children = _blobHeap.StoreApis(intermediateChildren);
-                var declarations = _blobHeap.StoreDeclarations(api, _builder._assemblies, _assemblyOffsets);
+                var declarations = _blobHeap.StoreDeclarations(api, _builder._assemblies, _assemblyOffsets, _stringHeap, _builder._apiByFingerprint);
 
                 var rowOffset = _apiTable.WriteRow(fingerprint, kind, parent, name, children, declarations);
                 SetApiOffset(api, rowOffset);
@@ -592,6 +592,7 @@ public sealed partial class CatalogBuilder
             private readonly List<BlobOffset> _assemblyPatchups = new();
             private readonly List<BlobOffset> _apiPatchups = new();
             private readonly List<(BlobOffset, IntermediateDeclaration)> _syntaxPatchups = new();
+            private readonly Dictionary<string, BlobOffset> _syntaxOffsets = new(StringComparer.Ordinal);
 
             public BlobHeap()
             {
@@ -798,7 +799,9 @@ public sealed partial class CatalogBuilder
 
             public BlobOffset StoreDeclarations(IntermediaApi api,
                                                 IReadOnlyList<IntermediaAssembly> assemblies,
-                                                IReadOnlyList<AssemblyOffset> assemblyOffsets)
+                                                IReadOnlyList<AssemblyOffset> assemblyOffsets,
+                                                StringHeap stringHeap,
+                                                IReadOnlyDictionary<Guid, IntermediaApi> apiByFingerprint)
             {
                 var count = 0;
                 foreach (var assembly in assemblies)
@@ -818,7 +821,8 @@ public sealed partial class CatalogBuilder
                     if (assembly.Declarations.TryGetValue(api, out var declaration))
                     {
                         Memory.WriteAssemblyOffset(assemblyOffsets[assembly.Index]);
-                        WriteSyntaxPatchup(declaration);
+                        var syntaxOffset = GetOrStoreSyntaxOffset(declaration.Syntax, stringHeap, apiByFingerprint);
+                        Memory.WriteBlobOffset(syntaxOffset);
                     }
                 }
 
@@ -872,6 +876,21 @@ public sealed partial class CatalogBuilder
                 }
 
                 return result;
+            }
+
+            private BlobOffset GetOrStoreSyntaxOffset(string syntax,
+                                                      StringHeap stringHeap,
+                                                      IReadOnlyDictionary<Guid, IntermediaApi> apiByFingerprint)
+            {
+                if (_syntaxOffsets.TryGetValue(syntax, out var syntaxOffset))
+                    return syntaxOffset;
+
+                if (_syntaxOffsets.Count >= SyntaxOffsetCacheLimit)
+                    _syntaxOffsets.Clear();
+
+                syntaxOffset = StoreSyntax(syntax, stringHeap, apiByFingerprint);
+                _syntaxOffsets.Add(syntax, syntaxOffset);
+                return syntaxOffset;
             }
 
             public void PatchSyntaxes(StringHeap stringHeap,
