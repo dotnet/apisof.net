@@ -197,6 +197,10 @@ public sealed partial class CatalogBuilder
 
         private void WriteApis(IReadOnlyList<IntermediaApi> apis)
         {
+
+            Console.WriteLine($"  Writing {apis.Count} APIs...");
+            var chunkSize = 10_000;
+            var apiIndex = 0;
             foreach (var api in apis)
             {
                 var intermediateChildren = (IReadOnlyList<IntermediaApi>?) api.Children ?? Array.Empty<IntermediaApi>();
@@ -213,6 +217,14 @@ public sealed partial class CatalogBuilder
 
                 if (api.Children is not null)
                     WriteApis(api.Children);
+                
+                if ((apiIndex + 1) % chunkSize == 0)
+                {
+                    Console.WriteLine($"    API chunk {(apiIndex + 1) / chunkSize}: {apiIndex + 1:N0}-{Math.Min(apiIndex + chunkSize, apis.Count):N0} of {apis.Count:N0}");
+                    GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
+                }
+
+                apiIndex++;
             }
         }
 
