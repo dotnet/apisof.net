@@ -5,18 +5,30 @@ namespace Terrajobst.ApiCatalog;
 public sealed class SuffixTreeBuilder
 {
     private readonly Node _root = new();
+    private readonly Dictionary<string, string> _tokenPool = new(StringComparer.Ordinal);
 
     public void Add(string key, int value)
     {
         ThrowIfNullOrEmpty(key);
 
-        var tokens = Tokenizer.Tokenize(key).ToArray();
+        var tokens = Tokenizer.Tokenize(key)
+            .Select(GetCanonicalToken)
+            .ToArray();
 
         for (var i = 0; i < tokens.Length; i++)
         {
             if (tokens[i] != ".")
                 Add(_root, tokens, i, value);
         }
+    }
+
+    private string GetCanonicalToken(string token)
+    {
+        if (_tokenPool.TryGetValue(token, out var canonicalToken))
+            return canonicalToken;
+
+        _tokenPool.Add(token, token);
+        return token;
     }
 
     private static void Add(Node node, string[] tokens, int tokenIndex, int value)

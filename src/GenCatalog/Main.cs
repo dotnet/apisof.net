@@ -59,6 +59,11 @@ internal sealed class Main : IConsoleMain
             await GeneratePlatformIndexAsync(frameworksPath, indexStore);
             await GeneratePackageIndexAsync(packageListPath, packagesPath, frameworksPath, indexStore);
             await GenerateCatalogAsync(indexStore, catalogModelPath);
+
+            // The stats phase loads the catalog model; force a full collection before allocating the suffix tree.
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
+            GC.WaitForPendingFinalizers();
+
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
             await _store.UploadApiCatalogAsync(catalogModelPath);
             await _store.UploadSuffixTreeAsync(suffixTreePath);
@@ -296,6 +301,7 @@ internal sealed class Main : IConsoleMain
         Console.WriteLine($"Generating {Path.GetFileName(suffixTreePath)}...");
         var catalog = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var builder = new SuffixTreeBuilder();
+        var processed = 0;
 
         foreach (var api in catalog.AllApis)
         {
@@ -303,6 +309,13 @@ internal sealed class Main : IConsoleMain
                 continue;
 
             builder.Add(api.ToString(), api.Id);
+
+            processed++;
+            if (processed % 250_000 == 0)
+            {
+                Console.WriteLine($"  Suffix tree APIs processed: {processed:N0}");
+                GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
+            }
         }
 
         await using var stream = File.Create(suffixTreePath);
