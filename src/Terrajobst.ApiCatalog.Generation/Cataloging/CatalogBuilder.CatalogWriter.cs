@@ -967,6 +967,8 @@ public sealed partial class CatalogBuilder
                 Console.WriteLine("Patching API offsets...");
                 var total = _apiPatchups.Count;
                 var chunkStart = 0;
+                var chunkNumber = 0;
+                Stopwatch? chunkStopwatch = null;
 
                 for (var i = 0; i < total; i++)
                 {
@@ -974,6 +976,9 @@ public sealed partial class CatalogBuilder
                     {
                         if (i > 0)
                         {
+                            chunkStopwatch!.Stop();
+                            Console.WriteLine($"  API chunk {chunkNumber} completed in {chunkStopwatch.Elapsed.TotalSeconds:N2} seconds");
+
                             for (var j = chunkStart; j < i; j++)
                                 _apiPatchups[j] = default;
 
@@ -981,9 +986,10 @@ public sealed partial class CatalogBuilder
                             GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
                         }
 
-                        var chunk = i / PatchChunkSize + 1;
+                        chunkNumber = i / PatchChunkSize + 1;
                         var chunkEnd = Math.Min(i + PatchChunkSize, total);
-                        Console.WriteLine($"  API chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
+                        Console.WriteLine($"  API chunk {chunkNumber} started: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
+                        chunkStopwatch = Stopwatch.StartNew();
                     }
 
                     var patchOffset = _apiPatchups[i];
@@ -991,6 +997,12 @@ public sealed partial class CatalogBuilder
                     var apiIndex = Memory.PeekInt32();
                     var apiOffset = apiOffsets[apiIndex];
                     Memory.WriteApiOffset(apiOffset);
+                }
+
+                if (total > 0)
+                {
+                    chunkStopwatch!.Stop();
+                    Console.WriteLine($"  API chunk {chunkNumber} completed in {chunkStopwatch.Elapsed.TotalSeconds:N2} seconds");
                 }
 
                 Memory.Seek(Memory.GetLength());
