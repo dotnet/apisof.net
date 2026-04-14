@@ -966,11 +966,21 @@ public sealed partial class CatalogBuilder
             {
                 Console.WriteLine("Patching API offsets...");
                 var total = _apiPatchups.Count;
+                var chunkStart = 0;
 
-                for (var i = 0; i < _apiPatchups.Count; i++)
+                for (var i = 0; i < total; i++)
                 {
                     if (i % PatchChunkSize == 0)
                     {
+                        if (i > 0)
+                        {
+                            for (var j = chunkStart; j < i; j++)
+                                _apiPatchups[j] = default;
+
+                            chunkStart = i;
+                            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
+                        }
+
                         var chunk = i / PatchChunkSize + 1;
                         var chunkEnd = Math.Min(i + PatchChunkSize, total);
                         Console.WriteLine($"  API chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
@@ -981,12 +991,12 @@ public sealed partial class CatalogBuilder
                     var apiIndex = Memory.PeekInt32();
                     var apiOffset = apiOffsets[apiIndex];
                     Memory.WriteApiOffset(apiOffset);
-
-                    if ((i + 1) % PatchChunkSize == 0)
-                        GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
                 }
 
                 Memory.Seek(Memory.GetLength());
+                for (var j = chunkStart; j < total; j++)
+                    _apiPatchups[j] = default;
+
                 _apiPatchups.Clear();
                 _apiPatchups.TrimExcess();
             }
@@ -996,11 +1006,21 @@ public sealed partial class CatalogBuilder
             {
                 Console.WriteLine("Patching assembly offsets...");
                 var total = _assemblyPatchups.Count;
+                var chunkStart = 0;
 
-                for (var i = 0; i < _assemblyPatchups.Count; i++)
+                for (var i = 0; i < total; i++)
                 {
                     if (i % PatchChunkSize == 0)
                     {
+                        if (i > 0)
+                        {
+                            for (var j = chunkStart; j < i; j++)
+                                _assemblyPatchups[j] = default;
+
+                            chunkStart = i;
+                            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
+                        }
+
                         var chunk = i / PatchChunkSize + 1;
                         var chunkEnd = Math.Min(i + PatchChunkSize, total);
                         Console.WriteLine($"  Assembly chunk {chunk}: {i + 1:N0}-{chunkEnd:N0} of {total:N0}");
@@ -1011,12 +1031,12 @@ public sealed partial class CatalogBuilder
                     var assemblyIndex = Memory.PeekInt32();
                     var assemblyOffset = assemblyOffsets[assemblyIndex];
                     Memory.WriteAssemblyOffset(assemblyOffset);
-
-                    if ((i + 1) % PatchChunkSize == 0)
-                        GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
                 }
 
                 Memory.Seek(Memory.GetLength());
+                for (var j = chunkStart; j < total; j++)
+                    _assemblyPatchups[j] = default;
+
                 _assemblyPatchups.Clear();
                 _assemblyPatchups.TrimExcess();
             }
