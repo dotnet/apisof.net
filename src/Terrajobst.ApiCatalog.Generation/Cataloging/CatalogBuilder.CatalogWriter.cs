@@ -93,6 +93,8 @@ public sealed partial class CatalogBuilder
             _blobHeap.PatchApiOffsets(_builder._apis, _apiOffsets);
 
             Console.WriteLine("Preparing final serialization...");
+            ReleaseBuilderMemory();
+            LogMemory("After releasing builder graph");
             LogMemory("Before final serialization GC");
             GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
             GC.WaitForPendingFinalizers();
@@ -129,6 +131,19 @@ public sealed partial class CatalogBuilder
                     heapOrTable.Memory.CopyTo(deflateStream);
             }
             LogMemory("After deflate serialization");
+        }
+
+        private void ReleaseBuilderMemory()
+        {
+            _builder._extensions.Clear();
+            _builder._platformNames.Clear();
+            _builder._frameworkByName.Clear();
+            _builder._packageByFingerprint.Clear();
+            _builder._assemblyByFingerprint.Clear();
+            _builder._apiByFingerprint.Clear();
+            _builder._rootApis.Clear();
+            _builder._assemblies.Clear();
+            _builder._apis.Clear();
         }
 
         private static void LogMemory(string stage)
