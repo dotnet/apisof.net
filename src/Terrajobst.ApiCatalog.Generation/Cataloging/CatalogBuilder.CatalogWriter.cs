@@ -92,8 +92,16 @@ public sealed partial class CatalogBuilder
             _blobHeap.PatchSyntaxes(_stringHeap, _builder._apiByFingerprint);
             _blobHeap.PatchApiOffsets(_builder._apis, _apiOffsets);
 
+            Console.WriteLine("Preparing final serialization...");
+            LogMemory("Before final serialization GC");
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            LogMemory("After final serialization GC");
+
             using (var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
             {
+                LogMemory("Before writing catalog header");
+
                 // Magic value
 
                 writer.Write(ApiCatalogSchema.MagicNumber);
@@ -110,13 +118,27 @@ public sealed partial class CatalogBuilder
                     var length = heapOrTable.Memory.GetLength();
                     writer.Write(length);
                 }
+
+                LogMemory("After writing catalog header");
             }
 
+            LogMemory("Before deflate serialization");
             using (var deflateStream = new DeflateStream(stream, CompressionLevel.Optimal, leaveOpen: true))
             {
                 foreach (var heapOrTable in heapsAndTables)
                     heapOrTable.Memory.CopyTo(deflateStream);
             }
+            LogMemory("After deflate serialization");
+        }
+
+        private static void LogMemory(string stage)
+        {
+            var process = Process.GetCurrentProcess();
+            var workingSetMb = process.WorkingSet64 / (1024.0 * 1024.0);
+            var privateMb = process.PrivateMemorySize64 / (1024.0 * 1024.0);
+            var managedHeapMb = GC.GetTotalMemory(forceFullCollection: false) / (1024.0 * 1024.0);
+
+            Console.WriteLine($"[{DateTime.UtcNow:O}] {stage} | WorkingSet={workingSetMb:N2} MB | Private={privateMb:N2} MB | ManagedHeap={managedHeapMb:N2} MB");
         }
 
         private void WritePlatforms()
@@ -962,6 +984,8 @@ public sealed partial class CatalogBuilder
                 syntaxOffsets.TrimExcess();
                 _syntaxPatchups.Clear();
                 _syntaxPatchups.TrimExcess();
+                _syntaxOffsets.Clear();
+                _syntaxOffsets.TrimExcess();
             }
 
             public void PatchApiOffsets(IReadOnlyList<IntermediaApi> apis,
