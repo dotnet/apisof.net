@@ -31,6 +31,7 @@ stages:
         cancelTimeoutInMinutes: 5
         steps:
           - checkout: self
+            clean: true
             fetchDepth: 0
           - task: UseDotNet@2
             displayName: "Install .NET 8"
@@ -48,6 +49,7 @@ stages:
               addSpnToEnvironment: true
               inlineScript: |
                 export APISOFDOTNET_INDEX_PATH="$(Pipeline.Workspace)/catalog"
+                rm -rf "$APISOFDOTNET_INDEX_PATH"
                 mkdir -p "$APISOFDOTNET_INDEX_PATH"
                 mkdir -p "$APISOFDOTNET_INDEX_PATH/index"
                 mkdir -p "$APISOFDOTNET_INDEX_PATH/frameworks"

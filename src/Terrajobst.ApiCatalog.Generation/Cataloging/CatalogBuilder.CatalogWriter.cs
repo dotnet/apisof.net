@@ -215,12 +215,16 @@ public sealed partial class CatalogBuilder
                 SetApiOffset(api, rowOffset);
 
                 if (api.Children is not null)
+                {
+                    Console.WriteLine($"    Writing children of API {api.Name} ({apiIndex + 1:N0} of {apis.Count:N0}) - {api.Children.Count:N0} children...");
                     WriteApis(api.Children);
+                }
                 
                 if ((apiIndex + 1) % chunkSize == 0)
                 {
-                    Console.WriteLine($"    API chunk {(apiIndex + 1) / chunkSize}: {apiIndex + 1:N0}-{Math.Min(apiIndex + chunkSize, apis.Count):N0} of {apis.Count:N0}");
+                    Console.WriteLine($"API {api.Name} chunk {(apiIndex + 1) / chunkSize}: {apiIndex + 1:N0}-{Math.Min(apiIndex + chunkSize, apis.Count):N0} of {apis.Count:N0}");
                     GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
+                    Console.WriteLine("Garbage collection completed.");
                 }
 
                 apiIndex++;
