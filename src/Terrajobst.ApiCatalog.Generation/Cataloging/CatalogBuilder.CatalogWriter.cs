@@ -198,8 +198,7 @@ public sealed partial class CatalogBuilder
         private void WriteApis(IReadOnlyList<IntermediaApi> apis)
         {
 
-            Console.WriteLine($"  Writing {apis.Count} APIs...");
-            var chunkSize = 10_000;
+            var chunkSize = 1000;
             var apiIndex = 0;
             foreach (var api in apis)
             {
