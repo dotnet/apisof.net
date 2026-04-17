@@ -18,52 +18,54 @@ resources:
       ref: main
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
-pool:
-  name: VSEng-MicroBuild-Large
-stages:
-  - stage: generate_catalog
-    displayName: "Generate Catalog"
-    jobs:
-      - job: generate_catalog_job
-        displayName: "Run Catalog Generator"
-        
-        timeoutInMinutes: 0
-        cancelTimeoutInMinutes: 5
-        steps:
-          - checkout: self
-            clean: true
-            fetchDepth: 0
-          - task: UseDotNet@2
-            displayName: "Install .NET 8"
-            inputs:
-              packageType: sdk
-              version: 8.x
-          - task: NuGetAuthenticate@1
-            displayName: "NuGet Authenticate"
-          - task: AzureCLI@2
-            displayName: "Generate Catalog"
-            inputs:
-              azureSubscription: "$(AzureSubscriptionConnection)"
-              scriptType: "bash"
-              scriptLocation: "inlineScript"                  
-              addSpnToEnvironment: true
-              inlineScript: |
-                export APISOFDOTNET_INDEX_PATH="$(Pipeline.Workspace)/catalog"
-                rm -rf "$APISOFDOTNET_INDEX_PATH"
-                mkdir -p "$APISOFDOTNET_INDEX_PATH"
-                mkdir -p "$APISOFDOTNET_INDEX_PATH/index"
-                mkdir -p "$APISOFDOTNET_INDEX_PATH/frameworks"
-                mkdir -p "$APISOFDOTNET_INDEX_PATH/packs"
-                mkdir -p "$APISOFDOTNET_INDEX_PATH/packages"
-                cd "$(Build.SourcesDirectory)/src/GenCatalog"
-                dotnet restore --disable-parallel
-                dotnet build --configuration $(BuildConfiguration) /m:1
-                dotnet run --configuration $(BuildConfiguration) --no-restore --no-build
-            env:
-              AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-              ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-              APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
-              DOTNET_gcServer: 0
-              DOTNET_GCConserveMemory: 9
-              DOTNET_GCHeapHardLimitPercent: 75
-              DOTNET_GCHeapHardLimit: 5368709120
+  parameters:
+    pool:
+      name: VSEng-MicroBuild-Large
+    stages:
+      - stage: generate_catalog
+        displayName: "Generate Catalog"
+        jobs:
+          - job: generate_catalog_job
+            displayName: "Run Catalog Generator"
+            
+            timeoutInMinutes: 0
+            cancelTimeoutInMinutes: 5
+            steps:
+              - checkout: self
+                clean: true
+                fetchDepth: 0
+              - task: UseDotNet@2
+                displayName: "Install .NET 8"
+                inputs:
+                  packageType: sdk
+                  version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - task: AzureCLI@2
+                displayName: "Generate Catalog"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "bash"
+                  scriptLocation: "inlineScript"                  
+                  addSpnToEnvironment: true
+                  inlineScript: |
+                    export APISOFDOTNET_INDEX_PATH="$(Pipeline.Workspace)/catalog"
+                    rm -rf "$APISOFDOTNET_INDEX_PATH"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/index"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/frameworks"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/packs"
+                    mkdir -p "$APISOFDOTNET_INDEX_PATH/packages"
+                    cd "$(Build.SourcesDirectory)/src/GenCatalog"
+                    dotnet restore --disable-parallel
+                    dotnet build --configuration $(BuildConfiguration) /m:1
+                    dotnet run --configuration $(BuildConfiguration) --no-restore --no-build
+                env:
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+                  APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
+                  DOTNET_gcServer: 0
+                  DOTNET_GCConserveMemory: 9
+                  DOTNET_GCHeapHardLimitPercent: 75
+                  DOTNET_GCHeapHardLimit: 5368709120
+      
