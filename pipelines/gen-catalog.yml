@@ -16,15 +16,17 @@ resources:
     - repository: self
       type: git
       ref: main
-
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+pool:
+  name: VSEng-MicroBuild-Large
 stages:
   - stage: generate_catalog
     displayName: "Generate Catalog"
     jobs:
       - job: generate_catalog_job
         displayName: "Run Catalog Generator"
-        pool:
-          name: VSEng-MicroBuild-Large
+        
         timeoutInMinutes: 0
         cancelTimeoutInMinutes: 5
         steps:
