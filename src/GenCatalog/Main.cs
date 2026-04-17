@@ -5,7 +5,6 @@ using System.Xml.Linq;
 
 using Microsoft.CodeAnalysis;
 using NuGet.Frameworks;
-
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.ActionsRunner;
 
@@ -18,6 +17,7 @@ internal sealed class Main : IConsoleMain
     private readonly ApisOfDotNetWebHook _webHook;
     private readonly GitHubActionsEnvironment _gitHubActionsEnvironment;
     private readonly GitHubActionsSummaryTable _summaryTable;
+    private readonly List<string> _memoryUsageReport = new();
 
     public Main(ApisOfDotNetPathProvider pathProvider,
                 ApisOfDotNetStore store,
@@ -52,21 +52,31 @@ internal sealed class Main : IConsoleMain
             var indexStore = new FileSystemIndexStore(indexPath);
 
             var stopwatch = Stopwatch.StartNew();
-
+            LogMemory("Before downloading archived platforms");
             await DownloadArchivedPlatformsAsync(frameworksPath);
+            LogMemory("After downloading archived platforms");
             await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
+            LogMemory("After downloading packaged platforms");
             await DownloadDotnetPackageListAsync(packageListPath);
+            LogMemory("After downloading package list");
             await GeneratePlatformIndexAsync(frameworksPath, indexStore);
+            LogMemory("After generating platform index");
             await GeneratePackageIndexAsync(packageListPath, packagesPath, frameworksPath, indexStore);
+            LogMemory("After generating package index");
+
             await GenerateCatalogAsync(indexStore, catalogModelPath);
+            LogMemory("After generating catalog");
 
             // The stats phase loads the catalog model; force a full collection before allocating the suffix tree.
             GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
             GC.WaitForPendingFinalizers();
-
+            LogMemory("After final GC before generating suffix tree");
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
+            LogMemory("After generating suffix tree");
             await _store.UploadApiCatalogAsync(catalogModelPath);
+            LogMemory("After uploading API catalog");
             await _store.UploadSuffixTreeAsync(suffixTreePath);
+            LogMemory("After uploading suffix tree");
 
             var catalogSize = new FileInfo(catalogModelPath).Length;
             var suffixTreeSize = new FileInfo(suffixTreePath).Length;
@@ -77,7 +87,10 @@ internal sealed class Main : IConsoleMain
 
             Console.WriteLine($"Completed in {stopwatch.Elapsed}");
             Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
-
+            foreach (var line in _memoryUsageReport)            
+            {
+                Console.WriteLine(line);
+            }
             await UploadSummaryAsync(success: true);
         }
         catch
@@ -340,6 +353,17 @@ internal sealed class Main : IConsoleMain
         jobStream.Position = 0;
 
         await _store.UploadAsync("catalog", "job.json", jobStream);
+    }
+
+    private void LogMemory(string stage)
+    {
+        var process = Process.GetCurrentProcess();
+        var workingSetMb = process.WorkingSet64 / (1024.0 * 1024.0);
+        var privateMb = process.PrivateMemorySize64 / (1024.0 * 1024.0);
+        var managedHeapMb = GC.GetTotalMemory(forceFullCollection: false) / (1024.0 * 1024.0);
+
+        var message = $"[{DateTime.UtcNow:O}] {stage} | WorkingSet={workingSetMb:N2} MB | Private={privateMb:N2} MB | ManagedHeap={managedHeapMb:N2} MB";
+        _memoryUsageReport.Add(message);
     }
 
     internal sealed class Job

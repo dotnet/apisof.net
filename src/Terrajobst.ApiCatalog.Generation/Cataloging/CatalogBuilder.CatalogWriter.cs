@@ -77,17 +77,29 @@ public sealed partial class CatalogBuilder
             };
 
             WritePlatforms();
+            LogMemory("After WritePlatforms");
             WriteFrameworks();
+            LogMemory("After WriteFrameworks");
             WritePackages();
+            LogMemory("After WritePackages");
             WriteAssemblies();
+            LogMemory("After WriteAssemblies");
             _blobHeap.PatchAssemblyOffsets(_builder._assemblies, _assemblyOffsets);
+            LogMemory("After PatchAssemblyOffsets");
             WriteApis();
+            LogMemory("After WriteApis");
             WriteRootApis();
+            LogMemory("After WriteRootApis");
             WriteExtensionMethods();
+            LogMemory("After WriteExtensionMethods");
             WriteObsoletions();
+            LogMemory("After WriteObsoletions");
             WritePlatformSupports();
+            LogMemory("After WritePlatformSupports");
             WritePreviewRequirements();
+            LogMemory("After WritePreviewRequirements");
             WriteExperimentals();
+            LogMemory("After WriteExperimentals");
 
             _blobHeap.PatchSyntaxes(_stringHeap, _builder._apiByFingerprint);
             _blobHeap.PatchApiOffsets(_builder._apis, _apiOffsets);

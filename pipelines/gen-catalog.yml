@@ -18,9 +18,7 @@ resources:
       ref: main
 
 pool:
-  name: AzurePipelines-EO
-  image: 1ESPT-Windows2022
-  os: windows
+  name: VSEng-MicroBuild-Large
 stages:
   - stage: generate_catalog
     displayName: "Generate Catalog"
