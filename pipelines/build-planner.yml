@@ -1,0 +1,84 @@
+---
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - pipelines/deploy-planner.yml
+      - src/NetUpgradePlanner/**
+      - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.NetUpgradePlanner/**
+      - src/Terrajobst.NetUpgradePlanner.Excel/**
+      - src/Terrajobst.UsageCrawling/**
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  BuildConfiguration: Release
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      codeql:
+        compiled:
+          enabled: true
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    customBuildTags:
+      - ES365AIMigrationTooling
+    stages:
+      - stage: DeployPlanner
+        jobs:
+          - job: build_and_deploy
+            displayName: Build and deploy planner
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: "Publish squirrel release"
+                  targetPath: $(Build.ArtifactStagingDirectory)/squirrel-release
+                  artifactName: squirrel-release
+            steps:
+              - checkout: self
+                fetchDepth: 0 # We need the full history in order to use Git versioning
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  dotnet tool install -g nbgv
+                  nbgv cloud -p src/NetUpgradePlanner
+                displayName: "Set build version (nbgv)"
+              - script: |
+                  cd src/NetUpgradePlanner
+                  dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
+                displayName: "dotnet publish"
+              - powershell: |
+                  New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release"
+                  Set-Location ".artifacts/publish/NetUpgradePlanner"
+                  Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe")
+                  Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "$(Build.ArtifactStagingDirectory)/squirrel-release"
+                  Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$(NBGV_SemVer1)" --packAuthors "Immo Landwerth" --packDir "." -r "$(Build.ArtifactStagingDirectory)/squirrel-release"
+                displayName: "squirrel pack"
+              - task: AzureCLI@2
+                displayName: "Upload release to Azure Storage"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "pscore"
+                  scriptLocation: "inlineScript"
+                  inlineScript: |
+                    az storage blob upload-batch -d squirrel -s "$(Build.ArtifactStagingDirectory)/squirrel-release" --overwrite
+                env:
+                  AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
