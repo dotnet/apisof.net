@@ -5,7 +5,7 @@ trigger:
       - main
   paths:
     include:
-      - pipelines/deploy-planner.yml
+      - pipelines/build-planner.yml
       - src/NetUpgradePlanner/**
       - src/Terrajobst.ApiCatalog/**
       - src/Terrajobst.NetUpgradePlanner/**
@@ -65,15 +65,39 @@ extends:
                   cd src/NetUpgradePlanner
                   dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: "dotnet publish"
+              - task: AzureCLI@2
+                displayName: "Download existing squirrel releases"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnection)"
+                  scriptType: "pscore"
+                  scriptLocation: "inlineScript"
+                  inlineScript: |
+                    New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release" | Out-Null
+                    az storage blob download-batch -d "$(Build.ArtifactStagingDirectory)/squirrel-release" -s squirrel --overwrite --pattern "*.nupkg"
+                    az storage blob download-batch -d "$(Build.ArtifactStagingDirectory)/squirrel-release" -s squirrel --overwrite --pattern "RELEASES"
+                env:
+                  AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
               - powershell: |
                   New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release"
                   Set-Location ".artifacts/publish/NetUpgradePlanner"
                   Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe")
-                  Squirrel http-down --url "https://apisofdotnet.blob.core.windows.net/squirrel/" -r "$(Build.ArtifactStagingDirectory)/squirrel-release"
-                  Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$(NBGV_SemVer1)" --packAuthors "Immo Landwerth" --packDir "." -r "$(Build.ArtifactStagingDirectory)/squirrel-release"
+
+                  $releaseDir = "$(Build.ArtifactStagingDirectory)/squirrel-release"
+                  $version = "$(NBGV_SemVer1)"
+                  $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-*.nupkg" -ErrorAction SilentlyContinue
+
+                  if ($existing) {
+                    Write-Host "Version $version already exists in squirrel release feed; skipping pack to avoid 409 conflict."
+                    Write-Host "##vso[task.setvariable variable=PlannerVersionExists]true"
+                  }
+                  else {
+                    Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." -r "$releaseDir"
+                    Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
+                  }
                 displayName: "squirrel pack"
               - task: AzureCLI@2
                 displayName: "Upload release to Azure Storage"
+                condition: and(succeeded(), ne(variables['PlannerVersionExists'], 'true'))
                 inputs:
                   azureSubscription: "$(AzureSubscriptionConnection)"
                   scriptType: "pscore"

@@ -62,7 +62,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: squirrel-release
-          path: .artifacts/squirrel-release
+          path: .artifacts/squirrel-release 
 
       - name: Upload release
         uses: azure/cli@v2
