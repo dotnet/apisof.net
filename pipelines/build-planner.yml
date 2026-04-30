@@ -75,8 +75,7 @@ extends:
                     New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release" | Out-Null
                     az storage blob download-batch -d "$(Build.ArtifactStagingDirectory)/squirrel-release" -s squirrel --overwrite --pattern "*.nupkg"
                     az storage blob download-batch -d "$(Build.ArtifactStagingDirectory)/squirrel-release" -s squirrel --overwrite --pattern "RELEASES"
-                env:
-                  AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
+                
               - powershell: |
                   New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release"
                   Set-Location ".artifacts/publish/NetUpgradePlanner"
@@ -104,5 +103,4 @@ extends:
                   scriptLocation: "inlineScript"
                   inlineScript: |
                     az storage blob upload-batch -d squirrel -s "$(Build.ArtifactStagingDirectory)/squirrel-release" --overwrite
-                env:
-                  AZURE_STORAGE_CONNECTION_STRING: $(AzureStorageConnectionString)
+                
