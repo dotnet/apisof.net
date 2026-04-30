@@ -73,8 +73,8 @@ extends:
                   scriptLocation: "inlineScript"
                   inlineScript: |
                     New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release" | Out-Null
-                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/squirrel-release" --source squirrel --auth-mode login --overwrite --pattern "*.nupkg"
-                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/squirrel-release" --source squirrel --auth-mode login --overwrite --pattern "RELEASES"
+                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/squirrel-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "*.nupkg"
+                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/squirrel-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "RELEASES"
                 
               - powershell: |
                   New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release"
@@ -102,5 +102,5 @@ extends:
                   scriptType: "pscore"
                   scriptLocation: "inlineScript"
                   inlineScript: |
-                    az storage blob upload-batch --destination squirrel --source "$(Build.ArtifactStagingDirectory)/squirrel-release" --auth-mode login --overwrite
+                    az storage blob upload-batch --destination squirrel --source "$(Build.ArtifactStagingDirectory)/squirrel-release" --account-name $(StorageAccountName) --auth-mode login --overwrite
                 
