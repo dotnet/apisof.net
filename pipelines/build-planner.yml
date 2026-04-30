@@ -58,7 +58,7 @@ extends:
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
               - script: |
-                  dotnet tool install -g nbgv
+                  dotnet tool update -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
                   nbgv cloud -p src/NetUpgradePlanner
                 displayName: "Set build version (nbgv)"
               - script: |
