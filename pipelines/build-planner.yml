@@ -82,7 +82,7 @@ extends:
                   Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe")
 
                   $releaseDir = "$(Build.ArtifactStagingDirectory)/squirrel-release"
-                  $version = "$(NBGV_SemVer1)"
+                  $version = "$(Build.SourceVersion)"
                   $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-*.nupkg" -ErrorAction SilentlyContinue
 
                   if ($existing) {
