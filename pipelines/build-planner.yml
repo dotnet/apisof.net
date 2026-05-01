@@ -82,7 +82,12 @@ extends:
                   Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe")
 
                   $releaseDir = "$(Build.ArtifactStagingDirectory)/squirrel-release"
-                  $version = "$(Build.SourceVersion)"
+                  $version = $env:PLANNER_SEMVER1
+
+                  if ([string]::IsNullOrWhiteSpace($version)) {
+                    throw "NBGV version variable is missing. Ensure 'nbgv cloud -p src/NetUpgradePlanner' completed successfully."
+                  }
+
                   $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-*.nupkg" -ErrorAction SilentlyContinue
 
                   if ($existing) {
@@ -94,6 +99,8 @@ extends:
                     Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
                   }
                 displayName: "squirrel pack"
+                env:
+                  PLANNER_SEMVER1: $(GitBuildVersionSimple)
               - task: AzureCLI@2
                 displayName: "Upload release to Azure Storage"
                 condition: and(succeeded(), ne(variables['PlannerVersionExists'], 'true'))
