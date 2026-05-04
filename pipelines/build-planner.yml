@@ -45,9 +45,9 @@ extends:
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: "Publish squirrel release"
-                  targetPath: $(Build.ArtifactStagingDirectory)/squirrel-release
-                  artifactName: squirrel-release
+                  displayName: "Publish velopack release"
+                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-release
+                  artifactName: velopack-release
             steps:
               - checkout: self
                 fetchDepth: 0 # We need the full history in order to use Git versioning
@@ -65,40 +65,41 @@ extends:
                   cd src/NetUpgradePlanner
                   dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: "dotnet publish"
+              - script: |
+                  dotnet tool update -g vpk --ignore-failed-sources || dotnet tool install -g vpk --ignore-failed-sources
+                displayName: "Install vpk"
               - task: AzureCLI@2
-                displayName: "Download existing squirrel releases"
+                displayName: "Download existing velopack releases"
                 inputs:
                   azureSubscription: "$(AzureSubscriptionConnection)"
                   scriptType: "pscore"
                   scriptLocation: "inlineScript"
                   inlineScript: |
-                    New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release" | Out-Null
-                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/squirrel-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "*.nupkg"
-                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/squirrel-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "RELEASES"
-                
-              - powershell: |
-                  New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/squirrel-release"
-                  Set-Location ".artifacts/publish/NetUpgradePlanner"
-                  Set-Alias Squirrel ($env:USERPROFILE + "\.nuget\packages\clowd.squirrel\2.11.1\tools\Squirrel.exe")
+                    New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/velopack-release" | Out-Null
+                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/velopack-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "*.nupkg"
+                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/velopack-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "releases.*.json"
 
-                  $releaseDir = "$(Build.ArtifactStagingDirectory)/squirrel-release"
+              - powershell: |
+                  Set-Location ".artifacts/publish/NetUpgradePlanner"
+
+                  $releaseDir = "$(Build.ArtifactStagingDirectory)/velopack-release"
                   $version = $env:PLANNER_SEMVER1
 
                   if ([string]::IsNullOrWhiteSpace($version)) {
                     throw "NBGV version variable is missing. Ensure 'nbgv cloud -p src/NetUpgradePlanner' completed successfully."
                   }
 
-                  $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-*.nupkg" -ErrorAction SilentlyContinue
+                  $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-full.nupkg" -ErrorAction SilentlyContinue
 
                   if ($existing) {
-                    Write-Host "Version $version already exists in squirrel release feed; skipping pack to avoid 409 conflict."
+                    Write-Host "Version $version already exists in velopack release feed; skipping pack to avoid 409 conflict."
                     Write-Host "##vso[task.setvariable variable=PlannerVersionExists]true"
                   }
                   else {
-                    Squirrel pack --framework net6.0,vcredist143-x86 --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." -r "$releaseDir"
+                    vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net8-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
                     Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
                   }
-                displayName: "squirrel pack"
+                displayName: "vpk pack"
                 env:
                   PLANNER_SEMVER1: $(GitBuildVersionSimple)
               - task: AzureCLI@2
@@ -109,5 +110,5 @@ extends:
                   scriptType: "pscore"
                   scriptLocation: "inlineScript"
                   inlineScript: |
-                    az storage blob upload-batch --destination squirrel --source "$(Build.ArtifactStagingDirectory)/squirrel-release" --account-name $(StorageAccountName) --auth-mode login --overwrite
+                    az storage blob upload-batch --destination squirrel --source "$(Build.ArtifactStagingDirectory)/velopack-release" --account-name $(StorageAccountName) --auth-mode login --overwrite
                 

@@ -8,7 +8,7 @@ using NetUpgradePlanner.ViewModels.AssemblyListView;
 using NetUpgradePlanner.ViewModels.MainWindow;
 using NetUpgradePlanner.Views;
 
-using Squirrel;
+using Velopack;
 
 namespace NetUpgradePlanner;
 
@@ -22,17 +22,17 @@ internal sealed partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        VelopackApp.Build()
+                   .SetArgs(e.Args)
+                   .OnAfterInstallFastCallback(_ => FileExtensionManager.RegisterFileExtensions())
+                   .OnAfterUpdateFastCallback(_ => FileExtensionManager.RegisterFileExtensions())
+                   .OnBeforeUninstallFastCallback(_ => FileExtensionManager.UnregisterFileExtensions())
+                   .Run();
+
         _host = Host.CreateDefaultBuilder(e.Args)
                     .ConfigureServices(ConfigureServices)
                     .Build();
         _host.Start();
-
-        SquirrelAwareApp.HandleEvents(
-            onInitialInstall: OnAppInstall,
-            onAppUninstall: OnAppUninstall,
-            onEveryRun: OnAppRun,
-            arguments: e.Args
-        );
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
@@ -48,24 +48,6 @@ internal sealed partial class App : Application
             var workspaceDocumentService = _host.Services.GetRequiredService<WorkspaceDocumentService>();
             await workspaceDocumentService.LoadAsync(fileName);
         }
-    }
-
-    private static void OnAppInstall(SemanticVersion version, IAppTools tools)
-    {
-        tools.CreateShortcutForThisExe(ShortcutLocation.StartMenu);
-        tools.CreateUninstallerRegistryEntry();
-        FileExtensionManager.RegisterFileExtensions();
-    }
-
-    private static void OnAppUninstall(SemanticVersion version, IAppTools tools)
-    {
-        FileExtensionManager.UnregisterFileExtensions();
-        tools.RemoveShortcutForThisExe(ShortcutLocation.StartMenu);
-    }
-
-    private void OnAppRun(SemanticVersion version, IAppTools tools, bool firstRun)
-    {
-        tools.SetProcessAppUserModelId();
     }
 
     protected override void OnExit(ExitEventArgs e)
