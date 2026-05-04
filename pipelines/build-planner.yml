@@ -66,7 +66,7 @@ extends:
                   dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: "dotnet publish"
               - script: |
-                  dotnet tool update -g vpk --ignore-failed-sources || dotnet tool install -g vpk --ignore-failed-sources
+                  dotnet tool update -g vpk --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g vpk --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
                 displayName: "Install vpk"
               - task: AzureCLI@2
                 displayName: "Download existing velopack releases"
