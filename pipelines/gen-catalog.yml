@@ -1,6 +1,9 @@
 trigger: none
 variables:
-  BuildConfiguration: Release
+  - name: BuildConfiguration
+    value: Release
+  - name: TeamName
+    value: DevDiv
 schedules:
   - cron: "21 12 * * *"   # 12:21 PM UTC
     displayName: Daily 12:21 UTC
