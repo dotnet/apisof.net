@@ -116,7 +116,7 @@ public sealed class NuGetFeed
         {
             var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
             using var data = await s_httpClient.GetStreamAsync(url);
-            var document = JsonNode.Parse(data)!; 
+            var document = JsonNode.Parse(data)!;
 
             var count = document["count"]!.GetValue<int>();
             if (count == 0)
