@@ -8,12 +8,19 @@ namespace ApisOfDotNet.Services;
 public sealed class BlobStorageService
 {
     private readonly BlobServiceClient _serviceClient;
+    private readonly ILogger<BlobStorageService> _logger;
 
-    public BlobStorageService(IOptions<ApisOfDotNetOptions> options)
+    public BlobStorageService(IOptions<ApisOfDotNetOptions> options, ILogger<BlobStorageService> logger)
     {
         ThrowIfNull(options);
+        ThrowIfNull(logger);
+
+        _logger = logger;
+
         var serviceUri = new Uri(options.Value.AzureStorageServiceUrl);
+        _logger.LogInformation("Initializing BlobStorageService with endpoint: {ServiceUri}", serviceUri);
         _serviceClient = new BlobServiceClient(serviceUri, new DefaultAzureCredential());
+        _logger.LogInformation("BlobStorageService initialized successfully.");
     }
 
     public BlobServiceClient GetServiceClient() => _serviceClient;

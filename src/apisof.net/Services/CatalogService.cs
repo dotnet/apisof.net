@@ -42,17 +42,35 @@ public sealed class CatalogService
     public async Task InvalidateAsync()
     {
         var invalidateCachedDownload = !_environment.IsDevelopment();
+        _logger.LogInformation("InvalidateAsync started. Environment={Environment}, InvalidateCachedDownload={InvalidateCache}",
+            _environment.EnvironmentName, invalidateCachedDownload);
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
         var catalogTask = _catalogBlobSource.DownloadAsync(invalidateCachedDownload);
         var suffixTreeTask = _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
         var jobInfoTask = _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
         var usageDataTask = DownloadWithFallbackAsync(_usageBlobSource, FeatureUsageData.Empty, invalidateCachedDownload);
         var designNotesTask = DownloadWithFallbackAsync(_designNotesBlobSource, DesignNoteDatabase.Empty, invalidateCachedDownload);
-        await Task.WhenAll(catalogTask,
-                           suffixTreeTask,
-                           jobInfoTask,
-                           usageDataTask,
-                           designNotesTask);
+
+        try
+        {
+            await Task.WhenAll(catalogTask,
+                               suffixTreeTask,
+                               jobInfoTask,
+                               usageDataTask,
+                               designNotesTask);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "One or more downloads failed during InvalidateAsync. " +
+                "Catalog={CatalogStatus}, SuffixTree={SuffixTreeStatus}, JobInfo={JobInfoStatus}, UsageData={UsageStatus}, DesignNotes={DesignNotesStatus}",
+                catalogTask.Status, suffixTreeTask.Status, jobInfoTask.Status, usageDataTask.Status, designNotesTask.Status);
+            throw;
+        }
+
         _data = new CatalogData(catalogTask.Result, suffixTreeTask.Result, jobInfoTask.Result, usageDataTask.Result, designNotesTask.Result);
+        _logger.LogInformation("InvalidateAsync completed in {ElapsedMs}ms.", sw.ElapsedMilliseconds);
     }
 
     private async Task<T> DownloadWithFallbackAsync<T>(BlobSource<T> source, T fallback, bool invalidateCachedDownload)
@@ -164,26 +182,30 @@ public sealed class CatalogService
         public async Task<T> DownloadAsync(bool invalidateCachedDownload)
         {
             var localPath = GetLocalPath();
+            _logger.LogInformation("DownloadAsync for {BlobName}: localPath={LocalPath}, invalidateCache={InvalidateCache}, fileExists={FileExists}",
+                BlobName, localPath, invalidateCachedDownload, File.Exists(localPath));
 
             if (!invalidateCachedDownload && File.Exists(localPath))
             {
-                _logger.LogInformation($"Found {BlobName}. Skipping download.");
+                _logger.LogInformation("Found {BlobName}. Skipping download.", BlobName);
             }
             else
             {
-                _logger.LogInformation($"Downloading {BlobName}...");
+                _logger.LogInformation("Downloading {BlobName} from {ContainerName}...", BlobName, ContainerName);
 
                 await Task.Run(() =>
                 {
                     var blobClient = _blobStorageService.GetBlobClient(ContainerName, BlobName);
+                    _logger.LogInformation("BlobClient URI for {BlobName}: {BlobUri}", BlobName, blobClient.Uri);
                     return blobClient.DownloadToAsync(localPath);
                 });
 
-                _logger.LogInformation($"Downloading {BlobName} complete.");
+                var fileInfo = new FileInfo(localPath);
+                _logger.LogInformation("Downloaded {BlobName} complete. File size: {FileSize} bytes", BlobName, fileInfo.Exists ? fileInfo.Length : -1);
             }
 
             var result = await Task.Run(() => _loader(localPath));
-            _logger.LogInformation($"Loaded {BlobName}.");
+            _logger.LogInformation("Loaded {BlobName}.", BlobName);
 
             return result;
         }
