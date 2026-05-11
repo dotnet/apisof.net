@@ -6,6 +6,7 @@ trigger:
   paths:
     include:
       - pipelines/build-planner.yml
+      - pipelines/templates/steps-build-planner.yml
       - src/NetUpgradePlanner/**
       - src/Terrajobst.ApiCatalog/**
       - src/Terrajobst.NetUpgradePlanner/**
@@ -40,17 +41,10 @@ extends:
     stages:
       - stage: DeployPlanner
         jobs:
-          - job: build_and_deploy
-            displayName: Build and deploy planner
-            templateContext:
-              outputs:
-                - output: pipelineArtifact
-                  displayName: "Publish velopack release"
-                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-release
-                  artifactName: velopack-release
+          - job: planner_tests
+            displayName: Run planner tests
             steps:
               - checkout: self
-                fetchDepth: 0 # We need the full history in order to use Git versioning
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
@@ -58,57 +52,34 @@ extends:
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
               - script: |
-                  dotnet tool update -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
-                  nbgv cloud -p src/NetUpgradePlanner
-                displayName: "Set build version (nbgv)"
-              - script: |
-                  cd src/NetUpgradePlanner
-                  dotnet publish /p:SourceRevisionId=$(Build.SourceVersion)
-                displayName: "dotnet publish"
-              - script: |
-                  dotnet tool update -g vpk --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g vpk --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
-                displayName: "Install vpk"
-              - task: AzureCLI@2
-                displayName: "Download existing velopack releases"
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "pscore"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/velopack-release" | Out-Null
-                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/velopack-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "*.nupkg"
-                    az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/velopack-release" --source squirrel --account-name $(StorageAccountName) --auth-mode login --overwrite --pattern "releases.*.json"
-
-              - powershell: |
-                  Set-Location ".artifacts/publish/NetUpgradePlanner"
-
-                  $releaseDir = "$(Build.ArtifactStagingDirectory)/velopack-release"
-                  $version = $env:PLANNER_SEMVER1
-
-                  if ([string]::IsNullOrWhiteSpace($version)) {
-                    throw "NBGV version variable is missing. Ensure 'nbgv cloud -p src/NetUpgradePlanner' completed successfully."
-                  }
-
-                  $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-full.nupkg" -ErrorAction SilentlyContinue
-
-                  if ($existing) {
-                    Write-Host "Version $version already exists in velopack release feed; skipping pack to avoid 409 conflict."
-                    Write-Host "##vso[task.setvariable variable=PlannerVersionExists]true"
-                  }
-                  else {
-                    vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net8-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
-                    Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
-                  }
-                displayName: "vpk pack"
-                env:
-                  PLANNER_SEMVER1: $(GitBuildVersionSimple)
-              - task: AzureCLI@2
-                displayName: "Upload release to Azure Storage"
-                condition: and(succeeded(), ne(variables['PlannerVersionExists'], 'true'))
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "pscore"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    az storage blob upload-batch --destination squirrel --source "$(Build.ArtifactStagingDirectory)/velopack-release" --account-name $(StorageAccountName) --auth-mode login --overwrite
+                  dotnet test src/Terrajobst.ApiCatalog.Tests/Terrajobst.ApiCatalog.Tests.csproj -c $(BuildConfiguration) --nologo
+                  dotnet test src/Terrajobst.UsageCrawling.Tests/Terrajobst.UsageCrawling.Tests.csproj -c $(BuildConfiguration) --nologo
+                  dotnet test src/Terrajobst.UsageCrawling.Storage.Tests/Terrajobst.UsageCrawling.Storage.Tests.csproj -c $(BuildConfiguration) --nologo
+                displayName: "Run unit tests"
+          - job: build_and_deploy
+            displayName: Build and deploy planner
+            dependsOn: planner_tests
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: "Publish velopack dev"
+                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-dev
+                  artifactName: velopack-dev
+                - output: pipelineArtifact
+                  displayName: "Publish planner release"
+                  targetPath: $(Build.ArtifactStagingDirectory)/planner-release
+                  artifactName: planner-release
+            steps:
+              - template: ../templates/steps-build-planner.yml@self
+                displayName: Build and deploy planner dev
+                parameters:
+                  azureSubscriptionConnection: $(AzureDevSubscriptionConnection)
+                  storageAccountName: $(StorageDevAccountName)
+                  artifactName: velopack-dev
+              - template: ../templates/steps-build-planner.yml@self
+                displayName: Build and deploy planner prod
+                parameters:
+                  azureSubscriptionConnection: $(AzureSubscriptionConnection)
+                  storageAccountName: $(StorageAccountName)
+                  artifactName: planner-release
                 
