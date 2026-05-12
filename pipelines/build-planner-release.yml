@@ -52,15 +52,29 @@ extends:
                   artifactName: planner-release
                   targetPath: $(Pipeline.Workspace)/planner-release
             steps:
-              - template: ../templates/steps-build-planner.yml@self
-                displayName: Build and deploy planner release
+              - template: ../templates/upload-build-planner.yml@self
+                displayName: Upload planner release to Dev environment
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionDev)
                   storageAccountName: $(StorageAccountNameDev)
       - stage: Prod
         jobs:
-          - job: build_and_upload
-            displayName: Build and upload planner release
+          - job: PreDeploymentApprovalJob
+            displayName: Pre-Deployment Approval
+            condition: succeeded()
+            timeoutInMinutes: 43200
+            pool: server
+            steps:
+              - task: ManualValidation@1
+                inputs:
+                  notifyUsers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+                  approvers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+          - job: build_and_upload_planner_prod
+            displayName: Build and upload planner to Prod environment
             templateContext:
               type: releaseJob
               isProduction: false
@@ -70,8 +84,6 @@ extends:
                   artifactName: planner-release
                   targetPath: $(Pipeline.Workspace)/planner-release
             steps:
-              - template: ../templates/steps-build-planner.yml@self
-                displayName: Build and deploy planner release
               - template: ../templates/upload-build-planner.yml@self
                 displayName: Upload planner release to Prod environment
                 parameters:
