@@ -23,7 +23,7 @@
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.2.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="1.17.4" />
     <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="12.2.7" />
-    <PackageVersion Include="Microsoft.Cci.Extensions" Version="7.0.0-beta.22175.2" />
+    <PackageVersion Include="Microsoft.Cci.Extensions" Version="4.0.0-rc3-24214-00" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
     <PackageVersion Include="Microsoft.Composition" Version="1.0.31" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.11" />
