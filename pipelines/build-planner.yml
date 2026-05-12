@@ -44,12 +44,15 @@ extends:
       - stage: BuildAndPublish
         jobs:
           - job: build_and_publish
-            displayName: "Build and publish planner"
+            displayName: "Build and publish velopack"
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: "Publish planner release"
-                  targetPath: $(Build.ArtifactStagingDirectory)/planner-release
-                  artifactName: planner-release
+                  displayName: "Publish velopack release"
+                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-release
+                  artifactName: velopack-release
             steps:
               - template: /pipelines/templates/steps-build-planner.yml@self
+                parameters:
+                  azureSubscriptionConnection: $(AzureSubscriptionConnection)
+                  storageAccountName: $(StorageAccountName)

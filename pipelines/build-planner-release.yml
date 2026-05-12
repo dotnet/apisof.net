@@ -42,18 +42,18 @@ extends:
       - stage: Dev
         jobs:
           - job: build_and_upload_dev
-            displayName: Build and upload planner to Dev environment
+            displayName: Build and upload velopack to Dev environment
             templateContext:
               type: releaseJob
               isProduction: false
               inputs:
                 - input: pipelineArtifact
                   pipeline: "build-planner"
-                  artifactName: planner-release
-                  targetPath: $(Pipeline.Workspace)/planner-release
+                  artifactName: velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
-              - template: ../templates/upload-build-planner.yml@self
-                displayName: Upload planner release to Dev environment
+              - template: /pipelines/templates/upload-build-planner.yml@self
+                displayName: Upload velopack release to Dev environment
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionDev)
                   storageAccountName: $(StorageAccountNameDev)
@@ -73,19 +73,19 @@ extends:
                   approvers: |-
                     Chris.Sfanos@microsoft.com,
                     v-danzhu1@microsoft.com
-          - job: build_and_upload_planner_prod
-            displayName: Build and upload planner to Prod environment
+          - job: build_and_upload_velopack_prod
+            displayName: Build and upload velopack to Prod environment
             templateContext:
               type: releaseJob
               isProduction: false
               inputs:
                 - input: pipelineArtifact
                   pipeline: "build-planner"
-                  artifactName: planner-release
-                  targetPath: $(Pipeline.Workspace)/planner-release
+                  artifactName: velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
-              - template: ../templates/upload-build-planner.yml@self
-                displayName: Upload planner release to Prod environment
+              - template: /pipelines/templates/upload-build-planner.yml@self
+                displayName: Upload velopack release to Prod environment
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionProd)
                   storageAccountName: $(StorageAccountNameProd)

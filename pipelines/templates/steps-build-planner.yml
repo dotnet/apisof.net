@@ -1,3 +1,8 @@
+parameters:
+  - name: azureSubscriptionConnection
+    type: string
+  - name: storageAccountName
+    type: string
 steps:
   - checkout: self
     fetchDepth: 0 # We need the full history in order to use Git versioning
@@ -18,3 +23,36 @@ steps:
   - script: |
       dotnet tool update -g vpk --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g vpk --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
     displayName: "Install vpk"
+  - task: AzureCLI@2
+    displayName: "Download existing velopack releases"
+    inputs:
+      azureSubscription: "${{ parameters.azureSubscriptionConnection }}"
+      scriptType: "pscore"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        New-Item -ItemType Directory -Force -Path "$(Build.ArtifactStagingDirectory)/velopack-release" | Out-Null
+        az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "*.nupkg"
+        az storage blob download-batch --destination "$(Build.ArtifactStagingDirectory)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "releases.*.json"
+  - powershell: |
+      Set-Location ".artifacts/publish/NetUpgradePlanner"
+
+      $releaseDir = "$(Build.ArtifactStagingDirectory)/velopack-release"
+      $version = $env:PLANNER_SEMVER1
+
+      if ([string]::IsNullOrWhiteSpace($version)) {
+        throw "NBGV version variable is missing. Ensure 'nbgv cloud -p src/NetUpgradePlanner' completed successfully."
+      }
+
+      $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-full.nupkg" -ErrorAction SilentlyContinue
+
+      if ($existing) {
+        Write-Host "Version $version already exists in velopack release feed; skipping pack to avoid 409 conflict."
+        Write-Host "##vso[task.setvariable variable=PlannerVersionExists]true"
+      }
+      else {
+        vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net8-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
+        Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
+      }
+    displayName: "vpk pack"
+    env:
+      PLANNER_SEMVER1: $(GitBuildVersionSimple)
