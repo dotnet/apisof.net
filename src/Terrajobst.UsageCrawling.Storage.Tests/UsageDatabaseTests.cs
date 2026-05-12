@@ -45,8 +45,11 @@ public class UsageDatabaseTests : IDisposable
     [Fact]
     public async Task UsageDatabase_CloseOpen_ReleasesAndReacquiresFileLock()
     {
-        using var db = await UsageDatabase.OpenOrCreateAsync(_fileName);
+        // File locking behavior is platform-specific; only test on Windows
+        if (!OperatingSystem.IsWindows())
+            return;
 
+        using var db = await UsageDatabase.OpenOrCreateAsync(_fileName);
         Assert.Throws<IOException>(() => OpenAndCloseFileForExclusiveRead(_fileName));
 
         await db.CloseAsync();
