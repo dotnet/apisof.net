@@ -22,16 +22,34 @@ resources:
     - repository: self
       type: git
       ref: main
-stages:
-  - stage: BuildAndPublish
-    jobs:
-      - job: build_and_publish
-        displayName: "Build and publish planner"
-        templateContext:
-          outputs:
-            - output: pipelineArtifact
-              displayName: "Publish planner release"
-              targetPath: $(Build.ArtifactStagingDirectory)/planner-release
-              artifactName: planner-release
-        steps:
-          - template: /pipelines/templates/steps-build-planner.yml@self
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      codeql:
+        compiled:
+          enabled: true
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    customBuildTags:
+      - ES365AIMigrationTooling
+    stages:
+      - stage: BuildAndPublish
+        jobs:
+          - job: build_and_publish
+            displayName: "Build and publish planner"
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: "Publish planner release"
+                  targetPath: $(Build.ArtifactStagingDirectory)/planner-release
+                  artifactName: planner-release
+            steps:
+              - template: /pipelines/templates/steps-build-planner.yml@self
