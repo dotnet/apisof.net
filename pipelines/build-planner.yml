@@ -52,4 +52,4 @@ extends:
                   targetPath: $(Build.ArtifactStagingDirectory)/planner-release
                   artifactName: planner-release
             steps:
-              - template: /pipelines/templates/steps-build-planner.yml@self
+              - template: /pipelines/templates/steps-build-planner.yml
