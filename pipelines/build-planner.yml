@@ -48,4 +48,4 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/planner-release
               artifactName: planner-release
         steps:
-          - template: /pipelines/templates/steps-build-planner.yml@sel
+          - template: /pipelines/templates/steps-build-planner.yml@self
