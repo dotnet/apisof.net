@@ -5,8 +5,6 @@ steps:
     displayName: Use .NET 8 SDK
     inputs:
       version: 8.x
-  - task: NuGetAuthenticate@1
-    displayName: "NuGet Authenticate"
   - script: |
       dotnet tool update -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
       nbgv cloud -p src/NetUpgradePlanner
