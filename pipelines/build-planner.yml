@@ -2,6 +2,8 @@
 trigger:
   branches:
     include:
+      - "*"
+    exclude:
       - main
   paths:
     include:
@@ -56,15 +58,11 @@ extends:
                   dotnet test src/Terrajobst.UsageCrawling.Tests/Terrajobst.UsageCrawling.Tests.csproj -c $(BuildConfiguration) --nologo
                   dotnet test src/Terrajobst.UsageCrawling.Storage.Tests/Terrajobst.UsageCrawling.Storage.Tests.csproj -c $(BuildConfiguration) --nologo
                 displayName: "Run unit tests"
-          - job: build_and_deploy
-            displayName: Build and deploy planner
+          - job: build_and_publish
+            displayName: Build and publish planner
             dependsOn: planner_tests
             templateContext:
               outputs:
-                - output: pipelineArtifact
-                  displayName: "Publish velopack dev"
-                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-dev
-                  artifactName: velopack-dev
                 - output: pipelineArtifact
                   displayName: "Publish planner release"
                   targetPath: $(Build.ArtifactStagingDirectory)/planner-release
@@ -75,11 +73,4 @@ extends:
                 parameters:
                   azureSubscriptionConnection: $(AzureDevSubscriptionConnection)
                   storageAccountName: $(StorageDevAccountName)
-                  artifactName: velopack-dev
-              - template: ../templates/steps-build-planner.yml@self
-                displayName: Build and deploy planner prod
-                parameters:
-                  azureSubscriptionConnection: $(AzureSubscriptionConnection)
-                  storageAccountName: $(StorageAccountName)
-                  artifactName: planner-release
                 
