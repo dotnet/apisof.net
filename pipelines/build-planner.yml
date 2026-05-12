@@ -45,7 +45,6 @@ extends:
         jobs:
           - job: build_and_publish
             displayName: "Build and publish planner"
-            dependsOn: planner_tests
             templateContext:
               outputs:
                 - output: pipelineArtifact
