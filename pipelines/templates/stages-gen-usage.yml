@@ -19,12 +19,6 @@ stages:
         displayName: Generate nuget usage artifact
         timeoutInMinutes: 0
         cancelTimeoutInMinutes: 5
-        templateContext:
-          outputs:
-            - output: pipelineArtifact
-              displayName: Publish GenUsageNuGet Artifact
-              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage-nuget
-              artifactName: gen-usage-nuget-${{ parameters.BuildType }}-drop
         steps:
           - template: /pipelines/templates/gen-usage-nuget.yml@self
             parameters:
@@ -34,12 +28,6 @@ stages:
         displayName: Generate planner usage artifact
         timeoutInMinutes: 0
         cancelTimeoutInMinutes: 5
-        templateContext:
-          outputs:
-            - output: pipelineArtifact
-              displayName: Publish GenUsagePlanner Artifact
-              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage-planner
-              artifactName: gen-usage-planner-${{ parameters.BuildType }}-drop
         steps:
           - template: /pipelines/templates/gen-usage-planner.yml@self
             parameters:
@@ -57,7 +45,7 @@ stages:
             - output: pipelineArtifact
               displayName: Publish GenUsage Artifact
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage
-              artifactName: gen-usage-${{ parameters.BuildType }}-drop
+              artifactName: ${{ parameters.BuildType }}-drop
         steps:
           - template: /pipelines/templates/steps-gen-usage.yml@self
             parameters:
