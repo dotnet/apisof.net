@@ -26,7 +26,7 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage-nuget
               artifactName: gen-usage-nuget-${{ parameters.BuildType }}-drop
         steps:
-          - template: /templates/gen-usage-nuget.yml@self
+          - template: /pipelines/templates/gen-usage-nuget.yml@self
             parameters:
               BuildType: ${{ parameters.BuildType }}
 
@@ -41,7 +41,7 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage-planner
               artifactName: gen-usage-planner-${{ parameters.BuildType }}-drop
         steps:
-          - template: /templates/gen-usage-planner.yml@self
+          - template: /pipelines/templates/gen-usage-planner.yml@self
             parameters:
               BuildType: ${{ parameters.BuildType }}
 
@@ -56,6 +56,6 @@ stages:
               targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage
               artifactName: gen-usage-${{ parameters.BuildType }}-drop
         steps:
-          - template: /templates/steps-gen-usage.yml@self
+          - template: /pipelines/templates/steps-gen-usage.yml@self
             parameters:
               BuildType: ${{ parameters.BuildType }}
