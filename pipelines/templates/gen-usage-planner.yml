@@ -1,4 +1,8 @@
 ---
+parameters:
+  - name: ArtifactName
+    type: string
+    default: "gen-usage-planner-dev-drop"
 steps:
   - checkout: self
   - task: UseDotNet@2
@@ -8,16 +12,8 @@ steps:
       includePreviewVersions: true
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
-  - task: AzureCLI@2
-    displayName: "Run GenUsagePlanner"
-    timeoutInMinutes: 0
-    inputs:
-      azureSubscription: "$(AzureSubscriptionConnection)"
-      scriptType: "bash"
-      scriptLocation: "inlineScript"
-      inlineScript: |
-        cd "$(Build.SourcesDirectory)/src/GenUsagePlanner"
-        dotnet run --configuration $(BuildConfiguration)
-    env:
-      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+  - script: |
+      dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
+        --configuration $(BuildConfiguration) \
+        --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
+    displayName: "Publish GenUsagePlanner"

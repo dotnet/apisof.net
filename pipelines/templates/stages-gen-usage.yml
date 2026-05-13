@@ -1,0 +1,34 @@
+# stages-gen-usage.yml
+# Reusable stages for GenUsage pipelines (dev/prod)
+
+parameters:
+  - name: BuildType
+    type: string
+    default: "dev"
+stages:
+  - stage: generate_artifacts
+    jobs:
+      - job: generate_nuget_usage_artifact
+        displayName: Generate nuget usage artifact
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
+        steps:
+          - template: /templates/gen-usage-nuget.yml@self
+            parameters:
+              ArtifactName: gen-usage-nuget-${{ parameters.BuildType }}-drop
+
+      - job: generate_planner_usage_artifact
+        displayName: Generate planner usage artifact
+        timeoutInMinutes: 0
+        cancelTimeoutInMinutes: 5
+        steps:
+          - template: /templates/gen-usage-planner.yml@self
+            parameters:
+              ArtifactName: gen-usage-planner-${{ parameters.BuildType }}-drop
+
+      - job: generate_usage_artifact
+        displayName: Generate usage artifact
+        steps:
+          - template: /templates/steps-gen-usage.yml@self
+            parameters:
+              ArtifactName: gen-usage-${{ parameters.BuildType }}-drop

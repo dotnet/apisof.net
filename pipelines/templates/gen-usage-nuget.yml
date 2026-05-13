@@ -1,4 +1,8 @@
 ---
+parameters:
+  - name: ArtifactName
+    type: string
+    default: "gen-usage-nuget-dev-drop"
 steps:
   - checkout: self
   - task: UseDotNet@2
@@ -8,20 +12,8 @@ steps:
       includePreviewVersions: true
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
-  - task: AzureCLI@2
-    displayName: "Run GenUsageNuGet"
-    timeoutInMinutes: 0
-    inputs:
-      azureSubscription: "$(AzureSubscriptionConnection)"
-      scriptType: "bash"
-      scriptLocation: "inlineScript"
-      inlineScript: |
-        cd "$(Build.SourcesDirectory)/src/GenUsageNuGet"
-        dotnet run --configuration $(BuildConfiguration) -- crawl
-    env:
-      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-      GENUSAGE_NUGET_CATALOG_DOP: "2"
-      GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
-      GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
-      GENUSAGE_NUGET_CRAWL_WORKERS: "16"
+  - script: |
+      dotnet publish "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
+        --configuration $(BuildConfiguration) \
+        --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-nuget"
+    displayName: "Publish GenUsageNuGet"
