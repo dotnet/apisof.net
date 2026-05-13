@@ -1,8 +1,8 @@
 ---
 parameters:
-  - name: ArtifactName
+  - name: BuildType
     type: string
-    default: "gen-usage-planner-dev-drop"
+    default: dev
 steps:
   - checkout: self
   - task: UseDotNet@2
@@ -15,5 +15,5 @@ steps:
   - script: |
       dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
         --configuration $(BuildConfiguration) \
-        --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
+        --output "$(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage-planner"
     displayName: "Publish GenUsagePlanner"

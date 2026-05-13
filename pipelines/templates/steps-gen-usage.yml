@@ -1,5 +1,8 @@
 ---
 parameters:
+  - name: BuildType
+    type: string
+    default: dev
 steps:
   - checkout: self
   - task: UseDotNet@2
@@ -9,5 +12,5 @@ steps:
   - script: |
       dotnet publish "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
         --configuration $(BuildConfiguration) \
-        --output "$(Build.ArtifactStagingDirectory)/publish"
+        --output "$(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage"
     displayName: "Publish GenUsage"
