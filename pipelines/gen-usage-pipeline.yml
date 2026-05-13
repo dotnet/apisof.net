@@ -37,10 +37,10 @@ extends:
       - template: /pipelines/templates/stages-gen-usage.yml@self
         parameters:
           StageName: GenerateUsageDev
-          StageDisplayName: Generate Usage Dev
+          StageDisplayName: Generate Usage Dev Artifact
           BuildType: dev
       - template: /pipelines/templates/stages-gen-usage.yml@self
         parameters:
           StageName: GenerateUsageProd
-          StageDisplayName: Generate Usage Prod
+          StageDisplayName: Generate Usage Prod Artifact
           BuildType: prod
