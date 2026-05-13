@@ -47,6 +47,9 @@ stages:
 
       - job: generate_usage_artifact
         displayName: Generate usage artifact
+        dependsOn:
+          - generate_nuget_usage_artifact
+          - generate_planner_usage_artifact
         timeoutInMinutes: 0
         cancelTimeoutInMinutes: 5
         templateContext:
