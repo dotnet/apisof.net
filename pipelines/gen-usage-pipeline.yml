@@ -17,7 +17,6 @@ resources:
     - repository: self
       type: git
       ref: main
-    - repository: 1ESPipelineTemplates
 stages:
   - template: /pipelines/templates/stages-gen-usage.yml@self
     parameters:
