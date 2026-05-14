@@ -15,50 +15,23 @@ stages:
   - stage: ${{ parameters.StageName }}
     displayName: ${{ parameters.StageDisplayName }}
     jobs:
-      - job: generate_nuget_usage_artifact
-        displayName: Generate nuget usage artifact
+      - job: generate_and_publish_usage_artifact
+        displayName: Generate and publish usage artifacts
         timeoutInMinutes: 0
         cancelTimeoutInMinutes: 5
         templateContext:
           outputs:
             - output: pipelineArtifact
               displayName: Publish GenUsage Artifact
-              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage
+              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}
               artifactName: ${{ parameters.BuildType }}-drop
         steps:
           - template: /pipelines/templates/gen-usage-nuget.yml@self
             parameters:
               BuildType: ${{ parameters.BuildType }}
-
-      - job: generate_planner_usage_artifact
-        displayName: Generate planner usage artifact
-        timeoutInMinutes: 0
-        cancelTimeoutInMinutes: 5
-        templateContext:
-          outputs:
-            - output: pipelineArtifact
-              displayName: Publish GenUsage Artifact
-              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage
-              artifactName: ${{ parameters.BuildType }}-drop
-        steps:
           - template: /pipelines/templates/gen-usage-planner.yml@self
             parameters:
               BuildType: ${{ parameters.BuildType }}
-
-      - job: generate_usage_artifact
-        displayName: Generate usage artifact
-        dependsOn:
-          - generate_nuget_usage_artifact
-          - generate_planner_usage_artifact
-        timeoutInMinutes: 0
-        cancelTimeoutInMinutes: 5
-        templateContext:
-          outputs:
-            - output: pipelineArtifact
-              displayName: Publish GenUsage Artifact
-              targetPath: $(Build.ArtifactStagingDirectory)/${{ parameters.BuildType }}/publish-gen-usage
-              artifactName: ${{ parameters.BuildType }}-drop
-        steps:
           - template: /pipelines/templates/steps-gen-usage.yml@self
             parameters:
               BuildType: ${{ parameters.BuildType }}
