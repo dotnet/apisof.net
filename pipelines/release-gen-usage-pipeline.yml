@@ -46,7 +46,7 @@ extends:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
                   BuildType: "dev"
-                  AzureSubscriptionConnection: "$(AzureDevSubscriptionConnectionDev)"
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
                   AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
                   ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
 
@@ -85,6 +85,6 @@ extends:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
                   BuildType: "prod"
-                  AzureSubscriptionConnection: "$(AzureProdSubscriptionConnectionProd)"
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
                   AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
                   ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
