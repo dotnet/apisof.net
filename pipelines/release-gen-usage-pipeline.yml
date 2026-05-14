@@ -6,9 +6,9 @@ name: $(Date:yyyyMMdd).$(Rev:r)
 
 resources:
   pipelines:
-    - pipeline: "apis-of-dotnet-gen-usage-build"
+    - pipeline: "gen-usage"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\gen-usage-pipeline'
+      source: 'ASP-IIS-dotnet\builds\gen-usage'
       trigger:
         branches:
           include:
@@ -39,64 +39,16 @@ extends:
               isProduction: false
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-gen-usage-build"
-                  artifactName: "gen-usage-nuget-drop"
-                  targetPath: "$(Pipeline.Workspace)/dev/gen-usage-nuget-dev-drop"
-                - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-gen-usage-build"
-                  artifactName: "gen-usage-planner-drop"
-                  targetPath: "$(Pipeline.Workspace)/dev/gen-usage-planner-dev-drop"
-                - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-gen-usage-build"
-                  artifactName: "gen-usage-drop"
-                  targetPath: "$(Pipeline.Workspace)/dev/gen-usage-dev-drop"
+                  pipeline: "gen-usage"
+                  artifactName: "dev-drop"
+                  targetPath: "$(Pipeline.Workspace)/dev-drop"
             steps:
-              - task: AzureCLI@2
-                displayName: Run GenUsageNuGet (Dev)
-                timeoutInMinutes: 0
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    dotnet "$(Pipeline.Workspace)/dev/gen-usage-nuget-dev-drop/GenUsageNuGet.dll" -- crawl
-                env:
-                  DOTNET_ENVIRONMENT: "Release"
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-                  GENUSAGE_NUGET_CATALOG_DOP: "2"
-                  GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
-                  GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
-                  GENUSAGE_NUGET_CRAWL_WORKERS: "16"
-              - task: AzureCLI@2
-                displayName: Run GenUsagePlanner (Dev)
-                timeoutInMinutes: 0
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    dotnet "$(Pipeline.Workspace)/dev/gen-usage-planner-dev-drop/GenUsagePlanner.dll"
-                env:
-                  DOTNET_ENVIRONMENT: "Release"
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-              - task: AzureCLI@2
-                displayName: Run GenUsage (Dev)
-                dependsOn: 
-                  - Run GenUsageNuGet (Dev)
-                  - Run GenUsagePlanner (Dev)
-                timeoutInMinutes: 0
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    dotnet "$(Pipeline.Workspace)/dev/gen-usage-dev-drop/GenUsage.dll"
-                env:
-                  DOTNET_ENVIRONMENT: "Release"
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+              - template: /pipelines/templates/steps-gen-usage.yml@self
+                parameters:
+                  BuildType: "dev"
+                  AzureSubscriptionConnection: "$(AzureDevSubscriptionConnectionDev)"
+                  AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+                  ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
 
       - stage: Production
         displayName: Run in Production
@@ -126,61 +78,13 @@ extends:
               isProduction: true
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-gen-usage-build"
-                  artifactName: "gen-usage-nuget-drop"
-                  targetPath: "$(Pipeline.Workspace)/prod/gen-usage-nuget-prod-drop"
-                - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-gen-usage-build"
-                  artifactName: "gen-usage-planner-drop"
-                  targetPath: "$(Pipeline.Workspace)/prod/gen-usage-planner-prod-drop"
-                - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-gen-usage-build"
-                  artifactName: "gen-usage-drop"
-                  targetPath: "$(Pipeline.Workspace)/prod/gen-usage-prod-drop"
+                  pipeline: "gen-usage"
+                  artifactName: "prod-drop" 
+                  targetPath: "$(Pipeline.Workspace)/prod-drop"
             steps:
-              - task: AzureCLI@2
-                displayName: Run GenUsageNuGet (Prod)
-                timeoutInMinutes: 0
-                inputs:
-                  azureSubscription: "$(AzureProdSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    dotnet "$(Pipeline.Workspace)/prod/gen-usage-nuget-prod-drop/GenUsageNuGet.dll" -- crawl
-                env:
-                  DOTNET_ENVIRONMENT: "Release"
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrlProd)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretProd)
-                  GENUSAGE_NUGET_CATALOG_DOP: "2"
-                  GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
-                  GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
-                  GENUSAGE_NUGET_CRAWL_WORKERS: "16"
-              - task: AzureCLI@2
-                displayName: Run GenUsagePlanner (Prod)
-                timeoutInMinutes: 0
-                inputs:
-                  azureSubscription: "$(AzureProdSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    dotnet "$(Pipeline.Workspace)/prod/gen-usage-planner-prod-drop/GenUsagePlanner.dll"
-                env:
-                  DOTNET_ENVIRONMENT: "Release"
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrlProd)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretProd)
-              - task: AzureCLI@2
-                displayName: Run GenUsage (Prod)
-                timeoutInMinutes: 0
-                dependsOn: 
-                  - Run GenUsageNuGet (Prod)
-                  - Run GenUsagePlanner (Prod)
-                inputs:
-                  azureSubscription: "$(AzureProdSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"
-                  inlineScript: |
-                    dotnet "$(Pipeline.Workspace)/prod/gen-usage-prod-drop/GenUsage.dll"
-                env:
-                  DOTNET_ENVIRONMENT: "Release"
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrlProd)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretProd)
+              - template: /pipelines/templates/steps-gen-usage.yml@self
+                parameters:
+                  BuildType: "prod"
+                  AzureSubscriptionConnection: "$(AzureProdSubscriptionConnectionProd)"
+                  AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
+                  ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"

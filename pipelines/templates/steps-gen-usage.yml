@@ -1,0 +1,54 @@
+parameters:
+  - name: BuildType
+    type: string
+    default: "dev"
+  - name: AzureSubscriptionConnection
+    type: string
+  - name: AzureStorageServiceUrl
+    type: string
+  - name: ApisOfDotNetWebHookSecret
+    type: string
+steps:
+  - task: AzureCLI@2
+    displayName: Run GenUsageNuGet (${{ parameters.BuildType }})
+    timeoutInMinutes: 0
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        dotnet "$(Pipeline.Workspace)/${{ parameters.BuildType }}-drop/publish-gen-usage-nuget/GenUsageNuGet.dll" -- crawl
+    env:
+      DOTNET_ENVIRONMENT: "Release"
+      AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
+      ApisOfDotNetWebHookSecret: ${{ parameters.ApisOfDotNetWebHookSecret }}
+      GENUSAGE_NUGET_CATALOG_DOP: "2"
+      GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
+      GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
+      GENUSAGE_NUGET_CRAWL_WORKERS: "16"
+  - task: AzureCLI@2
+    displayName: Run GenUsagePlanner (${{ parameters.BuildType }})
+    timeoutInMinutes: 0
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        dotnet "$(Pipeline.Workspace)/${{ parameters.BuildType }}-drop/publish-gen-usage-planner/GenUsagePlanner.dll"
+    env:
+      DOTNET_ENVIRONMENT: "Release"
+      AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
+      ApisOfDotNetWebHookSecret: ${{ parameters.ApisOfDotNetWebHookSecret }}
+  - task: AzureCLI@2
+    displayName: Run GenUsage (${{ parameters.BuildType }})
+    timeoutInMinutes: 0
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        dotnet "$(Pipeline.Workspace)/${{ parameters.BuildType }}-drop/publish-gen-usage/GenUsage.dll"
+    env:
+      DOTNET_ENVIRONMENT: "Release"
+      AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
+      ApisOfDotNetWebHookSecret: ${{ parameters.ApisOfDotNetWebHookSecret }}
