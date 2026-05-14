@@ -53,7 +53,6 @@ extends:
                   targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
               - template: /pipelines/templates/upload-build-planner.yml@self
-                displayName: Upload velopack release to Dev environment
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionDev)
                   storageAccountName: $(StorageAccountNameDev)
@@ -85,7 +84,6 @@ extends:
                   targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
               - template: /pipelines/templates/upload-build-planner.yml@self
-                displayName: Upload velopack release to Prod environment
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionProd)
                   storageAccountName: $(StorageAccountNameProd)
