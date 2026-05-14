@@ -13,4 +13,4 @@ steps:
       scriptType: "pscore"
       scriptLocation: "inlineScript"
       inlineScript: |
-        az storage blob upload-batch --destination squirrel --source "$(Build.ArtifactStagingDirectory)/velopack-release" --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite
+        az storage blob upload-batch --destination squirrel --source "$(Pipeline.Workspace)/velopack-release" --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite
