@@ -1,0 +1,44 @@
+parameters:
+  - name: StageName
+    type: string
+    default: BuildCatalog
+  - name: StageDisplayName
+    type: string
+    default: "Build Catalog Artifact"
+  - name: BuildConfiguration
+    type: string
+    default: Release
+  - name: BuildType
+    type: string
+    default: "dev"
+
+stages:
+- stage: ${{ parameters.StageName }}
+  displayName: ${{ parameters.StageDisplayName }}
+  jobs:
+  - job: generate_catalog_job
+    displayName: "Build Catalog Generator Artifact"
+    timeoutInMinutes: 0
+    cancelTimeoutInMinutes: 5
+    templateContext:
+      outputs:
+        - output: pipelineArtifact
+          displayName: "Publish catalog artifact"
+          targetPath: $(Build.ArtifactStagingDirectory)/gen-catalog-${{ parameters.BuildType }}-drop
+          artifactName: gen-catalog-${{ parameters.BuildType }}-drop
+    steps:
+    - checkout: self
+      clean: true
+      fetchDepth: 0
+    - task: UseDotNet@2
+      displayName: "Install .NET 8"
+      inputs:
+        packageType: sdk
+        version: 8.x
+    - task: NuGetAuthenticate@1
+      displayName: "NuGet Authenticate"
+    - script: |
+        dotnet publish "$(Build.SourcesDirectory)/src/GenCatalog/GenCatalog.csproj" \
+          --configuration ${{ parameters.BuildConfiguration }} \
+          --output "$(Build.ArtifactStagingDirectory)/gen-catalog-${{ parameters.BuildType }}-drop/publish-gen-catalog"
+      displayName: "Publish GenCatalog"
