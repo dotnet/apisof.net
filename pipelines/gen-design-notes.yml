@@ -39,13 +39,11 @@ extends:
       - ES365AIMigrationTooling
     stages:
       - template: /pipelines/templates/steps-gen-design-notes.yml@self
-        displayName: "Generate design notes Dev"
         parameters:
           BuildType: "dev"
           StageName: "GenerateDesignNotesDev"
           StageDisplayName: "Generate design notes Dev Artifact"
       - template: /pipelines/templates/steps-gen-design-notes.yml@self
-        displayName: "Generate design notes Prod"
         parameters:
           BuildType: "prod"
           StageName: "GenerateDesignNotesProd"
