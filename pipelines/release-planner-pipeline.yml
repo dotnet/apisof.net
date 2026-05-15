@@ -17,9 +17,9 @@ variables:
   BuildConfiguration: Release
 resources:
   pipelines:
-    - pipeline: "build-planner"
+    - pipeline: "apis-of-dotnet-build-planner"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\build-planner'
+      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-build-planner'
   repositories:
     - repository: 1ESPipelineTemplates
       type: git
