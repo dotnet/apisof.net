@@ -17,9 +17,9 @@ variables:
   BuildConfiguration: Release
 resources:
   pipelines:
-    - pipeline: "apis-of-dotnet-build-planner"
+    - pipeline: "apis-of-dotnet-planner-build"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-build-planner'
+      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-planner-build'
   repositories:
     - repository: 1ESPipelineTemplates
       type: git
@@ -49,7 +49,7 @@ extends:
               isProduction: false
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-build-planner"
+                  pipeline: "apis-of-dotnet-planner-build"
                   artifactName: velopack-release
                   targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
@@ -80,7 +80,7 @@ extends:
               isProduction: false
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "apis-of-dotnet-build-planner"
+                  pipeline: "apis-of-dotnet-planner-build"
                   artifactName: velopack-release
                   targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
