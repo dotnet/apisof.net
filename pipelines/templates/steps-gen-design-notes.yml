@@ -1,0 +1,42 @@
+parameters:
+  - name: AzureSubscriptionConnection
+    type: string
+  - name: AzureStorageServiceUrl
+    type: string
+  - name: ApisOfDotNetWebHookSecret
+    type: string
+  - name: BuildType
+    type: string
+    default: dev
+  - name: StageName
+    type: string
+    default: GenerateDesignNotes
+  - name: StageDisplayName
+    type: string
+    default: Generate design notes
+stages:    
+  - stage: ${{ parameters.StageName }}
+    displayName: ${{ parameters.StageDisplayName }}
+    jobs:
+      - job: generate_design_notes
+        displayName: Generate design notes and publish artifact
+        templateContext:
+          outputs:
+            - output: pipelineArtifact
+              displayName: "Publish GenDesignNotes ${{ parameters.BuildType }} artifact"
+              targetPath: "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes"
+              artifactName: "gen-design-notes-${{ parameters.BuildType }}-drop"
+        steps:
+          - checkout: self
+          - task: UseDotNet@2
+            displayName: Use .NET 8 SDK
+            inputs:
+              version: 8.x
+          - task: NugetAuthenticate@1
+            displayName: Authenticate with NuGet
+          - script: |
+              dotnet publish src/GenDesignNotes/GenDesignNotes.csproj -c $(BuildConfiguration) -o "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes" /p:SourceRevisionId=$(Build.SourceVersion)
+            displayName: "Publish GenDesignNotes (${{ parameters.BuildType }})"
+            env:
+              AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
+              ApisOfDotNetWebHookSecret: ${{ parameters.ApisOfDotNetWebHookSecret }}

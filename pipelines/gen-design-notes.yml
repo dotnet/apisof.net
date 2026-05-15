@@ -38,26 +38,15 @@ extends:
     customBuildTags:
       - ES365AIMigrationTooling
     stages:
-      - stage: GenerateDesignNotes
-        jobs:
-          - job: generate_design_notes
-            displayName: Generate design notes
-            steps:
-              - checkout: self
-              - task: UseDotNet@2
-                displayName: Use .NET 8 SDK
-                inputs:
-                  version: 8.x
-              - task: AzureCLI@2
-                displayName: "Run GenDesignNotes"
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"                  
-                  addSpnToEnvironment: true
-                  inlineScript: |
-                    cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run --configuration $(BuildConfiguration)
-                env:
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+      - template: /pipelines/templates/steps-gen-design-notes.yml@self
+        displayName: "Generate design notes Dev"
+        parameters:
+          BuildType: "dev"
+          StageName: "GenerateDesignNotesDev"
+          StageDisplayName: "Generate design notes Dev Artifact"
+      - template: /pipelines/templates/steps-gen-design-notes.yml@self
+        displayName: "Generate design notes Prod"
+        parameters:
+          BuildType: "prod"
+          StageName: "GenerateDesignNotesProd"
+          StageDisplayName: "Generate design notes Prod Artifact"
