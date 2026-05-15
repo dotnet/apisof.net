@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Net;
 using Newtonsoft.Json;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
@@ -17,23 +16,37 @@ internal sealed class NuGetFeed
 
     public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
 
+    private readonly Lazy<Task<ServiceIndexResourceV3>> _serviceIndex;
+    private readonly Lazy<Task<string>> _packageBaseAddress;
+
     public NuGetFeed(string feedUrl)
     {
         ThrowIfNull(feedUrl);
 
         FeedUrl = feedUrl;
+
+        _serviceIndex = new Lazy<Task<ServiceIndexResourceV3>>(() =>
+        {
+            var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
+            return sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
+        });
+
+        _packageBaseAddress = new Lazy<Task<string>>(async () =>
+        {
+            var serviceIndex = await _serviceIndex.Value;
+            var url = serviceIndex.GetServiceEntryUri("PackageBaseAddress/3.0.0")?.ToString();
+            if (url is null)
+                throw new InvalidOperationException("This feed doesn't expose PackageBaseAddress/3.0.0");
+            return url;
+        });
     }
 
     public string FeedUrl { get; }
 
     private static HttpClient CreateHttpClient()
     {
-        var handler = new HttpClientHandler
-        {
-            SslProtocols = System.Security.Authentication.SslProtocols.Tls12
-        };
-
-        return new HttpClient(handler, disposeHandler: true)
+        // Use the default SocketsHttpHandler so the OS negotiates TLS (incl. TLS 1.3)
+        return new HttpClient
         {
             Timeout = s_httpTimeout
         };
@@ -41,18 +54,13 @@ internal sealed class NuGetFeed
 
     public async Task<IReadOnlyList<PackageIdentity>> GetAllPackages(DateTimeOffset? since = null)
     {
-        var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
-        var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
+        var serviceIndex = await _serviceIndex.Value;
         var catalogIndexUrl = serviceIndex.GetServiceEntryUri("Catalog/3.0.0")?.ToString();
 
         if (catalogIndexUrl is null)
             throw new InvalidOperationException("This feed doesn't support enumeration");
 
         var maxDegreeOfParallelism = s_maxDegreeOfParallelism;
-
-        ThreadPool.SetMinThreads(maxDegreeOfParallelism, completionPortThreads: 4);
-        ServicePointManager.DefaultConnectionLimit = maxDegreeOfParallelism;
-        ServicePointManager.MaxServicePointIdleTime = 10000;
 
         var indexString = await s_httpClient.GetStringAsync(catalogIndexUrl);
         var index = JsonConvert.DeserializeObject<CatalogIndex>(indexString)!;
@@ -125,7 +133,7 @@ internal sealed class NuGetFeed
 
     private static TimeSpan GetHttpTimeout()
     {
-        const int fallbackSeconds = 36000;
+        const int fallbackSeconds = 600;     // 10 minutes
         const int minSeconds = 30;
         const int maxSeconds = 36000;
 
@@ -151,9 +159,7 @@ internal sealed class NuGetFeed
     {
         ThrowIfNull(identity);
 
-        var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
-        var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
-        var packageBaseAddress = serviceIndex.GetServiceEntryUri("PackageBaseAddress/3.0.0")?.ToString();
+        var packageBaseAddress = await _packageBaseAddress.Value;
 
         var id = identity.Id.ToLowerInvariant();
         var version = identity.Version.ToNormalizedString().ToLowerInvariant();
