@@ -49,7 +49,7 @@ extends:
               isProduction: false
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "build-planner"
+                  pipeline: "apis-of-dotnet-build-planner"
                   artifactName: velopack-release
                   targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
@@ -80,7 +80,7 @@ extends:
               isProduction: false
               inputs:
                 - input: pipelineArtifact
-                  pipeline: "build-planner"
+                  pipeline: "apis-of-dotnet-build-planner"
                   artifactName: velopack-release
                   targetPath: $(Pipeline.Workspace)/velopack-release
             steps:
