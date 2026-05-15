@@ -1,10 +1,4 @@
 parameters:
-  - name: AzureSubscriptionConnection
-    type: string
-  - name: AzureStorageServiceUrl
-    type: string
-  - name: ApisOfDotNetWebHookSecret
-    type: string
   - name: BuildType
     type: string
     default: dev
@@ -37,6 +31,3 @@ stages:
           - script: |
               dotnet publish src/GenDesignNotes/GenDesignNotes.csproj -c $(BuildConfiguration) -o "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes" /p:SourceRevisionId=$(Build.SourceVersion)
             displayName: "Publish GenDesignNotes (${{ parameters.BuildType }})"
-            env:
-              AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
-              ApisOfDotNetWebHookSecret: ${{ parameters.ApisOfDotNetWebHookSecret }}
