@@ -29,5 +29,5 @@ stages:
           - task: NugetAuthenticate@1
             displayName: Authenticate with NuGet
           - script: |
-              dotnet publish src/GenDesignNotes/GenDesignNotes.csproj -c $(BuildConfiguration) -o "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes" /p:SourceRevisionId=$(Build.SourceVersion)
+              dotnet publish src/GenDesignNotes/GenDesignNotes.csproj -o "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes" /p:SourceRevisionId=$(Build.SourceVersion)
             displayName: "Publish GenDesignNotes (${{ parameters.BuildType }})"
