@@ -17,7 +17,7 @@ steps:
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
-        dotnet "$(Pipeline.Workspace)/${{ parameters.BuildType }}-drop/publish-gen-usage-nuget/GenUsageNuGet.dll" -- crawl
+        dotnet "$(Pipeline.Workspace)/GenUsage-drop/publish-gen-usage-nuget/GenUsageNuGet.dll" --crawl
     env:
       DOTNET_ENVIRONMENT: "Release"
       AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
@@ -34,7 +34,7 @@ steps:
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
-        dotnet "$(Pipeline.Workspace)/${{ parameters.BuildType }}-drop/publish-gen-usage-planner/GenUsagePlanner.dll"
+        dotnet "$(Pipeline.Workspace)/GenUsage-drop/publish-gen-usage-planner/GenUsagePlanner.dll"
     env:
       DOTNET_ENVIRONMENT: "Release"
       AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
@@ -42,12 +42,13 @@ steps:
   - task: AzureCLI@2
     displayName: Run GenUsage (${{ parameters.BuildType }})
     timeoutInMinutes: 0
+    dependsOn: ["Run GenUsageNuGet (${{ parameters.BuildType }})", "Run GenUsagePlanner (${{ parameters.BuildType }})"]
     inputs:
       azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
       scriptType: "bash"
       scriptLocation: "inlineScript"
       inlineScript: |
-        dotnet "$(Pipeline.Workspace)/${{ parameters.BuildType }}-drop/publish-gen-usage/GenUsage.dll"
+        dotnet "$(Pipeline.Workspace)/GenUsage-drop/publish-gen-usage/GenUsage.dll"
     env:
       DOTNET_ENVIRONMENT: "Release"
       AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}

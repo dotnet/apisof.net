@@ -40,8 +40,8 @@ extends:
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-usage"
-                  artifactName: "dev-drop"
-                  targetPath: "$(Pipeline.Workspace)/dev-drop"
+                  artifactName: "GenUsage-drop"
+                  targetPath: "$(Pipeline.Workspace)/GenUsage-drop"
             steps:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
@@ -79,8 +79,8 @@ extends:
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-usage"
-                  artifactName: "prod-drop" 
-                  targetPath: "$(Pipeline.Workspace)/prod-drop"
+                  artifactName: "GenUsage-drop"
+                  targetPath: "$(Pipeline.Workspace)/GenUsage-drop"
             steps:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
