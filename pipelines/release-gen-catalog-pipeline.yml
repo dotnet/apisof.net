@@ -43,15 +43,15 @@ extends:
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-catalog"
-                  artifactName: "gen-catalog-dev-drop"
-                  targetPath: "$(Pipeline.Workspace)/gen-catalog-dev-drop"
+                  artifactName: "gen-catalog-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
                 parameters:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
                   AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
                   ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
-                  ArtifactRoot: "$(Pipeline.Workspace)/gen-catalog-dev-drop/publish-gen-catalog"
+                  ArtifactRoot: "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog"
 
       - stage: Production
         displayName: Run in Production
@@ -82,12 +82,12 @@ extends:
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-catalog"
-                  artifactName: "gen-catalog-prod-drop"
-                  targetPath: "$(Pipeline.Workspace)/gen-catalog-prod-drop"
+                  artifactName: "gen-catalog-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
                 parameters:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
                   AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
                   ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
-                  ArtifactRoot: "$(Pipeline.Workspace)/gen-catalog-prod-drop/publish-gen-catalog"
+                  ArtifactRoot: "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog"

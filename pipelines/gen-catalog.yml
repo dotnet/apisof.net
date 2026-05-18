@@ -2,8 +2,6 @@ trigger: none
 variables:
   - name: BuildConfiguration
     value: Release
-  - name: TeamName
-    value: DevDiv
 schedules:
   - cron: "21 12 * * *"   # 12:21 PM UTC
     displayName: Daily 12:21 UTC
@@ -36,16 +34,32 @@ extends:
       image: 1ESPT-Ubuntu22.04
       os: linux
     stages: 
-      - template: /pipelines/templates/steps-gen-catalog-build.yml@self
-        parameters:
-          StageName: BuildCatalogDev
-          StageDisplayName: Build Catalog Dev Artifact
-          BuildConfiguration: $(BuildConfiguration)
-          BuildType: dev
-      - template: /pipelines/templates/steps-gen-catalog-build.yml@self
-        parameters:
-          StageName: BuildCatalogProd
-          StageDisplayName: Build Catalog Prod Artifact
-          BuildConfiguration: $(BuildConfiguration)
-          BuildType: prod
-      
+      - stage: BuildAndPublishArtifact
+        displayName: Build and publish artifact
+        jobs:
+        - job: generate_catalog_job
+          displayName: "Build Catalog Generator Artifact"
+          timeoutInMinutes: 0
+          cancelTimeoutInMinutes: 5
+          templateContext:
+            outputs:
+              - output: pipelineArtifact
+                displayName: "Publish catalog artifact"
+                targetPath: $(Build.ArtifactStagingDirectory)/gen-catalog-drop
+                artifactName: gen-catalog-drop
+          steps:
+          - checkout: self
+            clean: true
+            fetchDepth: 0
+          - task: UseDotNet@2
+            displayName: "Install .NET 8"
+            inputs:
+              packageType: sdk
+              version: 8.x
+          - task: NuGetAuthenticate@1
+            displayName: "NuGet Authenticate"
+          - script: |
+              dotnet publish "$(Build.SourcesDirectory)/src/GenCatalog/GenCatalog.csproj" \
+                --configuration $(BuildConfiguration) \
+                --output "$(Build.ArtifactStagingDirectory)/gen-catalog-drop/publish-gen-catalog"
+            displayName: "Publish GenCatalog"
