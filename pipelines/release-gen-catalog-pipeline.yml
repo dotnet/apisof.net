@@ -3,7 +3,9 @@ trigger:
     include:
       - main
 name: $(Date:yyyyMMdd).$(Rev:r)
-
+variables:
+  - name: TeamName
+    value: "DevDiv"
 resources:
   pipelines:
     - pipeline: "gen-catalog"
