@@ -9,6 +9,8 @@ parameters:
   - name: ApisOfDotNetWebHookSecret
     type: string
 steps:
+  - task: NugetAuthenticate@1
+    displayName: "Authenticate with Nuget"
   - task: AzureCLI@2
     displayName: Run GenUsageNuGet (${{ parameters.BuildType }})
     timeoutInMinutes: 0
