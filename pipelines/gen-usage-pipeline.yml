@@ -35,39 +35,38 @@ extends:
       os: linux
     stages:
       - stage: GenerateUsageArtifacts
-    displayName: Generate usage artifacts
-    jobs:
-      - job: generate_and_publish_usage_artifact
-        displayName: Generate and publish usage artifacts
-        timeoutInMinutes: 0
-        cancelTimeoutInMinutes: 5
-        templateContext:
-          outputs:
-            - output: pipelineArtifact
-              displayName: Publish GenUsage Artifact
-              targetPath: $(Build.ArtifactStagingDirectory)
-              artifactName: GenUsage-drop
-        steps:
-          - checkout: self
-          - task: UseDotNet@2
-            displayName: Use .NET 8 SDK
-            inputs:
-              version: 8.x
-              includePreviewVersions: true
-          - task: NuGetAuthenticate@1
-            displayName: "NuGet Authenticate"
-          - script: |
-              dotnet publish "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
-                --configuration $(BuildConfiguration) \
-                --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-nuget"
-            displayName: "Publish GenUsageNuGet"
-          - script: |
-              dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
-                --configuration $(BuildConfiguration) \
-                --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
-            displayName: "Publish GenUsagePlanner"
-          - script: |
-              dotnet publish "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
-                --configuration $(BuildConfiguration) \
-                --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage"
-            displayName: "Publish GenUsage"
+        jobs:
+          - job: generate_and_publish_usage_artifact
+            displayName: Generate and publish usage artifacts
+            timeoutInMinutes: 0
+            cancelTimeoutInMinutes: 5
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: Publish GenUsage Artifact
+                  targetPath: $(Build.ArtifactStagingDirectory)
+                  artifactName: GenUsage-drop
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+                  includePreviewVersions: true
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  dotnet publish "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
+                    --configuration $(BuildConfiguration) \
+                    --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-nuget"
+                displayName: "Publish GenUsageNuGet"
+              - script: |
+                  dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
+                    --configuration $(BuildConfiguration) \
+                    --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
+                displayName: "Publish GenUsagePlanner"
+              - script: |
+                  dotnet publish "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
+                    --configuration $(BuildConfiguration) \
+                    --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage"
+                displayName: "Publish GenUsage"
