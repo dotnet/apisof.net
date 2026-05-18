@@ -14,8 +14,7 @@ internal sealed class NuGetFeed
     private static readonly TimeSpan s_httpTimeout = GetHttpTimeout();
     private static readonly HttpClient s_httpClient = CreateHttpClient();
 
-    public static NuGetFeed NuGetOrg { get; } = new("https://api.nuget.org/v3/index.json");
-
+    public static NuGetFeed NuGetOrg { get; } = new("https://devdiv.pkgs.visualstudio.com/OnlineServices/_packaging/dotnetlegacy/nuget/v3/index.json");
     private readonly Lazy<Task<ServiceIndexResourceV3>> _serviceIndex;
     private readonly Lazy<Task<string>> _packageBaseAddress;
 
