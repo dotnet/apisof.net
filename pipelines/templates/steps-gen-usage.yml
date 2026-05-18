@@ -42,7 +42,6 @@ steps:
   - task: AzureCLI@2
     displayName: Run GenUsage (${{ parameters.BuildType }})
     timeoutInMinutes: 0
-    dependsOn: ["Run GenUsageNuGet (${{ parameters.BuildType }})", "Run GenUsagePlanner (${{ parameters.BuildType }})"]
     inputs:
       azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
       scriptType: "bash"
