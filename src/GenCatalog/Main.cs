@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Runtime;
 using System.Text.Json;
 using System.Xml.Linq;
 
@@ -57,9 +58,19 @@ internal sealed class Main : IConsoleMain
 
             await GenerateCatalogAsync(indexStore, catalogModelPath);
 
-            // The stats phase loads the catalog model; force a full collection before allocating the suffix tree.
-            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: false);
+            // The stats phase loads the entire catalog as a large managed byte[] on
+            // the LOH. Before the suffix tree phase allocates another one, reclaim
+            // that buffer AND compact the LOH so the freed region can be reused
+            // instead of growing the heap. Aggressive + compacting + a CompactOnce
+            // LOH hint are the combination that actually returns memory to the OS;
+            // a non-compacting collect leaves a hole the next LoadAsync won't fit
+            // into. The collect-finalize-collect sequence ensures anything that
+            // finalizers release is reclaimed in the same pass.
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
             GC.WaitForPendingFinalizers();
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
             await _store.UploadApiCatalogAsync(catalogModelPath);
             await _store.UploadSuffixTreeAsync(suffixTreePath);
@@ -304,10 +315,7 @@ internal sealed class Main : IConsoleMain
 
             processed++;
             if (processed % 250_000 == 0)
-            {
                 Console.WriteLine($"  Suffix tree APIs processed: {processed:N0}");
-                GC.Collect(2, GCCollectionMode.Forced, blocking: false, compacting: false);
-            }
         }
 
         await using var stream = File.Create(suffixTreePath);
