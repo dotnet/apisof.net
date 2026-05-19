@@ -43,6 +43,10 @@ extends:
             displayName: Run on agent
             condition: succeeded()
             timeoutInMinutes: 0
+            variables:
+              AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
             templateContext:
               type: releaseJob
               isProduction: false
@@ -53,10 +57,6 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
-                variables:
-                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
-                  AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
-                  ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
 
       - stage: Production
         displayName: Run in Production
@@ -81,6 +81,10 @@ extends:
             dependsOn: PreDeploymentApprovalJob
             condition: succeeded()
             timeoutInMinutes: 0
+            variables:
+              AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
             templateContext:
               type: releaseJob
               isProduction: true
@@ -91,7 +95,3 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
-                variables:
-                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
-                  AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
-                  ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
