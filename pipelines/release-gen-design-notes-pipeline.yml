@@ -37,8 +37,8 @@ extends:
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-design-notes"
-                  artifactName: "gen-design-notes-dev-drop"
-                  targetPath: "$(Pipeline.Workspace)/gen-design-notes-dev-drop"
+                  artifactName: "gen-design-notes-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-design-notes-drop"
             steps:
               - task: AzureCLI@2
                 displayName: "Run GenDesignNotes (Dev)"
@@ -48,7 +48,7 @@ extends:
                   scriptLocation: "inlineScript"
                   addSpnToEnvironment: true
                   inlineScript: |
-                    Set-Location "$(Pipeline.Workspace)/gen-design-notes-dev-drop"
+                    Set-Location "$(Pipeline.Workspace)/gen-design-notes-drop"
                     dotnet GenDesignNotes.dll
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrlDev)
@@ -83,8 +83,8 @@ extends:
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-design-notes"
-                  artifactName: "gen-design-notes-prod-drop"
-                  targetPath: "$(Pipeline.Workspace)/gen-design-notes-prod-drop"
+                  artifactName: "gen-design-notes-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-design-notes-drop"
             steps:
               - task: AzureCLI@2
                 displayName: "Run GenDesignNotes (Prod)"
@@ -94,7 +94,7 @@ extends:
                   scriptLocation: "inlineScript"
                   addSpnToEnvironment: true
                   inlineScript: |
-                    Set-Location "$(Pipeline.Workspace)/gen-design-notes-prod-drop"
+                    Set-Location "$(Pipeline.Workspace)/gen-design-notes-drop"
                     dotnet GenDesignNotes.dll
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrlProd)

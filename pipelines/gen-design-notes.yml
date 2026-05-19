@@ -38,13 +38,25 @@ extends:
     customBuildTags:
       - ES365AIMigrationTooling
     stages:
-      - template: /pipelines/templates/steps-gen-design-notes.yml@self
-        parameters:
-          BuildType: "dev"
-          StageName: "GenerateDesignNotesDev"
-          StageDisplayName: "Generate design notes Dev Artifact"
-      - template: /pipelines/templates/steps-gen-design-notes.yml@self
-        parameters:
-          BuildType: "prod"
-          StageName: "GenerateDesignNotesProd"
-          StageDisplayName: "Generate design notes Prod Artifact"
+      - stage: "BuildAndPublishArtifact"
+        displayName: "Build GenDesignNotes and publish artifact"
+        jobs:
+          - job: generate_design_notes
+            displayName: Generate design notes and publish artifact
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: "Publish GenDesignNotes artifact"
+                  targetPath: "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes"
+                  artifactName: "gen-design-notes-drop"
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+              - task: NugetAuthenticate@1
+                displayName: Authenticate with NuGet
+              - script: |
+                  dotnet publish src/GenDesignNotes/GenDesignNotes.csproj -o "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes" /p:SourceRevisionId=$(Build.SourceVersion)
+                displayName: "Publish GenDesignNotes"
