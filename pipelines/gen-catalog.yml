@@ -1,15 +1,12 @@
-trigger: none
+trigger: 
+  branches:
+    include:
+      - "*"
+    exclude:
+      - main
 variables:
   - name: BuildConfiguration
     value: Release
-schedules:
-  - cron: "21 12 * * *"   # 12:21 PM UTC
-    displayName: Daily 12:21 UTC
-    branches:
-      include:
-        - main
-    always: true
-
 name: $(date:yyyyMMdd)$(rev:.r)
 
 resources:

@@ -1,7 +1,13 @@
-trigger:
-  branches:
-    include:
-      - main
+trigger: none
+
+schedules:
+  - cron: "21 12 * * *"   # 12:21 PM UTC
+    displayName: Daily 12:21 UTC
+    branches:
+      include:
+        - main
+    always: true
+
 name: $(Date:yyyyMMdd).$(Rev:r)
 variables:
   - name: TeamName
@@ -47,11 +53,10 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
-                parameters:
+                variables:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
                   AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
                   ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
-                  ArtifactRoot: "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog"
 
       - stage: Production
         displayName: Run in Production
@@ -86,8 +91,7 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
-                parameters:
+                variables:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
                   AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
                   ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
-                  ArtifactRoot: "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog"

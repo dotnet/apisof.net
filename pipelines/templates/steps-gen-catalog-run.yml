@@ -1,13 +1,3 @@
-parameters:
-  - name: AzureSubscriptionConnection
-    type: string
-  - name: AzureStorageServiceUrl
-    type: string
-  - name: ApisOfDotNetWebHookSecret
-    type: string
-  - name: ArtifactRoot
-    type: string
-
 steps:
   - task: NugetAuthenticate@1
     displayName: "Authenticate with NuGet feeds"
@@ -15,7 +5,7 @@ steps:
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
     inputs:
-      azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
+      azureSubscription: "$(AzureSubscriptionConnection)"
       scriptType: "pscore"
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
@@ -30,10 +20,10 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        dotnet "${{ parameters.ArtifactRoot }}/GenCatalog.dll"
+        dotnet "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
     env:
-      AzureStorageServiceUrl: ${{ parameters.AzureStorageServiceUrl }}
-      ApisOfDotNetWebHookSecret: ${{ parameters.ApisOfDotNetWebHookSecret }}
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
       APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
       DOTNET_gcServer: 0
       DOTNET_GCConserveMemory: 9
