@@ -44,7 +44,6 @@ extends:
             condition: succeeded()
             timeoutInMinutes: 0
             variables:
-              AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
               AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
               ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
             templateContext:
@@ -57,6 +56,8 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
+                parameters:
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
 
       - stage: Production
         displayName: Run in Production
@@ -82,7 +83,6 @@ extends:
             condition: succeeded()
             timeoutInMinutes: 0
             variables:
-              AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
               AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
               ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
             templateContext:
@@ -95,3 +95,5 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
             steps:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
+                parameters:
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"

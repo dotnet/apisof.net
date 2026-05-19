@@ -1,3 +1,7 @@
+parameters:
+  - name: AzureSubscriptionConnection
+    type: string
+
 steps:
   - task: NugetAuthenticate@1
     displayName: "Authenticate with NuGet feeds"
@@ -5,7 +9,7 @@ steps:
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
     inputs:
-      azureSubscription: "$(AzureSubscriptionConnection)"
+      azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
       scriptType: "pscore"
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
