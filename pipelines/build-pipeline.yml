@@ -51,6 +51,8 @@ extends:
                   artifactName: apis-of-dotnet-drop
             steps:
               - checkout: self
+              - task: NuGetAuthenticate@1
+                displayName: "Authenticate with NuGet feeds"
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
