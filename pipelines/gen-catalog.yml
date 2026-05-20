@@ -4,6 +4,14 @@ trigger:
       - "*"
     exclude:
       - main
+  paths:
+    include:
+      - src/GenCatalog/**
+      - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.ApiCatalog.ActionsRunner/**
+      - src/Terrajobst.ApiCatalog.Generation/**
+      - src/Terrajobst.ApiCatalog.SuffixTree/**
+      - src/GenUsageNuGet/**
 variables:
   - name: BuildConfiguration
     value: Release
@@ -32,7 +40,7 @@ extends:
       os: linux
     stages: 
       - stage: BuildAndPublishArtifact
-        displayName: Build and publish artifact
+        displayName: Build and Publish Artifact
         jobs:
         - job: generate_catalog_job
           displayName: "Build Catalog Generator Artifact"
@@ -41,7 +49,7 @@ extends:
           templateContext:
             outputs:
               - output: pipelineArtifact
-                displayName: "Publish catalog artifact"
+                displayName: "Publish Catalog Artifact"
                 targetPath: $(Build.ArtifactStagingDirectory)/gen-catalog-drop
                 artifactName: gen-catalog-drop
           steps:

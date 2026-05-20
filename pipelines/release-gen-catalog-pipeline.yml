@@ -40,7 +40,7 @@ extends:
         displayName: Run in Dev
         jobs:
           - job: Job_1
-            displayName: Run on agent
+            displayName: Run on Agent
             condition: succeeded()
             timeoutInMinutes: 0
             variables:
@@ -78,7 +78,7 @@ extends:
                     v-danzhu1@microsoft.com
 
           - job: Job_1
-            displayName: Run on agent
+            displayName: Run on Agent
             dependsOn: PreDeploymentApprovalJob
             condition: succeeded()
             timeoutInMinutes: 0

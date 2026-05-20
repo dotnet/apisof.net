@@ -4,7 +4,7 @@ parameters:
 
 steps:
   - task: NugetAuthenticate@1
-    displayName: "Authenticate with NuGet feeds"
+    displayName: "Authenticate with NuGet feed"
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
