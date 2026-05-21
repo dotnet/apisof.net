@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using NuGet.Configuration;
 using NuGet.Packaging;
@@ -57,6 +58,9 @@ internal sealed class NuGetFeed
 
     public async Task<IReadOnlyList<PackageIdentity>> GetAllPackages(DateTimeOffset? since = null)
     {
+        if (TryGetAzureDevOpsFeed(FeedUrl, out var organization, out var project, out var feed))
+            return await GetAllPackagesFromAzureDevOpsFeedAsync(organization, project, feed);
+
         var serviceIndex = await _serviceIndex.Value;
         var catalogIndexUrl = serviceIndex.GetServiceEntryUri("Catalog/3.0.0")?.ToString();
 
@@ -120,6 +124,41 @@ internal sealed class NuGetFeed
                 .Select(_ => work())
                 .ToList();
         }
+    }
+
+    private static async Task<IReadOnlyList<PackageIdentity>> GetAllPackagesFromAzureDevOpsFeedAsync(string organization, string project, string feed)
+    {
+        var result = new List<PackageIdentity>();
+
+        var skip = 0;
+
+        while (true)
+        {
+            var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
+            using var data = await s_httpClient.GetStreamAsync(url);
+            var document = JsonNode.Parse(data)!;
+
+            var count = document["count"]!.GetValue<int>();
+            if (count == 0)
+                break;
+
+            foreach (var element in document["value"]!.AsArray())
+            {
+                var name = element!["name"]!.GetValue<string>();
+
+                foreach (var versionElement in element["versions"]!.AsArray())
+                {
+                    var versionText = versionElement!["version"]!.GetValue<string>();
+                    var version = NuGetVersion.Parse(versionText);
+                    var identity = new PackageIdentity(name, version);
+                    result.Add(identity);
+                }
+            }
+
+            skip += count;
+        }
+
+        return result;
     }
 
     private static int GetCatalogMaxDegreeOfParallelism()
@@ -369,6 +408,43 @@ internal sealed class NuGetFeed
         }
 
         return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool TryGetAzureDevOpsFeed(string url,
+                                              [MaybeNullWhen(false)] out string organization,
+                                              [MaybeNullWhen(false)] out string project,
+                                              [MaybeNullWhen(false)] out string feed)
+    {
+        // New format: https://pkgs.dev.azure.com/{org}/{project}/_packaging/{feed}/nuget/v3/index.json
+        var match = Regex.Match(url, """
+            https\://pkgs\.dev\.azure\.com/(?<Organization>[^/]+)/(?<Project>[^/]+)/_packaging/(?<Feed>[^/]+)/nuget/v3/index\.json
+            """);
+
+        if (match.Success)
+        {
+            organization = match.Groups["Organization"].Value;
+            project = match.Groups["Project"].Value;
+            feed = match.Groups["Feed"].Value;
+            return true;
+        }
+
+        // Old format: https://{feed}.pkgs.visualstudio.com/{project}/_packaging/{feed}/nuget/v3/index.json
+        var oldMatch = Regex.Match(url, """
+            https\://(?<Feed>[^.]+)\.pkgs\.visualstudio\.com/(?<Project>[^/]+)/_packaging/(?<Feed2>[^/]+)/nuget/v3/index\.json
+            """);
+
+        if (oldMatch.Success)
+        {
+            organization = oldMatch.Groups["Feed"].Value;
+            project = oldMatch.Groups["Project"].Value;
+            feed = oldMatch.Groups["Feed2"].Value;
+            return true;
+        }
+
+        organization = default;
+        project = default;
+        feed = default;
+        return false;
     }
 
     private abstract class CatalogEntity
