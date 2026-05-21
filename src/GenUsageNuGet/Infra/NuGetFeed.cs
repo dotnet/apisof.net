@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
@@ -17,6 +18,7 @@ internal sealed class NuGetFeed
 {
     private static readonly int s_maxDegreeOfParallelism = GetCatalogMaxDegreeOfParallelism();
     private static readonly TimeSpan s_httpTimeout = GetHttpTimeout();
+    private static readonly int s_packageDownloadMaxRetries = GetPackageDownloadMaxRetries();
     private static readonly HttpClient s_httpClient = CreateHttpClient();
 
     public static NuGetFeed NuGetOrg { get; } = new("https://devdiv.pkgs.visualstudio.com/OnlineServices/_packaging/dotnetlegacy/nuget/v3/index.json");
@@ -225,14 +227,124 @@ internal sealed class NuGetFeed
         return TimeSpan.FromSeconds(seconds);
     }
 
+    private static int GetPackageDownloadMaxRetries()
+    {
+        const int fallback = 5;
+        const int min = 0;
+        const int max = 10;
+
+        var text = Environment.GetEnvironmentVariable("GENUSAGE_NUGET_DOWNLOAD_RETRIES");
+        return int.TryParse(text, out var value)
+            ? Math.Clamp(value, min, max)
+            : fallback;
+    }
+
     public async Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)
     {
         ThrowIfNull(identity);
 
         var url = await GetPackageUrlAsync(identity);
+        var downloadUrl = new Uri(url, UriKind.Absolute);
 
-        var nupkgStream = await s_httpClient.GetStreamAsync(url);
-        return new PackageArchiveReader(nupkgStream);
+        if (TryGetAzureArtifactsCredential(FeedUrl, out var username, out var password))
+        {
+            var token = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($"{username}:{password}"));
+            using var response = await SendWithRetriesAsync(() =>
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, downloadUrl);
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", token);
+                return request;
+            });
+
+            response.EnsureSuccessStatusCode();
+
+            // PackageArchiveReader requires the stream to remain valid for the reader lifetime,
+            // so we materialize the payload into memory before disposing the response.
+            var networkStream = await response.Content.ReadAsStreamAsync();
+            var memoryStream = new MemoryStream();
+            await networkStream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            return new PackageArchiveReader(memoryStream);
+        }
+
+        using var responseWithoutCredentials = await SendWithRetriesAsync(() => new HttpRequestMessage(HttpMethod.Get, downloadUrl));
+        responseWithoutCredentials.EnsureSuccessStatusCode();
+
+        // PackageArchiveReader requires the stream to remain valid for the reader lifetime,
+        // so we materialize the payload into memory before disposing the response.
+        var networkStreamWithoutCredentials = await responseWithoutCredentials.Content.ReadAsStreamAsync();
+        var memoryStreamWithoutCredentials = new MemoryStream();
+        await networkStreamWithoutCredentials.CopyToAsync(memoryStreamWithoutCredentials);
+        memoryStreamWithoutCredentials.Position = 0;
+
+        return new PackageArchiveReader(memoryStreamWithoutCredentials);
+    }
+
+    private static async Task<HttpResponseMessage> SendWithRetriesAsync(Func<HttpRequestMessage> createRequest)
+    {
+        var retriesLeft = s_packageDownloadMaxRetries;
+
+        while (true)
+        {
+            try
+            {
+                using var request = createRequest();
+                var response = await s_httpClient.SendAsync(request);
+
+                if (!IsTransientStatusCode(response.StatusCode) || retriesLeft == 0)
+                    return response;
+
+                var delay = GetRetryDelay(response, retriesLeft);
+                Console.Error.WriteLine($"warning: transient HTTP {(int)response.StatusCode} {response.ReasonPhrase}; retrying package download in {delay.TotalSeconds:N0}s ({retriesLeft} retries left)");
+
+                response.Dispose();
+                await Task.Delay(delay);
+                retriesLeft--;
+            }
+            catch (HttpRequestException ex) when (retriesLeft > 0)
+            {
+                var delay = GetRetryDelay(response: null, retriesLeft);
+                Console.Error.WriteLine($"warning: transient request failure ({ex.Message}); retrying package download in {delay.TotalSeconds:N0}s ({retriesLeft} retries left)");
+                await Task.Delay(delay);
+                retriesLeft--;
+            }
+            catch (TaskCanceledException) when (retriesLeft > 0)
+            {
+                var delay = GetRetryDelay(response: null, retriesLeft);
+                Console.Error.WriteLine($"warning: package download timed out; retrying in {delay.TotalSeconds:N0}s ({retriesLeft} retries left)");
+                await Task.Delay(delay);
+                retriesLeft--;
+            }
+        }
+    }
+
+    private static bool IsTransientStatusCode(HttpStatusCode statusCode)
+    {
+        return statusCode == HttpStatusCode.RequestTimeout ||
+               statusCode == HttpStatusCode.TooManyRequests ||
+               statusCode == HttpStatusCode.BadGateway ||
+               statusCode == HttpStatusCode.ServiceUnavailable ||
+               statusCode == HttpStatusCode.GatewayTimeout;
+    }
+
+    private static TimeSpan GetRetryDelay(HttpResponseMessage? response, int retriesLeft)
+    {
+        var retryAfterDelta = response?.Headers.RetryAfter?.Delta;
+        if (retryAfterDelta is not null && retryAfterDelta.Value > TimeSpan.Zero)
+            return retryAfterDelta.Value;
+
+        var retryAfterDate = response?.Headers.RetryAfter?.Date;
+        if (retryAfterDate is not null)
+        {
+            var serverDelay = retryAfterDate.Value - DateTimeOffset.UtcNow;
+            if (serverDelay > TimeSpan.Zero)
+                return serverDelay;
+        }
+
+        var attempt = s_packageDownloadMaxRetries - retriesLeft + 1;
+        var delaySeconds = Math.Min(30, Math.Pow(2, attempt));
+        return TimeSpan.FromSeconds(delaySeconds);
     }
 
     private async Task<string> GetPackageUrlAsync(PackageIdentity identity)
@@ -351,7 +463,8 @@ internal sealed class NuGetFeed
             if (string.IsNullOrEmpty(endpointUrl))
                 continue;
 
-            if (!string.Equals(endpointUrl.TrimEnd('/'), normalizedFeed, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(endpointUrl.TrimEnd('/'), normalizedFeed, StringComparison.OrdinalIgnoreCase) &&
+                !AreEquivalentAzureArtifactsFeeds(endpointUrl, feedUrl))
                 continue;
 
             var endpointUsername = endpoint?["username"]?.GetValue<string>();
@@ -366,6 +479,19 @@ internal sealed class NuGetFeed
         }
 
         return false;
+    }
+
+    private static bool AreEquivalentAzureArtifactsFeeds(string leftUrl, string rightUrl)
+    {
+        if (!TryGetAzureDevOpsFeed(leftUrl, out var leftOrganization, out var leftProject, out var leftFeed))
+            return false;
+
+        if (!TryGetAzureDevOpsFeed(rightUrl, out var rightOrganization, out var rightProject, out var rightFeed))
+            return false;
+
+        return string.Equals(leftOrganization, rightOrganization, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(leftProject, rightProject, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(leftFeed, rightFeed, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TryGetAzureArtifactsCredential(string feedUrl,

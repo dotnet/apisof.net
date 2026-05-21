@@ -28,6 +28,7 @@ steps:
       GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
       GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
       GENUSAGE_NUGET_CRAWL_WORKERS: "16"
+      GENUSAGE_NUGET_DOWNLOAD_RETRIES: "5"
   - task: AzureCLI@2
     displayName: Run GenUsagePlanner (${{ parameters.BuildType }})
     timeoutInMinutes: 0
