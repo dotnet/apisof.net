@@ -130,15 +130,53 @@ internal sealed class NuGetFeed
     {
         var result = new List<PackageIdentity>();
 
+        var feedUrl = $"https://{organization}.pkgs.visualstudio.com/{project}/_packaging/{feed}/nuget/v3/index.json";
+        var hasCredentials = TryGetAzureArtifactsCredential(feedUrl, out var username, out var password);
+
         var skip = 0;
 
         while (true)
         {
             var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
-            using var data = await s_httpClient.GetStreamAsync(url);
-            var document = JsonNode.Parse(data)!;
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
 
-            var count = document["count"]!.GetValue<int>();
+            if (hasCredentials)
+            {
+                var token = Convert.ToBase64String(System.Text.Encoding.ASCII.GetBytes($"{username}:{password}"));
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", token);
+            }
+
+            using var response = await s_httpClient.SendAsync(request);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var snippet = content.Length > 512
+                    ? content[..512]
+                    : content;
+
+                throw new InvalidOperationException($"Azure DevOps package listing failed: {(int)response.StatusCode} {response.ReasonPhrase}. url={url}. body={snippet}");
+            }
+
+            JsonNode? document;
+
+            try
+            {
+                document = JsonNode.Parse(content);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                var snippet = content.Length > 512
+                    ? content[..512]
+                    : content;
+
+                throw new InvalidOperationException($"Azure DevOps package listing returned non-JSON content. url={url}. body={snippet}", ex);
+            }
+
+            if (document is null)
+                throw new InvalidOperationException($"Azure DevOps package listing returned empty JSON content. url={url}");
+
+            var count = document["count"]!.GetValue<int>(); 
             if (count == 0)
                 break;
 
@@ -428,23 +466,26 @@ internal sealed class NuGetFeed
             return true;
         }
 
-        // Old format: https://{feed}.pkgs.visualstudio.com/{project}/_packaging/{feed}/nuget/v3/index.json
-        var oldMatch = Regex.Match(url, """
-            https\://(?<Feed>[^.]+)\.pkgs\.visualstudio\.com/(?<Project>[^/]+)/_packaging/(?<Feed2>[^/]+)/nuget/v3/index\.json
+        // Legacy format: https://{org}.pkgs.visualstudio.com/{project}/_packaging/{feed}/nuget/v3/index.json
+        var legacyMatch = Regex.Match(url, """
+            https\://(?<Organization>[^.]+)\.pkgs\.visualstudio\.com/(?<Project>[^/]+)/_packaging/(?<Feed>[^/]+)/nuget/v3/index\.json
             """);
 
-        if (oldMatch.Success)
+        if (legacyMatch.Success)
         {
-            organization = oldMatch.Groups["Feed"].Value;
-            project = oldMatch.Groups["Project"].Value;
-            feed = oldMatch.Groups["Feed2"].Value;
+            organization = legacyMatch.Groups["Organization"].Value;
+            project = legacyMatch.Groups["Project"].Value;
+            feed = legacyMatch.Groups["Feed"].Value;
             return true;
         }
 
-        organization = default;
-        project = default;
-        feed = default;
-        return false;
+        else
+        {
+            organization = default;
+            project = default;
+            feed = default;
+            return false;
+        }
     }
 
     private abstract class CatalogEntity
