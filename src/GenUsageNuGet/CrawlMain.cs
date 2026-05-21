@@ -356,12 +356,15 @@ internal sealed class CrawlMain : ConsoleCommand
     {
         const int MaxLoggedLines = 200;
 
+        var currentAssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
-            FileName = Environment.ProcessPath!,
+            FileName = "dotnet",
             ArgumentList =
             {
+                currentAssemblyPath,
                 "crawl-package",
                 "-n",
                 packageId.Id,
