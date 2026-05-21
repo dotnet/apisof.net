@@ -8,9 +8,15 @@ trigger:
       - "*"
   paths:
     include:
-      - pipelines/**
+      - pipelines/build-pipeline.yml
       - src/apisof.net/**
       - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.ApiCatalog.SuffixTree/**
+      - src/Directory.Build.props
+      - src/Directory.Build.targets
+      - src/Directory.Packages.props
+      - src/nuget.config
+      - src/version.json
     exclude:
       - .gitignore
       - .github/*
