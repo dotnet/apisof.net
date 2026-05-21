@@ -1,5 +1,15 @@
 ---
-trigger: none
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/GenDesignNotes/**
+      - src/Terrajobst.ApiCatalog.ActionsRunner/**
+      - src/Terrajobst.ApiCatalog.Generation/**
+      - src/nuget.config
+      - pipelines/gen-design-notes.yml
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   BuildConfiguration: Release
@@ -20,7 +30,6 @@ schedules:
       include:
         - main
     always: true
-
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
@@ -38,26 +47,25 @@ extends:
     customBuildTags:
       - ES365AIMigrationTooling
     stages:
-      - stage: GenerateDesignNotes
+      - stage: "BuildAndPublishArtifact"
+        displayName: "Build GenDesignNotes and publish artifact"
         jobs:
           - job: generate_design_notes
-            displayName: Generate design notes
+            displayName: Generate Design Notes and Publish Artifact
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: "Publish GenDesignNotes Artifact"
+                  targetPath: "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes"
+                  artifactName: "gen-design-notes-drop"
             steps:
               - checkout: self
               - task: UseDotNet@2
                 displayName: Use .NET 8 SDK
                 inputs:
                   version: 8.x
-              - task: AzureCLI@2
-                displayName: "Run GenDesignNotes"
-                inputs:
-                  azureSubscription: "$(AzureSubscriptionConnection)"
-                  scriptType: "bash"
-                  scriptLocation: "inlineScript"                  
-                  addSpnToEnvironment: true
-                  inlineScript: |
-                    cd "$(Build.SourcesDirectory)/src/GenDesignNotes"
-                    dotnet run --configuration $(BuildConfiguration)
-                env:
-                  AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+              - task: NugetAuthenticate@1
+                displayName: Authenticate with NuGet
+              - script: |
+                  dotnet publish src/GenDesignNotes/GenDesignNotes.csproj -o "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes" /p:SourceRevisionId=$(Build.SourceVersion)
+                displayName: "Publish GenDesignNotes"

@@ -1,0 +1,300 @@
+{
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines"
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "lastUpdatedDate": "2026-05-21 01:41:13Z"
+    }
+  },
+  "results": {
+    "727db23fc356b54f11874e913fc58d645dd4dd52c5addc9df7d3d023f10d45c6": {
+      "signature": "727db23fc356b54f11874e913fc58d645dd4dd52c5addc9df7d3d023f10d45c6",
+      "alternativeSignatures": [
+        "3562d9ca350cbecb276940b42c879062e73027554741da5f669ea7063b504683",
+        "7a372c114afec6861e9e9fc347c6d95544e7f66fdd4d2a63b132205eae3f296b",
+        "430f9309186e9bbd33cb546f1e16cc3f225b0b4950c4596feb9f2d8eaa76d278"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/CatalogModel/ApiModel.cs",
+      "line": 276,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "0536499b4ce85a3c7d9143b4b15c16e04566f55e11b91e207f0ee91391e908c1": {
+      "signature": "0536499b4ce85a3c7d9143b4b15c16e04566f55e11b91e207f0ee91391e908c1",
+      "alternativeSignatures": [
+        "34add2e0c65b4397e61cf12b1a6f7f4a07b056f38bce39c6385a7dc693782c0b",
+        "5ed91e674db3d07619a5154045c432be20305d81d28b652b8d9f386a8032fe87",
+        "afb9e51b86abe06edc9bff8538684ff6c10465b50168ed6d57a8f31d111203ca"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/CatalogModel/PlatformAnnotationContext.cs",
+      "line": 136,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "ef30ada0fb76096b882383791e1d5330b13a976b5c7fdb70c3d8f270a145d0a7": {
+      "signature": "ef30ada0fb76096b882383791e1d5330b13a976b5c7fdb70c3d8f270a145d0a7",
+      "alternativeSignatures": [
+        "659de34035b399f92377347cfd2d84d79112428e7cce54a907dd7f4229e211fb",
+        "01dc713f1b526ef5c965635adb5982200fa9c58589c0a498a2bfa156d753e33a",
+        "76683d342f54041b9ce2229838d59161c79a3bb8141e977b38aa883e36cda3c5"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/CatalogModel/PlatformAnnotationContext.cs",
+      "line": 137,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "3956be12a094a5ed84fabbfc0fe8aeaa09d02497ffee4039f3bee175a8fb7175": {
+      "signature": "3956be12a094a5ed84fabbfc0fe8aeaa09d02497ffee4039f3bee175a8fb7175",
+      "alternativeSignatures": [
+        "e8fa7eb9b55246c0e0fdb75c781ac7fb5508fb5e7315040d0dc6f8ecbef46805",
+        "8409b7bbc4b416aa8901a79bfded70e9d1408b742312b88e94f979d5e2149f9f",
+        "0576c10e80260de5ee808476bc1c953263d041acf0770cf0a308c5c7f108a855"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/Features/FeatureId.cs",
+      "line": 51,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "04d90ca76423a66fd52e53e99e7267a48eab73de234e29a15c74216c5d4872e0": {
+      "signature": "04d90ca76423a66fd52e53e99e7267a48eab73de234e29a15c74216c5d4872e0",
+      "alternativeSignatures": [
+        "d1885f4dbc6c636af033b5af67403d8d301f09a2a607f78d79e003eeae9b4e51",
+        "a7fc3e5304eaeebad771ddd895046dc2ff2cfbdde881c2033b80419d50250025",
+        "9c85fab93f2debaf18a5acd82d398abcf35cf651d4c86ac5017af15e620c343a"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/MissingNetFxFeatures/AssemblyMatcher.cs",
+      "line": 11,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "72da8ebec79037fea1cc8b1541c141c9e43f17336fc65989037ffaa18a1e99d9": {
+      "signature": "72da8ebec79037fea1cc8b1541c141c9e43f17336fc65989037ffaa18a1e99d9",
+      "alternativeSignatures": [
+        "9cd792f2f6c43539e1eab7ad94cef75074392026e490ca714ff152ec36a1cf71",
+        "8c15e570600e530cd0aaff3fe4c260d02ed1d7eb11c86f83f65fdac9fe4d5e42",
+        "7389519c7a939636d5ff5c683f47b31bab479d00da4a279b5e56805883ebd100"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/MissingNetFxFeatures/NamespaceMatcher.cs",
+      "line": 11,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "ea7a40811a808f6cf5f5cba9814831db8250b650a1e150636984f6abb89d8868": {
+      "signature": "ea7a40811a808f6cf5f5cba9814831db8250b650a1e150636984f6abb89d8868",
+      "alternativeSignatures": [
+        "838c9dfd61789ed465046453e12868569c243c7af5d08bedf811c07e8ee725cb",
+        "b3b75a4ae941b6d209dcc988c7616f89b888329a775b345cc0b8bb84677345a1",
+        "e65de549c40e72b0305d96fd33f58773d294584bea273927ba0080f1877c06de"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/DesignNotes/ApiResolver.cs",
+      "line": 24,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "b04b3a58efa07ad40b454b0339983ba307d7862033e85b400943350ccdf9abde": {
+      "signature": "b04b3a58efa07ad40b454b0339983ba307d7862033e85b400943350ccdf9abde",
+      "alternativeSignatures": [
+        "3b83b3c2a4e9210b8c7236e396511da7c1c8b771d8757335bcc0ad1168ca8f97",
+        "a3702276774a7c552ad8640b2fab5732108582515371ab75b5781b2955532dd9",
+        "f77a08d6f743d61af8f9b48db2cf8ed2f080459683c96bdd461cbe599e4295e1"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/DesignNotes/ReviewDatabase.cs",
+      "line": 70,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "adbce24313a5cf4d25c4eb93cfc42be2cbf07a0e707de2e71ec9fd1f2414ce7f": {
+      "signature": "adbce24313a5cf4d25c4eb93cfc42be2cbf07a0e707de2e71ec9fd1f2414ce7f",
+      "alternativeSignatures": [
+        "5fb10fca4f4b26b031f97a842241447b0cea4819d62d41e8afc740dbed5ec30a",
+        "458456268a8de7a215b06f64784998128cb9e47157d079929392218af4393821",
+        "ab10c390e3d045f746e907646856e025b40b352e473c000538474da7989484cd"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/DesignNotes/ReviewDatabase.cs",
+      "line": 109,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "eb57443107037099e0b0356c4ff7a0b9829d1b64808bbd86bcf3b0e220fdec41": {
+      "signature": "eb57443107037099e0b0356c4ff7a0b9829d1b64808bbd86bcf3b0e220fdec41",
+      "alternativeSignatures": [
+        "d50fec246bd2e4f51c0182484cdf799efb2a19e07b6d4afede41d27349a99c71",
+        "d98fb9b755ad6646503ad737f067474efdd841148834816b4e02934db87e2221",
+        "d3041299b922c87351185ddfe8adc0827e293fa04a4dc2faf51bb20e73582849"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/AssemblyEntry.cs",
+      "line": 157,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "8cfcd8479f171644e5f29a5d20ae518d6ab2b8514b1f9dc18e0c0a389622e79a": {
+      "signature": "8cfcd8479f171644e5f29a5d20ae518d6ab2b8514b1f9dc18e0c0a389622e79a",
+      "alternativeSignatures": [
+        "7a653bab10586988f8f1903be7ba8bfefbdc0a9d178ad095ea2523687ad2d65d",
+        "1e68e644bccac04ceaffaca0176642e844583e4f0edb485e926d57c8bcededfc",
+        "0b86b4f12a9cff3b0d34115b3fefc6538c8a18c6e5a8a16c6744bf31fd4ef572"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/AssemblyEntry.cs",
+      "line": 181,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "5bfc82c189bc93f08823ea6c0d4213d69f8d18b3007949c6113c441ca738e3bd": {
+      "signature": "5bfc82c189bc93f08823ea6c0d4213d69f8d18b3007949c6113c441ca738e3bd",
+      "alternativeSignatures": [
+        "69f96b3343c98cc992114627cb4185e0c76a52abeee7a4c676700145c0df2a63",
+        "fc15c0ae9ff72a1571ae6dad9ae151de87b317e18ae292037ebe0a65135a1784",
+        "1feb41792249a963bd9943afa0e421ecc2af5fc4b8c6227829007f05f218e124"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CatalogExtensions.cs",
+      "line": 33,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "85363a29b5eca56a1367b79168487a1cabeab9442c81e5addb9e4d3e3b1b6427": {
+      "signature": "85363a29b5eca56a1367b79168487a1cabeab9442c81e5addb9e4d3e3b1b6427",
+      "alternativeSignatures": [
+        "3443867ee2dad3618fe6968308b3384e5211039290d8c142dcbe24d8f1e6b574",
+        "4c825881916edf4db6f17860f06405d092328e9362ac61747e0da2c24e001512",
+        "d9f4ca460b1e4f92a6e652bb526e32a9754ce6cd099c50dd3978af8c7664c1a7"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CatalogExtensions.cs",
+      "line": 47,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "aa7c9cd5a15dc53ddffedaad0683d936ad1294ebc2f299b3d2adb367fba206c0": {
+      "signature": "aa7c9cd5a15dc53ddffedaad0683d936ad1294ebc2f299b3d2adb367fba206c0",
+      "alternativeSignatures": [
+        "a77becec51a5f8e1ce2cc18b606201f66539246646483f09be33076ff8add8ff",
+        "0b15b9303357c78e5c8769be536e531bde4652b415c0daac3dc2866b5b7e2001",
+        "39f532cdfa0ad16654c3a731d3da9e258cf32a4d4a5ab140cdd1439deeb4afdf"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CatalogExtensions.cs",
+      "line": 224,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "0dabc24ad924922fe59404f03f7c0cc718ecdd4460c30f2ab7731d2fb4c5c98f": {
+      "signature": "0dabc24ad924922fe59404f03f7c0cc718ecdd4460c30f2ab7731d2fb4c5c98f",
+      "alternativeSignatures": [
+        "453c1ffad98a6eae4e3a96ed6f974d236368a998f48c089e427464d5fc1ba26b",
+        "f283b251e4c01f59e7009e58ca53e8732d2afe4bf252e00b6fca380b4ec8a69c",
+        "ed5e4a4cedfbc64c007a94a4b1dd80d6f93819360749ff92ca80ea0889b6941a"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CSharpDeclarationWriter.cs",
+      "line": 675,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    }
+  }
+}
