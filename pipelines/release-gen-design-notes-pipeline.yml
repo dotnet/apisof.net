@@ -1,6 +1,14 @@
 trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
+schedules:
+  - cron: "5 21 * * 2,4" # At 21:05 on Tuesday and Thursday
+    displayName: "Generate design notes every Tuesday and Thursday"
+    branches:
+      include:
+        - main
+    always: true
+
 resources:
   pipelines:
     - pipeline: "gen-design-notes"
@@ -41,7 +49,7 @@ extends:
                   targetPath: "$(Pipeline.Workspace)/gen-design-notes-drop"
             steps:
               - task: AzureCLI@2
-                displayName: "Run GenDesignNotes (Dev)"
+                displayName: "Upload GenDesignNotes Dev"
                 inputs:
                   azureSubscription: "$(AzureSubscriptionConnectionDev)"
                   scriptType: "pscore"
@@ -73,7 +81,7 @@ extends:
                     v-danzhu1@microsoft.com
 
           - job: RunGenDesignNotesProd
-            displayName: Run GenDesignNotes (Prod)
+            displayName: Upload GenDesignNotes Prod
             dependsOn: PreDeploymentApprovalJob
             condition: succeeded()
             timeoutInMinutes: 0

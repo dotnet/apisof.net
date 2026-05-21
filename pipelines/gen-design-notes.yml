@@ -1,5 +1,15 @@
 ---
-trigger: none
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - src/GenDesignNotes/**
+      - src/Terrajobst.ApiCatalog.ActionsRunner/**
+      - src/Terrajobst.ApiCatalog.Generation/**
+      - src/nuget.config
+      - pipelines/gen-design-notes.yml
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   BuildConfiguration: Release
@@ -20,7 +30,6 @@ schedules:
       include:
         - main
     always: true
-
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
@@ -42,11 +51,11 @@ extends:
         displayName: "Build GenDesignNotes and publish artifact"
         jobs:
           - job: generate_design_notes
-            displayName: Generate design notes and publish artifact
+            displayName: Generate Design Notes and Publish Artifact
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: "Publish GenDesignNotes artifact"
+                  displayName: "Publish GenDesignNotes Artifact"
                   targetPath: "$(Build.ArtifactStagingDirectory)/publish-gen-design-notes"
                   artifactName: "gen-design-notes-drop"
             steps:
