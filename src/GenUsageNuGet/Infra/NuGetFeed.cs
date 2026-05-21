@@ -1,5 +1,9 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Nodes;
 using Newtonsoft.Json;
+using NuGet.Configuration;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
@@ -26,7 +30,7 @@ internal sealed class NuGetFeed
 
         _serviceIndex = new Lazy<Task<ServiceIndexResourceV3>>(() =>
         {
-            var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
+            var sourceRepository = GetSourceRepository();
             return sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
         });
 
@@ -163,6 +167,208 @@ internal sealed class NuGetFeed
         var id = identity.Id.ToLowerInvariant();
         var version = identity.Version.ToNormalizedString().ToLowerInvariant();
         return $"{packageBaseAddress}{id}/{version}/{id}.{version}.nupkg";
+    }
+
+    private SourceRepository GetSourceRepository()
+    {
+        var settings = LoadSettings();
+        var packageSourceProvider = new PackageSourceProvider(settings);
+        var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, Repository.Provider.GetCoreV3());
+
+        PackageSource? packageSource = null;
+
+        foreach (var repository in sourceRepositoryProvider.GetRepositories())
+        {
+            if (AreSameSource(repository.PackageSource.Source, FeedUrl))
+            {
+                packageSource = repository.PackageSource;
+                break;
+            }
+        }
+
+        packageSource ??= new PackageSource(FeedUrl);
+
+        if (TryGetAzureArtifactsCredential(packageSource.Source, out var username, out var password))
+        {
+            packageSource.Credentials = new PackageSourceCredential(packageSource.Name ?? packageSource.Source,
+                                                                    username,
+                                                                    password,
+                                                                    isPasswordClearText: true,
+                                                                    validAuthenticationTypesText: null);
+        }
+
+        return new SourceRepository(packageSource, Repository.Provider.GetCoreV3());
+    }
+
+    private static ISettings LoadSettings()
+    {
+        foreach (var candidate in GetSettingsRoots())
+        {
+            var configPath = Path.Combine(candidate, "nuget.config");
+            if (File.Exists(configPath))
+                return Settings.LoadSpecificSettings(candidate, "nuget.config");
+        }
+
+        return Settings.LoadDefaultSettings(root: null);
+    }
+
+    private static IEnumerable<string> GetSettingsRoots()
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in EnumerateRoots(Environment.CurrentDirectory))
+        {
+            if (seen.Add(root))
+                yield return root;
+
+            var srcRoot = Path.Combine(root, "src");
+            if (seen.Add(srcRoot))
+                yield return srcRoot;
+        }
+
+        foreach (var root in EnumerateRoots(AppContext.BaseDirectory))
+        {
+            if (seen.Add(root))
+                yield return root;
+
+            var srcRoot = Path.Combine(root, "src");
+            if (seen.Add(srcRoot))
+                yield return srcRoot;
+        }
+    }
+
+    private static IEnumerable<string> EnumerateRoots(string startPath)
+    {
+        var directory = new DirectoryInfo(startPath);
+
+        while (directory is not null)
+        {
+            yield return directory.FullName;
+            directory = directory.Parent;
+        }
+    }
+
+    // VSS_NUGET_EXTERNAL_FEED_ENDPOINTS format set by NuGetAuthenticate@1:
+    // {"endpointCredentials":[{"endpoint":"https://...","username":"user","password":"token"},...]}
+    private static bool TryGetCredentialFromPipelineEnv(string feedUrl,
+                                                        [MaybeNullWhen(false)] out string username,
+                                                        [MaybeNullWhen(false)] out string password)
+    {
+        username = default;
+        password = default;
+
+        var envValue = Environment.GetEnvironmentVariable("VSS_NUGET_EXTERNAL_FEED_ENDPOINTS");
+        if (string.IsNullOrWhiteSpace(envValue))
+            return false;
+
+        var document = JsonNode.Parse(envValue);
+        var endpoints = document?["endpointCredentials"]?.AsArray();
+        if (endpoints is null)
+            return false;
+
+        var normalizedFeed = feedUrl.TrimEnd('/');
+
+        foreach (var endpoint in endpoints)
+        {
+            var endpointUrl = endpoint?["endpoint"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(endpointUrl))
+                continue;
+
+            if (!string.Equals(endpointUrl.TrimEnd('/'), normalizedFeed, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var endpointUsername = endpoint?["username"]?.GetValue<string>();
+            var endpointPassword = endpoint?["password"]?.GetValue<string>();
+
+            if (!string.IsNullOrWhiteSpace(endpointPassword))
+            {
+                username = string.IsNullOrWhiteSpace(endpointUsername) ? "VssSessionToken" : endpointUsername;
+                password = endpointPassword;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryGetAzureArtifactsCredential(string feedUrl,
+                                                       [MaybeNullWhen(false)] out string username,
+                                                       [MaybeNullWhen(false)] out string password)
+    {
+        // NuGetAuthenticate@1 in Azure Pipelines sets VSS_NUGET_EXTERNAL_FEED_ENDPOINTS with
+        // pre-configured credentials. Check this first so pipeline runs work without the
+        // credential provider binary being present on the agent.
+        if (TryGetCredentialFromPipelineEnv(feedUrl, out username, out password))
+            return true;
+
+        username = default;
+        password = default;
+
+        foreach (var providerPath in GetCredentialProviderPaths())
+        {
+            if (!File.Exists(providerPath))
+                continue;
+
+            var startInfo = new ProcessStartInfo(providerPath)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            startInfo.ArgumentList.Add("-U");
+            startInfo.ArgumentList.Add(feedUrl);
+            startInfo.ArgumentList.Add("-N");
+            startInfo.ArgumentList.Add("-I");
+            startInfo.ArgumentList.Add("-V");
+            startInfo.ArgumentList.Add("Minimal");
+            startInfo.ArgumentList.Add("-F");
+            startInfo.ArgumentList.Add("Json");
+
+            using var process = Process.Start(startInfo);
+            if (process is null)
+                continue;
+
+            var output = process.StandardOutput.ReadToEnd();
+            _ = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+                continue;
+
+            var document = JsonNode.Parse(output);
+            var providerUsername = document?["Username"]?.GetValue<string>();
+            var providerPassword = document?["Password"]?.GetValue<string>();
+
+            if (!string.IsNullOrWhiteSpace(providerUsername) && !string.IsNullOrWhiteSpace(providerPassword))
+            {
+                username = providerUsername;
+                password = providerPassword;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> GetCredentialProviderPaths()
+    {
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        yield return Path.Combine(userProfile, ".nuget", "plugins", "netfx", "CredentialProvider.Microsoft", "CredentialProvider.Microsoft.exe");
+        yield return Path.Combine(userProfile, ".nuget", "plugins", "netcore", "CredentialProvider.Microsoft", "CredentialProvider.Microsoft.exe");
+    }
+
+    private static bool AreSameSource(string left, string right)
+    {
+        if (Uri.TryCreate(left, UriKind.Absolute, out var leftUri) &&
+            Uri.TryCreate(right, UriKind.Absolute, out var rightUri))
+        {
+            return string.Equals(leftUri.AbsoluteUri.TrimEnd('/'), rightUri.AbsoluteUri.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
+        }
+
+        return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
     }
 
     private abstract class CatalogEntity
