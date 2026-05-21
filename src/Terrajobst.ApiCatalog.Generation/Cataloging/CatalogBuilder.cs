@@ -455,7 +455,10 @@ public sealed partial class CatalogBuilder
 
         if (assembly.Declarations.TryGetValue(api, out var declaration))
         {
-            _logger.WriteLine($"error: declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint}) already exists");
+            if (!StringComparer.Ordinal.Equals(declaration.Syntax, syntax))
+            {
+                _logger.WriteLine($"warning: duplicate declaration for API {api.Name} ({api.Fingerprint}) in assembly {assembly.Name} ({assembly.Fingerprint}) with different syntax; keeping first declaration");
+            }
             return;
         }
 

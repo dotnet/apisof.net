@@ -1,11 +1,10 @@
-using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime;
 using System.Text.Json;
 using System.Xml.Linq;
 
 using Microsoft.CodeAnalysis;
 using NuGet.Frameworks;
-
 using Terrajobst.ApiCatalog;
 using Terrajobst.ApiCatalog.ActionsRunner;
 
@@ -51,14 +50,27 @@ internal sealed class Main : IConsoleMain
 
             var indexStore = new FileSystemIndexStore(indexPath);
 
-            var stopwatch = Stopwatch.StartNew();
-
             await DownloadArchivedPlatformsAsync(frameworksPath);
             await DownloadPackagedPlatformsAsync(frameworksPath, packsPath);
             await DownloadDotnetPackageListAsync(packageListPath);
             await GeneratePlatformIndexAsync(frameworksPath, indexStore);
             await GeneratePackageIndexAsync(packageListPath, packagesPath, frameworksPath, indexStore);
+
             await GenerateCatalogAsync(indexStore, catalogModelPath);
+
+            // The stats phase loads the entire catalog as a large managed byte[] on
+            // the LOH. Before the suffix tree phase allocates another one, reclaim
+            // that buffer AND compact the LOH so the freed region can be reused
+            // instead of growing the heap. Aggressive + compacting + a CompactOnce
+            // LOH hint are the combination that actually returns memory to the OS;
+            // a non-compacting collect leaves a hole the next LoadAsync won't fit
+            // into. The collect-finalize-collect sequence ensures anything that
+            // finalizers release is reclaimed in the same pass.
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+
             await GenerateSuffixTreeAsync(catalogModelPath, suffixTreePath);
             await _store.UploadApiCatalogAsync(catalogModelPath);
             await _store.UploadSuffixTreeAsync(suffixTreePath);
@@ -69,10 +81,6 @@ internal sealed class Main : IConsoleMain
             _summaryTable.AppendBytes("Suffix Tree Size", suffixTreeSize);
 
             await PostToGenCatalogWebHook();
-
-            Console.WriteLine($"Completed in {stopwatch.Elapsed}");
-            Console.WriteLine($"Peak working set: {Process.GetCurrentProcess().PeakWorkingSet64 / (1024 * 1024):N2} MB");
-
             await UploadSummaryAsync(success: true);
         }
         catch
@@ -174,8 +182,7 @@ internal sealed class Main : IConsoleMain
         var packages = document.Root!.Elements("package")
             .Select(e => (
                 Id: e.Attribute("id")!.Value,
-                Version: e.Attribute("version")!.Value))
-            .ToArray();
+                Version: e.Attribute("version")!.Value));
 
         var nightlies = new NuGetFeed(NuGetFeeds.NightlyLatest);
         var nuGetOrg = new NuGetFeed(NuGetFeeds.NuGetOrg);
@@ -297,6 +304,7 @@ internal sealed class Main : IConsoleMain
         Console.WriteLine($"Generating {Path.GetFileName(suffixTreePath)}...");
         var catalog = await ApiCatalogModel.LoadAsync(catalogModelPath);
         var builder = new SuffixTreeBuilder();
+        var processed = 0;
 
         foreach (var api in catalog.AllApis)
         {
@@ -304,6 +312,10 @@ internal sealed class Main : IConsoleMain
                 continue;
 
             builder.Add(api.ToString(), api.Id);
+
+            processed++;
+            if (processed % 250_000 == 0)
+                Console.WriteLine($"  Suffix tree APIs processed: {processed:N0}");
         }
 
         await using var stream = File.Create(suffixTreePath);
