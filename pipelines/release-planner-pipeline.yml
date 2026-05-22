@@ -63,6 +63,9 @@ extends:
                     v-danzhu1@microsoft.com
           - job: build_and_upload_velopack_prod
             displayName: Build and upload velopack to Prod environment
+            dependsOn: PreDeploymentApprovalJob
+            condition: succeeded()
+            timeoutInMinutes: 0
             templateContext:
               type: releaseJob
               isProduction: true
