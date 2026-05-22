@@ -1,17 +1,5 @@
 ---
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - pipelines/build-planner.yml
-      - pipelines/templates/steps-build-planner.yml
-      - src/NetUpgradePlanner/**
-      - src/Terrajobst.ApiCatalog/**
-      - src/Terrajobst.NetUpgradePlanner/**
-      - src/Terrajobst.NetUpgradePlanner.Excel/**
-      - src/Terrajobst.UsageCrawling/**
+trigger: none
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   BuildConfiguration: Release
@@ -51,7 +39,7 @@ extends:
                 - input: pipelineArtifact
                   pipeline: "apis-of-dotnet-planner-build"
                   artifactName: velopack-release
-                  targetPath: $(Pipeline.Workspace)/velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-input
             steps:
               - template: /pipelines/templates/upload-build-planner.yml@self
                 parameters:
@@ -77,12 +65,12 @@ extends:
             displayName: Build and upload velopack to Prod environment
             templateContext:
               type: releaseJob
-              isProduction: false
+              isProduction: true
               inputs:
                 - input: pipelineArtifact
                   pipeline: "apis-of-dotnet-planner-build"
                   artifactName: velopack-release
-                  targetPath: $(Pipeline.Workspace)/velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-input
             steps:
               - template: /pipelines/templates/upload-build-planner.yml@self
                 parameters:

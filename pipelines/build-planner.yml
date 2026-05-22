@@ -3,8 +3,6 @@ trigger:
   branches:
     include:
       - "*"
-    exclude:
-      - main
   paths:
     include:
       - pipelines/build-planner.yml
@@ -44,12 +42,12 @@ extends:
       - stage: BuildAndPublish
         jobs:
           - job: build_and_publish
-            displayName: "Build and publish velopack"
+            displayName: "Build and Publish Velopack"
             templateContext:
               outputs:
                 - output: pipelineArtifact
-                  displayName: "Publish velopack release"
-                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-release
+                  displayName: "Publish velopack inputs"
+                  targetPath: $(Build.ArtifactStagingDirectory)/velopack-input
                   artifactName: velopack-release
             steps:
               - template: /pipelines/templates/steps-build-planner.yml@self
