@@ -1,17 +1,33 @@
 ---
-trigger: none
+trigger:
+  branches:
+    include:
+      - "*"
+  paths:
+    include:
+      - pipelines/gen-usage-pipeline.yml
+      - pipelines/templates/steps-gen-usage.yml
+      - src/Directory.Build.props
+      - src/Directory.Build.targets
+      - src/Directory.Packages.props
+      - src/nuget.config
+      - src/version.json
+      - src/GenUsage/**
+      - src/GenUsageNuGet/**
+      - src/GenUsagePlanner/**
+      - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.ApiCatalog.ActionsRunner/**
+      - src/Terrajobst.UsageCrawling/**
+      - src/Terrajobst.UsageCrawling.Storage/**
+    exclude:
+      - .gitignore
+      - .github/*
+  batch: true
 
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: BuildConfiguration
     value: Release
-schedules:
-  - cron: '21 */6 * * *' # At :21 in every 6th hour
-    displayName: "Generate usage every 6 hours"
-    branches:
-      include:
-        - main
-    always: true
 resources:
   repositories:
     - repository: self
@@ -45,7 +61,7 @@ extends:
                 - output: pipelineArtifact
                   displayName: Publish GenUsage Artifact
                   targetPath: $(Build.ArtifactStagingDirectory)
-                  artifactName: GenUsage-drop
+                  artifactName: gen-usage-drop
             steps:
               - checkout: self
               - task: UseDotNet@2

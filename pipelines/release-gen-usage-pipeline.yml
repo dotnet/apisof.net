@@ -1,8 +1,14 @@
-trigger: 
-  branches:
-    include:
-      - main
+trigger: none
+
 name: $(Date:yyyyMMdd).$(Rev:r)
+
+schedules:
+  - cron: "21 */6 * * *" # At :21 in every 6th hour
+    displayName: "Release usage every 6 hours"
+    branches:
+      include:
+        - main
+    always: true
 
 resources:
   pipelines:
@@ -34,21 +40,22 @@ extends:
             displayName: Run on agent
             condition: succeeded()
             timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
             templateContext:
               type: releaseJob
               isProduction: false
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-usage"
-                  artifactName: "GenUsage-drop"
-                  targetPath: "$(Pipeline.Workspace)/GenUsage-drop"
+                  artifactName: "gen-usage-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
             steps:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
                   BuildType: "dev"
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
-                  AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
-                  ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
 
       - stage: Production
         displayName: Run in Production
@@ -73,18 +80,19 @@ extends:
             dependsOn: PreDeploymentApprovalJob
             condition: succeeded()
             timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
             templateContext:
               type: releaseJob
               isProduction: true
               inputs:
                 - input: pipelineArtifact
                   pipeline: "gen-usage"
-                  artifactName: "GenUsage-drop"
-                  targetPath: "$(Pipeline.Workspace)/GenUsage-drop"
+                  artifactName: "gen-usage-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
             steps:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
                   BuildType: "prod"
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
-                  AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
-                  ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
