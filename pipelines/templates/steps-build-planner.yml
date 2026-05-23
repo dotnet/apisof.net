@@ -16,7 +16,7 @@ steps:
       if ($LASTEXITCODE -ne 0) {
         dotnet tool install -g nbgv --configfile $config
       }
-      nbgv cloud -p ${{ parameters.projectPath }}
+      nbgv cloud -p ${{ parameters.projectPath }} -a
     displayName: "Set build version (nbgv)"
   - pwsh: |
       $ErrorActionPreference = 'Stop'
@@ -30,7 +30,11 @@ steps:
       $version = $env:PLANNER_SEMVER1
 
       if ([string]::IsNullOrWhiteSpace($version)) {
-        throw "NBGV version variable is missing. Ensure 'nbgv cloud -p ${{ parameters.projectPath }}' completed successfully."
+        throw "NBGV version variable is missing. Ensure 'nbgv cloud -p ${{ parameters.projectPath }} -a' completed successfully."
+      }
+
+      if ($version -match '^\$\(') {
+        throw "NBGV version variable was not expanded (got literal '$version'). Ensure 'nbgv cloud -p ${{ parameters.projectPath }} -a' ran with the -a/--all-vars flag so NBGV_SemVer1 is published."
       }
 
       $inputRoot = "$(Build.ArtifactStagingDirectory)/velopack-input"
