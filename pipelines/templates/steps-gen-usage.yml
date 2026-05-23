@@ -1,0 +1,51 @@
+parameters:
+  - name: BuildType
+    type: string
+    default: "dev"
+  - name: AzureSubscriptionConnection
+    type: string
+  - name: Tools
+    type: object
+    default:
+      - name: GenUsageNuGet
+        publishDir: publish-gen-usage-nuget
+        dll: GenUsageNuGet.dll
+        args: crawl
+        # Tuned for the Azure DevOps Linux agent
+        # long-running, memory-hungry crawl within the agent's resource budget
+        env:
+          GENUSAGE_NUGET_CATALOG_DOP: "2"
+          GENUSAGE_NUGET_HTTP_TIMEOUT_SECONDS: "36000"
+          GENUSAGE_NUGET_CRAWL_TIMEOUT_HOURS: "3"
+          GENUSAGE_NUGET_CRAWL_WORKERS: "16"
+          GENUSAGE_NUGET_DOWNLOAD_RETRIES: "5"
+      - name: GenUsagePlanner
+        publishDir: publish-gen-usage-planner
+        dll: GenUsagePlanner.dll
+        args: ""
+        env: {}
+      - name: GenUsage
+        publishDir: publish-gen-usage
+        dll: GenUsage.dll
+        args: ""
+        env: {}
+
+steps:
+  - task: NuGetAuthenticate@1
+    displayName: "Authenticate with NuGet feed"
+
+  - ${{ each tool in parameters.Tools }}:
+      - task: AzureCLI@2
+        displayName: "Run ${{ tool.name }} (${{ parameters.BuildType }})"
+        timeoutInMinutes: 0
+        inputs:
+          azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
+          scriptType: "bash"
+          scriptLocation: "inlineScript"
+          inlineScript: |
+            dotnet "$(Pipeline.Workspace)/gen-usage-drop/${{ tool.publishDir }}/${{ tool.dll }}" ${{ tool.args }}
+        env:
+          AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+          ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+          ${{ each pair in tool.env }}:
+            ${{ pair.key }}: ${{ pair.value }}

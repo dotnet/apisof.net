@@ -1,4 +1,5 @@
 ﻿using Terrajobst.UsageCrawling.Storage;
+using Microsoft.Data.Sqlite;
 
 namespace GenUsageNuGet.Tests;
 
@@ -335,5 +336,42 @@ public class UsageDatabaseTests : IDisposable
         var actualUsages = (await db.GetUsagesAsync()).OrderBy(u => u.Feature).ToArray();
 
         Assert.Equal(expectedUsages, actualUsages);
+    }
+
+    [Fact]
+    public async Task UsageDatabase_GetUsagesAsync_IgnoresDanglingParentFeatureIds()
+    {
+        var featureChild = Guid.Parse("f4cd0618-411e-4ad3-b7ab-0576f88f75d8");
+
+        using (var db = await UsageDatabase.OpenOrCreateAsync(_fileName))
+        {
+            await db.AddReferenceUnitAsync("Unit1");
+            await db.TryAddFeatureAsync(featureChild);
+            await db.AddUsageAsync("Unit1", featureChild);
+        }
+
+        await using (var connection = new SqliteConnection($"Data Source={_fileName}"))
+        {
+            await connection.OpenAsync();
+
+            await using var insertDanglingParent = new SqliteCommand(
+                """
+                INSERT INTO ParentFeatures(ChildFeatureId, ParentFeatureId)
+                VALUES ((SELECT FeatureId FROM Features WHERE Guid = @FeatureGuid), @DanglingParentId)
+                """, connection);
+
+            insertDanglingParent.Parameters.AddWithValue("@FeatureGuid", featureChild.ToString());
+            insertDanglingParent.Parameters.AddWithValue("@DanglingParentId", 999999);
+            await insertDanglingParent.ExecuteNonQueryAsync();
+        }
+
+        using (var db = await UsageDatabase.OpenOrCreateAsync(_fileName))
+        {
+            var usages = await db.GetUsagesAsync();
+            var actualUsage = Assert.Single(usages);
+
+            Assert.Equal(featureChild, actualUsage.Feature);
+            Assert.Equal(1.0f, actualUsage.percentage);
+        }
     }
 }

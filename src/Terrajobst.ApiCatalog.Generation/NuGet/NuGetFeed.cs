@@ -22,12 +22,24 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class NuGetFeed
 {
+    private static readonly HttpClient s_httpClient = CreateHttpClient();
+
     public NuGetFeed(string feedUrl)
     {
         FeedUrl = feedUrl;
     }
 
     public string FeedUrl { get; }
+
+    private static HttpClient CreateHttpClient()
+    {
+        var handler = new HttpClientHandler
+        {
+            SslProtocols = SslProtocols.Tls12
+        };
+
+        return new HttpClient(handler, disposeHandler: true);
+    }
 
     public async Task<IReadOnlyList<PackageIdentity>> GetAllPackagesAsync(DateTimeOffset? since = null)
     {
@@ -41,12 +53,7 @@ public sealed class NuGetFeed
         if (catalogIndexUrl == null)
             throw new InvalidOperationException("This feed doesn't support enumeration");
 
-        var handler = new HttpClientHandler();
-        handler.SslProtocols = SslProtocols.Tls12;
-
-        using var httpClient = new HttpClient(handler);
-
-        var indexString = await httpClient.GetStringAsync(catalogIndexUrl);
+        var indexString = await s_httpClient.GetStringAsync(catalogIndexUrl);
         var index = JsonConvert.DeserializeObject<CatalogIndex>(indexString)!;
 
         // Find all pages in the catalog index.
@@ -65,7 +72,7 @@ public sealed class NuGetFeed
                 try
                 {
                     // Download the catalog page and deserialize it.
-                    var pageString = await httpClient.GetStringAsync(pageItem.Url);
+                    var pageString = await s_httpClient.GetStringAsync(pageItem.Url);
                     var page = JsonConvert.DeserializeObject<CatalogPage>(pageString)!;
 
                     foreach (var pageLeafItem in page.Items)
@@ -105,14 +112,12 @@ public sealed class NuGetFeed
     {
         var result = new List<PackageIdentity>();
 
-        var client = new HttpClient();
-
         var skip = 0;
 
         while (true)
         {
             var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
-            var data = await client.GetStreamAsync(url);
+            using var data = await s_httpClient.GetStreamAsync(url);
             var document = JsonNode.Parse(data)!;
 
             var count = document["count"]!.GetValue<int>();
@@ -250,14 +255,25 @@ public sealed class NuGetFeed
         await TryCopyPackageStreamAsync(identity, destination);
     }
 
-    public Task<Dictionary<string, string[]>> GetOwnerMappingAsync()
+    private async Task<string> GetPackageUrlAsync(PackageIdentity identity)
+    {
+        var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
+        var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
+        var packageBaseAddress = serviceIndex.GetServiceEntryUri("PackageBaseAddress/3.0.0")?.ToString();
+
+        var id = identity.Id.ToLowerInvariant();
+        var version = identity.Version.ToNormalizedString().ToLowerInvariant();
+        return $"{packageBaseAddress}{id}/{version}/{id}.{version}.nupkg";
+    }
+
+    public async Task<Dictionary<string, string[]>> GetOwnerMappingAsync()
     {
         if (FeedUrl != NuGetFeeds.NuGetOrg)
             throw new NotSupportedException("We can only retrieve owner information for nuget.org");
 
-        var httpClient = new HttpClient();
         var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-017/owners/owners.v2.json";
-        return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url)!;
+        var mapping = await s_httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
+        return mapping ?? new Dictionary<string, string[]>();
     }
 
     private SourceRepository GetSourceRepository()

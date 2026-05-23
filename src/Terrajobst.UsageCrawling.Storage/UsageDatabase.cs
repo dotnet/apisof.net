@@ -330,12 +330,13 @@ public sealed class UsageDatabase : IDisposable
 
         var results = _connection.QueryUnbufferedAsync<(int FeatureId, float Percentage)>(
             """
-            SELECT   COALESCE(a.ParentFeatureId, u.FeatureId) AS FeatureId,
+            SELECT   COALESCE(p.FeatureId, u.FeatureId) AS FeatureId,
                      CAST(COUNT(DISTINCT u.ReferenceUnitId) AS REAL) / (SELECT r.Count FROM ReferenceUnitCounts r WHERE r.CollectorVersion = f.CollectorVersion) AS Percentage
             FROM     Usages u
                          JOIN Features f ON f.FeatureId = u.FeatureId
                          LEFT JOIN ParentFeatures a ON a.ChildFeatureId = u.FeatureId
-            GROUP BY COALESCE(a.ParentFeatureId, u.FeatureId)
+                         LEFT JOIN Features p ON p.FeatureId = a.ParentFeatureId
+            GROUP BY COALESCE(p.FeatureId, u.FeatureId)
             """, transaction: _transaction);
 
         var result = new List<(Guid, float)>();
@@ -507,9 +508,13 @@ public sealed class UsageDatabase : IDisposable
             //       However, since we're only using this to trim the export functionality we can
             //       ignore this because we do an INNER JOIN with the Feature table which reject
             //       those rows.
+            //
+            //       We do clean up ParentFeatures though. Dangling parent links can otherwise
+            //       cause aggregation to resolve to removed feature IDs.
 
             _command = new SqliteCommand(
                 """
+                DELETE FROM ParentFeatures WHERE ChildFeatureId = @FeatureId OR ParentFeatureId = @FeatureId;
                 DELETE FROM Features WHERE FeatureId = @FeatureId;
                 """, connection, transaction);
 
@@ -544,7 +549,7 @@ public sealed class UsageDatabase : IDisposable
         {
             _command = new SqliteCommand(
                 """
-                INSERT INTO [ParentFeatures]
+                INSERT OR IGNORE INTO [ParentFeatures]
                     ([ChildFeatureId], [ParentFeatureId])
                 VALUES
                     (@ChildFeatureId, @ParentFeatureId)

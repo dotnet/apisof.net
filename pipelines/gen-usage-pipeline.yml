@@ -1,0 +1,88 @@
+---
+trigger:
+  branches:
+    include:
+      - "*"
+  paths:
+    include:
+      - pipelines/gen-usage-pipeline.yml
+      - pipelines/templates/steps-gen-usage.yml
+      - src/Directory.Build.props
+      - src/Directory.Build.targets
+      - src/Directory.Packages.props
+      - src/nuget.config
+      - src/version.json
+      - src/GenUsage/**
+      - src/GenUsageNuGet/**
+      - src/GenUsagePlanner/**
+      - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.ApiCatalog.ActionsRunner/**
+      - src/Terrajobst.UsageCrawling/**
+      - src/Terrajobst.UsageCrawling.Storage/**
+    exclude:
+      - .gitignore
+      - .github/*
+  batch: true
+
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  - name: BuildConfiguration
+    value: Release
+resources:
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022
+        os: windows
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Ubuntu22.04
+      os: linux
+    stages:
+      - stage: GenerateUsageArtifacts
+        jobs:
+          - job: generate_and_publish_usage_artifact
+            displayName: Generate and publish usage artifacts
+            timeoutInMinutes: 0
+            cancelTimeoutInMinutes: 5
+            templateContext:
+              outputs:
+                - output: pipelineArtifact
+                  displayName: Publish GenUsage Artifact
+                  targetPath: $(Build.ArtifactStagingDirectory)
+                  artifactName: gen-usage-drop
+            steps:
+              - checkout: self
+              - task: UseDotNet@2
+                displayName: Use .NET 8 SDK
+                inputs:
+                  version: 8.x
+                  includePreviewVersions: true
+              - task: NuGetAuthenticate@1
+                displayName: "NuGet Authenticate"
+              - script: |
+                  dotnet publish "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
+                    --configuration $(BuildConfiguration) \
+                    --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-nuget"
+                displayName: "Publish GenUsageNuGet"
+              - script: |
+                  dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
+                    --configuration $(BuildConfiguration) \
+                    --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
+                displayName: "Publish GenUsagePlanner"
+              - script: |
+                  dotnet publish "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
+                    --configuration $(BuildConfiguration) \
+                    --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage"
+                displayName: "Publish GenUsage"
