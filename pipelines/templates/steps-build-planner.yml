@@ -36,6 +36,7 @@ steps:
       $inputRoot = "$(Build.ArtifactStagingDirectory)/velopack-input"
       New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
       Set-Content -Path (Join-Path $inputRoot "planner-version.txt") -Value $version -NoNewline
+      Copy-Item -Path "$(Build.SourcesDirectory)/src/nuget.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
     displayName: "Prepare velopack inputs"
     env:
       PLANNER_SEMVER1: $(NBGV_SemVer1)
