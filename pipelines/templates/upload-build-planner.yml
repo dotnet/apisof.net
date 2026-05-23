@@ -8,11 +8,16 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: UseDotNet@2
-    displayName: Use .NET 8 SDK
+    displayName: "Use .NET 8"
     inputs:
       version: 8.x
-  - script: |
-      dotnet tool update -g vpk --configfile "$(Pipeline.Workspace)/velopack-input/nuget.config" --ignore-failed-sources || dotnet tool install -g vpk --configfile "$(Pipeline.Workspace)/velopack-input/nuget.config" --ignore-failed-sources
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $config = "$(Build.SourcesDirectory)/src/nuget.config"
+      dotnet tool update -g vpk --configfile $config
+      if ($LASTEXITCODE -ne 0) {
+        dotnet tool install -g vpk --configfile $config
+      }
     displayName: "Install vpk"
   - task: AzureCLI@2
     displayName: "Download existing velopack releases"
@@ -24,7 +29,8 @@ steps:
         New-Item -ItemType Directory -Force -Path "$(Pipeline.Workspace)/velopack-release" | Out-Null
         az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "*.nupkg"
         az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "releases.*.json"
-  - powershell: |
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
       $releaseDir = "$(Pipeline.Workspace)/velopack-release"
       $publishDir = "$(Pipeline.Workspace)/velopack-input/publish/NetUpgradePlanner"
       $versionFile = "$(Pipeline.Workspace)/velopack-input/planner-version.txt"

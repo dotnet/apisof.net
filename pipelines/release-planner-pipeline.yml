@@ -41,6 +41,7 @@ extends:
                   artifactName: velopack-release
                   targetPath: $(Pipeline.Workspace)/velopack-input
             steps:
+              - checkout: self
               - template: /pipelines/templates/upload-build-planner.yml@self
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionDev)
@@ -75,6 +76,7 @@ extends:
                   artifactName: velopack-release
                   targetPath: $(Pipeline.Workspace)/velopack-input
             steps:
+              - checkout: self
               - template: /pipelines/templates/upload-build-planner.yml@self
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionProd)

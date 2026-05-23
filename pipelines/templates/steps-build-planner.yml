@@ -1,39 +1,41 @@
 parameters:
-  - name: azureSubscriptionConnection
+  - name: projectPath
     type: string
-  - name: storageAccountName
-    type: string
+    default: src/NetUpgradePlanner
 steps:
-  - checkout: self
-    fetchDepth: 0 # We need the full history in order to use Git versioning
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: UseDotNet@2
-    displayName: Use .NET 8 SDK
+    displayName: "Use .NET 8 SDK"
     inputs:
       version: 8.x
-  - script: |
-      dotnet tool update -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources || dotnet tool install -g nbgv --configfile "$(Build.SourcesDirectory)/src/nuget.config" --ignore-failed-sources
-      nbgv cloud -p src/NetUpgradePlanner
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $config = "$(Build.SourcesDirectory)/src/nuget.config"
+      dotnet tool update -g nbgv --configfile $config
+      if ($LASTEXITCODE -ne 0) {
+        dotnet tool install -g nbgv --configfile $config
+      }
+      nbgv cloud -p ${{ parameters.projectPath }}
     displayName: "Set build version (nbgv)"
-  - script: |
-      cd src/NetUpgradePlanner
-      dotnet publish /p:SourceRevisionId=$(Build.SourceVersion) /p:EnableWindowsTargeting=true
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $publishDest = "$(Build.ArtifactStagingDirectory)/velopack-input/publish/NetUpgradePlanner"
+      dotnet publish "${{ parameters.projectPath }}" `
+        -o $publishDest `
+        /p:SourceRevisionId=$(Build.SourceVersion)
     displayName: "dotnet publish"
-  - powershell: |
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
       $version = $env:PLANNER_SEMVER1
 
       if ([string]::IsNullOrWhiteSpace($version)) {
-        throw "NBGV version variable is missing. Ensure 'nbgv cloud -p src/NetUpgradePlanner' completed successfully."
+        throw "NBGV version variable is missing. Ensure 'nbgv cloud -p ${{ parameters.projectPath }}' completed successfully."
       }
 
       $inputRoot = "$(Build.ArtifactStagingDirectory)/velopack-input"
-      $publishDestination = Join-Path $inputRoot "publish/NetUpgradePlanner"
-
-      New-Item -ItemType Directory -Force -Path $publishDestination | Out-Null
-      Copy-Item -Path ".artifacts/publish/NetUpgradePlanner/*" -Destination $publishDestination -Recurse -Force
-      Copy-Item -Path "src/nuget.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
+      New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
       Set-Content -Path (Join-Path $inputRoot "planner-version.txt") -Value $version -NoNewline
     displayName: "Prepare velopack inputs"
     env:
-      PLANNER_SEMVER1: $(GitBuildVersionSimple)
+      PLANNER_SEMVER1: $(NBGV_SemVer1)
