@@ -1,0 +1,81 @@
+---
+trigger: none
+name: $(date:yyyyMMdd)$(rev:.r)
+variables:
+  BuildConfiguration: Release
+resources:
+  pipelines:
+    - pipeline: "apis-of-dotnet-planner-build"
+      project: "OnlineServices"
+      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-planner-build'
+  repositories:
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    sdl:
+      codeql:
+        compiled:
+          enabled: true
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    customBuildTags:
+      - ES365AIMigrationTooling
+    stages:
+      - stage: Dev
+        jobs:
+          - job: build_and_upload_dev
+            displayName: Build and upload velopack to Dev environment
+            templateContext:
+              type: releaseJob
+              isProduction: false
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet-planner-build"
+                  artifactName: velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-input
+            steps:
+              - template: /pipelines/templates/upload-build-planner.yml@self
+                parameters:
+                  azureSubscriptionConnection: $(AzureSubscriptionConnectionDev)
+                  storageAccountName: $(StorageAccountNameDev)
+      - stage: Prod
+        jobs:
+          - job: PreDeploymentApprovalJob
+            displayName: Pre-Deployment Approval
+            condition: succeeded()
+            timeoutInMinutes: 43200
+            pool: server
+            steps:
+              - task: ManualValidation@1
+                inputs:
+                  notifyUsers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+                  approvers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+          - job: build_and_upload_velopack_prod
+            displayName: Build and upload velopack to Prod environment
+            dependsOn: PreDeploymentApprovalJob
+            condition: succeeded()
+            timeoutInMinutes: 0
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet-planner-build"
+                  artifactName: velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-input
+            steps:
+              - template: /pipelines/templates/upload-build-planner.yml@self
+                parameters:
+                  azureSubscriptionConnection: $(AzureSubscriptionConnectionProd)
+                  storageAccountName: $(StorageAccountNameProd)
