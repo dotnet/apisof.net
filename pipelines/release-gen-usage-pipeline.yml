@@ -37,7 +37,7 @@ extends:
         displayName: Run in Dev
         jobs:
           - job: Job_1
-            displayName: Run on agent
+            displayName: Generate Usage (Dev)
             condition: succeeded()
             timeoutInMinutes: 0
             variables:
@@ -60,24 +60,8 @@ extends:
       - stage: Production
         displayName: Run in Production
         jobs:
-          - job: PreDeploymentApprovalJob
-            displayName: Pre-Deployment Approval
-            condition: succeeded()
-            timeoutInMinutes: 43200
-            pool: server
-            steps:
-              - task: ManualValidation@1
-                inputs:
-                  notifyUsers: |-
-                    Chris.Sfanos@microsoft.com,
-                    v-danzhu1@microsoft.com
-                  approvers: |-
-                    Chris.Sfanos@microsoft.com,
-                    v-danzhu1@microsoft.com
-
           - job: Job_1
-            displayName: Run on agent
-            dependsOn: PreDeploymentApprovalJob
+            displayName: Generate Usage (Prod)
             condition: succeeded()
             timeoutInMinutes: 0
             variables:

@@ -1,7 +1,7 @@
 trigger: none
 
 schedules:
-  - cron: "21 12 * * *"   # 12:21 PM UTC
+  - cron: "21 12 * * *" # 12:21 PM UTC
     displayName: Daily 12:21 UTC
     branches:
       include:
@@ -40,7 +40,7 @@ extends:
         displayName: Run in Dev
         jobs:
           - job: Job_1
-            displayName: Run on Agent
+            displayName: Generate Catalog (Dev)
             condition: succeeded()
             timeoutInMinutes: 0
             variables:
@@ -62,24 +62,8 @@ extends:
       - stage: Production
         displayName: Run in Production
         jobs:
-          - job: PreDeploymentApprovalJob
-            displayName: Pre-Deployment Approval
-            condition: succeeded()
-            timeoutInMinutes: 43200
-            pool: server
-            steps:
-              - task: ManualValidation@1
-                inputs:
-                  notifyUsers: |-
-                    Chris.Sfanos@microsoft.com,
-                    v-danzhu1@microsoft.com
-                  approvers: |-
-                    Chris.Sfanos@microsoft.com,
-                    v-danzhu1@microsoft.com
-
           - job: Job_1
-            displayName: Run on Agent
-            dependsOn: PreDeploymentApprovalJob
+            displayName: Generate Catalog (Prod)
             condition: succeeded()
             timeoutInMinutes: 0
             variables:

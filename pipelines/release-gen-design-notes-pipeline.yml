@@ -35,8 +35,8 @@ extends:
       - stage: Dev
         displayName: Run in Dev
         jobs:
-          - job: RunGenDesignNotesDev
-            displayName: Run GenDesignNotes (Dev)
+          - job: Job_1
+            displayName: Generate Design Notes (Dev)
             condition: succeeded()
             timeoutInMinutes: 0
             templateContext:
@@ -65,24 +65,8 @@ extends:
       - stage: Production
         displayName: Run in Production
         jobs:
-          - job: PreDeploymentApprovalJob
-            displayName: Pre-Deployment Approval
-            condition: succeeded()
-            timeoutInMinutes: 43200
-            pool: server
-            steps:
-              - task: ManualValidation@1
-                inputs:
-                  notifyUsers: |-
-                    Chris.Sfanos@microsoft.com,
-                    v-danzhu1@microsoft.com
-                  approvers: |-
-                    Chris.Sfanos@microsoft.com,
-                    v-danzhu1@microsoft.com
-
-          - job: RunGenDesignNotesProd
-            displayName: Upload GenDesignNotes Prod
-            dependsOn: PreDeploymentApprovalJob
+          - job: Job_1
+            displayName: Generate Design Notes (Prod)
             condition: succeeded()
             timeoutInMinutes: 0
             templateContext:
