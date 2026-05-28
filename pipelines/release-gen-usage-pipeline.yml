@@ -14,7 +14,7 @@ resources:
   pipelines:
     - pipeline: "gen-usage"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\gen-usage'
+      source: 'dev-comm-partners\builds\gen-usage'
       trigger:
         branches:
           include:

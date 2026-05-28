@@ -16,7 +16,7 @@ resources:
   pipelines:
     - pipeline: "gen-catalog"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\gen-catalog'
+      source: 'dev-comm-partners\builds\gen-catalog'
       trigger:
         branches:
           include:

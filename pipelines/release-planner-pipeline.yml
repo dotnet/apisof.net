@@ -7,7 +7,7 @@ resources:
   pipelines:
     - pipeline: "apis-of-dotnet-planner-build"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\apis-of-dotnet-planner-build'
+      source: 'dev-comm-partners\builds\apis-of-dotnet-planner-build'
   repositories:
     - repository: 1ESPipelineTemplates
       type: git
