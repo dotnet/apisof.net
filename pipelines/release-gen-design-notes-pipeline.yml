@@ -13,7 +13,7 @@ resources:
   pipelines:
     - pipeline: "gen-design-notes"
       project: "OnlineServices"
-      source: 'ASP-IIS-dotnet\builds\gen-design-notes'
+      source: 'dev-comm-partners\builds\gen-design-notes'
       trigger:
         branches:
           include:
