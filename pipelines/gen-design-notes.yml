@@ -61,9 +61,9 @@ extends:
             steps:
               - checkout: self
               - task: UseDotNet@2
-                displayName: Use .NET 8 SDK
+                displayName: Use .NET 10 SDK
                 inputs:
-                  version: 8.x
+                  version: 10.x
               - task: NugetAuthenticate@1
                 displayName: Authenticate with NuGet
               - script: |

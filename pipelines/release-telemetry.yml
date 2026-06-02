@@ -42,7 +42,7 @@ extends:
                 displayName: Deploy Azure Function
                 inputs:
                   connectedServiceNameARM: "$(AzureDevSubscriptionConnection)"
-                  runtimeStack: DOTNET|8.0
+                  runtimeStack: DOTNET|10.0
                   appType: functionAppLinux
                   appName: apisofdotnetplanner-dev
                   package: "$(Pipeline.Workspace)/telemetry-drop/telemetry.zip"

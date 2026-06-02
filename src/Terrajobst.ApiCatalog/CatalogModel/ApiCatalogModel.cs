@@ -248,9 +248,19 @@ public sealed class ApiCatalogModel
 
     internal Markup GetMarkup(int offset)
     {
+        if (offset < 0)
+            return new Markup(Array.Empty<MarkupToken>());
+
         var span = BlobHeap[offset..];
+
+        if (span.Length < 4)
+            return new Markup(Array.Empty<MarkupToken>());
+
         var tokenCount = BinaryPrimitives.ReadInt32LittleEndian(span);
         span = span[4..];
+
+        if (tokenCount <= 0)
+            return new Markup(Array.Empty<MarkupToken>());
 
         var tokens = new List<MarkupToken>(tokenCount);
 

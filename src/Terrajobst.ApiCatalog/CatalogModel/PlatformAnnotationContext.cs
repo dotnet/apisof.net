@@ -99,7 +99,15 @@ public sealed class PlatformAnnotationContext
                     var declaration = member.Declarations.FirstOrDefault(d => frameworkAssemblies.Contains(d.Assembly));
                     if (declaration != default)
                     {
-                        var markup = declaration.GetMyMarkup();
+                        Markup markup;
+                        try
+                        {
+                            markup = declaration.GetMyMarkup();
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            continue;
+                        }
 
                         for (var i = 0; i < markup.Tokens.Length - 6; i++)
                         {
@@ -117,8 +125,17 @@ public sealed class PlatformAnnotationContext
                                 t5.Kind == MarkupTokenKind.CloseParenToken &&
                                 t6.Kind == MarkupTokenKind.CloseBracketToken)
                             {
-                                var literalWithoutQuotes = t4.Text.Substring(1, t4.Text.Length - 2);
-                                var impliedPlatformName = literalWithoutQuotes;
+                                if (string.IsNullOrEmpty(t4.Text) || t4.Text.Length < 2)
+                                    continue;
+
+                                var impliedPlatformName = t4.Text;
+                                if (impliedPlatformName.Length >= 2 &&
+                                    impliedPlatformName[0] == '"' &&
+                                    impliedPlatformName[^1] == '"')
+                                {
+                                    impliedPlatformName = impliedPlatformName.Substring(1, impliedPlatformName.Length - 2);
+                                }
+
                                 yield return (platformName, impliedPlatformName);
                             }
                         }

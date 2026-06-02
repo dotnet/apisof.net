@@ -32,6 +32,12 @@ public class TargetFrameworkCollectorTests : CollectorTest<TargetFrameworkCollec
 
         Check(TargetFramework.Net80, source, [FeatureUsage.ForTargetFramework("net5.1")]);
     }
+    
+    [Fact]
+    public void TargetFrameworkCollector_Infers_Net100()
+    {
+        Check(TargetFramework.Net10, string.Empty, [FeatureUsage.ForTargetFramework("net10.0")]);
+    }
 
     [Fact]
     public void TargetFrameworkCollector_Infers_NetCoreApp80()
