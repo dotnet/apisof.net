@@ -54,6 +54,7 @@ extends:
                   packageType: runtime
                   version: 10.x
                   includePreviewVersions: true
+                  installationPath: $(Agent.ToolsDirectory)/dotnet
               - task: AzureCLI@2
                 displayName: "Upload GenDesignNotes Dev"
                 inputs:
@@ -63,10 +64,11 @@ extends:
                   addSpnToEnvironment: true
                   inlineScript: |
                     Set-Location "$(Pipeline.Workspace)/gen-design-notes-drop"
-                    dotnet GenDesignNotes.dll
+                    & "$(Agent.ToolsDirectory)/dotnet/dotnet.exe" GenDesignNotes.dll
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrlDev)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretDev)
+                  DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
 
       - stage: Production
         displayName: Run in Production
@@ -90,6 +92,7 @@ extends:
                   packageType: runtime
                   version: 10.x
                   includePreviewVersions: true
+                  installationPath: $(Agent.ToolsDirectory)/dotnet
               - task: AzureCLI@2
                 displayName: "Run GenDesignNotes (Prod)"
                 inputs:
@@ -99,7 +102,8 @@ extends:
                   addSpnToEnvironment: true
                   inlineScript: |
                     Set-Location "$(Pipeline.Workspace)/gen-design-notes-drop"
-                    dotnet GenDesignNotes.dll
+                    & "$(Agent.ToolsDirectory)/dotnet/dotnet.exe" GenDesignNotes.dll
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrlProd)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretProd)
+                  DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet

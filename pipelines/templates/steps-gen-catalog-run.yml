@@ -11,6 +11,7 @@ steps:
       packageType: runtime
       version: 10.x
       includePreviewVersions: true
+      installationPath: $(Agent.ToolsDirectory)/dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -30,11 +31,12 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        dotnet "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
+        & "$(Agent.ToolsDirectory)/dotnet/dotnet.exe" "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
       APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
+      DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
       DOTNET_gcServer: 0
       DOTNET_GCConserveMemory: 9
       DOTNET_GCHeapHardLimitPercent: 75
