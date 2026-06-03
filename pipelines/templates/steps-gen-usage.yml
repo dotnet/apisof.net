@@ -34,6 +34,13 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "Authenticate with NuGet feed"
 
+  - task: UseDotNet@2
+    displayName: "Install .NET 10"
+    inputs:
+      packageType: runtime
+      version: 10.x
+      includePreviewVersions: true
+
   - ${{ each tool in parameters.Tools }}:
       - task: AzureCLI@2
         displayName: "Run ${{ tool.name }} (${{ parameters.BuildType }})"

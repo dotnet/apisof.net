@@ -48,6 +48,12 @@ extends:
                   artifactName: "gen-design-notes-drop"
                   targetPath: "$(Pipeline.Workspace)/gen-design-notes-drop"
             steps:
+              - task: UseDotNet@2
+                displayName: "Install .NET 10"
+                inputs:
+                  packageType: runtime
+                  version: 10.x
+                  includePreviewVersions: true
               - task: AzureCLI@2
                 displayName: "Upload GenDesignNotes Dev"
                 inputs:
@@ -78,6 +84,12 @@ extends:
                   artifactName: "gen-design-notes-drop"
                   targetPath: "$(Pipeline.Workspace)/gen-design-notes-drop"
             steps:
+              - task: UseDotNet@2
+                displayName: "Install .NET 10"
+                inputs:
+                  packageType: runtime
+                  version: 10.x
+                  includePreviewVersions: true
               - task: AzureCLI@2
                 displayName: "Run GenDesignNotes (Prod)"
                 inputs:
