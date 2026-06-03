@@ -99,15 +99,7 @@ public sealed class PlatformAnnotationContext
                     var declaration = member.Declarations.FirstOrDefault(d => frameworkAssemblies.Contains(d.Assembly));
                     if (declaration != default)
                     {
-                        Markup markup;
-                        try
-                        {
-                            markup = declaration.GetMyMarkup();
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            continue;
-                        }
+                        var markup = declaration.GetMyMarkup();
 
                         for (var i = 0; i < markup.Tokens.Length - 6; i++)
                         {
@@ -125,17 +117,7 @@ public sealed class PlatformAnnotationContext
                                 t5.Kind == MarkupTokenKind.CloseParenToken &&
                                 t6.Kind == MarkupTokenKind.CloseBracketToken)
                             {
-                                if (string.IsNullOrEmpty(t4.Text) || t4.Text.Length < 2)
-                                    continue;
-
-                                var impliedPlatformName = t4.Text;
-                                if (impliedPlatformName.Length >= 2 &&
-                                    impliedPlatformName[0] == '"' &&
-                                    impliedPlatformName[^1] == '"')
-                                {
-                                    impliedPlatformName = impliedPlatformName.Substring(1, impliedPlatformName.Length - 2);
-                                }
-
+                                var impliedPlatformName = UnquoteLiteral(t4.Text);
                                 yield return (platformName, impliedPlatformName);
                             }
                         }
@@ -143,6 +125,19 @@ public sealed class PlatformAnnotationContext
                 }
             }
         }
+    }
+
+    private static string UnquoteLiteral(string text)
+    {
+        // LiteralString tokens are stored as C# string literals (e.g. "windows").
+        // Strip the surrounding quotes to recover the platform name. The guard keeps
+        // the original behavior for the expected quoted form while avoiding the
+        // out-of-range trim the old Substring(1, Length - 2) performed on
+        // unexpectedly short or unquoted text.
+        if (text.Length >= 2 && text[0] == '"' && text[^1] == '"')
+            return text.Substring(1, text.Length - 2);
+
+        return text;
     }
 
     private static bool TryGetPlatformFromIsPlatformMethod(ApiModel operatingSystemMember, [MaybeNullWhen(false)] out string platformName)
