@@ -35,8 +35,6 @@ public abstract class IncrementalUsageCollector : UsageCollector
 
         public void Report(FeatureUsage feature)
         {
-            ThrowIfNull(feature);
-
             _receiver.Add(feature);
         }
     }
