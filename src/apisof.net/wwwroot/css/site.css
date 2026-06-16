@@ -639,6 +639,83 @@ html, body {
 .table-responsive-stack th{
     min-width: 200px;
 }
+
+/* UHF footer */
+
+.page-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.layout-main {
+    flex: 1 0 auto;
+}
+
+.uhf-footer {
+    background-color: var(--dotnet-purple);
+    color: #ffffff;
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}
+
+.uhf-footer-row {
+    margin-bottom: 0.35rem;
+}
+
+.uhf-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.uhf-footer-links li {
+    white-space: nowrap;
+}
+
+.uhf-footer-links li + li::before {
+    content: "|";
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0.55rem;
+}
+
+.uhf-footer-links a,
+.uhf-footer-links a:link,
+.uhf-footer-links a:visited {
+    color: #d1c7f5;
+}
+
+.uhf-footer-links a:hover,
+.uhf-footer-links a:focus {
+    color: #ffffff;
+}
+
+.uhf-privacy-choices {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.uhf-privacy-icon {
+    width: 1.65rem;
+    height: 0.9rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .uhf-footer-links {
+        row-gap: 0.25rem;
+    }
+
+    .uhf-footer-links li + li::before {
+        margin: 0 0.4rem;
+    }
+}
+
 /* Small screens (mobile and narrow windows) */
 @media (max-width: 480px)
 {
