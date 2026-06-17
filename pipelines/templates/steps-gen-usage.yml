@@ -40,7 +40,7 @@ steps:
       packageType: runtime
       version: 10.x
       includePreviewVersions: true
-      installationPath: $(Agent.ToolsDirectory)/dotnet
+      installationPath: $(Agent.ToolsDirectory)\dotnet
 
   - ${{ each tool in parameters.Tools }}:
       - task: AzureCLI@2
@@ -51,10 +51,10 @@ steps:
           scriptType: "bash"
           scriptLocation: "inlineScript"
           inlineScript: |
-            "$(Agent.ToolsDirectory)/dotnet/dotnet" "$(Pipeline.Workspace)/gen-usage-drop/${{ tool.publishDir }}/${{ tool.dll }}" ${{ tool.args }}
+            "$(Agent.ToolsDirectory)\dotnet\dotnet" "$(Pipeline.Workspace)/gen-usage-drop/${{ tool.publishDir }}/${{ tool.dll }}" ${{ tool.args }}
         env:
           AzureStorageServiceUrl: $(AzureStorageServiceUrl)
           ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-          DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
+          DOTNET_ROOT: $(Agent.ToolsDirectory)\dotnet
           ${{ each pair in tool.env }}:
             ${{ pair.key }}: ${{ pair.value }}
