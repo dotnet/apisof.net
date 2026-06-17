@@ -32,7 +32,17 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        & "$(Agent.ToolsDirectory)/dotnet/dotnet.exe" "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
+        $dotnetExe = Join-Path $env:DOTNET_ROOT "dotnet.exe"
+        if (-not (Test-Path $dotnetExe)) {
+          Write-Host "dotnet executable not found at '$dotnetExe'. Attempting to locate dotnet on PATH."
+          $dotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+          if ($null -eq $dotnetCmd) {
+            throw "Unable to locate dotnet. DOTNET_ROOT='$env:DOTNET_ROOT'."
+          }
+          $dotnetExe = $dotnetCmd.Source
+        }
+
+        & $dotnetExe "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
