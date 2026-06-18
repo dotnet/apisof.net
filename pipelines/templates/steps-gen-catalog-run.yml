@@ -20,87 +20,8 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
-        $dotnet = $null
-
-        $dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
-        if ($dotnetCommand) {
-          $dotnet = $dotnetCommand.Source
-        }
-
-        if (-not $dotnet) {
-          $probeRoots = @(
-            "$(Agent.ToolsDirectory)",
-            "$(Agent.TempDirectory)",
-            "$(Pipeline.Workspace)"
-          )
-
-          foreach ($probeRoot in $probeRoots) {
-            if (Test-Path $probeRoot) {
-              $found = Get-ChildItem -Path $probeRoot -Filter dotnet.exe -Recurse -ErrorAction SilentlyContinue |
-                Select-Object -First 1 -ExpandProperty FullName
-              if ($found) {
-                $dotnet = $found
-                break
-              }
-            }
-          }
-        }
-
-        if (-not $dotnet) {
-          throw "dotnet.exe was not found via PATH or probe roots. PATH='$env:PATH'"
-        }
-
-        $env:DOTNET_ROOT = Split-Path -Path $dotnet -Parent
-
-        Write-Host "=== .NET Runtime Diagnostics ==="
-        Write-Host "Agent.ToolsDirectory: $(Agent.ToolsDirectory)"
-        Write-Host "Agent.TempDirectory: $(Agent.TempDirectory)"
-        Write-Host "Resolved dotnet: $dotnet"
-        Write-Host "DOTNET_ROOT: $env:DOTNET_ROOT"
-        Write-Host "PATH (first 8 entries):"
-        ($env:PATH -split ';' | Select-Object -First 8) | ForEach-Object { Write-Host "  $_" }
-
-        Write-Host "Checking DOTNET_ROOT existence..."
-        if (Test-Path $env:DOTNET_ROOT) {
-          Write-Host "DOTNET_ROOT exists"
-          Write-Host "Top-level contents of DOTNET_ROOT:"
-          Get-ChildItem -Path $env:DOTNET_ROOT -Force -ErrorAction SilentlyContinue | Select-Object Mode,Length,Name | Format-Table -AutoSize | Out-String | Write-Host
-        }
-        else {
-          Write-Host "DOTNET_ROOT does not exist"
-        }
-
-        Write-Host "Searching Agent.ToolsDirectory and Agent.TempDirectory for dotnet.exe..."
-        Get-ChildItem -Path "$(Agent.ToolsDirectory)", "$(Agent.TempDirectory)" -Filter dotnet.exe -Recurse -ErrorAction SilentlyContinue |
-          Select-Object -First 20 FullName |
-          Format-Table -AutoSize |
-          Out-String |
-          Write-Host
-
-        Write-Host "where.exe dotnet:"
-        & where.exe dotnet 2>&1 | Out-String | Write-Host
-
-        Write-Host "Get-Command dotnet:"
-        Get-Command dotnet -ErrorAction SilentlyContinue | Select-Object Name,Source,Version | Format-Table -AutoSize | Out-String | Write-Host
-
-        $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)/catalog"
-        if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
-          Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
-        }
-        
-
-        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/index" | Out-Null
-        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/frameworks" | Out-Null
-        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
-        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
-
-        if (-not (Test-Path $dotnet)) {
-          throw "dotnet.exe was not found. DOTNET_ROOT='$env:DOTNET_ROOT' PATH='$env:PATH'"
-        }
-
-        & $dotnet --list-runtimes
-        
-        & $dotnet "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
+        dotnet --version
+        dotnet $(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
@@ -109,3 +30,6 @@ steps:
       DOTNET_GCConserveMemory: 9
       DOTNET_GCHeapHardLimitPercent: 75
       DOTNET_GCHeapHardLimit: 5368709120
+      DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
+      PATH: $(Agent.ToolsDirectory)/dotnet;$(PATH)
+
