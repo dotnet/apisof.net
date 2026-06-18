@@ -11,6 +11,7 @@ steps:
       packageType: runtime
       version: 10.x
       includePreviewVersions: true
+      installationPath: $(Agent.ToolsDirectory)\dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -20,6 +21,9 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
+        $env:DOTNET_ROOT = "$(Agent.ToolsDirectory)\dotnet"
+        $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+
         $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)/catalog"
         if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
           Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
@@ -40,6 +44,7 @@ steps:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
       APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
+      DOTNET_ROOT: $(Agent.ToolsDirectory)\dotnet
       DOTNET_gcServer: 0
       DOTNET_GCConserveMemory: 9
       DOTNET_GCHeapHardLimitPercent: 75
