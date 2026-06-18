@@ -13,16 +13,12 @@ steps:
       includePreviewVersions: true
       installationPath: $(Pipeline.Workspace)\10\dotnet
   - pwsh: |
-      $installPath = "$(Pipeline.Workspace)\10\dotnet"
-      Write-Host "Install path exists: $(Test-Path $installPath)"
-      if (Test-Path $installPath) {
-        Get-ChildItem $installPath -Recurse -Depth 4 | Select-Object FullName | Format-Table -AutoSize
-      }
-      $env:DOTNET_ROOT = $installPath
-      where.exe dotnet
+      $src = "$(Pipeline.Workspace)\10\dotnet\shared"
+      $dst = "C:\Program Files\dotnet\shared"
+      Write-Host "Copying .NET 10 runtime from $src to $dst"
+      Copy-Item -Path $src -Destination $dst -Recurse -Force
       dotnet --list-runtimes
-      Write-Host "Agent.ToolsDirectory:=$(Agent.ToolsDirectory)"
-    displayName: "Verify .NET installation"
+    displayName: "Install .NET 10 runtime into host"
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -32,8 +28,6 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
-        $env:DOTNET_ROOT = "$(Pipeline.Workspace)\10\dotnet"
-
         $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)\catalog"
         if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
           Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
