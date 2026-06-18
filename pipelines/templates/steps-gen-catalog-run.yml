@@ -21,12 +21,38 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
-        $env:DOTNET_ROOT = "$(Agent.ToolsDirectory)\dotnet"
+        $dotnetRootCandidates = @(
+          "$(Agent.ToolsDirectory)\dotnet",
+          "$(Agent.ToolsDirectory)\dotnet\x64"
+        )
+
+        $dotnet = $null
+        foreach ($candidateRoot in $dotnetRootCandidates) {
+          $candidateExe = Join-Path $candidateRoot "dotnet.exe"
+          if (Test-Path $candidateExe) {
+            $dotnet = $candidateExe
+            break
+          }
+        }
+
+        if (-not $dotnet) {
+          $dotnet = Get-ChildItem -Path "$(Agent.ToolsDirectory)\dotnet" -Filter dotnet.exe -Recurse -ErrorAction SilentlyContinue |
+            Select-Object -First 1 -ExpandProperty FullName
+        }
+
+        if (-not $dotnet) {
+          throw "dotnet.exe was not found under '$(Agent.ToolsDirectory)\\dotnet' after UseDotNet runtime install."
+        }
+
+        $env:DOTNET_ROOT = Split-Path -Path $dotnet -Parent
+        $env:DOTNET_MULTILEVEL_LOOKUP = "0"
         $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
 
         Write-Host "=== .NET Runtime Diagnostics ==="
         Write-Host "Agent.ToolsDirectory: $(Agent.ToolsDirectory)"
+        Write-Host "Resolved dotnet: $dotnet"
         Write-Host "DOTNET_ROOT: $env:DOTNET_ROOT"
+        Write-Host "DOTNET_MULTILEVEL_LOOKUP: $env:DOTNET_MULTILEVEL_LOOKUP"
         Write-Host "PATH (first 8 entries):"
         ($env:PATH -split ';' | Select-Object -First 8) | ForEach-Object { Write-Host "  $_" }
 
@@ -63,14 +89,6 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/frameworks" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
-
-        $dotnet = Join-Path $env:DOTNET_ROOT "dotnet.exe"
-        if (-not (Test-Path $dotnet)) {
-          $dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
-          if ($dotnetCommand) {
-            $dotnet = $dotnetCommand.Source
-          }
-        }
 
         if (-not (Test-Path $dotnet)) {
           throw "dotnet.exe was not found. DOTNET_ROOT='$env:DOTNET_ROOT' PATH='$env:PATH'"
