@@ -8,18 +8,9 @@ steps:
   - task: UseDotNet@2
     displayName: "Install .NET 10"
     inputs:
-      packageType: runtime
+      packageType: sdk
       version: 10.x
       includePreviewVersions: true
-      installationPath: $(Pipeline.Workspace)\10\dotnet
-  - pwsh: |
-      $src = "$(Pipeline.Workspace)\10\dotnet\shared"
-      $dst = "C:\Program Files\dotnet\shared"
-      Write-Host "Copying .NET 10 runtime from $src to $dst"
-      Copy-Item -Path "$src\*" -Destination $dst -Recurse -Force
-      Write-Host "Installed 10.0.9 path exists: $(Test-Path 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.9')"
-      dotnet --list-runtimes
-    displayName: "Install .NET 10 runtime into host"
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -39,7 +30,6 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        dotnet --version
         dotnet "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog\GenCatalog.dll"
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
