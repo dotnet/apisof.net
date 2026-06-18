@@ -11,7 +11,6 @@ steps:
       packageType: runtime
       version: 10.x
       includePreviewVersions: true
-      installationPath: $(Agent.ToolsDirectory)\dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -23,7 +22,9 @@ steps:
       inlineScript: |
         $dotnetRootCandidates = @(
           "$(Agent.ToolsDirectory)\dotnet",
-          "$(Agent.ToolsDirectory)\dotnet\x64"
+          "$(Agent.ToolsDirectory)\dotnet\x64",
+          "$(Agent.ToolsDirectory)\windows\dotnet",
+          "$(Agent.ToolsDirectory)\windows\dotnet\x64"
         )
 
         $dotnet = $null
@@ -36,12 +37,12 @@ steps:
         }
 
         if (-not $dotnet) {
-          $dotnet = Get-ChildItem -Path "$(Agent.ToolsDirectory)\dotnet" -Filter dotnet.exe -Recurse -ErrorAction SilentlyContinue |
+          $dotnet = Get-ChildItem -Path "$(Agent.ToolsDirectory)" -Filter dotnet.exe -Recurse -ErrorAction SilentlyContinue |
             Select-Object -First 1 -ExpandProperty FullName
         }
 
         if (-not $dotnet) {
-          throw "dotnet.exe was not found under '$(Agent.ToolsDirectory)\\dotnet' after UseDotNet runtime install."
+          throw "dotnet.exe was not found under '$(Agent.ToolsDirectory)' after UseDotNet runtime install."
         }
 
         $env:DOTNET_ROOT = Split-Path -Path $dotnet -Parent
@@ -66,7 +67,7 @@ steps:
           Write-Host "DOTNET_ROOT does not exist"
         }
 
-        Write-Host "Searching ToolCache for dotnet.exe..."
+        Write-Host "Searching Agent.ToolsDirectory for dotnet.exe..."
         Get-ChildItem -Path "$(Agent.ToolsDirectory)" -Filter dotnet.exe -Recurse -ErrorAction SilentlyContinue |
           Select-Object -First 20 FullName |
           Format-Table -AutoSize |
