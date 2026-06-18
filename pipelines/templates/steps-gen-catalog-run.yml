@@ -21,26 +21,26 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
-        cd $(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog
-
-        $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)\catalog"
+        $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)/catalog"
         if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
           Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
         }
 
-        New-Item -ItemType Directory -Force -Path (Join-Path $env:APISOFDOTNET_INDEX_PATH "index") | Out-Null
-        New-Item -ItemType Directory -Force -Path (Join-Path $env:APISOFDOTNET_INDEX_PATH "frameworks") | Out-Null
-        New-Item -ItemType Directory -Force -Path (Join-Path $env:APISOFDOTNET_INDEX_PATH "packs") | Out-Null
-        New-Item -ItemType Directory -Force -Path (Join-Path $env:APISOFDOTNET_INDEX_PATH "packages") | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/index" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/frameworks" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
         dotnet --version
-        dotnet GenCatalog.dll
+        dotnet $(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
-      APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)\catalog
+      APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
       DOTNET_gcServer: 0
       DOTNET_GCConserveMemory: 9
       DOTNET_GCHeapHardLimitPercent: 75
       DOTNET_GCHeapHardLimit: 5368709120
+      DOTNET_ROOT: $(Pipeline.Workspace)/dotnet
+      PATH: $(Pipeline.Workspace)/dotnet;$(PATH)
 
