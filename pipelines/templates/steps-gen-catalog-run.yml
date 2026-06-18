@@ -13,7 +13,12 @@ steps:
       includePreviewVersions: true
       installationPath: $(Pipeline.Workspace)\10\dotnet
   - pwsh: |
-      $env:DOTNET_ROOT = "$(Pipeline.Workspace)\10\dotnet"
+      $installPath = "$(Pipeline.Workspace)\10\dotnet"
+      Write-Host "Install path exists: $(Test-Path $installPath)"
+      if (Test-Path $installPath) {
+        Get-ChildItem $installPath -Recurse -Depth 4 | Select-Object FullName | Format-Table -AutoSize
+      }
+      $env:DOTNET_ROOT = $installPath
       $env:DOTNET_MULTILEVEL_LOOKUP = "0"
       where.exe dotnet
       dotnet --list-runtimes
