@@ -8,7 +8,7 @@ steps:
   - task: UseDotNet@2
     displayName: "Install .NET 10"
     inputs:
-      packageType: runtime
+      packageType: sdk
       version: 10.x
       includePreviewVersions: true
   - task: AzureCLI@2
