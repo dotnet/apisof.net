@@ -16,7 +16,8 @@ steps:
       $src = "$(Pipeline.Workspace)\10\dotnet\shared"
       $dst = "C:\Program Files\dotnet\shared"
       Write-Host "Copying .NET 10 runtime from $src to $dst"
-      Copy-Item -Path $src -Destination $dst -Recurse -Force
+      Copy-Item -Path "$src\*" -Destination $dst -Recurse -Force
+      Write-Host "Installed 10.0.9 path exists: $(Test-Path 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.9')"
       dotnet --list-runtimes
     displayName: "Install .NET 10 runtime into host"
   - task: AzureCLI@2
