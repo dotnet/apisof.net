@@ -8,9 +8,10 @@ steps:
   - task: UseDotNet@2
     displayName: "Install .NET 10"
     inputs:
-      packageType: sdk
+      packageType: runtime
       version: 10.x
       includePreviewVersions: true
+      installationPath: $(Pipeline.Workspace)/dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -20,8 +21,33 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
-        dotnet --version
-        dotnet $(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll
+        $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)/catalog"
+        if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
+          Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
+        }
+
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/index" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/frameworks" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
+
+        $publishDir = "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog"
+        $dotnet = "$(Pipeline.Workspace)/dotnet/dotnet.exe"
+
+        if (-not (Test-Path $publishDir)) {
+          throw "Publish directory not found: $publishDir"
+        }
+
+        if (-not (Test-Path $dotnet)) {
+          throw "dotnet host not found at: $dotnet"
+        }
+
+        $env:DOTNET_ROOT = "$(Pipeline.Workspace)/dotnet"
+        $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+
+        Set-Location "$publishDir"
+        & $dotnet --version
+        & $dotnet GenCatalog.dll
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
@@ -30,6 +56,4 @@ steps:
       DOTNET_GCConserveMemory: 9
       DOTNET_GCHeapHardLimitPercent: 75
       DOTNET_GCHeapHardLimit: 5368709120
-      DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
-      PATH: $(Agent.ToolsDirectory)/dotnet;$(PATH)
 
