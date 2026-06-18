@@ -11,7 +11,6 @@ steps:
       packageType: runtime
       version: 10.x
       includePreviewVersions: true
-      installationPath: $(Agent.ToolsDirectory)/dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -32,22 +31,15 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        $dotnetExe = Join-Path $env:DOTNET_ROOT "dotnet.exe"
-        if (-not (Test-Path $dotnetExe)) {
-          Write-Host "dotnet executable not found at '$dotnetExe'. Attempting to locate dotnet on PATH."
-          $dotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
-          if ($null -eq $dotnetCmd) {
-            throw "Unable to locate dotnet. DOTNET_ROOT='$env:DOTNET_ROOT'."
-          }
-          $dotnetExe = $dotnetCmd.Source
+        $dotnetCmd = Get-Command dotnet -ErrorAction SilentlyContinue
+        if ($null -eq $dotnetCmd) {
+          throw "Unable to locate dotnet. Ensure UseDotNet@2 task has run successfully."
         }
-
-        & $dotnetExe "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
+        & $dotnetCmd.Source "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
       APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)/catalog
-      DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
       DOTNET_gcServer: 0
       DOTNET_GCConserveMemory: 9
       DOTNET_GCHeapHardLimitPercent: 75
