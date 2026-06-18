@@ -25,6 +25,7 @@ steps:
           Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
         }
         Write-Host $env:AGENT_TOOLSDIRECTORY
+        Get-ChildItem -Recurse "$(Agent.ToolsDirectory)" -Filter dotnet.exe
         
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/index" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/frameworks" | Out-Null
