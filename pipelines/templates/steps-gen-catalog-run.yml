@@ -11,7 +11,10 @@ steps:
       packageType: runtime
       version: 10.x
       includePreviewVersions: true
+      installationPath: $(Pipeline.Workspace)\dotnet
   - pwsh: |
+      $env:DOTNET_ROOT = "$(Pipeline.Workspace)\dotnet"
+      $env:DOTNET_MULTILEVEL_LOOKUP = "0"
       where.exe dotnet
       dotnet --list-runtimes
       Write-Host "Agent.ToolsDirectory:=$(Agent.ToolsDirectory)"
@@ -25,10 +28,9 @@ steps:
       scriptLocation: "inlineScript"
       addSpnToEnvironment: true
       inlineScript: |
-        $dotnet = "$(Agent.ToolsDirectory)\dotnet\dotnet.exe"
-        $env:DOTNET_ROOT = "$(Agent.ToolsDirectory)\dotnet"
+        $env:DOTNET_ROOT = "$(Pipeline.Workspace)\dotnet"
         $env:DOTNET_MULTILEVEL_LOOKUP = "0"
-        $env:PATH = "$env:DOTNET_ROOT;$env:PATH"
+        $env:PATH = "C:\Program Files\dotnet;$env:PATH"
 
         $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)/catalog"
         if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
@@ -40,8 +42,8 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        & $dotnet --version
-        & $dotnet "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
+        dotnet --version
+        dotnet "$(Pipeline.Workspace)/gen-catalog-drop/publish-gen-catalog/GenCatalog.dll"
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
