@@ -62,6 +62,7 @@ extends:
               - task: UseDotNet@2
                 displayName: Use .NET 10 SDK
                 inputs:
+                  packageType: sdk
                   version: 10.x
                   includePreviewVersions: true
               - script: |
