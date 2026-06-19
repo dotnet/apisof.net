@@ -10,7 +10,9 @@ steps:
   - task: UseDotNet@2
     displayName: "Use .NET 10"
     inputs:
+      packageType: sdk
       version: 10.x
+      includePreviewVersions: true
   - pwsh: |
       $ErrorActionPreference = 'Stop'
       $config = "$(Pipeline.Workspace)/velopack-input/nuget.config"

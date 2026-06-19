@@ -68,6 +68,7 @@ extends:
                 displayName: Use .NET 10 SDK
                 inputs:
                   version: 10.x
+                  packageType: sdk
                   includePreviewVersions: true
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
