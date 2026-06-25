@@ -662,7 +662,8 @@ body {
 .uhf-footer-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0;
+    column-gap: 0.7rem;
+    row-gap: 0.25rem;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -670,12 +671,6 @@ body {
 
 .uhf-footer-links li {
     white-space: nowrap;
-}
-
-.uhf-footer-links li+li::before {
-    content: "|";
-    color: rgba(255, 255, 255, 0.55);
-    margin: 0 0.55rem;
 }
 
 .uhf-footer-links a,
@@ -704,11 +699,8 @@ body {
 /* Small screens (mobile and narrow windows) */
 @media (max-width: 480px) {
     .uhf-footer-links {
+        column-gap: 0.55rem;
         row-gap: 0.25rem;
-    }
-
-    .uhf-footer-links li+li::before {
-        margin: 0 0.4rem;
     }
 
     /* Container adjustments */
