@@ -28,11 +28,14 @@ function initializeCookieConsent() {
     });
 }
 
-function manageConsent() {
-    if (siteConsent && siteConsent.isConsentRequired && typeof siteConsent.manageConsent === "function") {
-        siteConsent.manageConsent();
+function openCookiePreferences() {
+    var consent = siteConsent || (typeof WcpConsent !== "undefined" ? WcpConsent.siteConsent : null);
+    if (consent && typeof consent.manageConsent === "function") {
+        consent.manageConsent();
     }
 }
+
+window.openCookiePreferences = openCookiePreferences;
 
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeCookieConsent);
