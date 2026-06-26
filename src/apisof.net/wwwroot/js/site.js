@@ -3,6 +3,7 @@ var siteConsent = null;
 function setCookieManagementVisibility(isVisible) {
     var elements = document.querySelectorAll(".manageCookieChoice");
     for (var i = 0; i < elements.length; i++) {
+        elements[i].hidden = !isVisible;
         elements[i].style.display = isVisible ? "list-item" : "none";
     }
 }
