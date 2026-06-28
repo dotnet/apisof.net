@@ -2,8 +2,11 @@ var siteConsent = null;
 
 function setCookieManagementVisibility(isVisible) {
     var elements = document.querySelectorAll(".manageCookieChoice");
+    var targetDisplay = isVisible ? "inline-block" : "none";
     for (var i = 0; i < elements.length; i++) {
-        elements[i].style.display = isVisible ? "inline-block" : "none";
+        if (elements[i].style.display !== targetDisplay) {
+            elements[i].style.display = targetDisplay;
+        }
     }
 }
 
@@ -52,6 +55,10 @@ function scrollIntoMainContent() {
 }
 
 var observer = new MutationObserver(function () {
+    if (siteConsent) {
+        setCookieManagementVisibility(!!siteConsent.isConsentRequired);
+    }
+
     $('[data-toggle="popover"]').popover({
         placement: 'top',
         trigger: 'hover',
