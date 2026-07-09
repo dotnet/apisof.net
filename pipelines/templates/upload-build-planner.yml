@@ -60,7 +60,7 @@ steps:
       }
       else {
         Write-Host "Attempting to package version $version..."
-        if($LASTEXITCODE -ne 0) {
+        if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
           throw "vpk tool is not available. Ensure it is installed and in the PATH."
         }
         try {
