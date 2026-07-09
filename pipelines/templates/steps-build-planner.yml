@@ -13,13 +13,16 @@ steps:
       includePreviewVersions: true
   - pwsh: |
       $ErrorActionPreference = 'Stop'
-      $config = "$(Build.SourcesDirectory)/src/nuget.config"
-      dotnet tool update -g nbgv --configfile $config
-      if ($LASTEXITCODE -ne 0) {
-        dotnet tool install -g nbgv --configfile $config
-      }
-      nbgv cloud -p ${{ parameters.projectPath }} -a
-    displayName: "Set build version (nbgv)"
+      
+      # Use Build.BuildId for versioning to ensure monotonically increasing versions
+      $buildId = "$(Build.BuildId)"
+      $gitHash = "$(Build.SourceVersion)".Substring(0, 10)
+      $version = "0.1.$buildId+$gitHash"
+
+      Write-Host "Computed Version: $version"
+      
+      Write-Host "##vso[task.setvariable variable=PlannerSemVer]$version"
+    displayName: "Set build version (using Build.BuildId)"
   - pwsh: |
       $ErrorActionPreference = 'Stop'
       $publishDest = "$(Build.ArtifactStagingDirectory)/velopack-input/publish/NetUpgradePlanner"
@@ -29,14 +32,14 @@ steps:
     displayName: "dotnet publish"
   - pwsh: |
       $ErrorActionPreference = 'Stop'
-      $version = $env:PLANNER_SEMVER1
+      $version = $env:PlannerSemVer
 
       if ([string]::IsNullOrWhiteSpace($version)) {
-        throw "NBGV version variable is missing. Ensure 'nbgv cloud -p ${{ parameters.projectPath }} -a' completed successfully."
+        throw "Build version is empty. Ensure the 'Set build version' step executed successfully."
       }
 
       if ($version -match '^\$\(') {
-        throw "NBGV version variable was not expanded (got literal '$version'). Ensure 'nbgv cloud -p ${{ parameters.projectPath }} -a' ran with the -a/--all-vars flag so NBGV_SemVer1 is published."
+        throw "Build version was not expanded (got literal '$version'). Ensure pipeline variables are properly set."
       }
 
       $inputRoot = "$(Build.ArtifactStagingDirectory)/velopack-input"
@@ -45,4 +48,4 @@ steps:
       Copy-Item -Path "$(Build.SourcesDirectory)/src/nuget.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
     displayName: "Prepare velopack inputs"
     env:
-      PLANNER_SEMVER1: $(NBGV_SemVer1)
+      PlannerSemVer: $(PlannerSemVer)
