@@ -60,8 +60,15 @@ steps:
       }
       else {
         Write-Host "Attempting to package version $version..."
+        if($LASTEXITCODE -ne 0) {
+          throw "vpk tool is not available. Ensure it is installed and in the PATH."
+        }
         try {
           vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net8-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
+          if ($LASTEXITCODE -ne 0) {
+            throw "vpk pack failed with exit code $LASTEXITCODE."
+          }
+
           Write-Host "Successfully packaged version $version"
           Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
         }

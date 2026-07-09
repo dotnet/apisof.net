@@ -15,11 +15,11 @@ steps:
       # Use Build.BuildId for versioning to ensure monotonically increasing versions
       $buildId = "$(Build.BuildId)"
       $gitHash = "$(Build.SourceVersion)".Substring(0, 10)
-      $version = "0.1.$buildId-beta+$gitHash"
+      $version = "0.1.$buildId+$gitHash"
 
       Write-Host "Computed Version: $version"
       
-      Write-Host "##vso[task.setvariable variable=NBGV_SemVer1]$version"
+      Write-Host "##vso[task.setvariable variable=PlannerSemVer]$version"
     displayName: "Set build version (using Build.BuildId)"
   - pwsh: |
       $ErrorActionPreference = 'Stop'
@@ -30,7 +30,7 @@ steps:
     displayName: "dotnet publish"
   - pwsh: |
       $ErrorActionPreference = 'Stop'
-      $version = $env:NBGV_SemVer1
+      $version = $env:PlannerSemVer
 
       if ([string]::IsNullOrWhiteSpace($version)) {
         throw "Build version is empty. Ensure the 'Set build version' step executed successfully."
@@ -46,4 +46,4 @@ steps:
       Copy-Item -Path "$(Build.SourcesDirectory)/src/nuget.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
     displayName: "Prepare velopack inputs"
     env:
-      NBGV_SemVer1: $(NBGV_SemVer1)
+      PlannerSemVer: $(PlannerSemVer)
