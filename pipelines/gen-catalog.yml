@@ -57,10 +57,11 @@ extends:
             clean: true
             fetchDepth: 0
           - task: UseDotNet@2
-            displayName: "Install .NET 8"
+            displayName: "Install .NET 10"
             inputs:
               packageType: sdk
-              version: 8.x
+              version: 10.x
+              includePreviewVersions: true
           - task: NuGetAuthenticate@1
             displayName: "NuGet Authenticate"
           - script: |

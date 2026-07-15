@@ -117,8 +117,7 @@ public sealed class PlatformAnnotationContext
                                 t5.Kind == MarkupTokenKind.CloseParenToken &&
                                 t6.Kind == MarkupTokenKind.CloseBracketToken)
                             {
-                                var literalWithoutQuotes = t4.Text.Substring(1, t4.Text.Length - 2);
-                                var impliedPlatformName = literalWithoutQuotes;
+                                var impliedPlatformName = UnquoteLiteral(t4.Text);
                                 yield return (platformName, impliedPlatformName);
                             }
                         }
@@ -126,6 +125,19 @@ public sealed class PlatformAnnotationContext
                 }
             }
         }
+    }
+
+    private static string UnquoteLiteral(string text)
+    {
+        // LiteralString tokens are stored as C# string literals (e.g. "windows").
+        // Strip the surrounding quotes to recover the platform name. The guard keeps
+        // the original behavior for the expected quoted form while avoiding the
+        // out-of-range trim the old Substring(1, Length - 2) performed on
+        // unexpectedly short or unquoted text.
+        if (text.Length >= 2 && text[0] == '"' && text[^1] == '"')
+            return text.Substring(1, text.Length - 2);
+
+        return text;
     }
 
     private static bool TryGetPlatformFromIsPlatformMethod(ApiModel operatingSystemMember, [MaybeNullWhen(false)] out string platformName)

@@ -8,9 +8,11 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: UseDotNet@2
-    displayName: "Use .NET 8"
+    displayName: "Use .NET 10"
     inputs:
-      version: 8.x
+      packageType: sdk
+      version: 10.x
+      includePreviewVersions: true
   - pwsh: |
       $ErrorActionPreference = 'Stop'
       $config = "$(Pipeline.Workspace)/velopack-input/nuget.config"

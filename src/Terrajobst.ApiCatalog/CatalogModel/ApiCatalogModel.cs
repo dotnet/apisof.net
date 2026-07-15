@@ -248,6 +248,13 @@ public sealed class ApiCatalogModel
 
     internal Markup GetMarkup(int offset)
     {
+        // A negative offset is the sentinel for "no markup" -- the same convention
+        // used for absent references in this blob format (see the ReferenceToken
+        // handling below). Some declarations legitimately have no markup, so return
+        // an empty markup instead of indexing past the heap and throwing.
+        if (offset < 0)
+            return new Markup(Array.Empty<MarkupToken>());
+
         var span = BlobHeap[offset..];
         var tokenCount = BinaryPrimitives.ReadInt32LittleEndian(span);
         span = span[4..];

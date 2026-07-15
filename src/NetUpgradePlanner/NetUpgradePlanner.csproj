@@ -1,14 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
 	  <UseWindowsForms>true</UseWindowsForms>
 	  <ApplicationIcon>NetUpgradePlanner.ico</ApplicationIcon>
     <ApplicationManifest>App.manifest</ApplicationManifest>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <Product>.NET Upgrade Planner</Product>
     <AssemblyTitle>$(Product)</AssemblyTitle>
     <NoWarn>WFAC010</NoWarn>

@@ -78,7 +78,7 @@ public class UsesNullableReferenceTypesCollectorTests : CollectorTest<UsesNullab
     private static CSharpCompilation ApplyNullableMode(CSharpCompilation compilation, NullableMode mode)
     {
         var references = mode == NullableMode.ReferencedFrameworkTypes
-            ? Net80.References.All
+            ? Net100.References.All
             : NetStandard20.References.All;
 
         return compilation.WithReferences(references);

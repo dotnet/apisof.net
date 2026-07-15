@@ -6,9 +6,11 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: UseDotNet@2
-    displayName: "Use .NET 8 SDK"
+    displayName: "Use .NET 10 SDK"
     inputs:
-      version: 8.x
+      packageType: sdk
+      version: 10.x
+      includePreviewVersions: true
   - pwsh: |
       $ErrorActionPreference = 'Stop'
       

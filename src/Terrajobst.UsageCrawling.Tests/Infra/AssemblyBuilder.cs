@@ -14,7 +14,7 @@ public sealed class AssemblyBuilder
 
     public AssemblyBuilder SetAssembly(
         string source,
-        TargetFramework framework = TargetFramework.Net80,
+        TargetFramework framework = TargetFramework.Net10,
         Func<CSharpCompilation, CSharpCompilation>? transformer = null
         )
     {
@@ -27,7 +27,7 @@ public sealed class AssemblyBuilder
         return this;
     }
 
-    public AssemblyBuilder AddDependency(string source, TargetFramework framework = TargetFramework.Net80)
+    public AssemblyBuilder AddDependency(string source, TargetFramework framework = TargetFramework.Net10)
     {
         var compilation = CreateCompilation(source, framework);
         _dependencies.Add(compilation);
@@ -74,6 +74,7 @@ public sealed class AssemblyBuilder
     {
         return framework switch
         {
+            TargetFramework.Net10 => Net100.References.All,
             TargetFramework.Net80 => Net80.References.All,
             TargetFramework.Net472 => Net472.References.All,
             TargetFramework.NetStandard20 => NetStandard20.References.All,
