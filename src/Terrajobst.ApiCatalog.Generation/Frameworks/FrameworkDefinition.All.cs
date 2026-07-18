@@ -1375,10 +1375,6 @@ public partial class FrameworkDefinition
 
         static string? ResolveDumpPackManifestPath()
         {
-            var explicitPath = @"c:\Users\v-syforonda\OneDrive - Microsoft\Documents\CodeBase\apisof.net-nonfork\src\DumpPacks\dumppack_output.json";
-            if (File.Exists(explicitPath))
-                return explicitPath;
-
             var candidateRoots = new[]
             {
                 Directory.GetCurrentDirectory(),
