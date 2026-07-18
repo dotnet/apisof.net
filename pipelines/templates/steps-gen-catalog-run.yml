@@ -11,6 +11,12 @@ steps:
       packageType: sdk
       version: 10.x
       includePreviewVersions: true
+  - task: UseDotNet@2
+    displayName: "Install .NET 11"
+    inputs:
+      packageType: sdk
+      version: 11.x
+      includePreviewVersions: true
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -21,6 +27,9 @@ steps:
       addSpnToEnvironment: true
       inlineScript: |
         $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)\catalog"
+        $genCatalogPublishPath = "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog"
+        $dumpPacksOutputPath = Join-Path $genCatalogPublishPath "dumppack_output.json"
+
         if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
           Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
         }
@@ -30,7 +39,8 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        dotnet "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog\GenCatalog.dll"
+        dotnet "$(Pipeline.Workspace)\gen-catalog-drop\publish-dumppacks\DumpPacks.dll" 2>&1 > $dumpPacksOutputPath
+        dotnet (Join-Path $genCatalogPublishPath "GenCatalog.dll")
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
