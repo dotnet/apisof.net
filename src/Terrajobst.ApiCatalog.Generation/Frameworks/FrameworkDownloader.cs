@@ -70,7 +70,7 @@ public static class FrameworkDownloader
                 {
                     var pack = packGroup
                         .Where(p => Applies(platformFramework, framework, p))
-                        .MaxBy(p => Version.Parse(p.Version));
+                        .MaxBy(p => NuGetVersion.Parse(p.Version));
 
                     if (pack is null)
                         continue;

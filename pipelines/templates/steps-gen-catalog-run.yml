@@ -46,6 +46,7 @@ steps:
 
         try {
           Get-Content -Raw -Path $dumpPacksOutputPath | ConvertFrom-Json | Out-Null
+          Write-Host "DumpPacks output created at '$dumpPacksOutputPath'."
         }
         catch {
           Write-Host "DumpPacks output is not valid JSON. First 20 lines:"
