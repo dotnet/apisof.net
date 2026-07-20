@@ -52,6 +52,8 @@ steps:
           Get-Content -Path $dumpPacksOutputPath -TotalCount 20 | ForEach-Object { Write-Host $_ }
           throw
         }
+    env:
+      DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0

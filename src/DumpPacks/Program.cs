@@ -1,13 +1,14 @@
 ﻿using NuGet.Versioning;
 
-var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-var dotnetDirectory = Path.Join(programFiles, "dotnet");
+var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
+if (string.IsNullOrEmpty(dotnetRoot))
+    dotnetRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"dotnet");
 var dumpPackManifest = new DumpPackManifest();
 // Console.WriteLine("//");
 // Console.WriteLine("// Built-in Packs");
 // Console.WriteLine("//");
 
-foreach (var sdkDirectory in GetSdkDirectories(dotnetDirectory))
+foreach (var sdkDirectory in GetSdkDirectories(dotnetRoot))
 {
     var version = NuGetVersion.Parse(Path.GetFileName(sdkDirectory));
     var builtInManifest = new BuiltInPackManifest
@@ -67,8 +68,8 @@ foreach (var sdkDirectory in GetSdkDirectories(dotnetDirectory))
 // Console.WriteLine("// Workload Packs");
 // Console.WriteLine("//");
 
-var manifestsRoot = Path.Join(dotnetDirectory, "sdk-manifests");
-var packsRoot = Path.Join(dotnetDirectory, "packs");
+var manifestsRoot = Path.Join(dotnetRoot, "sdk-manifests");
+var packsRoot = Path.Join(dotnetRoot, "packs");
 
 foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 {
