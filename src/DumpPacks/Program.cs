@@ -8,9 +8,8 @@ var dumpPackManifest = new DumpPackManifest();
 // Console.WriteLine("// Built-in Packs");
 // Console.WriteLine("//");
 
-foreach (var sdkDirectory in GetSdkDirectories(dotnetRoot))
+foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
 {
-    var version = NuGetVersion.Parse(Path.GetFileName(sdkDirectory));
     var builtInManifest = new BuiltInPackManifest
     {
         SdkVersion = $".NET SDK {version}"
@@ -74,7 +73,9 @@ var packsRoot = Path.Join(dotnetRoot, "packs");
 foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 {
     var versionText = Path.GetFileName(versionDirectory);
-    var version = NuGetVersion.Parse(versionText);
+    if (!NuGetVersion.TryParse(versionText, out var version))
+        continue;
+
     var workloadManifest = new WorkLoadPackManifest
     {
         DotNetVersion = $"net{version.Major}.{version.Minor}"
@@ -177,14 +178,19 @@ dumpPackManifest.Errors = DumpPackDiagnostics.Drain();
 // Output the final manifest as JSON
 Console.WriteLine(SetJsonString(dumpPackManifest));
 
-static IReadOnlyList<string> GetSdkDirectories(string dotnetDirectory)
+static IReadOnlyList<(string Path, NuGetVersion Version)> GetSdkDirectories(string dotnetDirectory)
 {
     var sdkRoot = Path.Join(dotnetDirectory, "sdk");
+
+    if (!Directory.Exists(sdkRoot))
+        return [];
+
     return Directory.GetDirectories(sdkRoot)
-                    .Select(d => (Path: d, Version: NuGetVersion.Parse(Path.GetFileName(d))))
+                    .Select(d => (Path: d, VersionText: Path.GetFileName(d)))
+                    .Where(t => NuGetVersion.TryParse(t.VersionText, out _))
+                    .Select(t => (t.Path, Version: NuGetVersion.Parse(t.VersionText)))
                     .GroupBy(t => (t.Version.Major, t.Version.Minor))
                     .Select(g => g.OrderByDescending(t => t.Version).First())
-                    .Select(t => t.Path)
                     .ToArray();
 }
 
