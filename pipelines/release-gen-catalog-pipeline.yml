@@ -1,8 +1,8 @@
 trigger: none
 
 schedules:
-  - cron: "21 12 * * *" # 12:21 PM UTC
-    displayName: Daily 12:21 UTC
+  - cron: "00 00 * * *" # 12:00 AM UTC
+    displayName: Daily 12:00 AM UTC
     branches:
       include:
         - main

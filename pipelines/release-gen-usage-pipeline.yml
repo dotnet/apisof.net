@@ -3,8 +3,8 @@ trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
 schedules:
-  - cron: "21 */6 * * *" # At :21 in every 6th hour
-    displayName: "Release usage every 6 hours"
+  - cron: "00 09,21 * * *" # At 09:00 and 21:00 UTC daily (avoids 00:00-08:00 catalog window)
+    displayName: "Release usage every 12 hours (09:00/21:00 UTC)"
     branches:
       include:
         - main
