@@ -34,55 +34,57 @@ public partial class SyntaxView
 
     private void UpdateSyntaxClassAndMarkup()
     {
-        var selectedFramework = BrowsingContext.SelectedFramework!;
-
-        IEnumerable<MarkupTokenWithDiff> tokenDiff;
-        MarkupTokenDiffKind apiDiff;
-
-        if (BrowsingContext is FrameworkDiffBrowsingContext diff &&
-            (selectedFramework == diff.Left || selectedFramework == diff.Right))
+        try
         {
-            var left = Current.GetDefinition(diff.Left);
-            var right = Current.GetDefinition(diff.Right);
+            var selectedFramework = BrowsingContext.SelectedFramework!;
 
-            if (left is null)
+            IEnumerable<MarkupTokenWithDiff> tokenDiff;
+            MarkupTokenDiffKind apiDiff;
+
+            if (BrowsingContext is FrameworkDiffBrowsingContext diff &&
+                (selectedFramework == diff.Left || selectedFramework == diff.Right))
             {
-                Debug.Assert(right is not null);
-                apiDiff = MarkupTokenDiffKind.Added;
-                tokenDiff = GetTokensWithoutDiff(right.Value);
-                Availability = Current.GetAvailability(diff.Right)!;
-            }
-            else if (right is null)
-            {
-                apiDiff = MarkupTokenDiffKind.Removed;
-                tokenDiff = GetTokensWithoutDiff(left.Value);
-                Availability = Current.GetAvailability(diff.Left)!;
+                var left = Current.GetDefinition(diff.Left);
+                var right = Current.GetDefinition(diff.Right);
+
+                if (left is null)
+                {
+                    Debug.Assert(right is not null);
+                    apiDiff = MarkupTokenDiffKind.Added;
+                    tokenDiff = GetTokensWithoutDiff(right.Value);
+                    Availability = Current.GetAvailability(diff.Right)!;
+                }
+                else if (right is null)
+                {
+                    apiDiff = MarkupTokenDiffKind.Removed;
+                    tokenDiff = GetTokensWithoutDiff(left.Value);
+                    Availability = Current.GetAvailability(diff.Left)!;
+                }
+                else
+                {
+                    apiDiff = MarkupTokenDiffKind.None;
+                    tokenDiff = MarkupDiff.Diff(left.Value.GetMarkup(), right.Value.GetMarkup());
+                    Availability = Current.GetAvailability(diff.Right)!;
+                }
             }
             else
             {
                 apiDiff = MarkupTokenDiffKind.None;
-                tokenDiff = MarkupDiff.Diff(left.Value.GetMarkup(), right.Value.GetMarkup());
-                Availability = Current.GetAvailability(diff.Right)!;
+                Availability = Current.GetAvailability(selectedFramework)!;
+                tokenDiff = GetTokensWithoutDiff(Availability.Declaration);
             }
-        }
-        else
-        {
-            apiDiff = MarkupTokenDiffKind.None;
-            Availability = Current.GetAvailability(selectedFramework)!;
-            tokenDiff = GetTokensWithoutDiff(Availability.Declaration);
-        }
 
-        Debug.Assert(Availability is not null);
+            Debug.Assert(Availability is not null);
 
-        IEnumerable<MarkupTokenWithDiff> GetTokensWithoutDiff(ApiDeclarationModel declaration)
-        {
-            return declaration
-                .GetMarkup()
-                .Tokens
-                .Select(t => new MarkupTokenWithDiff(t, MarkupTokenDiffKind.None));
-        }
+            IEnumerable<MarkupTokenWithDiff> GetTokensWithoutDiff(ApiDeclarationModel declaration)
+            {
+                return declaration
+                    .GetMarkup()
+                    .Tokens
+                    .Select(t => new MarkupTokenWithDiff(t, MarkupTokenDiffKind.None));
+            }
 
-        var markupBuilder = new StringBuilder();
+            var markupBuilder = new StringBuilder();
 
         void WriteToken(string text, string cssClass, Guid? link = null, string? tooltip = null)
         {
@@ -104,13 +106,13 @@ public partial class SyntaxView
             markupBuilder.Append("</span>");
         }
 
-        foreach (var (token, tokenDiffKind) in tokenDiff)
-        {
-            var diffClass = tokenDiffKind switch {
-                MarkupTokenDiffKind.Added => "diff-added",
-                MarkupTokenDiffKind.Removed => "diff-removed",
-                _ => null
-            };
+            foreach (var (token, tokenDiffKind) in tokenDiff)
+            {
+                var diffClass = tokenDiffKind switch {
+                    MarkupTokenDiffKind.Added => "diff-added",
+                    MarkupTokenDiffKind.Removed => "diff-removed",
+                    _ => null
+                };
 
             if (diffClass is not null)
                 markupBuilder.Append($"""<span class="{diffClass}">""");
@@ -164,16 +166,22 @@ public partial class SyntaxView
                 }
             }
 
-            if (diffClass is not null)
-                markupBuilder.Append("</span>");
-        }
+                if (diffClass is not null)
+                    markupBuilder.Append("</span>");
+            }
 
-        SyntaxClass = apiDiff == MarkupTokenDiffKind.Added
-                        ? "diff-added"
-                        : apiDiff == MarkupTokenDiffKind.Removed
-                            ? "diff-removed"
-                            : "";
-        SyntaxMarkup = new MarkupString(markupBuilder.ToString().Trim());
+            SyntaxClass = apiDiff == MarkupTokenDiffKind.Added
+                            ? "diff-added"
+                            : apiDiff == MarkupTokenDiffKind.Removed
+                                ? "diff-removed"
+                                : "";
+            SyntaxMarkup = new MarkupString(markupBuilder.ToString().Trim());
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            SyntaxClass = "text-muted";
+            SyntaxMarkup = new MarkupString("&lt;declaration unavailable&gt;");
+        }
     }
 
     private string GeneratedTooltip(ApiModel current)
