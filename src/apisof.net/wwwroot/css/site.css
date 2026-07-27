@@ -31,12 +31,30 @@
     justify-content: center;
     text-align: center;
     padding: 2rem;
+    background-color: rgb(233, 236, 239);
+    color: rgb(33, 37, 41);
 }
 
 .friendly-error h1 {
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
     margin: 0;
+}
+
+.layout-main:has(.friendly-error) + hr + .container-fluid[role="complementary"] {
+    display: none;
+}
+
+.layout-main:has(.friendly-error) {
+    background-color: rgb(233, 236, 239);
+}
+
+.page-shell:has(.friendly-error) {
+    background-color: rgb(233, 236, 239);
+}
+
+.layout-main:has(.friendly-error) + hr {
+    display: none;
 }
 
 #blazor-error-ui {
