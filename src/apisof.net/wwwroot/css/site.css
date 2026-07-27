@@ -24,6 +24,21 @@
     border-color: var(--dotnet-purple-border-hover);
 }
 
+.friendly-error {
+    min-height: 55vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.friendly-error h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin: 0;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
