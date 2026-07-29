@@ -5,7 +5,8 @@
     --dotnet-purple-hover: #4411BB;
     --dotnet-purple-border-hover: #3311BB;
     --dotnet-catalog-link-color: #0062ce;
-    --dotnet-catalog-link-dark-color: #00b1ff
+    --dotnet-catalog-link-dark-color: #00b1ff;
+    --dotnet-surface-subtle: #e9ecef;
 }
 
 .bg-dotnet {
@@ -31,7 +32,7 @@
     justify-content: center;
     text-align: center;
     padding: 2rem;
-    background-color: rgb(233, 236, 239);
+    background-color: var(--dotnet-surface-subtle);
     color: rgb(33, 37, 41);
 }
 
@@ -46,11 +47,11 @@
 }
 
 .layout-main:has(.friendly-error) {
-    background-color: rgb(233, 236, 239);
+    background-color: var(--dotnet-surface-subtle);
 }
 
 .page-shell:has(.friendly-error) {
-    background-color: rgb(233, 236, 239);
+    background-color: var(--dotnet-surface-subtle);
 }
 
 .layout-main:has(.friendly-error) + hr {
@@ -236,7 +237,7 @@ a:visited {
 .syntax-view {
     display: block;
     font-size: larger;
-    background-color: #e9ecef;
+    background-color: var(--dotnet-surface-subtle);
     border-radius: 0.25rem;
     padding: 1rem;
     position: relative;
@@ -397,7 +398,7 @@ a:visited {
 /* Section Row */
 
 .section-row {
-    background-color: #e9ecef;
+    background-color: var(--dotnet-surface-subtle);
 }
 
 @media (prefers-color-scheme: dark) {
