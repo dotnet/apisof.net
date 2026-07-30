@@ -69,20 +69,20 @@ public static class DiffExtensions
                 continue;
 
             var diffKind = child.GetDiffKind(left, right);
-            if (diffKind is null)
-                continue;
-
-            switch (diffKind)
+            if (diffKind is not null)
             {
-                case DiffKind.Added:
-                    added++;
-                    break;
-                case DiffKind.Removed:
-                    removed++;
-                    break;
-                case DiffKind.Changed:
-                    modified++;
-                    break;
+                switch (diffKind)
+                {
+                    case DiffKind.Added:
+                        added++;
+                        break;
+                    case DiffKind.Removed:
+                        removed++;
+                        break;
+                    case DiffKind.Changed:
+                        modified++;
+                        break;
+                }
             }
 
             child.GetDiffCount(left, right, ref added, ref removed, ref modified);
