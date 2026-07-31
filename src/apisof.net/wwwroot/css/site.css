@@ -7,6 +7,16 @@
     --dotnet-catalog-link-color: #0062ce;
     --dotnet-catalog-link-dark-color: #00b1ff;
     --dotnet-surface-subtle: #e9ecef;
+    --dotnet-surface-code: #e9ecef;
+    --dotnet-text-primary: #212529;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dotnet-surface-subtle: #343a40;
+        --dotnet-surface-code: #282828;
+        --dotnet-text-primary: #f8f9fa;
+    }
 }
 
 .bg-dotnet {
@@ -33,13 +43,14 @@
     text-align: center;
     padding: 2rem;
     background-color: var(--dotnet-surface-subtle);
-    color: rgb(33, 37, 41);
+    color: var(--dotnet-text-primary);
 }
 
 .friendly-error h1 {
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 700;
     margin: 0;
+    color: inherit;
 }
 
 .layout-main:has(.friendly-error) + hr + .container-fluid[role="complementary"] {
@@ -55,6 +66,16 @@
 }
 
 .layout-main:has(.friendly-error) + hr {
+    display: none;
+}
+
+.page-shell.is-error-page,
+.page-shell.is-error-page .layout-main {
+    background-color: var(--dotnet-surface-subtle);
+}
+
+.page-shell.is-error-page hr,
+.page-shell.is-error-page .container-fluid[role="complementary"] {
     display: none;
 }
 
@@ -237,7 +258,7 @@ a:visited {
 .syntax-view {
     display: block;
     font-size: larger;
-    background-color: var(--dotnet-surface-subtle);
+    background-color: var(--dotnet-surface-code);
     border-radius: 0.25rem;
     padding: 1rem;
     position: relative;
@@ -327,10 +348,6 @@ a:visited {
 }
 
 @media (prefers-color-scheme: dark) {
-    .syntax-view {
-        background-color: rgb(40, 40, 40);
-    }
-
     .syntax-view.diff-added,
     .syntax-view .diff-added {
         background: rgba(46, 139, 87, 0.3);
@@ -402,10 +419,6 @@ a:visited {
 }
 
 @media (prefers-color-scheme: dark) {
-    .section-row {
-        background-color: rgb(52, 58, 64);
-    }
-
     a,
     a:link,
     a:visited {
