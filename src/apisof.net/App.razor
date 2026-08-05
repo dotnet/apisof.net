@@ -12,10 +12,12 @@
         </Router>
     </ChildContent>
     <ErrorContent>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <section class="friendly-error" role="alert" aria-live="assertive">
-                <h1>Oops we couldn't process your request</h1>
-            </section>
-        </LayoutView>
+        <CascadingValue Name="IsErrorPage" Value="true">
+            <LayoutView Layout="@typeof(MainLayout)">
+                <section class="friendly-error" role="alert" aria-live="assertive">
+                    <h1>Oops, we couldn't process your request.</h1>
+                </section>
+            </LayoutView>
+        </CascadingValue>
     </ErrorContent>
 </ErrorBoundary>

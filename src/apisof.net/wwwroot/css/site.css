@@ -53,29 +53,13 @@
     color: inherit;
 }
 
-.layout-main:has(.friendly-error) + hr + .container-fluid[role="complementary"] {
-    display: none;
-}
-
-.layout-main:has(.friendly-error) {
-    background-color: var(--dotnet-surface-subtle);
-}
-
-.page-shell:has(.friendly-error) {
-    background-color: var(--dotnet-surface-subtle);
-}
-
-.layout-main:has(.friendly-error) + hr {
-    display: none;
-}
-
 .page-shell.is-error-page,
 .page-shell.is-error-page .layout-main {
     background-color: var(--dotnet-surface-subtle);
 }
 
-.page-shell.is-error-page hr,
-.page-shell.is-error-page .container-fluid[role="complementary"] {
+    .page-shell.is-error-page > hr,
+.page-shell.is-error-page > .container-fluid[role="complementary"] {
     display: none;
 }
 
