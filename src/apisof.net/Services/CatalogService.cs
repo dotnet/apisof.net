@@ -45,14 +45,27 @@ public sealed class CatalogService
         var catalogTask = _catalogBlobSource.DownloadAsync(invalidateCachedDownload);
         var suffixTreeTask = _suffixTreeBlobSource.DownloadAsync(invalidateCachedDownload);
         var jobInfoTask = _catalogJobBlobSource.DownloadAsync(invalidateCachedDownload);
-        var usageDataTask = _usageBlobSource.DownloadAsync(invalidateCachedDownload);
-        var designNotesTask = _designNotesBlobSource.DownloadAsync(invalidateCachedDownload);
+        var usageDataTask = DownloadWithFallbackAsync(_usageBlobSource, FeatureUsageData.Empty, invalidateCachedDownload);
+        var designNotesTask = DownloadWithFallbackAsync(_designNotesBlobSource, DesignNoteDatabase.Empty, invalidateCachedDownload);
         await Task.WhenAll(catalogTask,
                            suffixTreeTask,
                            jobInfoTask,
                            usageDataTask,
                            designNotesTask);
         _data = new CatalogData(catalogTask.Result, suffixTreeTask.Result, jobInfoTask.Result, usageDataTask.Result, designNotesTask.Result);
+    }
+
+    private async Task<T> DownloadWithFallbackAsync<T>(BlobSource<T> source, T fallback, bool invalidateCachedDownload)
+    {
+        try
+        {
+            return await source.DownloadAsync(invalidateCachedDownload);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load {BlobName}. Using empty fallback.", source.BlobName);
+            return fallback;
+        }
     }
 
     public async void InvalidateCatalog()

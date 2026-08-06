@@ -1,0 +1,42 @@
+parameters:
+  - name: AzureSubscriptionConnection
+    type: string
+
+steps:
+  - task: NugetAuthenticate@1
+    displayName: "Authenticate with NuGet feed"
+  - task: UseDotNet@2
+    displayName: "Install .NET 10"
+    inputs:
+      packageType: sdk
+      version: 10.x
+      includePreviewVersions: true
+  - task: AzureCLI@2
+    displayName: "Run GenCatalog"
+    timeoutInMinutes: 0
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscriptionConnection }}"
+      scriptType: "pscore"
+      scriptLocation: "inlineScript"
+      addSpnToEnvironment: true
+      inlineScript: |
+        $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)\catalog"
+        if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
+          Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
+        }
+
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/index" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/frameworks" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
+        New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
+
+        dotnet "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog\GenCatalog.dll"
+    env:
+      AzureStorageServiceUrl: $(AzureStorageServiceUrl)
+      ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+      APISOFDOTNET_INDEX_PATH: $(Pipeline.Workspace)\catalog
+      DOTNET_gcServer: 0
+      DOTNET_GCConserveMemory: 9
+      DOTNET_GCHeapHardLimitPercent: 75
+      DOTNET_GCHeapHardLimit: 5368709120
+

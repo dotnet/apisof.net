@@ -1,0 +1,83 @@
+trigger: none
+
+schedules:
+  - cron: "00 00 * * *" # 12:00 AM UTC
+    displayName: Daily 12:00 AM UTC
+    branches:
+      include:
+        - main
+    always: true
+
+name: $(Date:yyyyMMdd).$(Rev:r)
+variables:
+  - name: TeamName
+    value: "DevDiv"
+resources:
+  pipelines:
+    - pipeline: "gen-catalog"
+      project: "OnlineServices"
+      source: 'dev-comm-partners\builds\gen-catalog'
+      trigger:
+        branches:
+          include:
+            - main
+  repositories:
+    - repository: self
+      type: git
+      ref: main
+    - repository: MicroBuildTemplate
+      type: git
+      name: 1ESPipelineTemplates/MicroBuildTemplate
+      ref: refs/tags/release
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: VSEngSS-Microbuild2022-1ES
+      os: windows
+    stages:
+      - stage: Dev
+        displayName: Run in Dev
+        jobs:
+          - job: Job_1
+            displayName: Generate Catalog (Dev)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
+            templateContext:
+              type: releaseJob
+              isProduction: false
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-catalog"
+                  artifactName: "gen-catalog-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-catalog-run.yml@self
+                parameters:
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+
+      - stage: Production
+        displayName: Run in Production
+        jobs:
+          - job: Job_1
+            displayName: Generate Catalog (Prod)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-catalog"
+                  artifactName: "gen-catalog-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-catalog-run.yml@self
+                parameters:
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"

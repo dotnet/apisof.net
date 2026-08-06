@@ -1,0 +1,1730 @@
+{
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines"
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "lastUpdatedDate": "2026-05-21 01:41:13Z"
+    }
+  },
+  "results": {
+    "727db23fc356b54f11874e913fc58d645dd4dd52c5addc9df7d3d023f10d45c6": {
+      "signature": "727db23fc356b54f11874e913fc58d645dd4dd52c5addc9df7d3d023f10d45c6",
+      "alternativeSignatures": [
+        "3562d9ca350cbecb276940b42c879062e73027554741da5f669ea7063b504683",
+        "7a372c114afec6861e9e9fc347c6d95544e7f66fdd4d2a63b132205eae3f296b",
+        "430f9309186e9bbd33cb546f1e16cc3f225b0b4950c4596feb9f2d8eaa76d278"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/CatalogModel/ApiModel.cs",
+      "line": 276,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "0536499b4ce85a3c7d9143b4b15c16e04566f55e11b91e207f0ee91391e908c1": {
+      "signature": "0536499b4ce85a3c7d9143b4b15c16e04566f55e11b91e207f0ee91391e908c1",
+      "alternativeSignatures": [
+        "34add2e0c65b4397e61cf12b1a6f7f4a07b056f38bce39c6385a7dc693782c0b",
+        "5ed91e674db3d07619a5154045c432be20305d81d28b652b8d9f386a8032fe87",
+        "afb9e51b86abe06edc9bff8538684ff6c10465b50168ed6d57a8f31d111203ca"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/CatalogModel/PlatformAnnotationContext.cs",
+      "line": 136,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "ef30ada0fb76096b882383791e1d5330b13a976b5c7fdb70c3d8f270a145d0a7": {
+      "signature": "ef30ada0fb76096b882383791e1d5330b13a976b5c7fdb70c3d8f270a145d0a7",
+      "alternativeSignatures": [
+        "659de34035b399f92377347cfd2d84d79112428e7cce54a907dd7f4229e211fb",
+        "01dc713f1b526ef5c965635adb5982200fa9c58589c0a498a2bfa156d753e33a",
+        "76683d342f54041b9ce2229838d59161c79a3bb8141e977b38aa883e36cda3c5"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/CatalogModel/PlatformAnnotationContext.cs",
+      "line": 137,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "3956be12a094a5ed84fabbfc0fe8aeaa09d02497ffee4039f3bee175a8fb7175": {
+      "signature": "3956be12a094a5ed84fabbfc0fe8aeaa09d02497ffee4039f3bee175a8fb7175",
+      "alternativeSignatures": [
+        "e8fa7eb9b55246c0e0fdb75c781ac7fb5508fb5e7315040d0dc6f8ecbef46805",
+        "8409b7bbc4b416aa8901a79bfded70e9d1408b742312b88e94f979d5e2149f9f",
+        "0576c10e80260de5ee808476bc1c953263d041acf0770cf0a308c5c7f108a855"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/Features/FeatureId.cs",
+      "line": 51,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "04d90ca76423a66fd52e53e99e7267a48eab73de234e29a15c74216c5d4872e0": {
+      "signature": "04d90ca76423a66fd52e53e99e7267a48eab73de234e29a15c74216c5d4872e0",
+      "alternativeSignatures": [
+        "d1885f4dbc6c636af033b5af67403d8d301f09a2a607f78d79e003eeae9b4e51",
+        "a7fc3e5304eaeebad771ddd895046dc2ff2cfbdde881c2033b80419d50250025",
+        "9c85fab93f2debaf18a5acd82d398abcf35cf651d4c86ac5017af15e620c343a"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/MissingNetFxFeatures/AssemblyMatcher.cs",
+      "line": 11,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "72da8ebec79037fea1cc8b1541c141c9e43f17336fc65989037ffaa18a1e99d9": {
+      "signature": "72da8ebec79037fea1cc8b1541c141c9e43f17336fc65989037ffaa18a1e99d9",
+      "alternativeSignatures": [
+        "9cd792f2f6c43539e1eab7ad94cef75074392026e490ca714ff152ec36a1cf71",
+        "8c15e570600e530cd0aaff3fe4c260d02ed1d7eb11c86f83f65fdac9fe4d5e42",
+        "7389519c7a939636d5ff5c683f47b31bab479d00da4a279b5e56805883ebd100"
+      ],
+      "target": "src/Terrajobst.ApiCatalog/MissingNetFxFeatures/NamespaceMatcher.cs",
+      "line": 11,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "ea7a40811a808f6cf5f5cba9814831db8250b650a1e150636984f6abb89d8868": {
+      "signature": "ea7a40811a808f6cf5f5cba9814831db8250b650a1e150636984f6abb89d8868",
+      "alternativeSignatures": [
+        "838c9dfd61789ed465046453e12868569c243c7af5d08bedf811c07e8ee725cb",
+        "b3b75a4ae941b6d209dcc988c7616f89b888329a775b345cc0b8bb84677345a1",
+        "e65de549c40e72b0305d96fd33f58773d294584bea273927ba0080f1877c06de"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/DesignNotes/ApiResolver.cs",
+      "line": 24,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "b04b3a58efa07ad40b454b0339983ba307d7862033e85b400943350ccdf9abde": {
+      "signature": "b04b3a58efa07ad40b454b0339983ba307d7862033e85b400943350ccdf9abde",
+      "alternativeSignatures": [
+        "3b83b3c2a4e9210b8c7236e396511da7c1c8b771d8757335bcc0ad1168ca8f97",
+        "a3702276774a7c552ad8640b2fab5732108582515371ab75b5781b2955532dd9",
+        "f77a08d6f743d61af8f9b48db2cf8ed2f080459683c96bdd461cbe599e4295e1"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/DesignNotes/ReviewDatabase.cs",
+      "line": 70,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "adbce24313a5cf4d25c4eb93cfc42be2cbf07a0e707de2e71ec9fd1f2414ce7f": {
+      "signature": "adbce24313a5cf4d25c4eb93cfc42be2cbf07a0e707de2e71ec9fd1f2414ce7f",
+      "alternativeSignatures": [
+        "5fb10fca4f4b26b031f97a842241447b0cea4819d62d41e8afc740dbed5ec30a",
+        "458456268a8de7a215b06f64784998128cb9e47157d079929392218af4393821",
+        "ab10c390e3d045f746e907646856e025b40b352e473c000538474da7989484cd"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/DesignNotes/ReviewDatabase.cs",
+      "line": 109,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "eb57443107037099e0b0356c4ff7a0b9829d1b64808bbd86bcf3b0e220fdec41": {
+      "signature": "eb57443107037099e0b0356c4ff7a0b9829d1b64808bbd86bcf3b0e220fdec41",
+      "alternativeSignatures": [
+        "d50fec246bd2e4f51c0182484cdf799efb2a19e07b6d4afede41d27349a99c71",
+        "d98fb9b755ad6646503ad737f067474efdd841148834816b4e02934db87e2221",
+        "d3041299b922c87351185ddfe8adc0827e293fa04a4dc2faf51bb20e73582849"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/AssemblyEntry.cs",
+      "line": 157,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "8cfcd8479f171644e5f29a5d20ae518d6ab2b8514b1f9dc18e0c0a389622e79a": {
+      "signature": "8cfcd8479f171644e5f29a5d20ae518d6ab2b8514b1f9dc18e0c0a389622e79a",
+      "alternativeSignatures": [
+        "7a653bab10586988f8f1903be7ba8bfefbdc0a9d178ad095ea2523687ad2d65d",
+        "1e68e644bccac04ceaffaca0176642e844583e4f0edb485e926d57c8bcededfc",
+        "0b86b4f12a9cff3b0d34115b3fefc6538c8a18c6e5a8a16c6744bf31fd4ef572"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/AssemblyEntry.cs",
+      "line": 181,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "5bfc82c189bc93f08823ea6c0d4213d69f8d18b3007949c6113c441ca738e3bd": {
+      "signature": "5bfc82c189bc93f08823ea6c0d4213d69f8d18b3007949c6113c441ca738e3bd",
+      "alternativeSignatures": [
+        "69f96b3343c98cc992114627cb4185e0c76a52abeee7a4c676700145c0df2a63",
+        "fc15c0ae9ff72a1571ae6dad9ae151de87b317e18ae292037ebe0a65135a1784",
+        "1feb41792249a963bd9943afa0e421ecc2af5fc4b8c6227829007f05f218e124"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CatalogExtensions.cs",
+      "line": 33,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "85363a29b5eca56a1367b79168487a1cabeab9442c81e5addb9e4d3e3b1b6427": {
+      "signature": "85363a29b5eca56a1367b79168487a1cabeab9442c81e5addb9e4d3e3b1b6427",
+      "alternativeSignatures": [
+        "3443867ee2dad3618fe6968308b3384e5211039290d8c142dcbe24d8f1e6b574",
+        "4c825881916edf4db6f17860f06405d092328e9362ac61747e0da2c24e001512",
+        "d9f4ca460b1e4f92a6e652bb526e32a9754ce6cd099c50dd3978af8c7664c1a7"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CatalogExtensions.cs",
+      "line": 47,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA5351",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "aa7c9cd5a15dc53ddffedaad0683d936ad1294ebc2f299b3d2adb367fba206c0": {
+      "signature": "aa7c9cd5a15dc53ddffedaad0683d936ad1294ebc2f299b3d2adb367fba206c0",
+      "alternativeSignatures": [
+        "a77becec51a5f8e1ce2cc18b606201f66539246646483f09be33076ff8add8ff",
+        "0b15b9303357c78e5c8769be536e531bde4652b415c0daac3dc2866b5b7e2001",
+        "39f532cdfa0ad16654c3a731d3da9e258cf32a4d4a5ab140cdd1439deeb4afdf"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CatalogExtensions.cs",
+      "line": 224,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "0dabc24ad924922fe59404f03f7c0cc718ecdd4460c30f2ab7731d2fb4c5c98f": {
+      "signature": "0dabc24ad924922fe59404f03f7c0cc718ecdd4460c30f2ab7731d2fb4c5c98f",
+      "alternativeSignatures": [
+        "453c1ffad98a6eae4e3a96ed6f974d236368a998f48c089e427464d5fc1ba26b",
+        "f283b251e4c01f59e7009e58ca53e8732d2afe4bf252e00b6fca380b4ec8a69c",
+        "ed5e4a4cedfbc64c007a94a4b1dd80d6f93819360749ff92ca80ea0889b6941a"
+      ],
+      "target": "src/Terrajobst.ApiCatalog.Generation/Metadata/CSharpDeclarationWriter.cs",
+      "line": 675,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-21 01:41:13Z",
+      "expirationDate": "2026-11-07 01:42:45Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-21 01:42:45Z"
+    },
+    "682a020b4d3f57f498bee09d965a75d99fff279ef2ac1f279b2dbd08084a0a8b": {
+      "signature": "682a020b4d3f57f498bee09d965a75d99fff279ef2ac1f279b2dbd08084a0a8b",
+      "alternativeSignatures": [
+        "13eac98138f2b5ac64a29f524f07583b5d05b32bbd55d29fa4d5b5382c696d3e",
+        "3859ade03a5bc75c4c46374199c8b2de283389a6b871bc9f31a31a19a26e189e",
+        "956fad27ff361c88c58723805ba87809fd22ef3995633b3d319047916de4407d"
+      ],
+      "target": "src/NetUpgradePlanner/App.xaml.cs",
+      "line": 42,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "9a63900bfc6d14828d1a522eabc4e3cced3cba3704c318c187f984e1873ebca5": {
+      "signature": "9a63900bfc6d14828d1a522eabc4e3cced3cba3704c318c187f984e1873ebca5",
+      "alternativeSignatures": [
+        "088c7be4e073287826e57043d45fac03ead6867f480990d68e039345bd143b80",
+        "102214f6a0173b7e5b71afde3ed445c7267cd912efb404a27a3e270765c226bf",
+        "71a1429652256e5e03d807e9248336ff63933eee5f81bb955027736e944b241c"
+      ],
+      "target": "src/Terrajobst.NetUpgradePlanner/FrameworkAndPlatformInference.cs",
+      "line": 22,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "7782b10829a61ff1d980ad5b91a5aa86bcabf96a33ce69c31183520e9b04d2d3": {
+      "signature": "7782b10829a61ff1d980ad5b91a5aa86bcabf96a33ce69c31183520e9b04d2d3",
+      "alternativeSignatures": [
+        "c2a111471c3e0bf7d748c01ff418c077364d26491624255f1245fb3c324c7cb5",
+        "d3003f5709bd335217c9fd7764b068788927fe45f061689d61168434e7ec0742",
+        "46d25ddc0de73947eacbd0feb63084c2d333a6b0a3cd28dcea38ee1245f7cca0"
+      ],
+      "target": "src/NetUpgradePlanner/Services/WorkspaceService.cs",
+      "line": 56,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "07f767408adb74c6196e36f8bc13ea4e359fb5c975442a89b72f91c973567cca": {
+      "signature": "07f767408adb74c6196e36f8bc13ea4e359fb5c975442a89b72f91c973567cca",
+      "alternativeSignatures": [
+        "470bcfbaee465935967cd2810cc764b47fa5fbf9dbc428518e0fb88aea53e028",
+        "e8ff83205eade95ef53a590e20747967e0f75fbb8967486bef0bfae606bf2621",
+        "93903c357697aec050078a0c59fbaed178c5e97f5315f64e54750f7faa079c7b"
+      ],
+      "target": "src/NetUpgradePlanner/ViewModels/ProblemListView/ProblemListViewItem.cs",
+      "line": 70,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "f8ea2280988054af4ea378dfa1a7179ae83a47bba13e7f0b0c77acd6daa85da4": {
+      "signature": "f8ea2280988054af4ea378dfa1a7179ae83a47bba13e7f0b0c77acd6daa85da4",
+      "alternativeSignatures": [
+        "7efbb38bf61c9cc85831081516540b9aea76307644343b22339a1b76c6abc39d",
+        "c2a8666d0c1145249757bca864347bfbbd0c0b10908051ce85a2be39adeb6525",
+        "2a21c0025f9b54163c831dd4ff24faccf2051fcd1e8618aa9095a0b58312e71c"
+      ],
+      "target": "src/NetUpgradePlanner/ViewModels/ProblemListView/ProblemListViewItem.cs",
+      "line": 74,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "daff9a6f391dc530223495f8cb6d98058bef0af771163cf0bf4469e4daf24fbd": {
+      "signature": "daff9a6f391dc530223495f8cb6d98058bef0af771163cf0bf4469e4daf24fbd",
+      "alternativeSignatures": [
+        "0ef78bc7bc3cebef66c1ac2d6c772090758da88f4d2fdbac21f489f563f45953",
+        "4bd694a9d2bc01443e77b6a342decb496714a4abf83ab5d99f60b04607ad17ff",
+        "2b28a6dae069c9abd04a07f4df5521e02ba23aaaeff4fdd798b269f264036aaa"
+      ],
+      "target": "src/NetUpgradePlanner/ViewModels/ProblemListView/ProblemListViewItem.cs",
+      "line": 84,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "2d17bdc49ebe0cd7814c0bcca626f77d8abf1a9a0ad8fce9d833b25d7dc62358": {
+      "signature": "2d17bdc49ebe0cd7814c0bcca626f77d8abf1a9a0ad8fce9d833b25d7dc62358",
+      "alternativeSignatures": [
+        "3db6c6126b9ea881532dae72a3c326ba8e3be9ac466f206ee0e4e2ec8f5df008",
+        "0967753c00ea2d35aeb30746fb66c11748743b5defca1cd13ae82ee3c74d0dc5",
+        "2bc04020a5e99504408d4b295865b4421d2396bcae87e81b44473839bbfc64c5"
+      ],
+      "target": "src/NetUpgradePlanner/ViewModels/ProblemListView/ProblemListViewItem.cs",
+      "line": 88,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "bed971747a13440f405ad8dccf3228b645ab3ed10a659f1bd235a6a456423134": {
+      "signature": "bed971747a13440f405ad8dccf3228b645ab3ed10a659f1bd235a6a456423134",
+      "alternativeSignatures": [
+        "489e362c7efc687bd2cca5ae227f740d0d051bbcaa9310f2f32be5040d949859",
+        "a016060beb070c986ea8915cf70c67ed05df20a06a67ab476db7dd8affcb7157",
+        "0a83a987a76e4f8a2d608638643b73e811ee5a1e33d8d7ab0c790e883f3ee791"
+      ],
+      "target": "src/NetUpgradePlanner/ViewModels/ProblemListView/ProblemListViewItem.cs",
+      "line": 92,
+      "uriBaseId": "file:///D:/a/_work/1/s/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "roslynanalyzers",
+      "ruleId": "CA1310",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "c81bc2a0dfcfa9b6a94616549c66abd4b32398bfc6a19e09b220dd6bb27ecbea": {
+      "signature": "c81bc2a0dfcfa9b6a94616549c66abd4b32398bfc6a19e09b220dd6bb27ecbea",
+      "alternativeSignatures": [
+        "e6b2d9f9b723e4758f2e88f69059e491e0dd3a69fa016d32b53e8495cc1a935b",
+        "bcd1bf1305e97f1715658603d8db1d15ce39a6c323ae0816f24665f3afcd5dfb",
+        "84c83ca1e4bf4a6a6c2334f830e21eef34833990a2270f9d50f27db7aae8740b"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/acyclic.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "3d1cb6edadaf1d956c8e8d481fa3a47041e5df8f432979d2f90bc1dedd3d2d7f": {
+      "signature": "3d1cb6edadaf1d956c8e8d481fa3a47041e5df8f432979d2f90bc1dedd3d2d7f",
+      "alternativeSignatures": [
+        "13090933e718fa51d2ea160753ed61099e334fb74099f86e04dc9eccf34987a2",
+        "2b8a90adb3ff3cd6136bdb3a03948539b47ac1b333215c4bf92ca9dd4c2243aa",
+        "fde04dd74afa7b1e28090c380c8b8a1a7017cbfec32162ac2284b42b3377d5ab"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/ANN.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2009",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "4d7a04b3c0b8a0906bf656876fca48840f67fcbece7abdc9a62d989b50d658bd": {
+      "signature": "4d7a04b3c0b8a0906bf656876fca48840f67fcbece7abdc9a62d989b50d658bd",
+      "alternativeSignatures": [
+        "2e44c75e4654a286724b295db288151c3b83c506404393db8b9a36092e73fc4a",
+        "8169b62a2628824e4810f34e80e7f2b923cd3183c232c0a37363410f481eb0b1",
+        "e97031f13be2096b0021dbb1d154995251dfaef2f45fabf32af200d2f67079a3"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/ANN.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2016",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "f09d9a886def44261270452aa32ed49fb6a2b1f88dd89b0d802d3fa08f881309": {
+      "signature": "f09d9a886def44261270452aa32ed49fb6a2b1f88dd89b0d802d3fa08f881309",
+      "alternativeSignatures": [
+        "8b23c1e027ffccbb91dd1b000fe714585ff9e2615ff3c316d0bbe205611faaac",
+        "9427214ce6e081bb4b55987fea7202c86a5ac334bf787231b6fecedb78bb53d0",
+        "28e95722502c8226e864afe3ac3ba65919eebe81b341923041c59afbff96b109"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/bcomps.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "c06b685b12936ad1149be7537e27827b0581658ed7a3e283e9ba9e6de5af1326": {
+      "signature": "c06b685b12936ad1149be7537e27827b0581658ed7a3e283e9ba9e6de5af1326",
+      "alternativeSignatures": [
+        "f8051e07aebc2600489588a587d21f744dcfcbcb75bdea58330831747caca0e9",
+        "845b7204f888cd8520a47c334d0c479a46631e8a6a865985eb6ee973f2ef3c75",
+        "05bdb0de5b01795a9c3dce630bd4adc9be160f2614a512343656cf27ab28906c"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/cairo.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "58985ef2463c35d35538f0ca9a7f25ef96ca71bb235dfd0685c427d06e9f6903": {
+      "signature": "58985ef2463c35d35538f0ca9a7f25ef96ca71bb235dfd0685c427d06e9f6903",
+      "alternativeSignatures": [
+        "f2e68b99124c88a6dce6140eb7dfcb26b228a0dec48ca048049b9061793fb135",
+        "ee5a5a146e6c20fefa7a38f4e85c9cc724724601729adfa6333cc2385275ba58",
+        "92711326b8db82ad73a0657b73df0f45296f536869b860be06007afd62513d11"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/ccomps.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "53205c1238acf75520b0a5e6d24d10418e374222df32cca3f96982309dd6f403": {
+      "signature": "53205c1238acf75520b0a5e6d24d10418e374222df32cca3f96982309dd6f403",
+      "alternativeSignatures": [
+        "f14f289485ad14804ffb8e349f230020ae5598e20c7caf76828a6f954030f5ea",
+        "d4d7a6c750fc7a9fd8283caa42d6557be95187a2313256bc60a1972bb21a1b90",
+        "4fa72edc2005440e327e3f246c993a13f4461a9b121806ed71d5a77f5a0dac18"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/cdt.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "a0e49719d5126ff032f14824be20d5988ce606ecf081d6bc11c0f2d7d3ef387f": {
+      "signature": "a0e49719d5126ff032f14824be20d5988ce606ecf081d6bc11c0f2d7d3ef387f",
+      "alternativeSignatures": [
+        "1ea881fb9929622d0b3b79dea0b7335ecb1fc59a4c18d20204dda84c070fb668",
+        "6be69b0b9f4adf43a246a51cfeea2c1b10866c207eb38740433452d7f9735dfb",
+        "d5ff4c8869a9cfddea6fd1dcf30d163bc2570cc9361ef0122737ed35a534ef70"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/cgraph.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "0e8dce609a405e719937972279da662069479ef74636a7a4f239030e35f9019e": {
+      "signature": "0e8dce609a405e719937972279da662069479ef74636a7a4f239030e35f9019e",
+      "alternativeSignatures": [
+        "cf6689071da6c0fae2686ce03e76055956cef1f99c359e4b6930d6f52c255b9d",
+        "c507e61d947853db57034dda041c1c03b4344a2207f4681d40f4ac8b8d5e3e1f",
+        "24371939d9a6979708208a113302b6155d9b2c5c3cb6b71cc58bbf9cacc36fc4"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/circo.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "05ca391502b00c21f2782d1a6b8803a89f2f7224025bda7058c946c0cb00f18b": {
+      "signature": "05ca391502b00c21f2782d1a6b8803a89f2f7224025bda7058c946c0cb00f18b",
+      "alternativeSignatures": [
+        "9d5f7b717a8f755da6f07747326b0f0dcc286d449b5f07be43258ca6a7637b4a",
+        "34247556a24bd6670ee5dd98f5b160e09e9dceb1654fe94dee951627f1397b4d",
+        "7610adfbabc3960ede9773bcc641cb705d80253c7c1864144b0b364894f341c6"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/diffimg.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "4b0140f4c3bbb951c6bf8d0fea00f8456a6262927579b19d483fb4e267c0b921": {
+      "signature": "4b0140f4c3bbb951c6bf8d0fea00f8456a6262927579b19d483fb4e267c0b921",
+      "alternativeSignatures": [
+        "d00209d65eac3f9781c37c6179ad9e86cf60d83c36014cddcf9b38fdd72d4a26",
+        "452a4abef0ae59c06813792f8256c645e1546a7f44c88e56d825bb205e4a3287",
+        "616ce9a5e886209e57b5477956a99c70d6d6712047d32f6dfbe9fab46fc6936a"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/dijkstra.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "cde62860db176c8a6b9bd0933020c5cdddeb6997330a2f4d07aa30ded2854880": {
+      "signature": "cde62860db176c8a6b9bd0933020c5cdddeb6997330a2f4d07aa30ded2854880",
+      "alternativeSignatures": [
+        "33676cbd508f60ff323930efd36e25586871a076022826c6676783f390ee5959",
+        "580c8433286209682371731c4f705223edbde2e0e34b15ad7656010140c0b97d",
+        "cdb498f750447b042766815a1a1b74275af726d986e16b9a43e53caad97badfb"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/dot.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "3a3a1f596b1d49ef22f70435e24d75f79f5cae3770c80868a0441a362b445dc0": {
+      "signature": "3a3a1f596b1d49ef22f70435e24d75f79f5cae3770c80868a0441a362b445dc0",
+      "alternativeSignatures": [
+        "7e334405e4b00240d6cccf862d3ef94f0efcb55ce529067b1d955e7071381913",
+        "3e96e54c4b3e03fd61087a062546bbbbebf56c90a07975480e8edec8d006259e",
+        "f5b7696b1633efefde750635d1fa9d96786199a64aa0148f5092d1ecc3bb0bbb"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/edgepaint.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "3c3ca167d2f02887af1604bd75e5e0c43b7963cd4626c487f32c4d589a2c98a6": {
+      "signature": "3c3ca167d2f02887af1604bd75e5e0c43b7963cd4626c487f32c4d589a2c98a6",
+      "alternativeSignatures": [
+        "71e8d41a21ce2bb8753506760045e833e8859d1a6cb2b938d8a3f86fae10607a",
+        "686b4b9733211c03dc1fc7c492462c2edb19089e385fb13a1f1c2e873f769209",
+        "6ee1fbe055134f5cb61132e98bde62a2990b22a6913ca8197c98acb758f077e5"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/expat.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "b8c9216814664cfad2af73ad4717a81627921f9f3705297bd43e3f754b7c9d37": {
+      "signature": "b8c9216814664cfad2af73ad4717a81627921f9f3705297bd43e3f754b7c9d37",
+      "alternativeSignatures": [
+        "129031807e7c457128cda1a2ff5477067e8de99aa0e9484952d049b373f7f3c8",
+        "7800415654b024e45707319752f8b3ba1a369d63babba037132284f3db41623a",
+        "482e63f003f1a766d331bfef51f7bb07b1f5319661b65c71f8bfe3a373bc98e1"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/fdp.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "a835f886e41dbac0482db57132cce12a460601d2c9e634b3f5c98f25c21f8117": {
+      "signature": "a835f886e41dbac0482db57132cce12a460601d2c9e634b3f5c98f25c21f8117",
+      "alternativeSignatures": [
+        "05d4f1f9929853849cd21f70b2a36b66dccacb6d20eff458f3611c552ea492f7",
+        "968b329517a80ea6814a92b09f9f50846b05a8c3bc4b7e1acab2e8337b36ba78",
+        "1078fc65fc441fedf359f2ed302f050b5a430be95c7223bbc36e288cab5c9bf1"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/fontconfig.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "153ba074ee473ca26a44c02172eeb615b885fd6134614a2168da8759bdedbc30": {
+      "signature": "153ba074ee473ca26a44c02172eeb615b885fd6134614a2168da8759bdedbc30",
+      "alternativeSignatures": [
+        "0232de80e3615936ba27fb24091cc4efb10ad286e59168f2eec2f2824824a5d0",
+        "7d794e63b6a76fd92e4d40a451935a41b4b4f0134e773d375d4baf3c8e4339f3",
+        "943593c3554cd7c506a0ad270b2e92e6bed4d695bc9ad19e0d3508df506522e0"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/fontconfig.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2009",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "4d8f044e78a93c0b98f226ea7836b3d5624983340730359037c46060e08cb380": {
+      "signature": "4d8f044e78a93c0b98f226ea7836b3d5624983340730359037c46060e08cb380",
+      "alternativeSignatures": [
+        "f4fe6bb9801d4bf0971b80bbc487a06fabf3bf7069b3d2fa2f6ecf87701d031d",
+        "d8662cbb462680e9c46c224c166761633cda62ba4b04d56d5b7be4772440deb7",
+        "6aa9b208f84b82aca3aa939052fef60d70b78cbd713bdbde699b0fee59e0aa2c"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gc.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "f4ccb43b162928b50415f513d7ddeed70e2a0085fefcb28cae22a4ef314a50a7": {
+      "signature": "f4ccb43b162928b50415f513d7ddeed70e2a0085fefcb28cae22a4ef314a50a7",
+      "alternativeSignatures": [
+        "c5463ee1268a5db47151a808b3c1706bda3efd8737811af345b35a98365f12b5",
+        "dcfb378a73dbbf6ea22b888345c7d3387880ec6a534aef2203f52734a1d658ad",
+        "c49c8365309f2da733c8e44381de4c58743d72d2c2b3ef3bd0e63d0c88c715e7"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/getopt.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "b952a875110e1869ab053383337dcc51b7e7204ac27babc608bd6599ceb19ba5": {
+      "signature": "b952a875110e1869ab053383337dcc51b7e7204ac27babc608bd6599ceb19ba5",
+      "alternativeSignatures": [
+        "97ab2006939dac7e46291c0a58d155645e33620a9ce2118ee7b59d01d480e787",
+        "6fcc4d9d5e40ff425e0f7fe34a0a74b178e301d26c0ce2125d7c55650f43e6af",
+        "cb62d65594319e3a894262cf9c3fedef474429499de9e156a0d839bc83fba77b"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/glib-2.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "28231fdc35e7c8887fd5dc1a04c0c7b44e36ab676fda3baf284188c26a213db0": {
+      "signature": "28231fdc35e7c8887fd5dc1a04c0c7b44e36ab676fda3baf284188c26a213db0",
+      "alternativeSignatures": [
+        "129f56cc6b4bee13eb78c3d963afc9c64bf30c9518b11968410661510dd7f81e",
+        "9a2da7c8cb64ae668a814ff569137e9aa211bc168d80d766f11907c34ebcbaf5",
+        "7eba85433dc98d784e738452e707b34fcbd890ed4ccde4208cdb57b10d764efd"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/glib-2.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2009",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "279f739ab38a117b816ef5930d0da4746406587e18ba9e0736932b29b6e490f1": {
+      "signature": "279f739ab38a117b816ef5930d0da4746406587e18ba9e0736932b29b6e490f1",
+      "alternativeSignatures": [
+        "1c88e3f4e83da9626a3f42dad52c0a5dfd3d9fd7ee27e5b6923ad8e85816e37b",
+        "0bdf1185c5ec25e6343459be0b1ac64d59b82c3c73c84f026f7fc5b08c69f322",
+        "488485e99bd8a245b830e127990de3d5285a582dc4c034e64cbfdd16d44640ea"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gml2gv.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "a14c087f21ebaa249913abb5c20ac7dd6173c9b6a04943dd5ea92de4611d2268": {
+      "signature": "a14c087f21ebaa249913abb5c20ac7dd6173c9b6a04943dd5ea92de4611d2268",
+      "alternativeSignatures": [
+        "594a52729825fac0c922cc838c1e52943b5192688746471c48c071ecbe1a11ba",
+        "46bc01928a077ab15b80a12c5884da67f9d2c6957288691fb2639b0a0542b60b",
+        "f918dfb38665f134f342bfac2a4ef14b650c3c09e6bf0f619f4d9a0f250affde"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gobject-2.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "267c3dd21c8bbffe5719be1a122906fd94fdb7ae248f6b0c71b4e54b24c6ab8c": {
+      "signature": "267c3dd21c8bbffe5719be1a122906fd94fdb7ae248f6b0c71b4e54b24c6ab8c",
+      "alternativeSignatures": [
+        "0604c2f3d10d5a09ee511628aa457ff8de6426e103edb8619a4990ad8fe6594f",
+        "a62dbe66d807d7a0a5788f3010e554878e0389d18188cd16c50d73ec7f300407",
+        "50c6fd6d2b9f8a0decf8c9e9995861e5b2282c8938f2fa8d85bab43323db49d2"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gobject-2.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2009",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "999b150d157e6ea66e9b56b6c4fc35b204673000d250625ecc574145b822d7f8": {
+      "signature": "999b150d157e6ea66e9b56b6c4fc35b204673000d250625ecc574145b822d7f8",
+      "alternativeSignatures": [
+        "88d8c1a88578a4a2d4d04c18af93199eebf711edd2935b347802dd9edb160448",
+        "6ed6a4eb983feda819c51ae19763e7cb41df841d589900e6d3c2797f9db1d057",
+        "49f14115527234456b1e53fdfa854efdbfdb752c47fceab8f3462a98c2e9e35a"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/graphml2gv.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "55637ea1392ffe2ce31120658740247dfc2037754ca0044a64c688feca98779f": {
+      "signature": "55637ea1392ffe2ce31120658740247dfc2037754ca0044a64c688feca98779f",
+      "alternativeSignatures": [
+        "6a6dedfd11d2f3b567b8cf364180c59ce3d017743b418b23cc8af9f343e4637e",
+        "76e3237bd6bfd7b140dc3397a16f0fb91f4b1ceeb30b5b3a0b95b13e93b44a3f",
+        "fa97e125b8fd233d669b19a48c3f982169349297d8fb7f773903f78855ab9c63"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gv2gml.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "a16cdf3ce0fe898c106a40cc042aa1c88f13d50dc4cacd74eed0ae50b05140f0": {
+      "signature": "a16cdf3ce0fe898c106a40cc042aa1c88f13d50dc4cacd74eed0ae50b05140f0",
+      "alternativeSignatures": [
+        "8d32f360f863ea53b604b4b5a23c5475f193e1e1dd321dd82399e0a866ac6ca6",
+        "3514f34f2caf2737a7a4276d86877a079cfcf752195d51e05d8c36920a949e81",
+        "ea350394ea1df4fb07f8632a795538b64ac670c170706f32a3344512dd4572a0"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvc.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "9b6ce83a1bcddf9194ac292d4a35ec7ce23060a389ace30d02f69583fcc554a6": {
+      "signature": "9b6ce83a1bcddf9194ac292d4a35ec7ce23060a389ace30d02f69583fcc554a6",
+      "alternativeSignatures": [
+        "b551f062ce97dce36e3a26c7b6824b07bbf095fbca6b7596e63da30cafcdf692",
+        "65e34fe04bf74a79bdff7010e575c1866ac0075add7b13ac0aff1dc4dab87c26",
+        "3ceaad91fd3b8fc4183c256413fe56e25e23f6428984d1795c95b4bf2282b263"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvcolor.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "a3791722138168efa3ef35c2e907370a4c98d22a51489a5862e8e015f9694560": {
+      "signature": "a3791722138168efa3ef35c2e907370a4c98d22a51489a5862e8e015f9694560",
+      "alternativeSignatures": [
+        "f22050a65792da64dc26c867260c5444f5bedc7f4fb107ec325a185a14d37886",
+        "7a97de0a6c3c0e6be7018264c0489ac865344a318f7691a0d5aeec83ff4a83df",
+        "e310d42c036f9bc52e6802c21e3daf04338faa3c8b08d0c0a99e9de1f7869c96"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvgen.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "5546c2cc416083ae823e2bbee337ec3de539f2dab8cb8db40cff81b6a66a40bc": {
+      "signature": "5546c2cc416083ae823e2bbee337ec3de539f2dab8cb8db40cff81b6a66a40bc",
+      "alternativeSignatures": [
+        "086fb568f340983b76829705ec42a0db1e7b3586804c26694690f4a2b0d83fa1",
+        "37f0006645e7b5ec101c3365ccb73e90ffd8d8deee866c362601f93469f74011",
+        "23cca2b5684811fdaf74b8f147e09f4eb8e9ddb49dc85f04f691a3ea9acdd519"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvmap.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "af3d40e1aba64b7c063443f9a05c5fec86671b7e6c71b85c0c82a01bf48d02af": {
+      "signature": "af3d40e1aba64b7c063443f9a05c5fec86671b7e6c71b85c0c82a01bf48d02af",
+      "alternativeSignatures": [
+        "1f634c9993216d58eb8068d44d9ae57a19d4cccbe7b901cb5f7956dcbd7f362c",
+        "5e3ffcbbb2b9c5c7f56dbee5f2a7566295743f8360f42cedf9454db0b4eae186",
+        "918b5cc62cb2d81884c8183793a4f5720f9125a26fe902001884a81c7a5d0f02"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvpack.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "ce6341071c642631b4e2885d70ee306acf69d15e2869de4a6a9f45f47e619ea5": {
+      "signature": "ce6341071c642631b4e2885d70ee306acf69d15e2869de4a6a9f45f47e619ea5",
+      "alternativeSignatures": [
+        "eaddd7cfea43ada01258c128dd3fa54cf6ad59eda7266dd91dd3092c03c50e31",
+        "983aced2f6b715edc1b04f89847b6f55876e8211a1a2ce29b87c32f4a066ef62",
+        "33f585c58a5240b45f40cfc5b4d7544acc86c018695dbcdf9cb4ed3f434d41b1"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvplugin_core.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "377a6a252e279cc413512878c6770752bb824761d4e098c82fdbbbe0c8042119": {
+      "signature": "377a6a252e279cc413512878c6770752bb824761d4e098c82fdbbbe0c8042119",
+      "alternativeSignatures": [
+        "dc6081e3a11420d96366cc55b41834c3df9454616503160fdaeaf9c0a42f6332",
+        "aaecf9bf14771616b099308272576152296a310e05ffa6c9df2d434b18e83e35",
+        "abf856eddc323b20a59336a30e29932cd63291ccdec670eaf47e3e41ee12dbd6"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvplugin_dot_layout.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "d19f5f781617d6543f4dd527ceb1235a2406a95fed5512306875abdc8748af32": {
+      "signature": "d19f5f781617d6543f4dd527ceb1235a2406a95fed5512306875abdc8748af32",
+      "alternativeSignatures": [
+        "90e61317b36c25efe5eb49618dd6d344c673a9231db962fce64e304c7c26aa06",
+        "410d302064d95051756959ec0dbe14db0f94dd14b5b45d7a5882e2205d7f2542",
+        "956506ed30cf92ac0c0a75f61357ad79d02a5add983760c5b85050a56459ee4f"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvplugin_gd.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "3b479d10e8cf2f97417a4b89cfae1af804a53de109ea45716aa5c1116b4597ba": {
+      "signature": "3b479d10e8cf2f97417a4b89cfae1af804a53de109ea45716aa5c1116b4597ba",
+      "alternativeSignatures": [
+        "8e5e2528754e7546a4c742f70cafde346224b0c6f807841c93e9feeb2cb55b86",
+        "07bffa6c1e123a10191345dd021010cf2b85201fabc000d078c126dd502e6baa",
+        "f84ee04120beb13c6fed36f361ce91b6b6dc721b01c384843e4c506799dd2cae"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvplugin_gdiplus.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "90cff87bc3064906cd8308fd923f8ccc6d7d54ec02e477404dbd112cd2e4c9e6": {
+      "signature": "90cff87bc3064906cd8308fd923f8ccc6d7d54ec02e477404dbd112cd2e4c9e6",
+      "alternativeSignatures": [
+        "71c853575d3e5ce6324bdee2681f8482e2495baa598d75df2937ca85fa0fb141",
+        "e1625cc544e693e974127cb960107877b6215453c5d784be39c16970f81b297f",
+        "d469435225fac7787a5b5c0c010b1b42efe538c5e6600f33a10a3e74e6b9a9f9"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvplugin_neato_layout.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "8ea8d3898ec5aead240bd256bbd0f68edc9c0d762d01b6a15958ec00a46c4928": {
+      "signature": "8ea8d3898ec5aead240bd256bbd0f68edc9c0d762d01b6a15958ec00a46c4928",
+      "alternativeSignatures": [
+        "4bc115d6b8b1cd75590fb9d74be66a6ff6d4d1e95a2fb590484080afe1fd1c7e",
+        "2572119ef7b5a59ea4ccd3219b4d26b8a9622d6234f53aa9a75a4cb4a1f71cd3",
+        "48cbded8127b4edfe88d3b1f26bc2e3c06031239b0272726291d710eaed043ba"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvplugin_pango.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "6f4ce90faded4d6f9f7cd5cb3efca958196c472861018b67b36a0a5ed242ec21": {
+      "signature": "6f4ce90faded4d6f9f7cd5cb3efca958196c472861018b67b36a0a5ed242ec21",
+      "alternativeSignatures": [
+        "2d4fed9e1011fcef303ba93315b33a72ca9cbd6d5034d9fc9a4d5c5983486251",
+        "5df40e229c90cf11ac5617f26c448b093ced821ae7450a98a95b6c62d801f536",
+        "cc6a8dc9d72f141fd05976afa28a86440821cec22adf7b7daf76f22e6b16d44b"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvpr.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "04d4481876abbf95a250fe2efa2ea186d4b83cb5e1cd04a4885ff537855cadae": {
+      "signature": "04d4481876abbf95a250fe2efa2ea186d4b83cb5e1cd04a4885ff537855cadae",
+      "alternativeSignatures": [
+        "dbbbafa245c5f511443b798dfb7df51a1f4ee928ea31dc628560b2e40fd0fcb0",
+        "191a3fb4990391a588deca75f57d68c030ef2bc1107a64e6b3d596e4456a7fb1",
+        "af93a5ff14926c9c223642ccfdfd84ce21d7ab59e019d1ada642886af921d223"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gvprlib.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "f8ac61ae3f8090c7cb7623355a0a01cf507dbad10cb4cbfb7ec3e563a24aa8c1": {
+      "signature": "f8ac61ae3f8090c7cb7623355a0a01cf507dbad10cb4cbfb7ec3e563a24aa8c1",
+      "alternativeSignatures": [
+        "9cf21acb44d75e585e4eb559a2e0e84cc1e4c34b74dcc1c2d5e3ef1b1570d847",
+        "a709c3ae88e5a830da3a9381879926c7aeee9ed202332ae93cee4f76c65b2e17",
+        "df0d3d202c92fa803d4f998ddf108d991bee2c18b7a4a74bb97843399bfce2c6"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/gxl2gv.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "617e1bf256da882a0860dd57ca74d1e555412556c61801347f8f9a78f7f8f175": {
+      "signature": "617e1bf256da882a0860dd57ca74d1e555412556c61801347f8f9a78f7f8f175",
+      "alternativeSignatures": [
+        "5872605f1207b3f78c3a1e05d44762b825d9e96545911dc59e4efbc6a65eb3a5",
+        "e700e15ebf4a48431a5f8623d6d34ba12ce7dc13d86cf371b94690c5894a382b",
+        "4cf1e1228c3cc946ed7e140779eda5776ccf4b2a8749ae7098f8f63e24ba4844"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/lab_gamut.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "afa427888cb78e3272f0c2e69efc8724a48ce153bafc3da35ec7c22e7a024522": {
+      "signature": "afa427888cb78e3272f0c2e69efc8724a48ce153bafc3da35ec7c22e7a024522",
+      "alternativeSignatures": [
+        "761ff4ad726122b036b14eef2178ac49c3af0043cfd59bdc532c750ddbb0f91d",
+        "8897ef856c5ee2bc8e460c255f08ff5466f32958eb1a1aadeb09d77a4280fd20",
+        "760378dca79a52cdbf7b15eb2895de39a68c18725431238f81245854528dd43e"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libatk-1.0-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2009",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "89cedf4008818f50b8575328815d3ce4fdb250c963f9f2cdafb90c3d8bc7fc1d": {
+      "signature": "89cedf4008818f50b8575328815d3ce4fdb250c963f9f2cdafb90c3d8bc7fc1d",
+      "alternativeSignatures": [
+        "94e0b923b4304872e754010e875a90a939300ed61e2c7c2e5fbbe20355cb514a",
+        "265a1a0aeaf0e0e9eee4222fd3a728710072bfc3bc556a1baf9441729aad0b68",
+        "c75945e32b6f8fe9fc470ec0e0aad872507c02d32322b07077eb504e47679774"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libatk-1.0-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2016",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "e87a22987cf54967e58a6c5dd00af142343562303c1814cfcafb9dc58f4ac2ae": {
+      "signature": "e87a22987cf54967e58a6c5dd00af142343562303c1814cfcafb9dc58f4ac2ae",
+      "alternativeSignatures": [
+        "2dcf720da5ec2a3605413b15ba0e92e4c01a73c1407751127ac9f5ddb0c26c57",
+        "4a364e7dc05f21fd70f0bb3a0b2989e88dd755de300091cff4ce8a62cec592c3",
+        "ecc72ad5b06e3beb6fa474d04eddf770bbf16d3587a83b824ecb53463cfcab17"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libatk-1.0-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2018",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "52ef3e87ea0d7f0a59e9b39549b51295a81017e55e9a7be32d2d816947aa1cbb": {
+      "signature": "52ef3e87ea0d7f0a59e9b39549b51295a81017e55e9a7be32d2d816947aa1cbb",
+      "alternativeSignatures": [
+        "bf812aa8bd46cbf2cc6a148dbb0d21a2ce93a308668a5b373848ece3758aafe5",
+        "88a8ad6d7b6a8f83fcff712fb16681a22b1646286b2a046fb4bac77334205fb1",
+        "64ec3aad05721b94ef00d153bd0e55e671329e439f925cfdbe5b3027a89aa5f7"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libexpat.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "70c802b68951359f87eb695cc0ee4e9725ee644d1ac03828eb2132e7bb65ff8a": {
+      "signature": "70c802b68951359f87eb695cc0ee4e9725ee644d1ac03828eb2132e7bb65ff8a",
+      "alternativeSignatures": [
+        "23fefa338c7466dee76963dee0e8dffa38b59e988cdb129e04d7ec92d1ff8f6b",
+        "a84395ce19c6f610e622f13c37ba9cb5001b969b1f0495fac1c606fcbdb2561c",
+        "54da5ae77800c91ba4ad4391db5fe0e66954dfccb1224b918cf741d4a522b6c7"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libgd.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "c397e566e39239adb38efba9ec1c933e16858d4fc6aefb0a6cdc9f50690820ca": {
+      "signature": "c397e566e39239adb38efba9ec1c933e16858d4fc6aefb0a6cdc9f50690820ca",
+      "alternativeSignatures": [
+        "1a0067905520be09e1006ce39cb36b9fc4429c8705d87830ffe8fec0116dea5f",
+        "08ac554d846eb6c3fefce44236dd7cd210e11accaee07496453aa945265ca884",
+        "779e604c458a23b0c0777ff4a64cad359e500a1238d9c7ce693e3d0ea82d21a7"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libgtk-win32-2.0-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2009",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "6fc80ed01737088f44b857b1d3c615cbb88bc283b290c25527df9397b6c1a14a": {
+      "signature": "6fc80ed01737088f44b857b1d3c615cbb88bc283b290c25527df9397b6c1a14a",
+      "alternativeSignatures": [
+        "fd4c867ef8545dca405948b7c502d3684cf218672b0c2c66c0e9d046506f3a2c",
+        "17997c622ffc0ade6be65051b6c1a4bd01aa1d8dc867d3233f14d624fd14b7ab",
+        "b88601673dd7f01d2dec3bffa726b85a4d4e49637241239c5393ea8fac45d114"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libgtk-win32-2.0-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2016",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "8ea24a8a2b54421462643de15e54a768ece56a4f2e5725f7a48a2d3516fcd6ec": {
+      "signature": "8ea24a8a2b54421462643de15e54a768ece56a4f2e5725f7a48a2d3516fcd6ec",
+      "alternativeSignatures": [
+        "c82ccf1a86938adc483c34f0e4bc5d156c7fa01cec3108e21bf65e3991491579",
+        "7ac8976c7e2c574b477da76b9e785b1a4df313b123404f115dd847edddeb34de",
+        "cdf792d7994ade64b2f7a1efea302a607e55885f08f5e29065b564cfc56e4db1"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libgtk-win32-2.0-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2018",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "92d665a498eabeb383f78d3e337878409a1aa45a26d2337ee855701d5da6577d": {
+      "signature": "92d665a498eabeb383f78d3e337878409a1aa45a26d2337ee855701d5da6577d",
+      "alternativeSignatures": [
+        "1a4939e4c14cee3b111f97502e2d918778433ff34a76f752c1e23b7be256e465",
+        "b16a996046c33ff609d1afb35adf14ab0942c57688cb7f1d505a9cb8e22a2247",
+        "91d88f18d4b8e74580ac68506bf7c242cb3e7290b2f3b8b35040da3f0b905497"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/libharfbuzz-0.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "49b6d6ca94fa96bb2cc68f614c2b57bc1065f1e004086b444b052d4138cdaefa": {
+      "signature": "49b6d6ca94fa96bb2cc68f614c2b57bc1065f1e004086b444b052d4138cdaefa",
+      "alternativeSignatures": [
+        "b5ca9159f7413e03681b7dc3afe64ec060e91934cb0cf46773cf746469dce979",
+        "16adb935ed972f967a054ebb4973d9f1bf0304ada12b42bd594c8ef8a0ccbbc9",
+        "aea0933b026cbe75f9293ddac0c0f6f0d059a851cecfdc62581e379b523ed413"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/mingle.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "3605525c7935f37d94865d449da1d18dcfa58b882e22bedbb8ac8f78c2b354f0": {
+      "signature": "3605525c7935f37d94865d449da1d18dcfa58b882e22bedbb8ac8f78c2b354f0",
+      "alternativeSignatures": [
+        "20aaf8a6aa33cd5d1d2ce57c2c6b3f5cec447624ed1eab64636698c88ef081a0",
+        "2b75f7ca8c201dd4baa33d530843e73986683b7b128f9547c6cd13affd7c70bc",
+        "c2fc33f9f57def0d17d1cc64ed71bc14285e89df0592724a771bdf5543f43eac"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/mm2gv.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "7ecb16887a8895f418e6cf1a0890175e1583173024571f6e25ea8c1f169fb5e1": {
+      "signature": "7ecb16887a8895f418e6cf1a0890175e1583173024571f6e25ea8c1f169fb5e1",
+      "alternativeSignatures": [
+        "a690a00751eeabbd6d8b402ecabe4a95f97c8ab0de924ff81f65245847e4353f",
+        "06aaf5b97533e2eacf85001e984834c94081ff810bf954fde03d61e3a1cd6506",
+        "bf2c47b8581aed53643f573e6afd33df0d652a97c946d25f76a2f57dfa28de01"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/neato.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "c5be7b5e473df963efad32f11e49a9be471d6d0ae835b7cda10fe82d47e5a623": {
+      "signature": "c5be7b5e473df963efad32f11e49a9be471d6d0ae835b7cda10fe82d47e5a623",
+      "alternativeSignatures": [
+        "39c27d19b23235a1984507cefd5ca05c668f6924981f5155ee88e2d532d9021a",
+        "336c88533904fa60e39d606892003971a7a04429806c1bbc8f393c4efbbb61d3",
+        "344c676985aa1c751aadb7d739ec99cd5083fa9f25d55ea15da1fe97e8fda530"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/nop.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "d9f2edd017044db77e3b03405b600783501ffb917301420634db79fbd25437ba": {
+      "signature": "d9f2edd017044db77e3b03405b600783501ffb917301420634db79fbd25437ba",
+      "alternativeSignatures": [
+        "ddd4532e648cea5a38b39535a15ee8c69bbde6a570400db81e26db996037af5a",
+        "b4e4e5cf9a4b783715fb5889e4ce763c0613ad42fa0f147aa71d9b59f26309f1",
+        "3b507667b1556f9f7552fb3cbac381f7419c05023a2082b3fd51333cd98a541e"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/osage.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "2ba5478ea1188f89c4394bfb7405f08fee21929bb07737df37f9bd6ab8545025": {
+      "signature": "2ba5478ea1188f89c4394bfb7405f08fee21929bb07737df37f9bd6ab8545025",
+      "alternativeSignatures": [
+        "c98590eeae2ceff21d281d182aff910ffac135eb0fe1b62ee4f59e01823fea49",
+        "9a0a83ff76b52c7c437e5e90367e7b0819963b0fa149e696d737141d93ed0723",
+        "60653c67d3a9756e41c213967e902fdc2da961cec11f6c4efc490daaa5d0bce9"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/pango-1.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "65778fdb5e2c7e86050cde0b1b4bc8eb2ec149954e7e6fd7e20705fcd0838e6e": {
+      "signature": "65778fdb5e2c7e86050cde0b1b4bc8eb2ec149954e7e6fd7e20705fcd0838e6e",
+      "alternativeSignatures": [
+        "fc8afc9ec42e3e3445e6294160c13cf34d5ca7886b6caf293b522414084170cd",
+        "cb44fe31b567fe49a9284dd5393986bf610924120e1205b842af169a8a68bf5b",
+        "3862881b80ff31350f468db8b37228ff6bcf9f99f3d41b91ebab0f530f515521"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/pango2-1.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "126f8f64218f4fe824f84ef08da4d385d4ddda79f88aff39503dc9109988a918": {
+      "signature": "126f8f64218f4fe824f84ef08da4d385d4ddda79f88aff39503dc9109988a918",
+      "alternativeSignatures": [
+        "197e3d58b93797aa979f67fccf7a23c63defff6e2ef07ecbfca9dca356bf3661",
+        "19c7b02b9f7988f1683ddb8a9daf056ed591026de0f37320bab4da5b146c8440",
+        "235f2290c2e42bd192caf86c751abc9f92897f1470055132aef82846fce4c28e"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/pangocairo-1.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "fe697136fa05ad9436e3152b72ff94da2ef32e3aad59a23e05acc6b9deca7338": {
+      "signature": "fe697136fa05ad9436e3152b72ff94da2ef32e3aad59a23e05acc6b9deca7338",
+      "alternativeSignatures": [
+        "0399db8d582e42140114efe630395fc6ffd200b078bd3284adfd5a25eafb826c",
+        "cfc933b43ba685f5c728233028d75150c07b5916be953442a661df11b877e41f",
+        "e52c04a93054938e946fd6e34a0104163dcabae09ae7d225ee262d5f5fa09494"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/pangoft2-1.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "c90b072e8d66c223ea547c2dcbbae188efc9e490f0d22a9bfc780f9d07b118ad": {
+      "signature": "c90b072e8d66c223ea547c2dcbbae188efc9e490f0d22a9bfc780f9d07b118ad",
+      "alternativeSignatures": [
+        "8071dba3003e3ba91b9d4c5e926bd3b4c7cfaf967e152715ea31ed0184b514e3",
+        "c89bcd4eec640569fe4d8921af4124f79f456603464d766606bca057f84b16e4",
+        "f82d06e93386f5c2b7e410c0ea83730b35d728bbdc2c2761cf422ef5f7dada8c"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/pangowin32-1.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "3a0626d7134e7666c2cd852df34e3447c7588ca75bce709199f193ed032378e0": {
+      "signature": "3a0626d7134e7666c2cd852df34e3447c7588ca75bce709199f193ed032378e0",
+      "alternativeSignatures": [
+        "e55e8d412acddcece0f2ba6dd3259f08eb8d2fbac19d7331f29966342027da14",
+        "1402316dbb9888218fa6d5f21ce6b74ed29c22c08b34cd67e9c35cffdc4a1bb2",
+        "e3eb4c834df3f15abd114be3a82408b4dcccc5d3e0e354ea61860a1cddd91a77"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/patchwork.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "7d3ca5765dafdcb3c0f047d55610510b2d5e1635534dfed3dbd5cd7dfb0c7865": {
+      "signature": "7d3ca5765dafdcb3c0f047d55610510b2d5e1635534dfed3dbd5cd7dfb0c7865",
+      "alternativeSignatures": [
+        "7b184aef79974379be88ce7b4088fb27607da9f70a823145860c5240bec39872",
+        "a4a1730253b28011fc40534b258ffaa075ec9076249f29490336ba053612d4d8",
+        "0aebaab154ef9358bb0e73b018df0db79c968b66d9d49ed31c912d8de2ba113a"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/Pathplan.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "f24e392dfae4a7a6d9ae35a319700d6fd927d4079401f0f7700c72fa41250e9d": {
+      "signature": "f24e392dfae4a7a6d9ae35a319700d6fd927d4079401f0f7700c72fa41250e9d",
+      "alternativeSignatures": [
+        "34391cb63553749e9a2b000385fda1cf6f69aa73d696e6abeb56b393bd885250",
+        "d00a0d2d3ac5a97506e54cfcdd4b70e541e53e4a73baee4cc4050cfecc181452",
+        "9fbe177d056e0d8bf01e3e75b694102a26ef8b2d56d4543cfe02400943d14e76"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/pixman-1.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "2ca111a350fd7ffcf774299e48f2ee3835fe5830e48101156c1d6ba13ee92fbd": {
+      "signature": "2ca111a350fd7ffcf774299e48f2ee3835fe5830e48101156c1d6ba13ee92fbd",
+      "alternativeSignatures": [
+        "c1db06fe85908f4992f0da02f56bba937934041354bc603ba56f8b6bfceaa998",
+        "393aa12a43a16b3667b4f665d07b9fb2eb56ce925007012f488cdf9cd3e8ef65",
+        "4db8255bb369329c0b61114a358b5e758e1c07f82062b7aa90b12b4089d4f710"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/prune.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "e5ad60643b1f92fe47a270ab985bae39bb89a5b4aa51ecda369eee2b6c48ce6e": {
+      "signature": "e5ad60643b1f92fe47a270ab985bae39bb89a5b4aa51ecda369eee2b6c48ce6e",
+      "alternativeSignatures": [
+        "c71f19c9b6b3ebb2a72b96f461dca2290c88a0c4c027e60aa568a5d78435a2f0",
+        "af27d6458f1641c5c04c31c48287efcce9bc2bde6bd0af994764744343278bbf",
+        "ce146830f0a55a1ba7f1eaf24b7208ba13b81c43e2872adfa5efeb074a28c32a"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/sccmap.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "43e1460b2c4937a031c7c57a01bedec1acd15b13dcc2cf67b48d0839fe26ff8f": {
+      "signature": "43e1460b2c4937a031c7c57a01bedec1acd15b13dcc2cf67b48d0839fe26ff8f",
+      "alternativeSignatures": [
+        "6a7e6e3d45112fb55e1a013179e36a98315ed9824d3aa7b5d585d8064d3bc45b",
+        "94da377edcfe82f5ca17d2c5a3772a2afc1ddbb8600c41efb25fa9e63fd74a70",
+        "63583dd783ea8b3775f47c11c2a0a04200cfd8044c7ac0fa35de0763f8c6b9a9"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/sfdp.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "f19b0ca7c9135e020d78ec018931d466778353df838292c58e8e49293d62a114": {
+      "signature": "f19b0ca7c9135e020d78ec018931d466778353df838292c58e8e49293d62a114",
+      "alternativeSignatures": [
+        "66c932d39395bdea87f553d21e7ff31ffabd453705cc5f4dffc1a7a27eec1f0b",
+        "6ffb4aa5b9494a5db90650c00f5d00435706f19eaf1d0d579ee1118e6d49f48a",
+        "c5912d53672f681b6e3368e64b9741d2b843e847c964eae3bfc0d6a54b1fecca"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/smyrna.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "9a9f24eea86895a0142639fd1257157d82d47171956d3b3d3d90d5906ec8762c": {
+      "signature": "9a9f24eea86895a0142639fd1257157d82d47171956d3b3d3d90d5906ec8762c",
+      "alternativeSignatures": [
+        "b9c67f2529379a8e46a240d62535454745ef9af39f29362109e4f986c8d9cc81",
+        "e35977d846833253a57b46adb034289848fa7a3663384e06b717b57fec607e2f",
+        "73828230a3f2844b4ea587395acbe554cb2326dcda0fe688b9424c16f34268f4"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/tred.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "e05b5e56af1589e54b557a73f2e6bfd5e4cb50b246ba8e18f6342f98813bf89e": {
+      "signature": "e05b5e56af1589e54b557a73f2e6bfd5e4cb50b246ba8e18f6342f98813bf89e",
+      "alternativeSignatures": [
+        "33e1c7a7480c08fc374692d1efea9519b5f2442b09db7cf6b45d9fbee5e52d8c",
+        "fc0d5338c56abf7b0eb15086df008e23c6ed95913e4da96ea5445b9d937fa26b",
+        "0699ff89443e7708ce3dd8c7aa169902e2a292ff011b10ebaca482da2eac5714"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/twopi.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "80e5d76784842d957b0b637de2eb03101ee3f0788cd7d067afabf63febc1264b": {
+      "signature": "80e5d76784842d957b0b637de2eb03101ee3f0788cd7d067afabf63febc1264b",
+      "alternativeSignatures": [
+        "ce4471f8662c857b64e0f4382fe3aaea278af60886fd1ea28c8cf5c2fe80c42f",
+        "27917de001717fb4ca28553bf1c16a538bef7607a0ee98270a5b9c51198dd228",
+        "7580600e12a1d22c9ee4de5425ab9ce1e42f2c82de1b2c8b132445d5f7647559"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/unflatten.exe",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    },
+    "542ed89e533d92ea0ba44b6fb05e9981c3e2902e947a95af6b3212d32e81d609": {
+      "signature": "542ed89e533d92ea0ba44b6fb05e9981c3e2902e947a95af6b3212d32e81d609",
+      "alternativeSignatures": [
+        "37cd1e6fff0c9254a3fb7918a5a24f338dd4d2e95bc5ea4a9fcf6fc430c70c5a",
+        "bd4c6d18cf5b0df56266dd63232f5bd19a32e03708ce14a0e2e09f6a6ca8bb37",
+        "0ec5ef216c536a4dd5aa0804a622d76a109bed8275d7c9f9959d9c17ebaae751"
+      ],
+      "target": "velopack-input/publish/NetUpgradePlanner/GraphViz/xdot.dll",
+      "uriBaseId": "file:///D:/a/_work/1/a/",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2026-05-26 20:11:31Z",
+      "expirationDate": "2026-11-12 20:13:02Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2026-05-26 20:13:02Z"
+    }
+  }
+}

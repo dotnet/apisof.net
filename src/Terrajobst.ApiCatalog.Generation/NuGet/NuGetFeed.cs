@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
@@ -9,6 +10,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
 using NuGet.Common;
+using NuGet.Configuration;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
@@ -20,6 +22,8 @@ namespace Terrajobst.ApiCatalog;
 
 public sealed class NuGetFeed
 {
+    private static readonly HttpClient s_httpClient = CreateHttpClient();
+
     public NuGetFeed(string feedUrl)
     {
         FeedUrl = feedUrl;
@@ -27,24 +31,29 @@ public sealed class NuGetFeed
 
     public string FeedUrl { get; }
 
+    private static HttpClient CreateHttpClient()
+    {
+        var handler = new HttpClientHandler
+        {
+            SslProtocols = SslProtocols.Tls12
+        };
+
+        return new HttpClient(handler, disposeHandler: true);
+    }
+
     public async Task<IReadOnlyList<PackageIdentity>> GetAllPackagesAsync(DateTimeOffset? since = null)
     {
         if (TryGetAzureDevOpsFeed(FeedUrl, out var organization, out var project, out var feed))
             return await GetAllPackagesFromAzureDevOpsFeedAsync(organization, project, feed);
 
-        var sourceRepository = Repository.Factory.GetCoreV3(FeedUrl);
+        var sourceRepository = GetSourceRepository();
         var serviceIndex = await sourceRepository.GetResourceAsync<ServiceIndexResourceV3>();
         var catalogIndexUrl = serviceIndex.GetServiceEntryUri("Catalog/3.0.0")?.ToString();
 
         if (catalogIndexUrl == null)
             throw new InvalidOperationException("This feed doesn't support enumeration");
 
-        var handler = new HttpClientHandler();
-        handler.SslProtocols = SslProtocols.Tls12;
-
-        using var httpClient = new HttpClient(handler);
-
-        var indexString = await httpClient.GetStringAsync(catalogIndexUrl);
+        var indexString = await s_httpClient.GetStringAsync(catalogIndexUrl);
         var index = JsonConvert.DeserializeObject<CatalogIndex>(indexString)!;
 
         // Find all pages in the catalog index.
@@ -63,7 +72,7 @@ public sealed class NuGetFeed
                 try
                 {
                     // Download the catalog page and deserialize it.
-                    var pageString = await httpClient.GetStringAsync(pageItem.Url);
+                    var pageString = await s_httpClient.GetStringAsync(pageItem.Url);
                     var page = JsonConvert.DeserializeObject<CatalogPage>(pageString)!;
 
                     foreach (var pageLeafItem in page.Items)
@@ -103,14 +112,12 @@ public sealed class NuGetFeed
     {
         var result = new List<PackageIdentity>();
 
-        var client = new HttpClient();
-
         var skip = 0;
 
         while (true)
         {
             var url = new Uri($"https://feeds.dev.azure.com/{organization}/{project}/_apis/packaging/Feeds/{feed}/packages?api-version=7.1&$skip={skip}", UriKind.Absolute);
-            var data = await client.GetStreamAsync(url);
+            using var data = await s_httpClient.GetStreamAsync(url);
             var document = JsonNode.Parse(data)!;
 
             var count = document["count"]!.GetValue<int>();
@@ -142,7 +149,7 @@ public sealed class NuGetFeed
         var logger = NullLogger.Instance;
         var cancellationToken = CancellationToken.None;
 
-        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var repository = GetSourceRepository();
         var resource = await repository.GetResourceAsync<MetadataResource>(cancellationToken);
         var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: includeUnlisted, cache, logger, cancellationToken);
 
@@ -155,7 +162,7 @@ public sealed class NuGetFeed
         var logger = NullLogger.Instance;
         var cancellationToken = CancellationToken.None;
 
-        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var repository = GetSourceRepository();
         var resource = await repository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
         if (resource is null)
             return null;
@@ -174,7 +181,7 @@ public sealed class NuGetFeed
         var logger = NullLogger.Instance;
         var cancellationToken = CancellationToken.None;
 
-        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var repository = GetSourceRepository();
         var resource = await repository.GetResourceAsync<IVulnerabilityInfoResource>(cancellationToken);
         if (resource is null)
             return Array.Empty<IReadOnlyDictionary<string, IReadOnlyList<PackageVulnerabilityInfo>>>();
@@ -189,7 +196,7 @@ public sealed class NuGetFeed
         var logger = NullLogger.Instance;
         var cancellationToken = CancellationToken.None;
 
-        var repository = Repository.Factory.GetCoreV3(FeedUrl);
+        var repository = GetSourceRepository();
         var resource = await repository.GetResourceAsync<MetadataResource>(cancellationToken);
         var versions = await resource.GetVersions(packageId, includePrerelease: true, includeUnlisted: true, cache, logger, cancellationToken);
         var bestMatch = versions.FindBestMatch(range, x => x);
@@ -202,25 +209,34 @@ public sealed class NuGetFeed
 
     public async Task<PackageArchiveReader> GetPackageAsync(PackageIdentity identity)
     {
-        var url = await GetPackageUrlAsync(identity);
+        var stream = new MemoryStream();
+        var success = await TryCopyPackageStreamAsync(identity, stream);
 
-        using var httpClient = new HttpClient();
-        var nupkgStream = await httpClient.GetStreamAsync(url);
-        return new PackageArchiveReader(nupkgStream);
+        if (!success)
+            throw new Exception($"Can't resolve package {identity.Id} {identity.Version}");
+
+        stream.Position = 0;
+        return new PackageArchiveReader(stream);
     }
 
     public async Task<bool> TryCopyPackageStreamAsync(PackageIdentity identity, Stream destination)
     {
-        var url = await GetPackageUrlAsync(identity);
+        var cache = NullSourceCacheContext.Instance;
+        var logger = NullLogger.Instance;
+        var cancellationToken = CancellationToken.None;
+        var repository = GetSourceRepository();
+        var resource = await repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
 
         var retryCount = 3;
     Retry:
         try
         {
-            using var httpClient = new HttpClient();
-            var nupkgStream = await httpClient.GetStreamAsync(url);
-            await nupkgStream.CopyToAsync(destination);
-            return true;
+            return await resource.CopyNupkgToStreamAsync(identity.Id,
+                                                         identity.Version,
+                                                         destination,
+                                                         cache,
+                                                         logger,
+                                                         cancellationToken);
         }
         catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
@@ -250,14 +266,216 @@ public sealed class NuGetFeed
         return $"{packageBaseAddress}{id}/{version}/{id}.{version}.nupkg";
     }
 
-    public Task<Dictionary<string, string[]>> GetOwnerMappingAsync()
+    public async Task<Dictionary<string, string[]>> GetOwnerMappingAsync()
     {
         if (FeedUrl != NuGetFeeds.NuGetOrg)
             throw new NotSupportedException("We can only retrieve owner information for nuget.org");
 
-        var httpClient = new HttpClient();
         var url = "https://nugetprodusncazuresearch.blob.core.windows.net/v3-azuresearch-017/owners/owners.v2.json";
-        return httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url)!;
+        var mapping = await s_httpClient.GetFromJsonAsync<Dictionary<string, string[]>>(url);
+        return mapping ?? new Dictionary<string, string[]>();
+    }
+
+    private SourceRepository GetSourceRepository()
+    {
+        var settings = LoadSettings();
+        var packageSourceProvider = new PackageSourceProvider(settings);
+        var sourceRepositoryProvider = new SourceRepositoryProvider(packageSourceProvider, Repository.Provider.GetCoreV3());
+
+        PackageSource? packageSource = null;
+
+        foreach (var repository in sourceRepositoryProvider.GetRepositories())
+        {
+            if (AreSameSource(repository.PackageSource.Source, FeedUrl))
+            {
+                packageSource = repository.PackageSource;
+                break;
+            }
+        }
+
+        packageSource ??= new PackageSource(FeedUrl);
+
+        if (TryGetAzureArtifactsCredential(packageSource.Source, out var username, out var password))
+        {
+            packageSource.Credentials = new PackageSourceCredential(packageSource.Name ?? packageSource.Source,
+                                                                    username,
+                                                                    password,
+                                                                    isPasswordClearText: true,
+                                                                    validAuthenticationTypesText: null);
+        }
+
+        return new SourceRepository(packageSource, Repository.Provider.GetCoreV3());
+    }
+
+    private static ISettings LoadSettings()
+    {
+        foreach (var candidate in GetSettingsRoots())
+        {
+            var configPath = Path.Combine(candidate, "nuget.config");
+            if (File.Exists(configPath))
+                return Settings.LoadSpecificSettings(candidate, "nuget.config");
+        }
+
+        return Settings.LoadDefaultSettings(root: null);
+    }
+
+    private static IEnumerable<string> GetSettingsRoots()
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in EnumerateRoots(Environment.CurrentDirectory))
+        {
+            if (seen.Add(root))
+                yield return root;
+
+            var srcRoot = Path.Combine(root, "src");
+            if (seen.Add(srcRoot))
+                yield return srcRoot;
+        }
+
+        foreach (var root in EnumerateRoots(AppContext.BaseDirectory))
+        {
+            if (seen.Add(root))
+                yield return root;
+
+            var srcRoot = Path.Combine(root, "src");
+            if (seen.Add(srcRoot))
+                yield return srcRoot;
+        }
+    }
+
+    private static IEnumerable<string> EnumerateRoots(string startPath)
+    {
+        var directory = new DirectoryInfo(startPath);
+
+        while (directory is not null)
+        {
+            yield return directory.FullName;
+            directory = directory.Parent;
+        }
+    }
+
+    // VSS_NUGET_EXTERNAL_FEED_ENDPOINTS format set by NuGetAuthenticate@1:
+    // {"endpointCredentials":[{"endpoint":"https://...","username":"user","password":"token"},...]}
+    private static bool TryGetCredentialFromPipelineEnv(string feedUrl,
+                                                        [MaybeNullWhen(false)] out string username,
+                                                        [MaybeNullWhen(false)] out string password)
+    {
+        username = default;
+        password = default;
+
+        var envValue = Environment.GetEnvironmentVariable("VSS_NUGET_EXTERNAL_FEED_ENDPOINTS");
+        if (string.IsNullOrWhiteSpace(envValue))
+            return false;
+
+        var document = JsonNode.Parse(envValue);
+        var endpoints = document?["endpointCredentials"]?.AsArray();
+        if (endpoints is null)
+            return false;
+
+        var normalizedFeed = feedUrl.TrimEnd('/');
+
+        foreach (var endpoint in endpoints)
+        {
+            var endpointUrl = endpoint?["endpoint"]?.GetValue<string>();
+            if (string.IsNullOrEmpty(endpointUrl))
+                continue;
+
+            if (!string.Equals(endpointUrl.TrimEnd('/'), normalizedFeed, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var endpointUsername = endpoint?["username"]?.GetValue<string>();
+            var endpointPassword = endpoint?["password"]?.GetValue<string>();
+
+            if (!string.IsNullOrWhiteSpace(endpointPassword))
+            {
+                username = string.IsNullOrWhiteSpace(endpointUsername) ? "VssSessionToken" : endpointUsername;
+                password = endpointPassword;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryGetAzureArtifactsCredential(string feedUrl,
+                                                       [MaybeNullWhen(false)] out string username,
+                                                       [MaybeNullWhen(false)] out string password)
+    {
+        // NuGetAuthenticate@1 in Azure Pipelines sets VSS_NUGET_EXTERNAL_FEED_ENDPOINTS with
+        // pre-configured credentials. Check this first so pipeline runs work without the
+        // credential provider binary being present on the agent.
+        if (TryGetCredentialFromPipelineEnv(feedUrl, out username, out password))
+            return true;
+
+        username = default;
+        password = default;
+
+        foreach (var providerPath in GetCredentialProviderPaths())
+        {
+            if (!File.Exists(providerPath))
+                continue;
+
+            var startInfo = new ProcessStartInfo(providerPath)
+            {
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            startInfo.ArgumentList.Add("-U");
+            startInfo.ArgumentList.Add(feedUrl);
+            startInfo.ArgumentList.Add("-N");
+            startInfo.ArgumentList.Add("-I");
+            startInfo.ArgumentList.Add("-V");
+            startInfo.ArgumentList.Add("Minimal");
+            startInfo.ArgumentList.Add("-F");
+            startInfo.ArgumentList.Add("Json");
+
+            using var process = Process.Start(startInfo);
+            if (process is null)
+                continue;
+
+            var output = process.StandardOutput.ReadToEnd();
+            _ = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(output))
+                continue;
+
+            var document = JsonNode.Parse(output);
+            var providerUsername = document?["Username"]?.GetValue<string>();
+            var providerPassword = document?["Password"]?.GetValue<string>();
+
+            if (!string.IsNullOrWhiteSpace(providerUsername) && !string.IsNullOrWhiteSpace(providerPassword))
+            {
+                username = providerUsername;
+                password = providerPassword;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static IEnumerable<string> GetCredentialProviderPaths()
+    {
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+        yield return Path.Combine(userProfile, ".nuget", "plugins", "netfx", "CredentialProvider.Microsoft", "CredentialProvider.Microsoft.exe");
+        yield return Path.Combine(userProfile, ".nuget", "plugins", "netcore", "CredentialProvider.Microsoft", "CredentialProvider.Microsoft.exe");
+    }
+
+    private static bool AreSameSource(string left, string right)
+    {
+        if (Uri.TryCreate(left, UriKind.Absolute, out var leftUri) &&
+            Uri.TryCreate(right, UriKind.Absolute, out var rightUri))
+        {
+            return string.Equals(leftUri.AbsoluteUri.TrimEnd('/'), rightUri.AbsoluteUri.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
+        }
+
+        return string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool TryGetAzureDevOpsFeed(string url,

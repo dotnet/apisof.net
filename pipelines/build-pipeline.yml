@@ -8,9 +8,15 @@ trigger:
       - "*"
   paths:
     include:
-      - pipelines/**
+      - pipelines/build-pipeline.yml
       - src/apisof.net/**
       - src/Terrajobst.ApiCatalog/**
+      - src/Terrajobst.ApiCatalog.SuffixTree/**
+      - src/Directory.Build.props
+      - src/Directory.Build.targets
+      - src/Directory.Packages.props
+      - src/nuget.config
+      - src/version.json
     exclude:
       - .gitignore
       - .github/*
@@ -51,13 +57,14 @@ extends:
                   artifactName: apis-of-dotnet-drop
             steps:
               - checkout: self
-              - task: UseDotNet@2
-                displayName: Use .NET 8 SDK
-                inputs:
-                  version: 8.x
-                  includePreviewVersions: true
               - task: NuGetAuthenticate@1
-                displayName: "NuGet Authenticate"
+                displayName: "Authenticate with NuGet feeds"
+              - task: UseDotNet@2
+                displayName: Use .NET 10 SDK
+                inputs:
+                  packageType: sdk
+                  version: 10.x
+                  includePreviewVersions: true
               - script: |
                   cd src/apisof.net
                   dotnet clean

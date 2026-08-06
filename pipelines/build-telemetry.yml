@@ -45,11 +45,11 @@ extends:
             steps:
               - checkout: self
               - task: UseDotNet@2
-                displayName: Use .NET 8 SDK
+                displayName: Use .NET 10 SDK
                 inputs:
-                  version: 8.x
-              - task: NuGetAuthenticate@1
-                displayName: "NuGet Authenticate"
+                  packageType: sdk
+                  version: 10.x
+                  includePreviewVersions: true
               - script: |
                   dotnet publish src/NetUpgradePlannerTelemetry/NetUpgradePlannerTelemetry.csproj -o "$(Build.ArtifactStagingDirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: Publish Function

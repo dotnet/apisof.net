@@ -1,0 +1,51 @@
+parameters:
+  - name: projectPath
+    type: string
+    default: src/NetUpgradePlanner
+steps:
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - task: UseDotNet@2
+    displayName: "Use .NET 10 SDK"
+    inputs:
+      packageType: sdk
+      version: 10.x
+      includePreviewVersions: true
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      
+      # Use Build.BuildId for versioning to ensure monotonically increasing versions
+      $buildId = "$(Build.BuildId)"
+      $gitHash = "$(Build.SourceVersion)".Substring(0, 10)
+      $version = "0.1.$buildId+$gitHash"
+
+      Write-Host "Computed Version: $version"
+      
+      Write-Host "##vso[task.setvariable variable=PlannerSemVer]$version"
+    displayName: "Set build version (using Build.BuildId)"
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $publishDest = "$(Build.ArtifactStagingDirectory)/velopack-input/publish/NetUpgradePlanner"
+      dotnet publish "${{ parameters.projectPath }}" `
+        -o $publishDest `
+        /p:SourceRevisionId=$(Build.SourceVersion)
+    displayName: "dotnet publish"
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $version = $env:PlannerSemVer
+
+      if ([string]::IsNullOrWhiteSpace($version)) {
+        throw "Build version is empty. Ensure the 'Set build version' step executed successfully."
+      }
+
+      if ($version -match '^\$\(') {
+        throw "Build version was not expanded (got literal '$version'). Ensure pipeline variables are properly set."
+      }
+
+      $inputRoot = "$(Build.ArtifactStagingDirectory)/velopack-input"
+      New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
+      Set-Content -Path (Join-Path $inputRoot "planner-version.txt") -Value $version -NoNewline
+      Copy-Item -Path "$(Build.SourcesDirectory)/src/nuget.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
+    displayName: "Prepare velopack inputs"
+    env:
+      PlannerSemVer: $(PlannerSemVer)

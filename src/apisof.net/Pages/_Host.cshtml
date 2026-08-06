@@ -16,8 +16,11 @@
     <link rel="stylesheet" media="(prefers-color-scheme: light)" href="~/css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="~/lib/forevolve/bootstrap-dark/dist/css/bootstrap-dark.min.css" />
     <link href="css/site.css" rel="stylesheet" />
+    <script src="https://consentdeliveryfd.azurefd.net/mscc/lib/v2/wcp-consent.js"></script>
 </head>
 <body>
+    <div id="cookie-banner"></div>
+
     <app>
         <component type="typeof(App)" render-mode="ServerPrerendered" />
     </app>
@@ -36,44 +39,6 @@
     <script src="_framework/blazor.server.js"></script>
     <script src="~/lib/jquery/jquery.min.js"></script>
     <script src="~/lib/twitter-bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script type="text/javascript">
-        
-        function scrollIntoMainContent(){
-             var mainContent = document.getElementById("main-content");
-                if (mainContent) {
-                    mainContent.scrollIntoView({ behavior: "smooth" });
-                    mainContent.focus();
-                }
-        }
-
-        var observer = new MutationObserver(function (mutations, observer) {
-            $('[data-toggle="popover"]').popover({
-                placement: 'top',
-                trigger: 'hover',
-                boundary: 'body'
-            });
-            $('[data-toggle="popover"]').on('click', function () {
-                $('[data-toggle="popover"]').popover('dispose');
-            });
-            $('.search-result-row.selected').each(function () {
-                this.scrollIntoView({block: "nearest"});
-            });
-            $("#skipToMain").on('keydown', function(e){
-                if (e.key === "Enter" || e.key === " ") {
-                    scrollIntoMainContent();
-                    e.preventDefault();
-                }
-            });
-            $("#skipToMain").on('click', function(e){
-               scrollIntoMainContent();
-               e.preventDefault();
-            });
-        });
-        observer.observe(document, {
-            subtree: true,
-            childList: true,
-            attributes: true
-        });
-    </script>
+    <script src="~/js/site.js"></script>
 </body>
 </html>

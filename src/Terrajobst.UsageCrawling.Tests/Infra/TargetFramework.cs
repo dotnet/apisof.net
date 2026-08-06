@@ -2,6 +2,7 @@
 
 public enum TargetFramework
 {
+    Net10,
     Net80,
     Net472,
     NetStandard20,

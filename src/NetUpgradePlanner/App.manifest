@@ -9,9 +9,6 @@
     </security>
   </trustInfo>
 
-  <!-- For Squirrel -->
-  <SquirrelAwareVersion xmlns="urn:schema-squirrel-com:asm.v1">1</SquirrelAwareVersion>
-
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
       <!-- A list of the Windows versions that this application has been tested on
@@ -44,7 +41,6 @@
 
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
-      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
       <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
     </windowsSettings>
   </application>

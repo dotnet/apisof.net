@@ -1,0 +1,82 @@
+trigger: none
+
+name: $(Date:yyyyMMdd).$(Rev:r)
+
+schedules:
+  - cron: "00 09,21 * * *" # At 09:00 and 21:00 UTC daily (avoids 00:00-08:00 catalog window)
+    displayName: "Release usage every 12 hours (09:00/21:00 UTC)"
+    branches:
+      include:
+        - main
+    always: true
+
+resources:
+  pipelines:
+    - pipeline: "gen-usage"
+      project: "OnlineServices"
+      source: 'dev-comm-partners\builds\gen-usage'
+      trigger:
+        branches:
+          include:
+            - main
+  repositories:
+    - repository: 1ESPipelineTemplates
+      type: git
+      name: 1ESPipelineTemplates/1ESPipelineTemplates
+      ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
+      os: windows
+    stages:
+      - stage: Dev
+        displayName: Run in Dev
+        jobs:
+          - job: Job_1
+            displayName: Generate Usage (Dev)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
+            templateContext:
+              type: releaseJob
+              isProduction: false
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-usage"
+                  artifactName: "gen-usage-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-usage.yml@self
+                parameters:
+                  BuildType: "dev"
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+
+      - stage: Production
+        displayName: Run in Production
+        jobs:
+          - job: Job_1
+            displayName: Generate Usage (Prod)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlProd)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretProd)"
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-usage"
+                  artifactName: "gen-usage-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-usage.yml@self
+                parameters:
+                  BuildType: "prod"
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"

@@ -1,0 +1,97 @@
+parameters:
+  - name: azureSubscriptionConnection
+    type: string
+  - name: storageAccountName
+    type: string
+
+steps:
+  - task: NuGetAuthenticate@1
+    displayName: "NuGet Authenticate"
+  - task: UseDotNet@2
+    displayName: "Use .NET 10"
+    inputs:
+      packageType: sdk
+      version: 10.x
+      includePreviewVersions: true
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $config = "$(Pipeline.Workspace)/velopack-input/nuget.config"
+      dotnet tool update -g vpk --configfile $config
+      if ($LASTEXITCODE -ne 0) {
+        dotnet tool install -g vpk --configfile $config
+      }
+    displayName: "Install vpk"
+  - task: AzureCLI@2
+    displayName: "Download existing velopack releases"
+    inputs:
+      azureSubscription: "${{ parameters.azureSubscriptionConnection }}"
+      scriptType: "pscore"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        New-Item -ItemType Directory -Force -Path "$(Pipeline.Workspace)/velopack-release" | Out-Null
+        az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "*.nupkg"
+        az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "releases.*.json"
+  - pwsh: |
+      $ErrorActionPreference = 'Stop'
+      $releaseDir = "$(Pipeline.Workspace)/velopack-release"
+      $publishDir = "$(Pipeline.Workspace)/velopack-input/publish/NetUpgradePlanner"
+      $versionFile = "$(Pipeline.Workspace)/velopack-input/planner-version.txt"
+
+      if (-not (Test-Path $versionFile)) {
+        throw "Version file does not exist at '$versionFile'."
+      }
+
+      $version = (Get-Content -Path $versionFile -Raw).Trim()
+
+      if ([string]::IsNullOrWhiteSpace($version)) {
+        throw "Planner version is empty in '$versionFile'."
+      }
+
+      if (-not (Test-Path $publishDir)) {
+        throw "Publish directory does not exist at '$publishDir'."
+      }
+
+      Set-Location $publishDir
+
+      $existing = Get-ChildItem -Path $releaseDir -Filter "NetUpgradePlanner-$version-full.nupkg" -ErrorAction SilentlyContinue
+
+      if ($existing) {
+        Write-Host "Version $version already exists in velopack release feed; skipping pack to avoid 409 conflict."
+        Write-Host "##vso[task.setvariable variable=PlannerVersionExists]true"
+        Write-Host "##vso[task.setvariable variable=PlannerVersion]$version"
+      }
+      else {
+        Write-Host "Attempting to package version $version..."
+        if (-not (Get-Command vpk -ErrorAction SilentlyContinue)) {
+          throw "vpk tool is not available. Ensure it is installed and in the PATH."
+        }
+        try {
+          vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net8-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
+          if ($LASTEXITCODE -ne 0) {
+            throw "vpk pack failed with exit code $LASTEXITCODE."
+          }
+
+          Write-Host "Successfully packaged version $version"
+          Write-Host "##vso[task.setvariable variable=PlannerVersionExists]false"
+        }
+        catch {
+          if ($_ -match "equal or greater" -or $_ -match "409") {
+            Write-Host "Version $version already exists in release channel; skipping to avoid conflict."
+            Write-Host "##vso[task.setvariable variable=PlannerVersionExists]true"
+          }
+          else {
+            throw $_
+          }
+        }
+        Write-Host "##vso[task.setvariable variable=PlannerVersion]$version"
+      }
+    displayName: "vpk pack"
+  - task: AzureCLI@2
+    displayName: "Upload release to Azure Storage"
+    condition: and(succeeded(), ne(variables['PlannerVersionExists'], 'true'))
+    inputs:
+      azureSubscription: "${{ parameters.azureSubscriptionConnection }}"
+      scriptType: "pscore"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        az storage blob upload-batch --destination squirrel --source "$(Pipeline.Workspace)/velopack-release" --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite

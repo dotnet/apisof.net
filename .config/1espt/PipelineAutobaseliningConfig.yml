@@ -1,0 +1,67 @@
+## DO NOT MODIFY THIS FILE MANUALLY. This is part of auto-baselining from 1ES Pipeline Templates. Go to [https://aka.ms/1espt-autobaselining] for more details.
+
+pipelines:
+  27559:
+    retail:
+      source:
+        eslint:
+          lastModifiedDate: 2026-05-11
+        psscriptanalyzer:
+          lastModifiedDate: 2026-05-11
+        armory:
+          lastModifiedDate: 2026-05-11
+        accessibilityinsights:
+          lastModifiedDate: 2025-10-30
+      binary:
+        binskim:
+          lastModifiedDate: 2026-05-11
+        spotbugs:
+          lastModifiedDate: 2026-05-11
+  27761:
+    retail:
+      source:
+        eslint:
+          lastModifiedDate: 2026-05-21
+        psscriptanalyzer:
+          lastModifiedDate: 2026-05-21
+        armory:
+          lastModifiedDate: 2026-05-21
+        accessibilityinsights:
+          lastModifiedDate: 2026-03-12
+      binary:
+        binskim:
+          lastModifiedDate: 2026-05-21
+        spotbugs:
+          lastModifiedDate: 2026-05-21
+  27759:
+    retail:
+      source:
+        eslint:
+          lastModifiedDate: 2026-05-23
+        psscriptanalyzer:
+          lastModifiedDate: 2026-05-23
+        armory:
+          lastModifiedDate: 2026-05-23
+        accessibilityinsights:
+          lastModifiedDate: 2026-05-23
+      binary:
+        binskim:
+          lastModifiedDate: 2026-05-23
+        spotbugs:
+          lastModifiedDate: 2026-05-23
+  27758:
+    retail:
+      source:
+        eslint:
+          lastModifiedDate: 2026-05-26
+        psscriptanalyzer:
+          lastModifiedDate: 2026-05-26
+        armory:
+          lastModifiedDate: 2026-05-26
+        accessibilityinsights:
+          lastModifiedDate: 2026-05-26
+      binary:
+        binskim:
+          lastModifiedDate: 2026-05-26
+        spotbugs:
+          lastModifiedDate: 2026-05-26
