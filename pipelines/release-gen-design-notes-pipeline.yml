@@ -68,8 +68,46 @@ extends:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrlDev)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretDev)
 
+      - stage: DR
+        displayName: Run in DR
+        dependsOn: Dev
+        jobs:
+          - job: Job_1
+            displayName: Generate Design Notes (DR)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-design-notes"
+                  artifactName: "gen-design-notes-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-design-notes-drop"
+            steps:
+              - task: UseDotNet@2
+                displayName: "Install .NET 10"
+                inputs:
+                  packageType: sdk
+                  version: 10.x
+                  includePreviewVersions: true
+              - task: AzureCLI@2
+                displayName: "Run GenDesignNotes (DR)"
+                inputs:
+                  azureSubscription: "$(AzureSubscriptionConnectionDR)"
+                  scriptType: "pscore"
+                  scriptLocation: "inlineScript"
+                  addSpnToEnvironment: true
+                  inlineScript: |
+                    Set-Location "$(Pipeline.Workspace)/gen-design-notes-drop"
+                    dotnet GenDesignNotes.dll
+                env:
+                  AzureStorageServiceUrl: $(AzureStorageServiceUrlDR)
+                  ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretDR)
+
       - stage: Production
         displayName: Run in Production
+        dependsOn: DR
         jobs:
           - job: Job_1
             displayName: Generate Design Notes (Prod)
