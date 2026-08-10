@@ -36,28 +36,28 @@ extends:
       name: VSEngSS-Microbuild2022-1ES
       os: windows
     stages:
-      - stage: Dev
-        displayName: Run in Dev
-        jobs:
-          - job: Job_1
-            displayName: Generate Catalog (Dev)
-            condition: succeeded()
-            timeoutInMinutes: 0
-            variables:
-              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
-              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
-            templateContext:
-              type: releaseJob
-              isProduction: false
-              inputs:
-                - input: pipelineArtifact
-                  pipeline: "gen-catalog"
-                  artifactName: "gen-catalog-drop"
-                  targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
-            steps:
-              - template: /pipelines/templates/steps-gen-catalog-run.yml@self
-                parameters:
-                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+      # - stage: Dev
+      #   displayName: Run in Dev
+      #   jobs:
+      #     - job: Job_1
+      #       displayName: Generate Catalog (Dev)
+      #       condition: succeeded()
+      #       timeoutInMinutes: 0
+      #       variables:
+      #         AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+      #         ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
+      #       templateContext:
+      #         type: releaseJob
+      #         isProduction: false
+      #         inputs:
+      #           - input: pipelineArtifact
+      #             pipeline: "gen-catalog"
+      #             artifactName: "gen-catalog-drop"
+      #             targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
+      #       steps:
+      #         - template: /pipelines/templates/steps-gen-catalog-run.yml@self
+      #           parameters:
+      #             AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
 
       - stage: DR
         displayName: Run in DR
