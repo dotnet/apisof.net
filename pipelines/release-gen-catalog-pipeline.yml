@@ -61,7 +61,7 @@ extends:
 
       - stage: DR
         displayName: Run in DR
-        dependsOn: Dev
+        # dependsOn: Dev
         jobs:
           - job: Job_1
             displayName: Generate Catalog (DR)
