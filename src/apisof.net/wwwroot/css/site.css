@@ -58,7 +58,7 @@
     background-color: var(--dotnet-surface-subtle);
 }
 
-    .page-shell.is-error-page > hr,
+.page-shell.is-error-page > hr,
 .page-shell.is-error-page > .container-fluid[role="complementary"] {
     display: none;
 }
@@ -319,14 +319,6 @@ a:visited {
     color: #19587D
 }
 
-.syntax-view .reference a {
-    color: black;
-}
-
-.syntax-view .reference {
-    color: black;
-}
-
 .syntax-view .reference-current {
     font-weight: 800
 }
@@ -387,13 +379,6 @@ a:visited {
         color: rgb(184, 215, 163);
     }
 
-    .syntax-view .reference a {
-        color: rgb(220, 220, 220);
-    }
-
-    .syntax-view .reference {
-        color: rgb(220, 220, 220);
-    }
 }
 
 /* Section Row */
@@ -403,12 +388,6 @@ a:visited {
 }
 
 @media (prefers-color-scheme: dark) {
-    a,
-    a:link,
-    a:visited {
-        color: var(--dotnet-catalog-link-dark-color);
-    }
-
     .btn-outline-secondary {
         color: #F7F7F7;
         border-color: #676E76;
