@@ -33,33 +33,33 @@ extends:
       image: 1ESPT-Windows2022
       os: windows
     stages:
-      # - stage: Dev
-      #   displayName: Run in Dev
-      #   jobs:
-      #     - job: Job_1
-      #       displayName: Generate Usage (Dev)
-      #       condition: succeeded()
-      #       timeoutInMinutes: 0
-      #       variables:
-      #         AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
-      #         ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
-      #       templateContext:
-      #         type: releaseJob
-      #         isProduction: false
-      #         inputs:
-      #           - input: pipelineArtifact
-      #             pipeline: "gen-usage"
-      #             artifactName: "gen-usage-drop"
-      #             targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
-      #       steps:
-      #         - template: /pipelines/templates/steps-gen-usage.yml@self
-      #           parameters:
-      #             BuildType: "dev"
-      #             AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+      - stage: Dev
+        displayName: Run in Dev
+        jobs:
+          - job: Job_1
+            displayName: Generate Usage (Dev)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
+            templateContext:
+              type: releaseJob
+              isProduction: false
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-usage"
+                  artifactName: "gen-usage-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-usage.yml@self
+                parameters:
+                  BuildType: "dev"
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
 
       - stage: DR
         displayName: Run in DR
-        # dependsOn: Dev
+        dependsOn: Dev
         jobs:
           - job: Job_1
             displayName: Generate Usage (DR)
@@ -79,7 +79,6 @@ extends:
             steps:
               - template: /pipelines/templates/steps-gen-usage.yml@self
                 parameters:
-                  BuildType: "dr"
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDR)"
 
       - stage: Production
