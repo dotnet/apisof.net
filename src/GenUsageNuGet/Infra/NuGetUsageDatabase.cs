@@ -23,7 +23,7 @@ internal sealed class NuGetUsageDatabase : UsageDatabase<PackageIdentity>
     {
         ThrowIfNullOrEmpty(referenceIdentifier);
 
-        var indexOfSlash = referenceIdentifier.IndexOf('/');
+        var indexOfSlash = referenceIdentifier.LastIndexOf('/');
         if (indexOfSlash < 0)
             throw new FormatException();
 

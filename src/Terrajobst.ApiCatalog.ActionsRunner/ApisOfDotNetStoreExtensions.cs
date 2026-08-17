@@ -1,5 +1,8 @@
 using System.IO.Compression;
 
+using Azure;
+using Azure.Storage.Blobs.Models;
+
 namespace Terrajobst.ApiCatalog.ActionsRunner;
 
 public static class ApisOfDotNetStoreExtensions
@@ -25,9 +28,18 @@ public static class ApisOfDotNetStoreExtensions
         await store.UploadAsync("catalog", "suffixtree.dat.deflate", compressedFileName);
     }
 
-    public static async Task DownloadNuGetUsageDatabaseAsync(this ApisOfDotNetStore store, string fileName)
+    public static async Task<bool> DownloadNuGetUsageDatabaseAsync(this ApisOfDotNetStore store, string fileName)
     {
-        await store.DownloadToAsync("usage", "usages-nuget.db", fileName);
+        try
+        {
+            await store.DownloadToAsync("usage", "usages-nuget.db", fileName);
+            return true;
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404 &&
+                                                ex.ErrorCode == BlobErrorCode.BlobNotFound.ToString())
+        {
+            return false;
+        }
     }
 
     public static async Task UploadNuGetUsageDatabaseAsync(this ApisOfDotNetStore store, string fileName)
@@ -42,9 +54,17 @@ public static class ApisOfDotNetStoreExtensions
 
     public static async Task<(bool, DateTimeOffset?)> DownloadPlannerUsageDatabaseAsync(this ApisOfDotNetStore store, string fileName)
     {
-        await store.DownloadToAsync("usage", "usages-planner.db", fileName);
-        var timestamp = await store.GetTimestampAsync("usage", "usages-planner.db");
-        return (true, timestamp);
+        try
+        {
+            await store.DownloadToAsync("usage", "usages-planner.db", fileName);
+            var timestamp = await store.GetTimestampAsync("usage", "usages-planner.db");
+            return (true, timestamp);
+        }
+        catch (RequestFailedException ex) when (ex.Status == 404 &&
+                                                ex.ErrorCode == BlobErrorCode.BlobNotFound.ToString())
+        {
+            return (false, null);
+        }
     }
 
     public static async Task UploadPlannerUsageDatabaseAsync(this ApisOfDotNetStore store, string fileName, DateTimeOffset indexTimestamp)
