@@ -1,12 +1,9 @@
 ﻿using NuGet.Versioning;
-
+using Terrajobst.ApiCatalog.PackManifest.Models;
 var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
 if (string.IsNullOrEmpty(dotnetRoot))
     dotnetRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"dotnet");
 var dumpPackManifest = new DumpPackManifest();
-// Console.WriteLine("//");
-// Console.WriteLine("// Built-in Packs");
-// Console.WriteLine("//");
 
 foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
 {
@@ -14,7 +11,6 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
     {
         SdkVersion = $".NET SDK {version}"
     };
-    // Console.WriteLine($"// .NET SDK {version}");
 
     var references = KnownFrameworkReference.Load(sdkDirectory);
 
@@ -22,7 +18,6 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
                                              .OrderBy(g => g.Key.Framework)
                                              .ThenBy(g => g.Key.Version))
     {
-        // Console.WriteLine($"// {frameworkGroup.Key.GetShortFolderName()}");
         var frameworkReferenceContent = new FrameworkReferenceContent
         {
             TargetFramework = frameworkGroup.Key.GetShortFolderName()
@@ -31,7 +26,6 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
                                                 .OrderBy(p => p.Key))
         {
             var pack = packGroup.MaxBy(p => p.TargetingPackVersion)!;
-            // Console.WriteLine($"{pack.TargetingPackName}, {pack.TargetingPackVersion}");
             var frameworkReferencePack = new FrameworkReferencePack
             {
                 PackName = pack.TargetingPackName,
@@ -57,15 +51,9 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
             Versions = versionList.Split(", ").ToList()
         };
         builtInManifest.PlatformVersions.Add(platformVersion);
-        
-        // Console.WriteLine($"{platform}: {versionList}");
     }
     dumpPackManifest.BuiltInPackManifests.Add(builtInManifest);
 }
-
-// Console.WriteLine("//");
-// Console.WriteLine("// Workload Packs");
-// Console.WriteLine("//");
 
 var manifestsRoot = Path.Join(dotnetRoot, "sdk-manifests");
 var packsRoot = Path.Join(dotnetRoot, "packs");
@@ -80,8 +68,6 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
     {
         DotNetVersion = $"net{version.Major}.{version.Minor}"
     };
-
-    // Console.WriteLine($"// net{version.Major}.{version.Minor}");
 
     var environment = await WorkloadEnvironment.LoadAsync(versionDirectory);
 
@@ -118,8 +104,6 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
                     WorkloadNames = workloads.Select(w => w.Name).Order().ToList()
                 };
                 workloadManifest.Packs.Add(jsonContent);
-                // Console.WriteLine($"{aliasTo}, {pack.Version} ({pack.Kind}): {workloadNames}");
-                //Console.WriteLine(SetJsonString(jsonContent));
             }
         }
     }
@@ -168,7 +152,6 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
             Versions = versions.Select(v => v.ToString()).Order().ToList()
         };
         workloadManifest.PlatformVersions.Add(platformVersion);
-        // Console.WriteLine($"{platform}: {versionList}");
     }
     dumpPackManifest.WorkLoadPackManifests.Add(workloadManifest);
 

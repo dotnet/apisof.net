@@ -1,3 +1,5 @@
+namespace Terrajobst.ApiCatalog.PackManifest.Models;
+
 public class BuiltInPackManifest
 {
     public string SdkVersion { get; set; } = string.Empty;

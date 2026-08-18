@@ -1077,7 +1077,6 @@ public partial class FrameworkDefinition
         },
     ];
 
-        frameworks.AddRange(frameworks.LoadDumpPackManifest());
         return frameworks;
     }
 }
