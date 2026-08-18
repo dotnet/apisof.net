@@ -54,7 +54,7 @@ public sealed class WorkloadEnvironment
             var manifestPath = ResolveManifestPath(workloadDirectory);
             if (manifestPath is null)
             {
-                Console.WriteLine($"warning: can't manifest in {workloadDirectory}");
+                DumpPackDiagnostics.Report("warning", $"Can't find manifest in {workloadDirectory}");
                 continue;
             }
 
@@ -77,7 +77,7 @@ public sealed class WorkloadEnvironment
             var versionDirectories = Directory.GetDirectories(workloadDirectory);
             if (versionDirectories.Length == 0)
             {
-                Console.WriteLine($"warning: can't find version directories in {workloadDirectory}");
+                DumpPackDiagnostics.Report("warning", $"Can't find version directories in {workloadDirectory}");
                 return null;
             }
 
@@ -118,7 +118,7 @@ public sealed class WorkloadEnvironment
             {
                 if (!Workloads.TryGetValue(baseName, out var baseWorkload))
                 {
-                    Console.WriteLine($"error: Can't resolve base workload '{baseName}' from '{derivedWorkload.Name}'");
+                    DumpPackDiagnostics.Report("error", $"Can't resolve base workload '{baseName}' from '{derivedWorkload.Name}'");
                     continue;
                 }
 
@@ -154,7 +154,7 @@ public sealed class WorkloadEnvironment
             {
                 if (!Packs.TryGetValue(packName, out var pack))
                 {
-                    Console.WriteLine($"error: Can't resolve pack '{packName}' from '{workload.Name}'");
+                    DumpPackDiagnostics.Report("error", $"Can't resolve pack '{packName}' from '{workload.Name}'");
                     continue;
                 }
 

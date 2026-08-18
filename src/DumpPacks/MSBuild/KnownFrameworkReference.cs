@@ -61,7 +61,7 @@ public sealed class KnownFrameworkReference
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"error: Can't read '{file}': {ex.Message}");
+                DumpPackDiagnostics.Report("error", $"Can't read '{file}': {ex.Message}");
             }
         }
 
