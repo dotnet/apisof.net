@@ -1,3 +1,4 @@
+namespace Terrajobst.ApiCatalog.PackManifest.Models;
 
 public class PlatformVersion
 {

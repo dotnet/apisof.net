@@ -1,3 +1,5 @@
+using Terrajobst.ApiCatalog.PackManifest.Models;
+
 public static class DumpPackDiagnostics
 {
     private static readonly List<ErrorContent> s_messages = [];

@@ -1,5 +1,5 @@
 using System.Text.Json;
-
+using Terrajobst.ApiCatalog.PackManifest.Models;
 namespace Terrajobst.ApiCatalog;
 
 public static class FrameworkDefinitionExtension
@@ -25,7 +25,7 @@ public static class FrameworkDefinitionExtension
 
         var result = new List<FrameworkDefinition>();
 
-        var frameworkVersions = manifest.WorkLoadPackManifests
+        var frameworkVersions = manifest.WorkloadPackManifests
             .Select(w => w.DotNetVersion)
             .Where(v => !string.IsNullOrWhiteSpace(v))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -38,7 +38,7 @@ public static class FrameworkDefinitionExtension
                 continue;
 
             var builtInPacks = ConvertBuiltInPacks(frameworkVersion, manifest.BuiltInPackManifests);
-            var workloadManifest = manifest.WorkLoadPackManifests
+            var workloadManifest = manifest.WorkloadPackManifests
                 .FirstOrDefault(w => frameworkVersion.Equals(w.DotNetVersion, StringComparison.OrdinalIgnoreCase));
             var workloadPacks = ConvertWorkloadPacks(workloadManifest);
 
@@ -95,7 +95,7 @@ public static class FrameworkDefinitionExtension
                         .ToArray();
         }
 
-        static IReadOnlyList<PackReference> ConvertWorkloadPacks(WorkLoadPackManifest? manifest)
+        static IReadOnlyList<PackReference> ConvertWorkloadPacks(WorkloadPackManifest? manifest)
         {
             if (manifest is null)
                 return [];
@@ -126,7 +126,7 @@ public static class FrameworkDefinitionExtension
 
         static IReadOnlyList<FrameworkPlatformDefinition> ConvertSupportedPlatforms(string tfm,
                                                                                     IEnumerable<BuiltInPackManifest> builtInManifests,
-                                                                                    WorkLoadPackManifest? workloadManifest,
+                                                                                    WorkloadPackManifest? workloadManifest,
                                                                                     IReadOnlyList<PackReference> workloadPacks)
         {
             IEnumerable<PlatformVersion>? source = null;
