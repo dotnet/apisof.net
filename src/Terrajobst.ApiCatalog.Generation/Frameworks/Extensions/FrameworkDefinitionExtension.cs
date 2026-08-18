@@ -21,7 +21,14 @@ public static class FrameworkDefinitionExtension
 
         var manifest = JsonSerializer.Deserialize<DumpPackManifest>(jsonContent, settings);
         if (manifest is null)
-            return [];
+            throw new InvalidDataException($"Pack manifest '{jsonFile}' did not contain a manifest.");
+
+        if (manifest.Errors.Count > 0)
+        {
+            var errors = string.Join(Environment.NewLine,
+                                     manifest.Errors.Select(e => $"[{e.Severity}] {e.Error}"));
+            throw new InvalidDataException($"Pack manifest '{jsonFile}' contains errors:{Environment.NewLine}{errors}");
+        }
 
         var result = new List<FrameworkDefinition>();
 

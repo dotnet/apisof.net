@@ -64,7 +64,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
     if (!NuGetVersion.TryParse(versionText, out var version))
         continue;
 
-    var workloadManifest = new WorkLoadPackManifest
+    var workloadManifest = new WorkloadPackManifest
     {
         DotNetVersion = $"net{version.Major}.{version.Minor}"
     };
@@ -81,7 +81,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 
         if (!pack.AliasTo.Any())
         {
-            var jsonContent = new WorkLoadPackContent
+            var jsonContent = new WorkloadPackContent
             {
                 PackName = pack.Name,
                 PackVersion = pack.Version,
@@ -96,7 +96,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
         {
             foreach (var aliasTo in pack.AliasTo.Values.Distinct().Order())
             {
-                var jsonContent = new WorkLoadPackContent
+                var jsonContent = new WorkloadPackContent
                 {
                     PackName = aliasTo,
                     PackVersion = pack.Version,
@@ -153,7 +153,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
         };
         workloadManifest.PlatformVersions.Add(platformVersion);
     }
-    dumpPackManifest.WorkLoadPackManifests.Add(workloadManifest);
+    dumpPackManifest.WorkloadPackManifests.Add(workloadManifest);
 
 }
 
