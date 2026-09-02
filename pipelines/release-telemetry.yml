@@ -45,8 +45,6 @@ extends:
                   resourceGroupName: apisofdotnet-dev
                   appName: apisofdotnetplanner-dev
                   appType: functionapp
-                  # The function app's own storage account, so deployment packages sit
-                  # alongside the app rather than in the shared app-data account.
-                  storageAccountName: apisofdotnetdev994a
+                  storageAccountName: apisofdotnetdev
                   blobName: telemetry/telemetry-$(Build.BuildNumber).zip
                   packagePath: $(Pipeline.Workspace)/telemetry-drop/telemetry.zip
