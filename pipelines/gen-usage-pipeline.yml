@@ -72,18 +72,36 @@ extends:
                   includePreviewVersions: true
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
+
+              # GenUsageNuGet
               - script: |
+                  dotnet restore "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
+                    --configfile "$(Build.SourcesDirectory)/src/nuget.config"
+
                   dotnet publish "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
+                    --no-restore \
                     --configuration $(BuildConfiguration) \
                     --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-nuget"
-                displayName: "Publish GenUsageNuGet"
+                displayName: "Restore & Publish GenUsageNuGet"
+
+              # GenUsagePlanner
               - script: |
+                  dotnet restore "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
+                    --configfile "$(Build.SourcesDirectory)/src/nuget.config"
+
                   dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
+                    --no-restore \
                     --configuration $(BuildConfiguration) \
                     --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
-                displayName: "Publish GenUsagePlanner"
+                displayName: "Restore & Publish GenUsagePlanner"
+
+              # GenUsage
               - script: |
+                  dotnet restore "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
+                    --configfile "$(Build.SourcesDirectory)/src/nuget.config"
+
                   dotnet publish "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
+                    --no-restore \
                     --configuration $(BuildConfiguration) \
                     --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage"
-                displayName: "Publish GenUsage"
+                displayName: "Restore & Publish GenUsage"
