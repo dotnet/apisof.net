@@ -10,7 +10,7 @@ trigger:
       - src/Directory.Build.props
       - src/Directory.Build.targets
       - src/Directory.Packages.props
-      - src/nuget.config
+      - NuGet.config
       - src/version.json
       - src/GenUsage/**
       - src/GenUsageNuGet/**
@@ -28,8 +28,6 @@ name: $(date:yyyyMMdd)$(rev:.r)
 variables:
   - name: BuildConfiguration
     value: Release
-  - name: NUGET_PACKAGES
-    value: $(Agent.TempDirectory)/.nuget/packages
 resources:
   repositories:
     - repository: self
@@ -42,6 +40,8 @@ resources:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: CFSClean
     sdl:
       sourceAnalysisPool:
         name: AzurePipelines-EO
@@ -75,42 +75,23 @@ extends:
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
 
-              - script: dotnet nuget locals all --clear
-                displayName: "Clear NuGet caches"
-
               # GenUsageNuGet
               - script: |
-                  dotnet restore "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
-                    --configfile "$(Build.SourcesDirectory)/src/nuget.config" \
-                    --verbosity detailed
-
                   dotnet publish "$(Build.SourcesDirectory)/src/GenUsageNuGet/GenUsageNuGet.csproj" \
-                    --no-restore \
-                    --no-self-contained \
                     --configuration $(BuildConfiguration) \
                     --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-nuget"
-                displayName: "Restore & Publish GenUsageNuGet"
+                displayName: "Publish GenUsageNuGet"
 
               # GenUsagePlanner
               - script: |
-                  dotnet restore "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
-                    --configfile "$(Build.SourcesDirectory)/src/nuget.config"
-
                   dotnet publish "$(Build.SourcesDirectory)/src/GenUsagePlanner/GenUsagePlanner.csproj" \
-                    --no-restore \
-                    --no-self-contained \
                     --configuration $(BuildConfiguration) \
                     --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage-planner"
-                displayName: "Restore & Publish GenUsagePlanner"
+                displayName: "Publish GenUsagePlanner"
 
               # GenUsage
               - script: |
-                  dotnet restore "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
-                    --configfile "$(Build.SourcesDirectory)/src/nuget.config"
-
                   dotnet publish "$(Build.SourcesDirectory)/src/GenUsage/GenUsage.csproj" \
-                    --no-restore \
-                    --no-self-contained \
                     --configuration $(BuildConfiguration) \
                     --output "$(Build.ArtifactStagingDirectory)/publish-gen-usage"
-                displayName: "Restore & Publish GenUsage"
+                displayName: "Publish GenUsage"

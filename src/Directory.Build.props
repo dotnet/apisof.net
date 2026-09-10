@@ -5,8 +5,11 @@
         <ArtifactsPath>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..))/.artifacts</ArtifactsPath>
         <ArtifactsPivots>.</ArtifactsPivots>
         <PackageOutputPath>$(ArtifactsPath)/package</PackageOutputPath>
-        <NuGetAudit>false</NuGetAudit>
         <RestoreSources>https://devdiv.pkgs.visualstudio.com/OnlineServices/_packaging/dotnetlegacy/nuget/v3/index.json</RestoreSources>
+    </PropertyGroup>
+
+    <PropertyGroup Label="Network isolation (SFI-ES4.2.4)">
+        <NuGetAudit>false</NuGetAudit>
     </PropertyGroup>
 
     <PropertyGroup Label="We're adults here">
