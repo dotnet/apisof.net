@@ -57,8 +57,33 @@ extends:
                   BuildType: "dev"
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
 
+      - stage: DR
+        displayName: Run in DR
+        dependsOn: Dev
+        jobs:
+          - job: Job_1
+            displayName: Generate Usage (DR)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDR)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDR)"
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-usage"
+                  artifactName: "gen-usage-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-usage-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-usage.yml@self
+                parameters:
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDR)"
+
       - stage: Production
         displayName: Run in Production
+        dependsOn: DR
         jobs:
           - job: Job_1
             displayName: Generate Usage (Prod)

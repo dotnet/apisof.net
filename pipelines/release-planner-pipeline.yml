@@ -45,7 +45,26 @@ extends:
                 parameters:
                   azureSubscriptionConnection: $(AzureSubscriptionConnectionDev)
                   storageAccountName: $(StorageAccountNameDev)
+      - stage: DR
+        dependsOn: Dev
+        jobs:
+          - job: build_and_upload_dr
+            displayName: Build and upload velopack to DR environment
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet-planner-build"
+                  artifactName: velopack-release
+                  targetPath: $(Pipeline.Workspace)/velopack-input
+            steps:
+              - template: /pipelines/templates/upload-build-planner.yml@self
+                parameters:
+                  azureSubscriptionConnection: $(AzureSubscriptionConnectionDR)
+                  storageAccountName: $(StorageAccountNameDR)
       - stage: Prod
+        dependsOn: DR
         jobs:
           - job: PreDeploymentApprovalJob
             displayName: Pre-Deployment Approval

@@ -40,7 +40,9 @@ internal sealed class Main : IConsoleMain
 
         Console.WriteLine("Downloading previously indexed usages...");
 
-        var (_, lastIndexTimestamp) = await _store.DownloadPlannerUsageDatabaseAsync(databasePath);
+        var (databaseExists, lastIndexTimestamp) = await _store.DownloadPlannerUsageDatabaseAsync(databasePath);
+        if (!databaseExists)
+            Console.WriteLine("No previously indexed usages found. Creating a new database...");
 
         using var usageDatabase = await UsageDatabase.OpenOrCreateAsync(databasePath);
 

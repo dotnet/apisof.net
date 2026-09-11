@@ -52,7 +52,9 @@ internal sealed class CrawlMain : ConsoleCommand
 
         Console.WriteLine("Downloading previously indexed usages...");
 
-        await _store.DownloadNuGetUsageDatabaseAsync(databasePath);
+        var databaseExists = await _store.DownloadNuGetUsageDatabaseAsync(databasePath);
+        if (!databaseExists)
+            Console.WriteLine("No previously indexed usages found. Creating a new database...");
 
         using var usageDatabase = await NuGetUsageDatabase.OpenOrCreateAsync(databasePath);
 

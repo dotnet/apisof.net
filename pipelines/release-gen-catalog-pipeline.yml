@@ -59,8 +59,33 @@ extends:
                 parameters:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
 
+      - stage: DR
+        displayName: Run in DR
+        dependsOn: Dev
+        jobs:
+          - job: Job_1
+            displayName: Generate Catalog (DR)
+            condition: succeeded()
+            timeoutInMinutes: 0
+            variables:
+              AzureStorageServiceUrl: "$(AzureStorageServiceUrlDR)"
+              ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDR)"
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "gen-catalog"
+                  artifactName: "gen-catalog-drop"
+                  targetPath: "$(Pipeline.Workspace)/gen-catalog-drop"
+            steps:
+              - template: /pipelines/templates/steps-gen-catalog-run.yml@self
+                parameters:
+                  AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDR)"
+
       - stage: Production
         displayName: Run in Production
+        dependsOn: DR
         jobs:
           - job: Job_1
             displayName: Generate Catalog (Prod)
