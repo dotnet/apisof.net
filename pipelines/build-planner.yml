@@ -31,6 +31,10 @@ extends:
     settings:
       networkIsolationPolicy: CFSClean
     sdl:
+      sourceAnalysisPool:
+        name: AzurePipelines-EO
+        image: 1ESPT-Windows2022
+        os: windows
       codeql:
         compiled:
           enabled: true
