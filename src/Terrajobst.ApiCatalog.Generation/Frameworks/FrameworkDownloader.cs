@@ -14,7 +14,10 @@ public static class FrameworkDownloader
         if (File.Exists(manifestPath))
             return FrameworkManifest.Load(manifestPath).Frameworks.Count;
 
-        Validate();
+        var frameworks = FrameworkDefinition.All.ToList();
+        frameworks.AddRange(frameworks.LoadDumpPackManifest());
+
+        Validate(frameworks);
 
         var entries = new List<FrameworkManifestEntry>();
 
@@ -29,7 +32,7 @@ public static class FrameworkDownloader
         var previewPacksPath = Path.Join(packsPath, "preview");
         var previewStore = new NuGetStore(previewPacksPath, previewFeeds);
 
-        foreach (var framework in FrameworkDefinition.All)
+        foreach (var framework in frameworks)
         {
             Console.WriteLine($"Processing packs for {framework.Name}...");
 
@@ -70,7 +73,7 @@ public static class FrameworkDownloader
                 {
                     var pack = packGroup
                         .Where(p => Applies(platformFramework, framework, p))
-                        .MaxBy(p => Version.Parse(p.Version));
+                        .MaxBy(p => NuGetVersion.Parse(p.Version));
 
                     if (pack is null)
                         continue;
@@ -184,9 +187,9 @@ public static class FrameworkDownloader
         return packFramework.PlatformVersion <= framework.PlatformVersion;
     }
 
-    private static void Validate()
+    private static void Validate(IReadOnlyList<FrameworkDefinition> frameworks)
     {
-        foreach (var framework in FrameworkDefinition.All)
+        foreach (var framework in frameworks)
         {
             var nugetFramework = NuGetFramework.Parse(framework.Name);
             var requiresSupportedPlatforms = string.Equals(nugetFramework.Framework, ".NETCoreApp", StringComparison.OrdinalIgnoreCase) &&

@@ -11,6 +11,50 @@ steps:
       packageType: sdk
       version: 10.x
       includePreviewVersions: true
+  - task: UseDotNet@2
+    displayName: "Install .NET 11"
+    inputs:
+      packageType: sdk
+      version: 11.x
+      includePreviewVersions: true
+  - task: PowerShell@2
+    displayName: "Run DumpPacks"
+    inputs:
+      targetType: "inline"
+      pwsh: true
+      script: |
+        $genCatalogPublishPath = "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog"
+        $dumpPacksDllPath = "$(Pipeline.Workspace)\gen-catalog-drop\publish-dumppacks\DumpPacks.dll"
+        $dumpPacksOutputPath = Join-Path $genCatalogPublishPath "dumppack_output.json"
+
+        if (-not (Test-Path $genCatalogPublishPath)) {
+          throw "GenCatalog publish directory does not exist at '$genCatalogPublishPath'."
+        }
+
+        if (-not (Test-Path $dumpPacksDllPath)) {
+          throw "DumpPacks DLL does not exist at '$dumpPacksDllPath'."
+        }
+
+        dotnet $dumpPacksDllPath > $dumpPacksOutputPath
+        if ($LASTEXITCODE -ne 0) {
+          throw "DumpPacks failed with exit code $LASTEXITCODE."
+        }
+
+        if (-not (Test-Path $dumpPacksOutputPath)) {
+          throw "DumpPacks output file was not created at '$dumpPacksOutputPath'."
+        }
+
+        try {
+          Get-Content -Raw -Path $dumpPacksOutputPath | ConvertFrom-Json | Out-Null
+          Write-Host "DumpPacks output created at '$dumpPacksOutputPath'."
+        }
+        catch {
+          Write-Host "DumpPacks output is not valid JSON. First 20 lines:"
+          Get-Content -Path $dumpPacksOutputPath -TotalCount 20 | ForEach-Object { Write-Host $_ }
+          throw
+        }
+    env:
+      DOTNET_ROOT: $(Agent.ToolsDirectory)/dotnet
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
@@ -21,6 +65,9 @@ steps:
       addSpnToEnvironment: true
       inlineScript: |
         $env:APISOFDOTNET_INDEX_PATH = "$(Pipeline.Workspace)\catalog"
+        $genCatalogPublishPath = "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog"
+        $dumpPacksOutputPath = Join-Path $genCatalogPublishPath "dumppack_output.json"
+
         if (Test-Path $env:APISOFDOTNET_INDEX_PATH) {
           Remove-Item -Recurse -Force $env:APISOFDOTNET_INDEX_PATH
         }
@@ -30,7 +77,11 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
-        dotnet "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog\GenCatalog.dll"
+        if (-not (Test-Path $dumpPacksOutputPath)) {
+          throw "DumpPacks output file is missing at '$dumpPacksOutputPath'."
+        }
+
+        dotnet (Join-Path $genCatalogPublishPath "GenCatalog.dll")
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)
       ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)

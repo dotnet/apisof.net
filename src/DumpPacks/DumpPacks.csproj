@@ -11,5 +11,8 @@
     <ItemGroup>
         <PackageReference Include="NuGet.Protocol" />
     </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Terrajobst.ApiCatalog.PackManifest\Terrajobst.ApiCatalog.PackManifest.csproj" />
+    </ItemGroup>
 
 </Project>
