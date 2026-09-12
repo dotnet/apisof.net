@@ -1,0 +1,94 @@
+# Deploys via WEBSITE_RUN_FROM_PACKAGE, so nothing is pushed over the public SCM endpoint.
+# This lets the app keep publicNetworkAccess disabled while still being deployable.
+
+parameters:
+  - name: azureSubscriptionConnection
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: appName
+    type: string
+  # 'webapp' or 'functionapp' - selects the matching az CLI command group.
+  - name: appType
+    type: string
+    default: webapp
+    values:
+      - webapp
+      - functionapp
+  - name: storageAccountName
+    type: string
+  - name: containerName
+    type: string
+    default: deployment-pkgs
+  # Must be build-unique, e.g. 'main-site/main-site-$(Build.BuildNumber).zip'.
+  - name: blobName
+    type: string
+  # Named explicitly rather than globbed, so a second package appearing in the drop
+  # can never be deployed by accident.
+  - name: packagePath
+    type: string
+  - name: displayName
+    type: string
+    default: "Deploy from storage package"
+
+steps:
+  - task: AzureCLI@2
+    displayName: "${{ parameters.displayName }}"
+    inputs:
+      azureSubscription: "${{ parameters.azureSubscriptionConnection }}"
+      scriptType: "pscore"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        $ErrorActionPreference = 'Stop'
+
+        $rg        = '${{ parameters.resourceGroupName }}'
+        $app       = '${{ parameters.appName }}'
+        $appType   = '${{ parameters.appType }}'
+        $storage   = '${{ parameters.storageAccountName }}'
+        $container = '${{ parameters.containerName }}'
+        $blob      = '${{ parameters.blobName }}'
+        $pkgPath   = '${{ parameters.packagePath }}'
+
+        if (-not (Test-Path -Path $pkgPath -PathType Leaf)) {
+          throw "Package not found: $pkgPath"
+        }
+
+        Write-Host "Package: $pkgPath"
+        Write-Host "Uploading to $container/$blob"
+
+        # Shared key access is disabled on these accounts, so Entra ID auth is required.
+        az storage blob upload --account-name $storage --container-name $container --name $blob --file $pkgPath --auth-mode login --overwrite
+        if ($LASTEXITCODE -ne 0) { throw "Blob upload failed" }
+
+        # Plain blob URL, read by the app's managed identity, so there is no SAS to expire.
+        $packageUrl = "https://$storage.blob.core.windows.net/$container/$blob"
+
+        az $appType config appsettings set --resource-group $rg --name $app --settings "WEBSITE_RUN_FROM_PACKAGE=$packageUrl"
+        if ($LASTEXITCODE -ne 0) { throw "Failed to set WEBSITE_RUN_FROM_PACKAGE" }
+
+        az $appType restart --resource-group $rg --name $app
+        if ($LASTEXITCODE -ne 0) { throw "App restart failed" }
+
+        # The app is now serving the package uploaded above, so anything older under the
+        # same prefix is a superseded build.
+        try {
+          $prefix = if ($blob.Contains('/')) { $blob.Substring(0, $blob.LastIndexOf('/') + 1) } else { '' }
+          $json = az storage blob list --account-name $storage --container-name $container --prefix $prefix --auth-mode login --query "[].{name:name,created:properties.creationTime}" -o json
+          if ($LASTEXITCODE -ne 0) { throw "Could not list blobs under '$prefix'" }
+
+          $all = $json | ConvertFrom-Json
+          $current = $all | Where-Object { $_.name -eq $blob }
+          if (-not $current) { throw "Just-deployed package '$blob' was not found in the listing" }
+          $currentCreated = [datetime]::Parse($current.created).ToUniversalTime()
+
+          foreach ($b in $all) {
+            if ($b.name -eq $blob) { continue }
+            if ([datetime]::Parse($b.created).ToUniversalTime() -ge $currentCreated) { continue }
+            Write-Host "Removing superseded package $($b.name) (created $($b.created))"
+            az storage blob delete --account-name $storage --container-name $container --name $b.name --auth-mode login
+            if ($LASTEXITCODE -ne 0) { throw "Could not delete $($b.name)" }
+          }
+        }
+        catch {
+          Write-Warning "Package cleanup skipped: $_"
+        }
