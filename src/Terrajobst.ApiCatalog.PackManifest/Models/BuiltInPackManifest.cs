@@ -11,6 +11,10 @@ public class BuiltInPackManifest
 public class FrameworkReferenceContent
 {
     public string TargetFramework { get; set; } = string.Empty;
+    // Split out at dump time from the already-parsed NuGetFramework so the
+    // consumer never has to re-parse the short folder name.
+    public string Platform { get; set; } = string.Empty;
+    public string PlatformVersion { get; set; } = string.Empty;
     public ICollection<FrameworkReferencePack> Packs { get; set; } = new List<FrameworkReferencePack>();
 }
 
