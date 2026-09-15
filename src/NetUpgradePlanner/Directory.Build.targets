@@ -1,25 +1,20 @@
 <Project>
 
   <!--
-    GraphViz ships with the app, but must not be downloaded from gitlab.com at build time -
-    that violates 1ES Network Isolation (CFSClean2). Same binaries, vendored as a package by
-    eng/Publish-GraphVizPackage.ps1.
+    GraphViz ships with the app and is vendored under eng/graphviz rather than downloaded at
+    build time - downloading from gitlab.com violates 1ES Network Isolation (CFSClean2).
+    Run eng/Update-GraphViz.ps1 to refresh it for a new GraphViz release.
   -->
-  <ItemGroup>
-    <PackageReference Include="ApisOfDotNet.GraphViz.Win32"
-                      GeneratePathProperty="true"
-                      ExcludeAssets="all"
-                      PrivateAssets="all" />
-  </ItemGroup>
+  <PropertyGroup>
+    <GraphVizDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\eng\graphviz'))</GraphVizDir>
+  </PropertyGroup>
 
   <Target Name="GetGraphVizFiles">
-    <Error Condition="'$(PkgApisOfDotNet_GraphViz_Win32)' == ''"
-           Text="The ApisOfDotNet.GraphViz.Win32 package was not restored, so GraphViz binaries are unavailable. Ensure the package is published to the 'apisofdotnet-tools' feed (see eng/Publish-GraphVizPackage.ps1)." />
     <ItemGroup>
-      <GraphVizFile Include="$(PkgApisOfDotNet_GraphViz_Win32)\tools\Graphviz\**\*.*" />
+      <GraphVizFile Include="$(GraphVizDir)\**\*.*" />
     </ItemGroup>
     <Error Condition="'@(GraphVizFile)' == ''"
-           Text="No GraphViz files found under '$(PkgApisOfDotNet_GraphViz_Win32)\tools\Graphviz'. The package layout is unexpected." />
+           Text="No GraphViz binaries found in '$(GraphVizDir)'. Run eng/Update-GraphViz.ps1 to restore them." />
   </Target>
 
   <Target Name="CopyGraphVizAfterBuild"
