@@ -1,27 +1,24 @@
 <Project>
 
+  <!--
+    GraphViz ships with the app and is vendored under eng/graphviz rather than downloaded at
+    build time - downloading from gitlab.com violates 1ES Network Isolation (CFSClean2).
+    Run eng/Update-GraphViz.ps1 to refresh it for a new GraphViz release.
+  -->
   <PropertyGroup>
-    <GraphVizVersion>6.0.2</GraphVizVersion>
+    <GraphVizDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\eng\graphviz'))</GraphVizDir>
   </PropertyGroup>
-
-  <Target Name="DownloadGraphViz"
-          AfterTargets="Build"
-          Condition="!Exists('$(IntermediateOutputPath)\Graphviz')">
-    <DownloadFile SourceUrl="https://gitlab.com/api/v4/projects/4207231/packages/generic/graphviz-releases/$(GraphVizVersion)/windows_10_msbuild_Release_graphviz-$(GraphVizVersion)-win32.zip"
-                  DestinationFolder="$(IntermediateOutputPath)"
-                  DestinationFileName="GraphViz.zip" />
-    <Unzip SourceFiles="$(IntermediateOutputPath)\GraphViz.zip"
-           DestinationFolder="$(IntermediateOutputPath)" />
-  </Target>
 
   <Target Name="GetGraphVizFiles">
     <ItemGroup>
-      <GraphVizFile Include="$(IntermediateOutputPath)\Graphviz\**\*.*" />
+      <GraphVizFile Include="$(GraphVizDir)\**\*.*" />
     </ItemGroup>
+    <Error Condition="'@(GraphVizFile)' == ''"
+           Text="No GraphViz binaries found in '$(GraphVizDir)'. Run eng/Update-GraphViz.ps1 to restore them." />
   </Target>
 
   <Target Name="CopyGraphVizAfterBuild"
-          DependsOnTargets="DownloadGraphViz;GetGraphVizFiles"
+          DependsOnTargets="GetGraphVizFiles"
           AfterTargets="Build"
           Condition="!Exists('$(OutDir)\Graphviz')">
     <Message Importance="high" Text="GraphViz -> $(OutDir)\GraphViz" />
@@ -29,7 +26,7 @@
   </Target>
 
   <Target Name="CopyGraphVizAfterPublish"
-          DependsOnTargets="DownloadGraphViz;GetGraphVizFiles"
+          DependsOnTargets="GetGraphVizFiles"
           AfterTargets="Publish"
           Condition="!Exists('$(PublishDir)\Graphviz')">
     <Message Importance="high" Text="GraphViz -> $(PublishDir)\GraphViz" />
