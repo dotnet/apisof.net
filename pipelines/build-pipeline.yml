@@ -15,7 +15,7 @@ trigger:
       - src/Directory.Build.props
       - src/Directory.Build.targets
       - src/Directory.Packages.props
-      - src/nuget.config
+      - NuGet.config
       - src/version.json
     exclude:
       - .gitignore

@@ -311,9 +311,12 @@ public sealed class NuGetFeed
     {
         foreach (var candidate in GetSettingsRoots())
         {
-            var configPath = Path.Combine(candidate, "nuget.config");
-            if (File.Exists(configPath))
-                return Settings.LoadSpecificSettings(candidate, "nuget.config");
+            foreach (var configFileName in new[] { "NuGet.config", "nuget.config" })
+            {
+                var configPath = Path.Combine(candidate, configFileName);
+                if (File.Exists(configPath))
+                    return Settings.LoadSpecificSettings(candidate, configFileName);
+            }
         }
 
         return Settings.LoadDefaultSettings(root: null);
