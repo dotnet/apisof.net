@@ -38,14 +38,16 @@ extends:
                   artifactName: "apis-of-dotnet-drop"
                   targetPath: "$(Pipeline.Workspace)/apis-of-dotnet-drop"
             steps:
-              - task: AzureWebApp@1
-                displayName: Deploy Web App
-                inputs:
-                  azureSubscription: "$(AzureDevSubscriptionConnection)"
+              - template: /pipelines/templates/steps-deploy-run-from-package.yml@self
+                parameters:
+                  displayName: Deploy Web App (package from storage)
+                  azureSubscriptionConnection: "$(AzureDevSubscriptionConnection)"
+                  resourceGroupName: apisofdotnet-dev
                   appName: apisofdotnet-dev
-                  appType: webAppLinux
-                  package: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
-                  deploymentMethod: auto
+                  appType: webapp
+                  storageAccountName: apisofdotnetdev
+                  blobName: main-site/main-site-$(Build.BuildNumber).zip
+                  packagePath: $(Pipeline.Workspace)/apis-of-dotnet-drop/site.zip
       - stage: Production
         displayName: Deploy to Production
         # dependsOn: DR
