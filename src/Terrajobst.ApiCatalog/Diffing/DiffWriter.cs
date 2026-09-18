@@ -45,6 +45,12 @@ public sealed class DiffWriter
         var defLeft = api.GetDefinition(_left);
         var defRight = api.GetDefinition(_right);
 
+        if (defLeft is ApiDeclarationModel leftDeclaration && !TryGetMarkupId(leftDeclaration, out _))
+            defLeft = null;
+
+        if (defRight is ApiDeclarationModel rightDeclaration && !TryGetMarkupId(rightDeclaration, out _))
+            defRight = null;
+
         if (defLeft is null && defRight is null)
             return;
 
@@ -63,7 +69,9 @@ public sealed class DiffWriter
             blockDiffMarker = "-";
             await WriteDeclarationAsync("-", defLeft.Value, writer, indent);
         }
-        else if (defLeft.Value.MarkupId == defRight.Value.MarkupId)
+        else if (TryGetMarkupId(defLeft.Value, out var leftMarkupId) &&
+                 TryGetMarkupId(defRight.Value, out var rightMarkupId) &&
+                 leftMarkupId == rightMarkupId)
         {
             await WriteDeclarationAsync(" ", defRight.Value, writer, indent);
         }
@@ -113,5 +121,19 @@ public sealed class DiffWriter
         await writer.WriteAsync(diffMarker);
         for (var i = 0; i < indent; i++)
             await writer.WriteAsync("    ");
+    }
+
+    private static bool TryGetMarkupId(ApiDeclarationModel declaration, out int markupId)
+    {
+        try
+        {
+            markupId = declaration.MarkupId;
+            return true;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            markupId = default;
+            return false;
+        }
     }
 }

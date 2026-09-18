@@ -133,7 +133,9 @@ internal sealed class ApiAvailabilityContext
 
         foreach (var declaration in api.Declarations)
         {
-            var assemblyId = declaration.Assembly.Id;
+            if (!TryGetAssemblyId(declaration, out var assemblyId))
+                continue;
+
             if (frameworkAssemblies.Contains(assemblyId) || packageAssemblies.ContainsKey(assemblyId))
                 return true;
         }
@@ -151,7 +153,9 @@ internal sealed class ApiAvailabilityContext
 
         foreach (var declaration in api.Declarations)
         {
-            var assemblyId = declaration.Assembly.Id;
+            if (!TryGetAssemblyId(declaration, out var assemblyId))
+                continue;
+
             if (frameworkAssemblies.Contains(assemblyId))
                 return declaration;
         }
@@ -198,13 +202,16 @@ internal sealed class ApiAvailabilityContext
 
         foreach (var declaration in api.Declarations)
         {
-            if (frameworkAssemblies.Contains(declaration.Assembly.Id))
+            if (!TryGetAssemblyId(declaration, out var assemblyId))
+                continue;
+
+            if (frameworkAssemblies.Contains(assemblyId))
             {
                 frameworkBuilder ??= ImmutableArray.CreateBuilder<ApiDeclarationModel>();
                 frameworkBuilder.Add(declaration);
             }
 
-            if (packageAssemblies.TryGetValue(declaration.Assembly.Id, out var packageInfo))
+            if (packageAssemblies.TryGetValue(assemblyId, out var packageInfo))
             {
                 packageBuilder ??= ImmutableArray.CreateBuilder<(PackageModel, NuGetFramework, ApiDeclarationModel)>();
 
@@ -233,6 +240,20 @@ internal sealed class ApiAvailabilityContext
             return (string.Empty, ImmutableArray<string>.Empty);
 
         return info;
+    }
+
+    private static bool TryGetAssemblyId(ApiDeclarationModel declaration, out int assemblyId)
+    {
+        try
+        {
+            assemblyId = declaration.Assembly.Id;
+            return true;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            assemblyId = default;
+            return false;
+        }
     }
 
     private sealed class PackageFolder : IFrameworkSpecific
