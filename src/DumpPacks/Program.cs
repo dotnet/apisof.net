@@ -4,6 +4,7 @@ var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
 if (string.IsNullOrEmpty(dotnetRoot))
     dotnetRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),"dotnet");
 var dumpPackManifest = new DumpPackManifest();
+var diagnostics = new DumpPackDiagnostics();
 
 foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
 {
@@ -12,7 +13,7 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
         SdkVersion = $".NET SDK {version}"
     };
 
-    var references = KnownFrameworkReference.Load(sdkDirectory);
+    var references = KnownFrameworkReference.Load(sdkDirectory, diagnostics);
 
     foreach (var frameworkGroup in references.GroupBy(f => f.TargetFramework)
                                              .OrderBy(g => g.Key.Framework)
@@ -38,7 +39,7 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
     }
 
     var supportedVersions = SupportedTargetPlatformVersion
-        .Load(sdkDirectory)
+        .Load(sdkDirectory, diagnostics)
         .GroupBy(v => v.Platform)
         .Select(g => (g.Key, string.Join(", ", g.Select(v => v.Version).Distinct().Order())));
 
@@ -69,7 +70,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
         DotNetVersion = $"net{version.Major}.{version.Minor}"
     };
 
-    var environment = await WorkloadEnvironment.LoadAsync(versionDirectory);
+    var environment = await WorkloadEnvironment.LoadAsync(versionDirectory, diagnostics);
 
     foreach (var (pack, workloads) in environment.GetFlattenedPacks())
     {
@@ -123,7 +124,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
             if (!Directory.Exists(sdkDirectory))
                 continue;
 
-            var supportedVersions = SupportedTargetPlatformVersion.Load(sdkDirectory).GroupBy(v => v.Platform);
+            var supportedVersions = SupportedTargetPlatformVersion.Load(sdkDirectory, diagnostics).GroupBy(v => v.Platform);
             if (!supportedVersions.Any())
                 continue;
 
@@ -157,7 +158,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 
 }
 
-dumpPackManifest.Errors = DumpPackDiagnostics.Drain();
+dumpPackManifest.Errors = diagnostics.Drain();
 // Output the final manifest as JSON
 Console.WriteLine(SetJsonString(dumpPackManifest));
 
@@ -179,5 +180,7 @@ static IReadOnlyList<(string Path, NuGetVersion Version)> GetSdkDirectories(stri
 
 static string SetJsonString(object value)
 {
-    return System.Text.Json.JsonSerializer.Serialize(value, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+    var options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+    options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase));
+    return System.Text.Json.JsonSerializer.Serialize(value, options);
 }

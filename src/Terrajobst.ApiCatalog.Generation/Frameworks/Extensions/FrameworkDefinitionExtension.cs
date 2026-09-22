@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Terrajobst.ApiCatalog.PackManifest.Models;
 namespace Terrajobst.ApiCatalog;
 
@@ -18,6 +19,7 @@ public static class FrameworkDefinitionExtension
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true
         };
+        settings.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 
         var manifest = JsonSerializer.Deserialize<DumpPackManifest>(jsonContent, settings);
         if (manifest is null)
@@ -31,6 +33,8 @@ public static class FrameworkDefinitionExtension
         }
 
         var result = new List<FrameworkDefinition>();
+        var predefinedFrameworkNames = frameworks.Select(f => f.Name)
+                               .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var frameworkVersions = manifest.WorkloadPackManifests
             .Select(w => w.DotNetVersion)
@@ -41,7 +45,7 @@ public static class FrameworkDefinitionExtension
 
         foreach (var frameworkVersion in frameworkVersions)
         {
-            if (IsFrameworkInPredefinedList(frameworkVersion))
+            if (predefinedFrameworkNames.Contains(frameworkVersion))
                 continue;
 
             var builtInPacks = ConvertBuiltInPacks(frameworkVersion, manifest.BuiltInPackManifests);
@@ -297,17 +301,6 @@ public static class FrameworkDefinitionExtension
             }
 
             return version;
-        }
-
-        static bool IsFrameworkInPredefinedList(string frameworkVersion)
-        {
-            return frameworkVersion.Equals("netcoreapp3.0", StringComparison.OrdinalIgnoreCase)
-                || frameworkVersion.Equals("netcoreapp3.1", StringComparison.OrdinalIgnoreCase)
-                || frameworkVersion.Equals("net5.0", StringComparison.OrdinalIgnoreCase)
-                || frameworkVersion.Equals("net6.0", StringComparison.OrdinalIgnoreCase)
-                || frameworkVersion.Equals("net7.0", StringComparison.OrdinalIgnoreCase)
-                || frameworkVersion.Equals("net8.0", StringComparison.OrdinalIgnoreCase)
-                || frameworkVersion.Equals("net9.0", StringComparison.OrdinalIgnoreCase);
         }
 
         static string? ResolveDumpPackManifestPath()

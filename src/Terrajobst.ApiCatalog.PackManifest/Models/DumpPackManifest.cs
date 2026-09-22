@@ -9,6 +9,12 @@ public class DumpPackManifest
 
 public class ErrorContent
 {
-    public string Severity { get; set; } = string.Empty;
+    public ErrorSeverity Severity { get; set; }
     public string Error { get; set; } = string.Empty;
+}
+
+public enum ErrorSeverity
+{
+    Error,
+    Warning
 }
