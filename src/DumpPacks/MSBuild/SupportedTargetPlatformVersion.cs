@@ -1,4 +1,5 @@
 ﻿using System.Xml.Linq;
+using Terrajobst.ApiCatalog.PackManifest.Models;
 
 public sealed class SupportedTargetPlatformVersion
 {
@@ -14,7 +15,7 @@ public sealed class SupportedTargetPlatformVersion
 
     public Version Version { get; }
 
-    public static IReadOnlyList<SupportedTargetPlatformVersion> Load(string path)
+    public static IReadOnlyList<SupportedTargetPlatformVersion> Load(string path, DumpPackDiagnostics diagnostics)
     {
         var result = new List<SupportedTargetPlatformVersion>();
 
@@ -51,7 +52,7 @@ public sealed class SupportedTargetPlatformVersion
             }
             catch (Exception ex)
             {
-                DumpPackDiagnostics.Report("error", $"Can't read '{file}': {ex.Message}");
+                diagnostics.Report(ErrorSeverity.Error, $"Can't read '{file}': {ex.Message}");
             }
 
         }

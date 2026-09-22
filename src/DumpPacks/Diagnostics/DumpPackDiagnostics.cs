@@ -1,22 +1,22 @@
 using Terrajobst.ApiCatalog.PackManifest.Models;
 
-public static class DumpPackDiagnostics
+public sealed class DumpPackDiagnostics
 {
-    private static readonly List<ErrorContent> s_messages = [];
+    private readonly List<ErrorContent> _messages = [];
 
-    public static void Report(string severity, string message)
+    public void Report(ErrorSeverity severity, string message)
     {
-        s_messages.Add(new ErrorContent
+        _messages.Add(new ErrorContent
         {
             Severity = severity,
             Error = message
         });
     }
 
-    public static List<ErrorContent> Drain()
+    public List<ErrorContent> Drain()
     {
-        var result = s_messages.ToList();
-        s_messages.Clear();
+        var result = _messages.ToList();
+        _messages.Clear();
         return result;
     }
 }

@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using NuGet.Frameworks;
 using NuGet.Versioning;
+using Terrajobst.ApiCatalog.PackManifest.Models;
 
 public sealed class KnownFrameworkReference
 {
@@ -20,7 +21,7 @@ public sealed class KnownFrameworkReference
     public string TargetingPackName { get; }
     public NuGetVersion TargetingPackVersion { get; }
 
-    public static IReadOnlyList<KnownFrameworkReference> Load(string path)
+    public static IReadOnlyList<KnownFrameworkReference> Load(string path, DumpPackDiagnostics diagnostics)
     {
         var result = new List<KnownFrameworkReference>();
 
@@ -61,7 +62,7 @@ public sealed class KnownFrameworkReference
             }
             catch (Exception ex)
             {
-                DumpPackDiagnostics.Report("error", $"Can't read '{file}': {ex.Message}");
+                diagnostics.Report(ErrorSeverity.Error, $"Can't read '{file}': {ex.Message}");
             }
         }
 
