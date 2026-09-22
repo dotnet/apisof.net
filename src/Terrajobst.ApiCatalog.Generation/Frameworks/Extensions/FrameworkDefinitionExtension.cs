@@ -81,21 +81,13 @@ public static class FrameworkDefinitionExtension
 
                 foreach (var reference in references)
                 {
-                    var platform = reference.TargetFramework.StartsWith(tfm + "-", StringComparison.OrdinalIgnoreCase)
-                        ? reference.TargetFramework[(tfm.Length + 1)..]
-                        : "";
-
                     foreach (var pack in reference.Packs)
                     {
-                        var computedPlatform = string.IsNullOrEmpty(platform)
-                            ? InferBuiltInPlatform(pack.PackName)
-                            : platform;
-
                         packs.Add(new PackReference(pack.PackName)
                         {
                             Version = pack.PackVersion,
                             Kind = PackKind.Framework,
-                            Platforms = [computedPlatform]
+                            Platforms = string.IsNullOrEmpty(reference.Platform) ? [] : [reference.Platform]
                         });
                     }
                 }
@@ -120,7 +112,7 @@ public static class FrameworkDefinitionExtension
 
                 // Library packs must not list platforms in FrameworkDefinition.
                 var platforms = kind == PackKind.Framework
-                    ? InferWorkloadPlatforms(pack.PackName, pack.WorkloadNames).ToArray()
+                    ? pack.Platforms.ToArray()
                     : [];
 
                 packs.Add(new PackReference(pack.PackName)
@@ -174,25 +166,6 @@ public static class FrameworkDefinitionExtension
                 versionByPlatform[platform.Platform.ToLowerInvariant()] = new HashSet<string>(normalizedVersions, StringComparer.OrdinalIgnoreCase);
             }
 
-            // Add missing platforms referenced by framework workload packs and infer at least one version.
-            foreach (var pack in workloadPacks.Where(p => p.Kind == PackKind.Framework))
-            {
-                foreach (var platform in pack.Platforms)
-                {
-                    if (string.IsNullOrWhiteSpace(platform))
-                        continue;
-
-                    if (!versionByPlatform.TryGetValue(platform, out var versions))
-                    {
-                        versions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                        versionByPlatform.Add(platform, versions);
-                    }
-
-                    if (TryInferPlatformVersion(platform, pack, out var inferredVersion))
-                        versions.Add(inferredVersion);
-                }
-            }
-
             var result = new List<FrameworkPlatformDefinition>();
 
             foreach (var (platform, versions) in versionByPlatform)
@@ -205,87 +178,6 @@ public static class FrameworkDefinitionExtension
                     Versions = versions.OrderBy(v => v, StringComparer.OrdinalIgnoreCase).ToArray()
                 });
             }
-
-            return result;
-        }
-
-        static bool TryInferPlatformVersion(string platform, PackReference pack, out string version)
-        {
-            // iOS/macOS/MacCatalyst/tvOS packs often encode platform version in name: ...net10.0_26.2
-            var underscoreIndex = pack.Name.LastIndexOf('_');
-            if (underscoreIndex >= 0 && underscoreIndex < pack.Name.Length - 1)
-            {
-                var fromName = pack.Name[(underscoreIndex + 1)..];
-                if (Version.TryParse(fromName, out var parsed))
-                {
-                    version = NormalizePlatformVersion(platform, fromName);
-                    return true;
-                }
-            }
-
-            // Android packs often encode API level in name: Microsoft.Android.Ref.36
-            if (platform.Equals("android", StringComparison.OrdinalIgnoreCase))
-            {
-                var segments = pack.Name.Split('.');
-                if (segments.Length > 0 && int.TryParse(segments[^1], out var apiLevel))
-                {
-                    version = $"{apiLevel}.0";
-                    return true;
-                }
-            }
-
-            // Fallback to major.minor of package version.
-            if (Version.TryParse(pack.Version, out var packageVersion))
-            {
-                version = NormalizePlatformVersion(platform, $"{packageVersion.Major}.{packageVersion.Minor}");
-                return true;
-            }
-
-            version = string.Empty;
-            return false;
-        }
-
-        static string InferBuiltInPlatform(string packName)
-        {
-            if (packName.Equals("Microsoft.WindowsDesktop.App.Ref", StringComparison.OrdinalIgnoreCase))
-                return "windows";
-
-            return "";
-        }
-
-        static IEnumerable<string> InferWorkloadPlatforms(string packName, IEnumerable<string> workloads)
-        {
-            var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var workload in workloads)
-            {
-                if (workload.Contains("android", StringComparison.OrdinalIgnoreCase))
-                    result.Add("android");
-                if (workload.Contains("ios", StringComparison.OrdinalIgnoreCase))
-                    result.Add("ios");
-                if (workload.Contains("maccatalyst", StringComparison.OrdinalIgnoreCase))
-                    result.Add("maccatalyst");
-                if (workload.Contains("macos", StringComparison.OrdinalIgnoreCase))
-                    result.Add("macos");
-                if (workload.Contains("tvos", StringComparison.OrdinalIgnoreCase))
-                    result.Add("tvos");
-                if (workload.Contains("windows", StringComparison.OrdinalIgnoreCase))
-                    result.Add("windows");
-            }
-
-            if (packName.Contains("Android", StringComparison.OrdinalIgnoreCase))
-                result.Add("android");
-            if (packName.Contains("iOS", StringComparison.OrdinalIgnoreCase))
-                result.Add("ios");
-            if (packName.Contains("MacCatalyst", StringComparison.OrdinalIgnoreCase))
-                result.Add("maccatalyst");
-            if (packName.Contains("macOS", StringComparison.OrdinalIgnoreCase))
-                result.Add("macos");
-            if (packName.Contains("tvOS", StringComparison.OrdinalIgnoreCase))
-                result.Add("tvos");
-            if (packName.Contains("Win", StringComparison.OrdinalIgnoreCase) ||
-                packName.Contains("Windows", StringComparison.OrdinalIgnoreCase))
-                result.Add("windows");
 
             return result;
         }
