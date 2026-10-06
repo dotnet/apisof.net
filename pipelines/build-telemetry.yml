@@ -40,7 +40,7 @@ extends:
               outputs:
                 - output: pipelineArtifact
                   displayName: "Publish Artifact"
-                  targetPath: $(Build.ArtifactStagingDirectory)/telemetry.zip
+                  targetPath: $(Build.ArtifactStagingDirectory)/out
                   artifactName: telemetry-drop
             steps:
               - checkout: self
