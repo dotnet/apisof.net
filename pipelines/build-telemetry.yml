@@ -61,7 +61,7 @@ extends:
                   rootFolderOrFile: "$(Build.ArtifactStagingDirectory)/publish"
                   includeRootFolder: false
                   archiveType: "zip"
-                  archiveFile: "$(Build.ArtifactStagingDirectory)/telemetry.zip"
+                  archiveFile: "$(Build.ArtifactStagingDirectory)/out/telemetry.zip"
                   replaceExistingArchive: true
               - script: |
                   rm -rf "$(Build.ArtifactStagingDirectory)/publish"
