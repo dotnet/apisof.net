@@ -105,22 +105,13 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
     public override ApiBrowsingData? GetData(ApiModel api)
     {
         var diffKind = api.GetDiffKind(_left, _right);
-        if (diffKind is null ||
-            diffKind == DiffKind.Added && !_diffOptions.HasFlag(DiffOptions.IncludeAdded) ||
-            diffKind == DiffKind.Removed && !_diffOptions.HasFlag(DiffOptions.IncludeRemoved))
-        {
-            return new ApiBrowsingData { Excluded = true };
-        }
-
-        if (diffKind == DiffKind.Added)
-            return new ApiBrowsingData { CssClasses = "diff-added" };
-
-        if (diffKind == DiffKind.Removed)
-            return new ApiBrowsingData { CssClasses = "diff-removed" };
-
         var cssClasses = "";
 
-        if (diffKind == DiffKind.Changed)
+        if (diffKind == DiffKind.Added && _diffOptions.HasFlag(DiffOptions.IncludeAdded))
+            cssClasses = "diff-added";
+        else if (diffKind == DiffKind.Removed && _diffOptions.HasFlag(DiffOptions.IncludeRemoved))
+            cssClasses = "diff-removed";
+        else if (diffKind == DiffKind.Changed && _diffOptions.HasFlag(DiffOptions.IncludeChanged))
             cssClasses = "diff-changed";
 
         MarkupString? additionalMarkup = null;
@@ -141,7 +132,9 @@ public sealed class FrameworkDiffBrowsingContext : ApiBrowsingContext
 
         var hasNestedChanges = added + removed + modified > 0;
 
-        if (!diffKind.Value.IsIncluded(_diffOptions) && !hasNestedChanges)
+        var hasOwnChange = diffKind?.IsIncluded(_diffOptions) == true;
+
+        if (!hasOwnChange && !hasNestedChanges)
             return new ApiBrowsingData { Excluded = true };
 
         if (hasNestedChanges)

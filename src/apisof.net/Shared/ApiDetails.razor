@@ -1,4 +1,14 @@
 ﻿@using NuGet.Frameworks
+@if (Availability.Frameworks.Count == 0)
+{
+    <div class="container-fluid">
+        <div class="alert alert-warning" role="alert">
+            <strong>@Api.Name</strong>: declaration unavailable. No framework availability could be resolved for this API.
+        </div>
+    </div>
+}
+else
+{
 <div class="container-fluid px-0">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
@@ -502,6 +512,8 @@
         </div>
     </div>
 </div>
+
+}
 
 @{
     void WritePlatformAnnotation(string apiName, PlatformAnnotation annotation)

@@ -15,6 +15,12 @@ public static class DiffExtensions
         var defLeft = api.GetDefinition(left);
         var defRight = api.GetDefinition(right);
 
+        if (defLeft is ApiDeclarationModel leftDeclaration && !TryGetMarkupId(leftDeclaration, out _))
+            defLeft = null;
+
+        if (defRight is ApiDeclarationModel rightDeclaration && !TryGetMarkupId(rightDeclaration, out _))
+            defRight = null;
+
         if (defLeft is null && defRight is null)
             return null;
 
@@ -24,7 +30,23 @@ public static class DiffExtensions
         if (defRight is null)
             return DiffKind.Removed;
 
-        return defLeft.Value.MarkupId == defRight.Value.MarkupId ? DiffKind.None : DiffKind.Changed;
+        TryGetMarkupId(defLeft.Value, out var leftMarkupId);
+        TryGetMarkupId(defRight.Value, out var rightMarkupId);
+        return leftMarkupId == rightMarkupId ? DiffKind.None : DiffKind.Changed;
+    }
+
+    private static bool TryGetMarkupId(ApiDeclarationModel declaration, out int markupId)
+    {
+        try
+        {
+            markupId = declaration.MarkupId;
+            return true;
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            markupId = default;
+            return false;
+        }
     }
 
     public static void GetDiffCount(this ApiModel api,
@@ -47,20 +69,20 @@ public static class DiffExtensions
                 continue;
 
             var diffKind = child.GetDiffKind(left, right);
-            if (diffKind is null)
-                continue;
-
-            switch (diffKind)
+            if (diffKind is not null)
             {
-                case DiffKind.Added:
-                    added++;
-                    break;
-                case DiffKind.Removed:
-                    removed++;
-                    break;
-                case DiffKind.Changed:
-                    modified++;
-                    break;
+                switch (diffKind)
+                {
+                    case DiffKind.Added:
+                        added++;
+                        break;
+                    case DiffKind.Removed:
+                        removed++;
+                        break;
+                    case DiffKind.Changed:
+                        modified++;
+                        break;
+                }
             }
 
             child.GetDiffCount(left, right, ref added, ref removed, ref modified);
