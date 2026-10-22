@@ -51,20 +51,20 @@ public partial class SyntaxView
                 {
                     Debug.Assert(right is not null);
                     apiDiff = MarkupTokenDiffKind.Added;
-                    tokenDiff = GetTokensWithoutDiff(right.Value);
                     Availability = Current.GetAvailability(diff.Right)!;
+                    tokenDiff = GetTokensWithoutDiff(right.Value);
                 }
                 else if (right is null)
                 {
                     apiDiff = MarkupTokenDiffKind.Removed;
-                    tokenDiff = GetTokensWithoutDiff(left.Value);
                     Availability = Current.GetAvailability(diff.Left)!;
+                    tokenDiff = GetTokensWithoutDiff(left.Value);
                 }
                 else
                 {
                     apiDiff = MarkupTokenDiffKind.None;
-                    tokenDiff = MarkupDiff.Diff(left.Value.GetMarkup(), right.Value.GetMarkup());
                     Availability = Current.GetAvailability(diff.Right)!;
+                    tokenDiff = MarkupDiff.Diff(left.Value.GetMarkup(), right.Value.GetMarkup());
                 }
             }
             else
