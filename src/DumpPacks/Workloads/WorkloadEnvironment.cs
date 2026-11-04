@@ -2,11 +2,15 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using NuGet.Versioning;
+using Terrajobst.ApiCatalog.PackManifest.Models;
 
 public sealed class WorkloadEnvironment
 {
-    private WorkloadEnvironment(IReadOnlyList<WorkloadManifest> manifests)
+    private readonly DumpPackDiagnostics _diagnostics;
+
+    private WorkloadEnvironment(IReadOnlyList<WorkloadManifest> manifests, DumpPackDiagnostics diagnostics)
     {
+        _diagnostics = diagnostics;
         var workloadByName = new Dictionary<string, Workload>(StringComparer.OrdinalIgnoreCase);
         var packByName = new Dictionary<string, Pack>(StringComparer.OrdinalIgnoreCase);
 
@@ -36,7 +40,7 @@ public sealed class WorkloadEnvironment
 
     public FrozenDictionary<string, Pack> Packs { get; }
 
-    public static async Task<WorkloadEnvironment> LoadAsync(string path)
+    public static async Task<WorkloadEnvironment> LoadAsync(string path, DumpPackDiagnostics diagnostics)
     {
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web)
         {
@@ -54,7 +58,7 @@ public sealed class WorkloadEnvironment
             var manifestPath = ResolveManifestPath(workloadDirectory);
             if (manifestPath is null)
             {
-                Console.WriteLine($"warning: can't manifest in {workloadDirectory}");
+                diagnostics.Report(ErrorSeverity.Warning, $"Can't find manifest in {workloadDirectory}");
                 continue;
             }
 
@@ -64,9 +68,9 @@ public sealed class WorkloadEnvironment
                 manifests.Add(manifest);
         }
 
-        return new WorkloadEnvironment(manifests);
+        return new WorkloadEnvironment(manifests, diagnostics);
 
-        static string? ResolveManifestPath(string workloadDirectory)
+        string? ResolveManifestPath(string workloadDirectory)
         {
             const string manifestName = "WorkloadManifest.json";
 
@@ -77,7 +81,7 @@ public sealed class WorkloadEnvironment
             var versionDirectories = Directory.GetDirectories(workloadDirectory);
             if (versionDirectories.Length == 0)
             {
-                Console.WriteLine($"warning: can't find version directories in {workloadDirectory}");
+                diagnostics.Report(ErrorSeverity.Warning, $"Can't find version directories in {workloadDirectory}");
                 return null;
             }
 
@@ -118,7 +122,7 @@ public sealed class WorkloadEnvironment
             {
                 if (!Workloads.TryGetValue(baseName, out var baseWorkload))
                 {
-                    Console.WriteLine($"error: Can't resolve base workload '{baseName}' from '{derivedWorkload.Name}'");
+                    _diagnostics.Report(ErrorSeverity.Error, $"Can't resolve base workload '{baseName}' from '{derivedWorkload.Name}'");
                     continue;
                 }
 
@@ -154,7 +158,7 @@ public sealed class WorkloadEnvironment
             {
                 if (!Packs.TryGetValue(packName, out var pack))
                 {
-                    Console.WriteLine($"error: Can't resolve pack '{packName}' from '{workload.Name}'");
+                    _diagnostics.Report(ErrorSeverity.Error, $"Can't resolve pack '{packName}' from '{workload.Name}'");
                     continue;
                 }
 

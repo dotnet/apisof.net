@@ -25,6 +25,9 @@
     <ItemGroup>
         <ProjectReference Include="..\Terrajobst.ApiCatalog\Terrajobst.ApiCatalog.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Terrajobst.ApiCatalog.PackManifest\Terrajobst.ApiCatalog.PackManifest.csproj" />
+    </ItemGroup>
 
     <ItemGroup>
       <EmbeddedResource Include="Packages\PackageIds.txt" />

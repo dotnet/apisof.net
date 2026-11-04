@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Terrajobst.ApiCatalog;
 
 // NOTE: Virtually all of the information here is extracted from the .NET SDK
@@ -14,8 +16,12 @@ namespace Terrajobst.ApiCatalog;
 
 public partial class FrameworkDefinition
 {
-    public static IReadOnlyList<FrameworkDefinition> All { get; } =
-    [
+    public static IReadOnlyList<FrameworkDefinition> All { get; } = CreateAll();
+
+    private static IReadOnlyList<FrameworkDefinition> CreateAll()
+    {
+        List<FrameworkDefinition> frameworks =
+        [
         new FrameworkDefinition("netcoreapp3.0")
         {
             BuiltInPacks =
@@ -1068,6 +1074,9 @@ public partial class FrameworkDefinition
                     Workloads = ["tvos"]
                 },
             ]
-        }
+        },
     ];
+
+        return frameworks;
+    }
 }
