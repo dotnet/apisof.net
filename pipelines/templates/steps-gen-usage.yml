@@ -4,6 +4,10 @@ parameters:
     default: "dev"
   - name: AzureSubscriptionConnection
     type: string
+  - name: WebhookUrl
+    type: string
+  - name: WebhookSecret
+    type: string
   - name: Tools
     type: object
     default:
@@ -53,6 +57,7 @@ steps:
             dotnet "$(Pipeline.Workspace)/gen-usage-drop/${{ tool.publishDir }}/${{ tool.dll }}" ${{ tool.args }}
         env:
           AzureStorageServiceUrl: $(AzureStorageServiceUrl)
-          ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecret)
+          ApisOfDotNetWebHookSecret: ${{ parameters.WebhookSecret }}
+          ApisOfDotNetWebHookUrl: ${{ parameters.WebhookUrl }}
           ${{ each pair in tool.env }}:
             ${{ pair.key }}: ${{ pair.value }}

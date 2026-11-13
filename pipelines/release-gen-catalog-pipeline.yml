@@ -46,6 +46,7 @@ extends:
             variables:
               AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
               ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
+              ApisOfDotNetWebHookUrl: "$(WebhookDevUrl)"
             templateContext:
               type: releaseJob
               isProduction: false
@@ -58,6 +59,8 @@ extends:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
                 parameters:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+                  WebhookUrl: "$(WebhookDevUrl)"
+                  WebhookSecret: "$(ApisOfDotNetWebHookSecretDev)"
 
       - stage: Production
         displayName: Run in Production
@@ -81,3 +84,4 @@ extends:
               - template: /pipelines/templates/steps-gen-catalog-run.yml@self
                 parameters:
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
+                  WebhookSecret: "$(ApisOfDotNetWebHookSecretProd)"
