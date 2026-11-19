@@ -33,7 +33,7 @@ extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
     pool:
-      name: VSEngSS-MicroBuild-Large
+      name: VSEng-MicroBuildVSStable
       os: windows
     stages:
       - stage: Dev
