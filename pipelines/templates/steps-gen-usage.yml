@@ -35,6 +35,13 @@ steps:
     displayName: "Authenticate with NuGet feed"
 
   - task: UseDotNet@2
+    displayName: "Install .NET 10"
+    inputs:
+      packageType: sdk
+      version: 10.x
+      includePreviewVersions: true
+
+  - task: UseDotNet@2
     displayName: "Install .NET 11"
     inputs:
       packageType: sdk
