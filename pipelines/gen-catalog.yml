@@ -7,6 +7,7 @@ trigger:
   paths:
     include:
       - src/GenCatalog/**
+      - src/DumpPacks/**
       - src/Terrajobst.ApiCatalog/**
       - src/Terrajobst.ApiCatalog.ActionsRunner/**
       - src/Terrajobst.ApiCatalog.Generation/**
@@ -69,3 +70,8 @@ extends:
                 --configuration $(BuildConfiguration) \
                 --output "$(Build.ArtifactStagingDirectory)/gen-catalog-drop/publish-gen-catalog"
             displayName: "Publish GenCatalog"
+          - script: |
+              dotnet publish "$(Build.SourcesDirectory)/src/DumpPacks/DumpPacks.csproj" \
+                --configuration $(BuildConfiguration) \
+                --output "$(Build.ArtifactStagingDirectory)/gen-catalog-drop/publish-dumppacks"
+            displayName: "Publish DumpPacks"
