@@ -35,10 +35,10 @@ steps:
     displayName: "Authenticate with NuGet feed"
 
   - task: UseDotNet@2
-    displayName: "Install .NET 10"
+    displayName: "Install .NET 11"
     inputs:
       packageType: sdk
-      version: 10.x
+      version: 11.x
       includePreviewVersions: true
 
   - ${{ each tool in parameters.Tools }}:
