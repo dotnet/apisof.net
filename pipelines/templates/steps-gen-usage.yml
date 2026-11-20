@@ -41,6 +41,13 @@ steps:
       version: 10.x
       includePreviewVersions: true
 
+  - task: UseDotNet@2
+    displayName: "Install .NET 11"
+    inputs:
+      packageType: sdk
+      version: 11.x
+      includePreviewVersions: true
+
   - ${{ each tool in parameters.Tools }}:
       - task: AzureCLI@2
         displayName: "Run ${{ tool.name }} (${{ parameters.BuildType }})"
