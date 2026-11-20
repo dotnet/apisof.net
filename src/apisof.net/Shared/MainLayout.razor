@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page-shell">
+<div class="page-shell @(IsErrorPage ? "is-error-page" : null)">
 <a href="javascript:void(0);" id="skipToMain" class="skip-to-main" target="_self">Skip to main content</a>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dotnet">

@@ -11,7 +11,7 @@ if "%CONFIG%"=="" set "CONFIG=Release"
 echo Building solution in %CONFIG% configuration...
 
 REM Restore packages first
-dotnet restore "%SLNDIR%\apisof.net.sln" --configfile "%SLNDIR%\nuget.config" --verbosity minimal
+dotnet restore "%SLNDIR%\apisof.net.sln" --configfile "%~dp0NuGet.config" --verbosity minimal
 
 REM Build the solution
 dotnet build "%SLNDIR%\apisof.net.sln" --configuration %CONFIG% --no-restore --nologo

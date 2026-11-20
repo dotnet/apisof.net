@@ -8,7 +8,7 @@ trigger:
       - src/GenDesignNotes/**
       - src/Terrajobst.ApiCatalog.ActionsRunner/**
       - src/Terrajobst.ApiCatalog.Generation/**
-      - src/nuget.config
+      - NuGet.config
       - pipelines/gen-design-notes.yml
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
