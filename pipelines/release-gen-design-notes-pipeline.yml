@@ -67,6 +67,7 @@ extends:
                 env:
                   AzureStorageServiceUrl: $(AzureStorageServiceUrlDev)
                   ApisOfDotNetWebHookSecret: $(ApisOfDotNetWebHookSecretDev)
+                  ApisOfDotNetWebHookUrl: $(WebhookDevUrl)
 
       - stage: Production
         displayName: Run in Production
