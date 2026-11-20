@@ -98,9 +98,10 @@ public partial class CatalogItem
         }
     }
 
-    private static NuGetFramework SelectFramework(ApiModel model)
+    private static NuGetFramework? SelectFramework(ApiModel model)
     {
-        return model.GetAvailability().GetCurrent().Framework;
+        var availability = model.GetAvailability();
+        return availability.Frameworks.Count == 0 ? null : availability.GetCurrent().Framework;
     }
 
     private void QueryManagerOnQueryChanged(object? sender, IReadOnlySet<string> e)

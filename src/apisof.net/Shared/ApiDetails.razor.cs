@@ -73,7 +73,7 @@ public partial class ApiDetails
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_rendered)
+        if (!_rendered && SelectedAvailability is not null)
         {
             _rendered = true;
             await UpdateLinksAsync();
@@ -82,8 +82,14 @@ public partial class ApiDetails
 
     private async Task UpdateApiAsync()
     {
-        Usages = GetUsages();
         Availability = Api.GetAvailability();
+        if (Availability.Frameworks.Count == 0)
+        {
+            SelectedAvailability = null;
+            return;
+        }
+
+        Usages = GetUsages();
         SelectedAvailability = Availability.Frameworks.FirstOrDefault(fx => fx.Framework == BrowsingContext.SelectedFramework) ??
                                Availability.GetCurrent();
 
