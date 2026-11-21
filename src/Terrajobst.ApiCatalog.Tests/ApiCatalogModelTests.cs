@@ -267,25 +267,27 @@ public class ApiCatalogModelTests
         var catalog = await new FluentCatalogBuilder()
             .AddPackage("System.Oob", "1.0.0", p => p
                 .AddFramework("netstandard2.0", fx =>
-                    fx.AddAssembly("System.Runtime", source)))
+                    fx.AddAssembly("System.Runtime", source)
+                      .AddAssembly("System.Runtime.Extensions", source)))
             .BuildAsync();
 
         var type = catalog.AllApis.Single(a => a.Name == "TheClass");
 
-        var declaration = Assert.Single(type.Declarations);
-        var assembly = Assert.Single(catalog.Assemblies);
+        var declarations = type.Declarations.ToArray();
+        var assemblies = catalog.Assemblies.ToArray();
         var framework = Assert.Single(catalog.Frameworks);
         var package = Assert.Single(catalog.Packages);
         Assert.Empty(framework.Assemblies);
-        var (packagedFramework, packagedAssembly) = Assert.Single(package.Assemblies);
+        var packagedAssemblies = package.Assemblies.ToArray();
 
-        Assert.Equal("System.Runtime", assembly.Name);
+        Assert.Equal(["System.Runtime", "System.Runtime.Extensions"], assemblies.Select(a => a.Name));
         Assert.Equal("netstandard2.0", framework.Name);
 
-        Assert.Equal(assembly, declaration.Assembly);
-        Assert.Equal(assembly, packagedAssembly);
+        Assert.Equal(assemblies, declarations.Select(d => d.Assembly));
+        Assert.All(declarations, d => Assert.Equal("public class TheClass", d.GetMyMarkup().ToString()));
+        Assert.Equal(assemblies, packagedAssemblies.Select(a => a.Assembly));
 
-        Assert.Equal(framework, packagedFramework);
+        Assert.All(packagedAssemblies, a => Assert.Equal(framework, a.Framework));
     }
 
     [Fact]
