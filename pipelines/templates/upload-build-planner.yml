@@ -8,10 +8,10 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: UseDotNet@2
-    displayName: "Use .NET 11"
+    displayName: "Use .NET 10"
     inputs:
       packageType: sdk
-      version: 11.x
+      version: 10.x
       includePreviewVersions: false
   - pwsh: |
       $ErrorActionPreference = 'Stop'
@@ -66,7 +66,7 @@ steps:
           throw "vpk tool is not available. Ensure it is installed and in the PATH."
         }
         try {
-          vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net11.0-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
+          vpk pack --packId "NetUpgradePlanner" --packTitle ".NET Upgrade Planner" --packVersion "$version" --packAuthors "Immo Landwerth" --packDir "." --framework net8-x64-desktop --mainExe NetUpgradePlanner.exe --outputDir "$releaseDir"
           if ($LASTEXITCODE -ne 0) {
             throw "vpk pack failed with exit code $LASTEXITCODE."
           }
