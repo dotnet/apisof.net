@@ -67,11 +67,11 @@ extends:
             steps:
               - checkout: self
               - task: UseDotNet@2
-                displayName: Use .NET 10 SDK
+                displayName: Use .NET 11 SDK
                 inputs:
-                  version: 10.x
+                  version: 11.x
                   packageType: sdk
-                  includePreviewVersions: true
+                  includePreviewVersions: false
               - task: NuGetAuthenticate@1
                 displayName: "NuGet Authenticate"
 

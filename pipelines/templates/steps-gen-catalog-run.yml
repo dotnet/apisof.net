@@ -6,11 +6,11 @@ steps:
   - task: NugetAuthenticate@1
     displayName: "Authenticate with NuGet feed"
   - task: UseDotNet@2
-    displayName: "Install .NET 10"
+    displayName: "Install .NET 11"
     inputs:
       packageType: sdk
-      version: 10.x
-      includePreviewVersions: true
+      version: 11.x
+      includePreviewVersions: false
   - task: AzureCLI@2
     displayName: "Run GenCatalog"
     timeoutInMinutes: 0
