@@ -24,7 +24,14 @@ public static class DiffExtensions
         if (defRight is null)
             return DiffKind.Removed;
 
-        return defLeft.Value.MarkupId == defRight.Value.MarkupId ? DiffKind.None : DiffKind.Changed;
+        return HasSameMarkup(defLeft.Value, defRight.Value) ? DiffKind.None : DiffKind.Changed;
+    }
+
+    internal static bool HasSameMarkup(ApiDeclarationModel left, ApiDeclarationModel right)
+    {
+        // Syntax cache eviction can give identical markup different IDs.
+        return left.MarkupId == right.MarkupId ||
+               left.GetMyMarkup().Tokens.SequenceEqual(right.GetMyMarkup().Tokens);
     }
 
     public static void GetDiffCount(this ApiModel api,

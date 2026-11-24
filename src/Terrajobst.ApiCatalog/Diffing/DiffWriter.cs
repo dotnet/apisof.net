@@ -63,7 +63,7 @@ public sealed class DiffWriter
             blockDiffMarker = "-";
             await WriteDeclarationAsync("-", defLeft.Value, writer, indent);
         }
-        else if (defLeft.Value.MarkupId == defRight.Value.MarkupId)
+        else if (DiffExtensions.HasSameMarkup(defLeft.Value, defRight.Value))
         {
             await WriteDeclarationAsync(" ", defRight.Value, writer, indent);
         }
