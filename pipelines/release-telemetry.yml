@@ -69,7 +69,6 @@ extends:
             displayName: Deploy to Azure Function
             dependsOn: PreDeploymentApprovalJob
             condition: succeeded()
-            timeoutInMinutes: 0
             templateContext:
               type: releaseJob
               isProduction: true
@@ -79,11 +78,14 @@ extends:
                   artifactName: "telemetry-drop"
                   targetPath: "$(Pipeline.Workspace)/telemetry-drop"
             steps:
-              - task: AzureFunctionApp@2
-                displayName: Deploy Azure Function
-                inputs:
-                  connectedServiceNameARM: "$(AzureSubscriptionConnectionProd)"
-                  runtimeStack: DOTNET|10.0
-                  appType: functionAppLinux
+              - template: /pipelines/templates/steps-deploy-run-from-package.yml@self
+                parameters:
+                  displayName: Deploy Azure Function (package from storage)
+                  azureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
+                  # Define these production resource variables in Azure DevOps.
+                  resourceGroupName: "$(ResourceGroupNameProd)"
+                  storageAccountName: "$(StorageAccountNameProd)"
                   appName: apisofdotnetplanner
-                  package: "$(Pipeline.Workspace)/telemetry-drop/telemetry.zip"
+                  appType: functionapp
+                  blobName: telemetry/telemetry-$(Build.BuildNumber).zip
+                  packagePath: $(Pipeline.Workspace)/telemetry-drop/telemetry.zip
