@@ -48,3 +48,44 @@ extends:
                   storageAccountName: apisofdotnetdev
                   blobName: telemetry/telemetry-$(Build.BuildNumber).zip
                   packagePath: $(Pipeline.Workspace)/telemetry-drop/telemetry.zip
+      - stage: Production
+        displayName: Deploy to Production
+        jobs:
+          - job: PreDeploymentApprovalJob
+            displayName: Pre-Deployment Approval
+            condition: succeeded()
+            timeoutInMinutes: 43200
+            pool: server
+            steps:
+              - task: ManualValidation@1
+                inputs:
+                  notifyUsers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+                  approvers: |-
+                    Chris.Sfanos@microsoft.com,
+                    v-danzhu1@microsoft.com
+          - job: Deploy
+            displayName: Deploy to Azure Function
+            dependsOn: PreDeploymentApprovalJob
+            condition: succeeded()
+            templateContext:
+              type: releaseJob
+              isProduction: true
+              inputs:
+                - input: pipelineArtifact
+                  pipeline: "apis-of-dotnet-telemetry-build"
+                  artifactName: "telemetry-drop"
+                  targetPath: "$(Pipeline.Workspace)/telemetry-drop"
+            steps:
+              - template: /pipelines/templates/steps-deploy-run-from-package.yml@self
+                parameters:
+                  displayName: Deploy Azure Function (package from storage)
+                  azureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
+                  # Define these production resource variables in Azure DevOps.
+                  resourceGroupName: "$(ResourceGroupNameProd)"
+                  storageAccountName: "$(StorageAccountNameProd)"
+                  appName: apisofdotnetplanner
+                  appType: functionapp
+                  blobName: telemetry/telemetry-$(Build.BuildNumber).zip
+                  packagePath: $(Pipeline.Workspace)/telemetry-drop/telemetry.zip
