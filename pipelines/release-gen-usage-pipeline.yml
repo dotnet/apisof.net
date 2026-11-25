@@ -43,6 +43,7 @@ extends:
             variables:
               AzureStorageServiceUrl: "$(AzureStorageServiceUrlDev)"
               ApisOfDotNetWebHookSecret: "$(ApisOfDotNetWebHookSecretDev)"
+              ApisOfDotNetWebHookUrl: "$(WebhookDevUrl)"
             templateContext:
               type: releaseJob
               isProduction: false
@@ -56,6 +57,8 @@ extends:
                 parameters:
                   BuildType: "dev"
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionDev)"
+                  WebhookUrl: "$(WebhookDevUrl)"
+                  WebhookSecret: "$(ApisOfDotNetWebHookSecretDev)"
 
       - stage: Production
         displayName: Run in Production
@@ -80,3 +83,4 @@ extends:
                 parameters:
                   BuildType: "prod"
                   AzureSubscriptionConnection: "$(AzureSubscriptionConnectionProd)"
+                  WebhookSecret: "$(ApisOfDotNetWebHookSecretProd)"
