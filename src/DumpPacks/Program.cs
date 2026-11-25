@@ -1,4 +1,5 @@
-﻿using NuGet.Versioning;
+﻿using NuGet.Frameworks;
+using NuGet.Versioning;
 using Terrajobst.ApiCatalog.PackManifest.Models;
 var dotnetRoot = Environment.GetEnvironmentVariable("DOTNET_ROOT");
 if (string.IsNullOrEmpty(dotnetRoot))
@@ -19,9 +20,13 @@ foreach (var (sdkDirectory, version) in GetSdkDirectories(dotnetRoot))
                                              .OrderBy(g => g.Key.Framework)
                                              .ThenBy(g => g.Key.Version))
     {
+        var tf = frameworkGroup.Key;
+        var hasPlatformVersion = tf.PlatformVersion is { } pv && pv != FrameworkConstants.EmptyVersion;
         var frameworkReferenceContent = new FrameworkReferenceContent
         {
-            TargetFramework = frameworkGroup.Key.GetShortFolderName()
+            TargetFramework = tf.GetShortFolderName(),
+            Platform = string.IsNullOrEmpty(tf.Platform) ? "" : tf.Platform,
+            PlatformVersion = hasPlatformVersion ? tf.PlatformVersion.ToString() : ""
         };
         foreach (var packGroup in frameworkGroup.GroupBy(r => r.TargetingPackName)
                                                 .OrderBy(p => p.Key))
@@ -72,43 +77,7 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
 
     var environment = await WorkloadEnvironment.LoadAsync(versionDirectory, diagnostics);
 
-    foreach (var (pack, workloads) in environment.GetFlattenedPacks())
-    {
-        if (pack.Kind is not (PackKind.Library or PackKind.Framework))
-            continue;
-
-        if (pack.Name.Contains(".Runtime.", StringComparison.OrdinalIgnoreCase))
-            continue;
-
-        if (!pack.AliasTo.Any())
-        {
-            var jsonContent = new WorkloadPackContent
-            {
-                PackName = pack.Name,
-                PackVersion = pack.Version,
-                PackKind = pack.Kind.ToString(),
-                WorkloadNames = workloads.Select(w => w.Name).Order().ToList()
-            };
-            workloadManifest.Packs.Add(jsonContent);
-            // Console.WriteLine($"{pack.Name}, {pack.Version} ({pack.Kind}): {workloadNames}");
-            //Console.WriteLine(SetJsonString(jsonContent));
-        }
-        else
-        {
-            foreach (var aliasTo in pack.AliasTo.Values.Distinct().Order())
-            {
-                var jsonContent = new WorkloadPackContent
-                {
-                    PackName = aliasTo,
-                    PackVersion = pack.Version,
-                    PackKind = pack.Kind.ToString(),
-                    WorkloadNames = workloads.Select(w => w.Name).Order().ToList()
-                };
-                workloadManifest.Packs.Add(jsonContent);
-            }
-        }
-    }
-
+    var platformsByPack = new Dictionary<string, SortedSet<string>>(StringComparer.OrdinalIgnoreCase);
     var platformVersions = new Dictionary<string, SortedSet<Version>>(StringComparer.OrdinalIgnoreCase);
 
     foreach (var (pack, workloads) in environment.GetFlattenedPacks())
@@ -132,6 +101,14 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
             {
                 var platform = platformGroup.Key;
 
+                if (!platformsByPack.TryGetValue(packName, out var packPlatforms))
+                {
+                    packPlatforms = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+                    platformsByPack.Add(packName, packPlatforms);
+                }
+
+                packPlatforms.Add(platform);
+
                 if (!platformVersions.TryGetValue(platform, out var versions))
                 {
                     versions = new();
@@ -143,10 +120,45 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
         }
     }
 
+    foreach (var (pack, workloads) in environment.GetFlattenedPacks())
+    {
+        if (pack.Kind is not (PackKind.Library or PackKind.Framework))
+            continue;
+
+        if (pack.Name.Contains(".Runtime.", StringComparison.OrdinalIgnoreCase))
+            continue;
+
+        if (!pack.AliasTo.Any())
+        {
+            var jsonContent = new WorkloadPackContent
+            {
+                PackName = pack.Name,
+                PackVersion = pack.Version,
+                PackKind = pack.Kind.ToString(),
+                Platforms = platformsByPack.TryGetValue(pack.Name, out var p) ? p.ToList() : new List<string>(),
+                WorkloadNames = workloads.Select(w => w.Name).Order().ToList()
+            };
+            workloadManifest.Packs.Add(jsonContent);
+        }
+        else
+        {
+            foreach (var aliasTo in pack.AliasTo.Values.Distinct().Order())
+            {
+                var jsonContent = new WorkloadPackContent
+                {
+                    PackName = aliasTo,
+                    PackVersion = pack.Version,
+                    PackKind = pack.Kind.ToString(),
+                    Platforms = platformsByPack.TryGetValue(aliasTo, out var p) ? p.ToList() : new List<string>(),
+                    WorkloadNames = workloads.Select(w => w.Name).Order().ToList()
+                };
+                workloadManifest.Packs.Add(jsonContent);
+            }
+        }
+    }
+
     foreach (var (platform, versions) in platformVersions)
     {
-        var versionList = string.Join(", ", versions);
-
         var platformVersion = new PlatformVersion
         {
             Platform = platform,
@@ -155,7 +167,6 @@ foreach (var versionDirectory in Directory.GetDirectories(manifestsRoot))
         workloadManifest.PlatformVersions.Add(platformVersion);
     }
     dumpPackManifest.WorkloadPackManifests.Add(workloadManifest);
-
 }
 
 dumpPackManifest.Errors = diagnostics.Drain();
