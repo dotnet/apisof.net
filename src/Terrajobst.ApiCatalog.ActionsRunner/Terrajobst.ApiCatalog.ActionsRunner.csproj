@@ -7,6 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <InternalsVisibleTo Include="Terrajobst.ApiCatalog.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Azure.Identity" />
       <PackageReference Include="Azure.Storage.Blobs" />
       <PackageReference Include="Humanizer.Core" />

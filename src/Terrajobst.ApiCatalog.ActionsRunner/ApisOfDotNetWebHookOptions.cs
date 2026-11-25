@@ -8,5 +8,5 @@ public sealed class ApisOfDotNetWebHookOptions
     public required string ApisOfDotNetWebHookSecret { get; init; }
 
     [Url]
-    public string ApisOfDotNetWebHookUrl { get; init; } = String.Empty;
+    public string? ApisOfDotNetWebHookUrl { get; init; }
 }

@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
 namespace Terrajobst.ApiCatalog.ActionsRunner;
 
 internal sealed class ApisOfDotNetWebHookReal : ApisOfDotNetWebHook
 {
-    private const string DefaultWebHookUrl = "https://apisof.net/webhook?subject=";
+    private const string DefaultWebHookUrl = "https://apisof.net/webhook";
 
     private readonly IOptions<ApisOfDotNetWebHookOptions> _options;
 
@@ -26,13 +27,17 @@ internal sealed class ApisOfDotNetWebHookReal : ApisOfDotNetWebHook
         Console.WriteLine($"Webhook returned: {response.StatusCode}");
     }
 
-    private string GetWebHookUrl(ApisOfDotNetWebHookSubject subject)
+    internal string GetWebHookUrl(ApisOfDotNetWebHookSubject subject)
     {
         var blobName = GetBlobName(subject);
         var baseUrl = string.IsNullOrWhiteSpace(_options.Value.ApisOfDotNetWebHookUrl)
             ? DefaultWebHookUrl
             : _options.Value.ApisOfDotNetWebHookUrl;
-        return $"{baseUrl}{Uri.EscapeDataString(blobName)}";
+        var uri = new UriBuilder(baseUrl);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        query["subject"] = blobName;
+        uri.Query = QueryHelpers.AddQueryString(string.Empty, query);
+        return uri.Uri.AbsoluteUri;
     }
 
     private static string GetBlobName(ApisOfDotNetWebHookSubject subject)

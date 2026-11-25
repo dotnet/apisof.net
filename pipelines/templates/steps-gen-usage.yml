@@ -6,6 +6,7 @@ parameters:
     type: string
   - name: WebhookUrl
     type: string
+    default: "https://apisof.net/webhook"
   - name: WebhookSecret
     type: string
   - name: Tools
