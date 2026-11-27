@@ -30,6 +30,22 @@ steps:
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packs" | Out-Null
         New-Item -ItemType Directory -Force -Path "$env:APISOFDOTNET_INDEX_PATH/packages" | Out-Null
 
+        $storageServiceUri = [Uri]$env:AzureStorageServiceUrl
+        $storageAccountName = $storageServiceUri.Host.Split('.')[0]
+        $catalogExists = az storage container exists --name catalog --account-name $storageAccountName --auth-mode login --query exists -o tsv
+        if ($LASTEXITCODE -ne 0) {
+          throw "Failed to determine whether the catalog container exists."
+        }
+
+        if ($catalogExists -ne "true") {
+          Write-Host "Creating the catalog container..."
+          az storage container create --name catalog --account-name $storageAccountName --auth-mode login --only-show-errors | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            throw "Failed to create the catalog container."
+          }
+          Write-Host "The catalog container was created successfully."
+        }
+
         dotnet "$(Pipeline.Workspace)\gen-catalog-drop\publish-gen-catalog\GenCatalog.dll"
     env:
       AzureStorageServiceUrl: $(AzureStorageServiceUrl)

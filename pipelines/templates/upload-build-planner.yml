@@ -29,8 +29,19 @@ steps:
       scriptLocation: "inlineScript"
       inlineScript: |
         New-Item -ItemType Directory -Force -Path "$(Pipeline.Workspace)/velopack-release" | Out-Null
-        az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "*.nupkg"
-        az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "releases.*.json"
+        $squirrelExists = az storage container exists --name squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --query exists -o tsv
+        if ($LASTEXITCODE -ne 0) {
+          throw "Failed to determine whether the squirrel container exists."
+        }
+
+        if ($squirrelExists -eq "true") {
+          Write-Host "Downloading existing velopack releases from the squirrel container..."
+          az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "*.nupkg"
+          az storage blob download-batch --destination "$(Pipeline.Workspace)/velopack-release" --source squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite --pattern "releases.*.json"
+        }
+        else {
+          Write-Host "The squirrel container does not exist; this will be the first velopack release."
+        }
   - pwsh: |
       $ErrorActionPreference = 'Stop'
       $releaseDir = "$(Pipeline.Workspace)/velopack-release"
@@ -86,6 +97,7 @@ steps:
         Write-Host "##vso[task.setvariable variable=PlannerVersion]$version"
       }
     displayName: "vpk pack"
+
   - task: AzureCLI@2
     displayName: "Upload release to Azure Storage"
     condition: and(succeeded(), ne(variables['PlannerVersionExists'], 'true'))
@@ -94,4 +106,9 @@ steps:
       scriptType: "pscore"
       scriptLocation: "inlineScript"
       inlineScript: |
+        az storage container create --name squirrel --account-name ${{ parameters.storageAccountName }} --auth-mode login --only-show-errors | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+          throw "Failed to create or access the squirrel container."
+        }
+
         az storage blob upload-batch --destination squirrel --source "$(Pipeline.Workspace)/velopack-release" --account-name ${{ parameters.storageAccountName }} --auth-mode login --overwrite
