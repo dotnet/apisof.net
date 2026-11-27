@@ -8,7 +8,7 @@ trigger:
       - src/GenDesignNotes/**
       - src/Terrajobst.ApiCatalog.ActionsRunner/**
       - src/Terrajobst.ApiCatalog.Generation/**
-      - src/nuget.config
+      - NuGet.config
       - pipelines/gen-design-notes.yml
 name: $(date:yyyyMMdd)$(rev:.r)
 variables:
@@ -61,11 +61,11 @@ extends:
             steps:
               - checkout: self
               - task: UseDotNet@2
-                displayName: Use .NET 10 SDK
+                displayName: Use .NET 11 SDK
                 inputs:
                   packageType: sdk
-                  version: 10.x
-                  includePreviewVersions: true
+                  version: 11.x
+                  includePreviewVersions: false
               - task: NugetAuthenticate@1
                 displayName: Authenticate with NuGet
               - script: |

@@ -38,11 +38,13 @@ extends:
                   artifactName: "telemetry-drop"
                   targetPath: "$(Pipeline.Workspace)/telemetry-drop"
             steps:
-              - task: AzureFunctionApp@2
-                displayName: Deploy Azure Function
-                inputs:
-                  connectedServiceNameARM: "$(AzureDevSubscriptionConnection)"
-                  runtimeStack: DOTNET|10.0
-                  appType: functionAppLinux
+              - template: /pipelines/templates/steps-deploy-run-from-package.yml@self
+                parameters:
+                  displayName: Deploy Azure Function (package from storage)
+                  azureSubscriptionConnection: "$(AzureDevSubscriptionConnection)"
+                  resourceGroupName: apisofdotnet-dev
                   appName: apisofdotnetplanner-dev
-                  package: "$(Pipeline.Workspace)/telemetry-drop/telemetry.zip"
+                  appType: functionapp
+                  storageAccountName: apisofdotnetdev
+                  blobName: telemetry/telemetry-$(Build.BuildNumber).zip
+                  packagePath: $(Pipeline.Workspace)/telemetry-drop/telemetry.zip

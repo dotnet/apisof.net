@@ -6,11 +6,11 @@ steps:
   - task: NuGetAuthenticate@1
     displayName: "NuGet Authenticate"
   - task: UseDotNet@2
-    displayName: "Use .NET 10 SDK"
+    displayName: "Use .NET 11 SDK"
     inputs:
       packageType: sdk
-      version: 10.x
-      includePreviewVersions: true
+      version: 11.x
+      includePreviewVersions: false
   - pwsh: |
       $ErrorActionPreference = 'Stop'
       
@@ -45,7 +45,7 @@ steps:
       $inputRoot = "$(Build.ArtifactStagingDirectory)/velopack-input"
       New-Item -ItemType Directory -Force -Path $inputRoot | Out-Null
       Set-Content -Path (Join-Path $inputRoot "planner-version.txt") -Value $version -NoNewline
-      Copy-Item -Path "$(Build.SourcesDirectory)/src/nuget.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
+      Copy-Item -Path "$(Build.SourcesDirectory)/NuGet.config" -Destination (Join-Path $inputRoot "nuget.config") -Force
     displayName: "Prepare velopack inputs"
     env:
       PlannerSemVer: $(PlannerSemVer)

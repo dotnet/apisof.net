@@ -40,16 +40,18 @@ extends:
               outputs:
                 - output: pipelineArtifact
                   displayName: "Publish Artifact"
-                  targetPath: $(Build.ArtifactStagingDirectory)/telemetry.zip
+                  targetPath: $(Build.ArtifactStagingDirectory)/out
                   artifactName: telemetry-drop
             steps:
               - checkout: self
+              - task: NuGetAuthenticate@1
+                displayName: "Authenticate with NuGet feeds"
               - task: UseDotNet@2
-                displayName: Use .NET 10 SDK
+                displayName: Use .NET 11 SDK
                 inputs:
                   packageType: sdk
-                  version: 10.x
-                  includePreviewVersions: true
+                  version: 11.x
+                  includePreviewVersions: false
               - script: |
                   dotnet publish src/NetUpgradePlannerTelemetry/NetUpgradePlannerTelemetry.csproj -o "$(Build.ArtifactStagingDirectory)/publish" /p:SourceRevisionId=$(Build.SourceVersion)
                 displayName: Publish Function
@@ -59,7 +61,7 @@ extends:
                   rootFolderOrFile: "$(Build.ArtifactStagingDirectory)/publish"
                   includeRootFolder: false
                   archiveType: "zip"
-                  archiveFile: "$(Build.ArtifactStagingDirectory)/telemetry.zip"
+                  archiveFile: "$(Build.ArtifactStagingDirectory)/out/telemetry.zip"
                   replaceExistingArchive: true
               - script: |
                   rm -rf "$(Build.ArtifactStagingDirectory)/publish"
